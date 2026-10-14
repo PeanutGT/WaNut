@@ -1,0 +1,89 @@
+using System.Diagnostics;
+using WaNut.Core.Downloads;
+using WaNut.Core.Http;
+using WaNut.Core.Instances;
+using WaNut.Core.Java;
+using WaNut.Core.Tests.TestSupport;
+using WaNut.Core.Versions;
+
+namespace WaNut.Core.Tests.Network;
+
+/// <summary>
+/// Talks to the real Mojang and Adoptium services. The end-to-end test downloads about 100 MB.
+/// CI skips these; run them with: dotnet test --filter Category=Network
+/// </summary>
+[Trait("Category", "Network")]
+public sealed class LiveApiTests : IDisposable
+{
+    private readonly HttpClient _http = WaNutHttp.CreateClient("0.0.0-test");
+
+    public void Dispose() => _http.Dispose();
+
+    [Fact]
+    public async Task Mojang_Releases_IncludeOldestSupportedAndNewerVersions()
+    {
+        var releases = await new MojangVersionService(_http, new FileDownloader(_http)).GetReleasesAsync();
+
+        Assert.Equal(MojangVersionService.OldestSupportedVersion, releases[^1].Id);
+        Assert.Contains(releases, r => r.Id == "1.21.1");
+    }
+
+    [Theory]
+    [InlineData("1.16.5", 8)]
+    [InlineData("1.21.1", 21)]
+    public async Task Mojang_ServerInfo_ReportsJavaVersionAndJar(string id, int expectedJava)
+    {
+        var service = new MojangVersionService(_http, new FileDownloader(_http));
+        var version = (await service.GetReleasesAsync()).Single(r => r.Id == id);
+
+        var info = await service.GetServerInfoAsync(version);
+
+        Assert.Equal(expectedJava, info.JavaMajor);
+        Assert.Equal(Uri.UriSchemeHttps, info.JarUrl.Scheme);
+        Assert.Equal(40, info.JarSha1.Length);
+    }
+
+    [Theory]
+    [InlineData(8)]
+    [InlineData(17)]
+    [InlineData(21)]
+    public async Task Adoptium_LatestJre_ReturnsHttpsZipWithSha256(int major)
+    {
+        var package = await new AdoptiumClient(_http).GetLatestJreAsync(major);
+
+        Assert.Equal(Uri.UriSchemeHttps, package.Link.Scheme);
+        Assert.EndsWith(".zip", package.Link.AbsolutePath, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(64, package.Sha256.Length);
+    }
+
+    [Fact]
+    public async Task VanillaServerCreator_RealDownloads_CreatesServerWithWorkingJava()
+    {
+        using var temp = new TempDir();
+        var paths = new LauncherPaths(temp.Path);
+        paths.EnsureCreated();
+        var downloader = new FileDownloader(_http);
+        var versions = new MojangVersionService(_http, downloader);
+        var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
+        var store = new InstanceStore(paths);
+        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
+
+        var metadata = await creator.CreateAsync(new CreateServerRequest("Live Test", version, 2048, EulaAccepted: true));
+
+        var dir = store.InstanceDir(metadata.Id);
+        Assert.True(new FileInfo(Path.Combine(dir, "server.jar")).Length > 1_000_000);
+        Assert.True(EulaFile.IsAccepted(dir));
+        var javaExe = java.FindJavaExe(metadata.JavaMajor);
+        Assert.NotNull(javaExe);
+
+        if (OperatingSystem.IsWindows())
+        {
+            using var process = Process.Start(new ProcessStartInfo(javaExe, "-version") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true })!;
+            var output = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+            Assert.Equal(0, process.ExitCode);
+            Assert.Contains("21", output);
+        }
+    }
+}

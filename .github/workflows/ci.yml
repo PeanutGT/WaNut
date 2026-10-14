@@ -22,7 +22,7 @@ jobs:
         run: dotnet build -c Release --no-restore
 
       - name: Test
-        run: dotnet test -c Release --no-build
+        run: dotnet test -c Release --no-build --filter "Category!=Network"
 
       - name: Check formatting
         run: dotnet format --verify-no-changes --no-restore
