@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using WaNut.Core.Downloads;
+using WaNut.Core.Hosting;
 using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
@@ -85,5 +87,41 @@ public sealed class LiveApiTests : IDisposable
             Assert.Equal(0, process.ExitCode);
             Assert.Contains("21", output);
         }
+    }
+
+    [Fact]
+    public async Task ServerProcess_RealVanillaServer_StartsOnlineAndStopsCleanly()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        using var temp = new TempDir();
+        var paths = new LauncherPaths(temp.Path);
+        paths.EnsureCreated();
+        var downloader = new FileDownloader(_http);
+        var versions = new MojangVersionService(_http, downloader);
+        var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
+        var store = new InstanceStore(paths);
+        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
+        var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true));
+        var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);
+        var lines = new ConcurrentQueue<string>();
+
+        using var server = new ServerHost().Start(metadata.Id, launch);
+        server.OutputReceived += lines.Enqueue;
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online || !server.IsRunning, timeoutMs: 180_000);
+        Assert.Equal(ServerStatus.Online, server.Status);
+        Assert.True(server.IsTrackedByJob);
+
+        await server.SendCommandAsync("say hello from WaNut");
+        await FakeServer.WaitUntilAsync(() => lines.Any(l => l.Contains("hello from WaNut", StringComparison.Ordinal)));
+        var stopped = await server.StopAsync(TimeSpan.FromSeconds(60));
+
+        Assert.True(stopped);
+        Assert.Equal(0, await server.Exited);
+        Assert.True(Directory.Exists(Path.Combine(store.InstanceDir(metadata.Id), "world")));
     }
 }

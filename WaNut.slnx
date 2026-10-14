@@ -4,6 +4,7 @@
     <Project Path="src/WaNut.Core/WaNut.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/FakeMinecraftServer/FakeMinecraftServer.csproj" />
     <Project Path="tests/WaNut.Core.Tests/WaNut.Core.Tests.csproj" />
   </Folder>
 </Solution>

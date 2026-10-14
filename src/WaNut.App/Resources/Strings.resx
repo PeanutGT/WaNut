@@ -90,4 +90,79 @@
   <data name="CreateServer_Failed" xml:space="preserve">
     <value>Could not create the server: {0}</value>
   </data>
+  <data name="Main_SavingWorld" xml:space="preserve">
+    <value>Saving the world before closing…</value>
+  </data>
+  <data name="Server_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Server_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Server_Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Server_CommandLabel" xml:space="preserve">
+    <value>Command</value>
+  </data>
+  <data name="Server_CommandHelp" xml:space="preserve">
+    <value>Type a server command without the slash, for example: say Hello, op Steve, time set day</value>
+  </data>
+  <data name="Server_TabConsole" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="Server_TabPlayers" xml:space="preserve">
+    <value>Players ({0})</value>
+  </data>
+  <data name="Server_NoPlayers" xml:space="preserve">
+    <value>No one is online right now.</value>
+  </data>
+  <data name="Status_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Status_Preparing" xml:space="preserve">
+    <value>Checking Java…</value>
+  </data>
+  <data name="Status_DownloadingJava" xml:space="preserve">
+    <value>Downloading Java… {0:0}%</value>
+  </data>
+  <data name="Status_Starting" xml:space="preserve">
+    <value>Starting…</value>
+  </data>
+  <data name="Status_Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>Saving world…</value>
+  </data>
+  <data name="Server_Exited" xml:space="preserve">
+    <value>Server stopped (exit code {0}).</value>
+  </data>
+  <data name="Server_StopOtherConfirm" xml:space="preserve">
+    <value>"{0}" is running, and only one server can run at a time.
+
+Stop "{0}" and start "{1}"?</value>
+  </data>
+  <data name="Server_ForceStopConfirm" xml:space="preserve">
+    <value>"{0}" is still saving after {1} seconds.
+
+Force it to close? Anything since the last save may be lost.
+
+Choose No to keep waiting.</value>
+  </data>
+  <data name="Server_Error_ServerJarMissing" xml:space="preserve">
+    <value>This server's folder has no server.jar, so it cannot start.</value>
+  </data>
+  <data name="Server_Error_EulaNotAccepted" xml:space="preserve">
+    <value>The Minecraft EULA has not been accepted for this server, so it cannot start.</value>
+  </data>
+  <data name="Server_Error_AnotherServerRunning" xml:space="preserve">
+    <value>Another server is already running. Stop it first.</value>
+  </data>
+  <data name="Server_StartFailed" xml:space="preserve">
+    <value>Could not start the server: {0}</value>
+  </data>
+  <data name="Server_CommandFailed" xml:space="preserve">
+    <value>Could not send the command: {0}</value>
+  </data>
 </root>
