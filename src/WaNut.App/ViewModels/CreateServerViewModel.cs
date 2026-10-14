@@ -13,10 +13,10 @@ namespace WaNut.App.ViewModels;
 public sealed partial class CreateServerViewModel : ObservableObject
 {
     private readonly MojangVersionService _versions;
-    private readonly VanillaServerCreator _creator;
+    private readonly ServerCreator _creator;
     private CancellationTokenSource? _cancellation;
 
-    public CreateServerViewModel(MojangVersionService versions, VanillaServerCreator creator)
+    public CreateServerViewModel(MojangVersionService versions, ServerCreator creator)
     {
         _versions = versions;
         _creator = creator;

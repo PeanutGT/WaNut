@@ -7,7 +7,7 @@ namespace WaNut.Core.Instances;
 /// <summary>
 /// Creates a ready-to-start Vanilla server: the right Java, the official server.jar and an accepted eula.txt.
 /// </summary>
-public sealed class VanillaServerCreator(
+public sealed class ServerCreator(
     LauncherPaths paths,
     MojangVersionService versions,
     JavaRuntimeManager java,

@@ -20,6 +20,10 @@ public sealed record InstanceMetadata
 
     public required int MemoryMb { get; init; }
 
+    /// <summary>Paper build number or Fabric loader version; null for Vanilla.</summary>
+    public string? LoaderVersion { get; init; }
+
+    /// <summary>The jar java.exe runs. Fabric runs its launcher, which loads the Vanilla server.jar next to it.</summary>
     public string ServerJar { get; init; } = "server.jar";
 
     public required DateTimeOffset CreatedAt { get; init; }

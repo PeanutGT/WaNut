@@ -8,7 +8,7 @@ using WaNut.Core.Versions;
 
 namespace WaNut.Core.Tests.Instances;
 
-public sealed class VanillaServerCreatorTests : IDisposable
+public sealed class ServerCreatorTests : IDisposable
 {
     private static readonly Uri DetailsUrl = new("https://piston-meta.mojang.com/v1/packages/1.21.1.json");
     private static readonly Uri JarUrl = new("https://piston-data.mojang.com/v1/objects/x/server.jar");
@@ -21,7 +21,7 @@ public sealed class VanillaServerCreatorTests : IDisposable
     private readonly InstanceStore _store;
     private readonly GameVersion _version;
 
-    public VanillaServerCreatorTests()
+    public ServerCreatorTests()
     {
         _paths = new LauncherPaths(_temp.Path);
         _paths.EnsureCreated();
@@ -39,13 +39,13 @@ public sealed class VanillaServerCreatorTests : IDisposable
 
     public void Dispose() => _temp.Dispose();
 
-    private VanillaServerCreator CreateCreator()
+    private ServerCreator CreateCreator()
     {
         var client = _http.CreateClient();
         var downloader = new FileDownloader(client);
         var java = new JavaRuntimeManager(_paths, new AdoptiumClient(client), downloader);
         var clock = new FakeTimeProvider(new DateTimeOffset(2026, 10, 14, 12, 0, 0, TimeSpan.Zero));
-        return new VanillaServerCreator(_paths, new MojangVersionService(client, downloader), java, downloader, _store, clock);
+        return new ServerCreator(_paths, new MojangVersionService(client, downloader), java, downloader, _store, clock);
     }
 
     [Fact]

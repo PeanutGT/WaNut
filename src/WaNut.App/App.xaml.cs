@@ -49,7 +49,7 @@ public partial class App : Application
         services.AddSingleton<AdoptiumClient>();
         services.AddSingleton<JavaRuntimeManager>();
         services.AddSingleton<InstanceStore>();
-        services.AddSingleton<VanillaServerCreator>();
+        services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<ServerHost>();
 

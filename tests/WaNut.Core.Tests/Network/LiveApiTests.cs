@@ -59,7 +59,7 @@ public sealed class LiveApiTests : IDisposable
     }
 
     [Fact]
-    public async Task VanillaServerCreator_RealDownloads_CreatesServerWithWorkingJava()
+    public async Task ServerCreator_RealDownloads_CreatesServerWithWorkingJava()
     {
         using var temp = new TempDir();
         var paths = new LauncherPaths(temp.Path);
@@ -68,7 +68,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
 
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Test", version, 2048, EulaAccepted: true));
@@ -104,7 +104,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true));
         var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);
