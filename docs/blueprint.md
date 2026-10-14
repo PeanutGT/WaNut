@@ -1,6 +1,6 @@
 # WaNut — Minecraft: Java Edition Server Launcher Blueprint (Windows)
 
-> Revision 2 (2026-10-14). Revised with Peanut from the original blueprint.
+> Revision 3 (2026-10-14). Revised with Peanut from the original blueprint; revision 3 adds the positioning decisions (14–18).
 > Repository: https://github.com/PeanutGT/WaNut
 
 ## Project Vision
@@ -23,6 +23,11 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 11 | Oldest supported MC | **1.16.5**. Older versions are not offered in the version list. |
 | 12 | Installer | **Setup .exe** installer (works best with self-update). |
 | 13 | .NET version | **.NET 10 (LTS)** instead of .NET 8. |
+| 14 | Audience | Beginners through advanced users. The feature set reaches advanced use, but the default screens stay simple. |
+| 15 | Hiding advanced settings | Two layers: a **"More settings"** expander on each settings page, and a global **Advanced mode** switch in app settings that shows advanced-only items. Phase 1 builds both; Advanced mode holds only **custom JVM arguments** for now. |
+| 16 | Tone | Cute and playful, with the peanut mascot appearing often. Errors (crash, failed backup) and Advanced mode sections use plain, calm wording with the fix. One set of texts. |
+| 17 | Guided onboarding | After Phase 1. Phase 1 has only the Create Server wizard; a peanut-led guide comes once features are stable. |
+| 18 | References | Modrinth App (clean, modern UI) and Duolingo (mascot, guidance), as direction only. |
 
 ---
 
@@ -100,6 +105,16 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 ---
 
+## 4b. Look, Tone and Settings Visibility
+
+* **Visual style:** follow `design/design-decisions.md` in the project files (warm off-white palette, warm dark mode that follows the Windows theme, green only for the primary action and Online state, 16x16 pixel peanut logo and `wanut.ico`).
+* **Mascot (decision 16):** the peanut appears often: empty states, Starting/Saving, success messages. Never in error messages or Advanced mode sections. This replaces "mascot sparingly" in the design notes.
+* **"More settings" (decision 15):** each settings page shows the common items first and the rest under an expander, e.g. the `server.properties` editor shows gamemode, difficulty and PvP first.
+* **Advanced mode (decision 15):** a switch in app settings. Items marked advanced-only are hidden until it is on. Phase 1 item: custom JVM arguments per server, added after WaNut's own flags.
+* **Which items are common, "More settings" or advanced-only:** draft in `product/positioning.md`, awaiting Peanut's review. Do not lock it in code beyond what a step needs.
+
+---
+
 ## 5. Directory & File Structure
 
 ```text
@@ -146,9 +161,12 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * [ ] LAN / virtual-LAN address panel with Copy button, and Windows Firewall rule.
 * [ ] Automatic backup before start, with cleanup rules.
 * [ ] Self-update from GitHub Releases.
+* [ ] Visual style (warm palette, dark mode, icon, peanut mascot).
+* [ ] "More settings" expanders; Advanced mode switch with custom JVM arguments.
 
 ### Phase 2: Easy Multiplayer & Customization
 * [ ] Traditional Chinese translation.
+* [ ] Peanut-led guided onboarding (decision 17).
 * [ ] UPnP port forwarding and built-in tunnel (playit.gg or similar).
 * [ ] Modrinth / CurseForge mod and plugin browser with version/loader filtering.
 * [ ] Forge / NeoForge support.
@@ -195,7 +213,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ### Screens (WaNut.App)
 1. **Main window:** server list on the left; on the right the selected server's status badge, Start/Stop, and tabs: Console, Players, Settings, Backups, Connect (IP + Copy).
 2. **Create Server wizard:** name → type (Vanilla/Paper/Fabric) → version → RAM slider → EULA checkbox → Create (progress bar while Java and the server jar download).
-3. **App settings:** language (later), instances folder, backup rules, update check.
+3. **App settings:** language (later), instances folder, backup rules, update check, Advanced mode switch.
 
 ### Start a server: what happens in order
 1. Check no other server is running (decision 5).
@@ -206,14 +224,16 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 6. On `Done (...)!` → status "Online"; apply queued commands such as keepInventory.
 
 ### Build order (each step ends with something runnable)
-1. Solution skeleton, Core tests running, empty main window.
-2. Create Server wizard with Vanilla: download Java + server.jar, write EULA.
-3. Start/stop with live console, command box, Online status, players list.
+1. ✓ Solution skeleton, Core tests running, empty main window.
+2. ✓ Create Server wizard with Vanilla: download Java + server.jar, write EULA.
+3. ✓ Start/stop with live console, command box, Online status, players list.
 4. Paper and Fabric support.
-5. `server.properties` editor.
-6. Backups with cleanup.
-7. Connect tab (IP list) and firewall rule.
-8. Installer and self-update; first GitHub Release.
+5. Visual style: warm palette, dark mode, app icon, peanut mascot in empty and Starting/Saving states (section 4b).
+6. `server.properties` editor with a "More settings" expander; a default `server.properties` is written when a server is created.
+7. App settings window with the Advanced mode switch; custom JVM arguments as its first advanced-only item.
+8. Backups with cleanup.
+9. Connect tab (IP list) and firewall rule.
+10. Installer and self-update; first GitHub Release.
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
@@ -223,4 +243,5 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ---
 
 ## Open Questions
-* None right now.
+* Which settings are common, "More settings" or advanced-only (draft in `product/positioning.md`, awaiting Peanut).
+* Content of the guided onboarding (decision 17, after Phase 1).
