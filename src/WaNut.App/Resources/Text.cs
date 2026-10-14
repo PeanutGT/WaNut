@@ -8,11 +8,11 @@ namespace WaNut.App.Resources;
 /// </summary>
 public static class Text
 {
-    private static readonly ResourceManager _manager = new("WaNut.App.Resources.Strings", typeof(Text).Assembly);
+    private static readonly ResourceManager Manager = new("WaNut.App.Resources.Strings", typeof(Text).Assembly);
 
     public static string Get(string key)
     {
         // A missing key shows up as [Key] on screen instead of crashing, so it is easy to spot.
-        return _manager.GetString(key, CultureInfo.CurrentUICulture) ?? $"[{key}]";
+        return Manager.GetString(key, CultureInfo.CurrentUICulture) ?? $"[{key}]";
     }
 }

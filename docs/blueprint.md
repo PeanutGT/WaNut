@@ -35,7 +35,7 @@ Different Minecraft versions require specific Java versions. **Never rely on the
   * MC 1.16.5: Java 8 (oldest supported version, decision 11)
   * MC 1.17 – 1.20.4: Java 17 (1.17 officially asks for Java 16; Java 17 runs it fine, so Java 16 is dropped)
   * MC 1.20.5 – 1.21.x: Java 21
-  * Newer: the newest Java that Mojang data names
+  * MC 26.x (year-based): Java 25 (confirmed on 26.3 against Mojang data, 2026-10-14)
 * **Implementation:** Query the **Eclipse Adoptium (Temurin) API** (`api.adoptium.net/v3`) for the Windows x64 `.zip` JRE, verify its checksum, extract into `runtimes/java-<major>/`.
 * **Execution:** Run `java.exe` by absolute path with a hidden console (see section 3).
 

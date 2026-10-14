@@ -24,4 +24,70 @@
   <data name="Main_SelectServer" xml:space="preserve">
     <value>Select a server to see its details.</value>
   </data>
+  <data name="Main_Java" xml:space="preserve">
+    <value>Java</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CreateServer_Title" xml:space="preserve">
+    <value>Create Server</value>
+  </data>
+  <data name="CreateServer_DefaultName" xml:space="preserve">
+    <value>My Server</value>
+  </data>
+  <data name="CreateServer_NameLabel" xml:space="preserve">
+    <value>Server name</value>
+  </data>
+  <data name="CreateServer_TypeLabel" xml:space="preserve">
+    <value>Server type</value>
+  </data>
+  <data name="CreateServer_TypeVanilla" xml:space="preserve">
+    <value>Vanilla (official Minecraft server). Paper and Fabric are coming soon.</value>
+  </data>
+  <data name="CreateServer_VersionLabel" xml:space="preserve">
+    <value>Minecraft version</value>
+  </data>
+  <data name="CreateServer_MemoryLabel" xml:space="preserve">
+    <value>Memory (RAM)</value>
+  </data>
+  <data name="CreateServer_MemoryValue" xml:space="preserve">
+    <value>{0:0.#} GB</value>
+  </data>
+  <data name="CreateServer_MemoryHint" xml:space="preserve">
+    <value>Capped at 75% of this PC's memory so Windows and Minecraft stay responsive.</value>
+  </data>
+  <data name="CreateServer_EulaPrefix" xml:space="preserve">
+    <value>I accept the</value>
+  </data>
+  <data name="CreateServer_EulaLink" xml:space="preserve">
+    <value>Minecraft End User License Agreement (EULA)</value>
+  </data>
+  <data name="CreateServer_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="CreateServer_LoadingVersions" xml:space="preserve">
+    <value>Loading Minecraft versions…</value>
+  </data>
+  <data name="CreateServer_VersionsFailed" xml:space="preserve">
+    <value>Could not load the Minecraft version list. Check your internet connection and reopen this window.</value>
+  </data>
+  <data name="CreateServer_Stage_ReadingVersion" xml:space="preserve">
+    <value>Reading version details…</value>
+  </data>
+  <data name="CreateServer_Stage_DownloadingJava" xml:space="preserve">
+    <value>Downloading Java (first time only)…</value>
+  </data>
+  <data name="CreateServer_Stage_DownloadingServer" xml:space="preserve">
+    <value>Downloading the Minecraft server…</value>
+  </data>
+  <data name="CreateServer_Stage_WritingFiles" xml:space="preserve">
+    <value>Setting up the server folder…</value>
+  </data>
+  <data name="CreateServer_ChecksumFailed" xml:space="preserve">
+    <value>A download was damaged or changed (its checksum did not match), so it was not used. Please try again.</value>
+  </data>
+  <data name="CreateServer_Failed" xml:space="preserve">
+    <value>Could not create the server: {0}</value>
+  </data>
 </root>
