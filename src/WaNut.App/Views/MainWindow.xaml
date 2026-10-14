@@ -3,106 +3,134 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:WaNut.App.Resources"
         xmlns:behaviors="clr-namespace:WaNut.App.Behaviors"
+        xmlns:converters="clr-namespace:WaNut.App.Converters"
+        xmlns:hosting="clr-namespace:WaNut.Core.Hosting;assembly=WaNut.Core"
         Title="{res:Text App_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
         Width="1000" Height="640"
         MinWidth="760" MinHeight="480"
         WindowStartupLocation="CenterScreen">
+  <Window.Resources>
+    <converters:LogLineLevelConverter x:Key="LogLineLevel" />
+
+    <!-- Status dot: gray when stopped, amber while busy, green when online. -->
+    <Style x:Key="StatusDot" TargetType="Ellipse">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Fill" Value="{DynamicResource OfflineDotBrush}" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+          <Setter Property="Fill" Value="{DynamicResource WarningTextBrush}" />
+        </DataTrigger>
+        <DataTrigger Binding="{Binding IsOnline}" Value="True">
+          <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ShownWhenNoServers" TargetType="FrameworkElement">
+      <Setter Property="Visibility" Value="Collapsed" />
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding Servers.Count}" Value="0">
+          <Setter Property="Visibility" Value="Visible" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="HiddenWhenNoServers" TargetType="FrameworkElement">
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding Servers.Count}" Value="0">
+          <Setter Property="Visibility" Value="Collapsed" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
+
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="280" />
+      <ColumnDefinition Width="230" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <!-- Server list -->
+    <!-- Sidebar: logo, server list, create button -->
     <Border Grid.Column="0"
-            Background="{StaticResource SidebarBrush}"
-            BorderBrush="{StaticResource BorderBrush}"
+            Background="{DynamicResource SidebarBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="0,0,1,0">
-      <DockPanel Margin="16">
-        <TextBlock DockPanel.Dock="Top"
-                   Text="{res:Text App_Title}"
-                   FontSize="22" FontWeight="Bold"
-                   Margin="0,0,0,16" />
+      <DockPanel Margin="12,16,12,12">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,20">
+          <Image Style="{StaticResource Peanut}" Width="32" Height="32" />
+          <TextBlock Text="{res:Text App_Title}" FontSize="20" FontWeight="Bold"
+                     VerticalAlignment="Center" Margin="10,0,0,0" />
+        </StackPanel>
 
-        <Button DockPanel.Dock="Bottom"
-                Content="{res:Text Main_CreateServer}"
-                Command="{Binding CreateServerCommand}"
-                Style="{StaticResource PrimaryButton}"
-                Margin="0,16,0,0" />
+        <TextBlock DockPanel.Dock="Top" Text="{res:Text Main_MyServers}"
+                   Style="{StaticResource SectionCaption}" Margin="6,0,0,8" />
 
-        <Grid>
-          <ListBox ItemsSource="{Binding Servers}"
-                   SelectedItem="{Binding SelectedServer}"
-                   Background="Transparent"
-                   BorderThickness="0"
-                   HorizontalContentAlignment="Stretch">
-            <ListBox.ItemContainerStyle>
-              <Style TargetType="ListBoxItem">
-                <!-- Screen readers read the server name instead of the raw record text. -->
-                <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
-                <Setter Property="AutomationProperties.ItemStatus" Value="{Binding StatusText}" />
-              </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <Grid Margin="4,6">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                  </Grid.ColumnDefinitions>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Foreground="{StaticResource MutedTextBrush}">
-                      <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
-                      <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
-                    </TextBlock>
-                  </StackPanel>
-                  <!-- Small dot for a running server; the status text says the same for screen readers. -->
-                  <Ellipse Grid.Column="1" Width="10" Height="10" VerticalAlignment="Center"
-                           ToolTip="{Binding StatusText}">
-                    <Ellipse.Style>
-                      <Style TargetType="Ellipse">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Setter Property="Fill" Value="{StaticResource StatusBusyBrush}" />
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                            <Setter Property="Visibility" Value="Visible" />
-                          </DataTrigger>
-                          <DataTrigger Binding="{Binding IsOnline}" Value="True">
-                            <Setter Property="Fill" Value="{StaticResource AccentBrush}" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </Ellipse.Style>
-                  </Ellipse>
-                </Grid>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-          <TextBlock Text="{res:Text Main_NoServers}"
-                     Foreground="{StaticResource MutedTextBrush}"
-                     TextWrapping="Wrap"
-                     VerticalAlignment="Center"
-                     TextAlignment="Center">
-            <TextBlock.Style>
-              <Style TargetType="TextBlock">
-                <Setter Property="Visibility" Value="Collapsed" />
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding Servers.Count}" Value="0">
-                    <Setter Property="Visibility" Value="Visible" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </TextBlock.Style>
-          </TextBlock>
-        </Grid>
+        <!-- With no servers yet, the big button in the middle takes over. -->
+        <Border DockPanel.Dock="Bottom" Style="{StaticResource HiddenWhenNoServers}" Margin="0,12,0,0">
+          <Button Command="{Binding CreateServerCommand}"
+                  Style="{StaticResource DashedButton}"
+                  AutomationProperties.Name="{res:Text Main_CreateServer}">
+            <TextBlock>
+              <Run Text="+" />
+              <Run Text="{res:Text Main_CreateServer}" />
+            </TextBlock>
+          </Button>
+        </Border>
+
+        <ListBox ItemsSource="{Binding Servers}"
+                 SelectedItem="{Binding SelectedServer}">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+              <!-- Screen readers read the server name instead of the raw record text. -->
+              <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+              <Setter Property="AutomationProperties.ItemStatus" Value="{Binding StatusText}" />
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ToolTip="{Binding StatusText}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,10,0" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Style="{StaticResource MutedText}" FontSize="12">
+                    <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
+                    <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
+                  </TextBlock>
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </DockPanel>
     </Border>
 
-    <!-- Server details -->
+    <!-- Right side -->
     <Grid Grid.Column="1">
+      <!-- No servers yet: the peanut and one big green button -->
+      <StackPanel Style="{StaticResource ShownWhenNoServers}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
+        <Image Style="{StaticResource Peanut}" Width="96" Height="96" Margin="0,0,0,20" />
+        <TextBlock Text="{res:Text Main_NoServers}" FontSize="20" FontWeight="SemiBold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="{res:Text Main_NoServersHint}" Style="{StaticResource MutedText}"
+                   TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,20" />
+        <Button Content="{res:Text Main_CreateServer}"
+                Command="{Binding CreateServerCommand}"
+                Style="{StaticResource PrimaryButton}"
+                FontSize="14" Padding="22,10" HorizontalAlignment="Center" />
+      </StackPanel>
+
+      <!-- Servers exist but none is selected -->
       <TextBlock Text="{res:Text Main_SelectServer}"
-                 Foreground="{StaticResource MutedTextBrush}"
+                 Foreground="{DynamicResource MutedTextBrush}"
                  FontSize="15"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center">
@@ -113,12 +141,16 @@
               <DataTrigger Binding="{Binding SelectedServer}" Value="{x:Null}">
                 <Setter Property="Visibility" Value="Visible" />
               </DataTrigger>
+              <DataTrigger Binding="{Binding Servers.Count}" Value="0">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
             </Style.Triggers>
           </Style>
         </TextBlock.Style>
       </TextBlock>
 
-      <DockPanel Margin="24" DataContext="{Binding SelectedServer}">
+      <!-- Selected server -->
+      <DockPanel Margin="24,20,24,20" DataContext="{Binding SelectedServer}">
         <DockPanel.Style>
           <Style TargetType="DockPanel">
             <Style.Triggers>
@@ -130,14 +162,14 @@
         </DockPanel.Style>
 
         <!-- Header: name, details, status and Start/Stop -->
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,16">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <StackPanel>
-            <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-            <TextBlock Foreground="{StaticResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0">
+            <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0">
               <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
               <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
               <Run Text="{Binding LoaderText, Mode=OneWay}" />
@@ -150,108 +182,182 @@
             </TextBlock>
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-            <Border CornerRadius="10" Padding="10,3" Margin="0,0,12,0" VerticalAlignment="Center">
+            <!-- The peanut wobbles while the server gets ready, starts or saves. -->
+            <Image Width="22" Height="22" Margin="0,0,8,0">
+              <Image.Style>
+                <Style TargetType="Image" BasedOn="{StaticResource BusyPeanut}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Image.Style>
+            </Image>
+
+            <!-- Status pill -->
+            <Border CornerRadius="11" Padding="10,3" Margin="0,0,12,0" VerticalAlignment="Center" BorderThickness="1">
               <Border.Style>
                 <Style TargetType="Border">
-                  <Setter Property="Background" Value="{StaticResource StatusStoppedBrush}" />
+                  <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+                  <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                  <Setter Property="TextElement.Foreground" Value="{DynamicResource MutedTextBrush}" />
                   <Style.Triggers>
-                    <DataTrigger Binding="{Binding Status}" Value="Starting">
-                      <Setter Property="Background" Value="{StaticResource StatusBusyBrush}" />
+                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                      <Setter Property="Background" Value="{DynamicResource WarningBrush}" />
+                      <Setter Property="BorderBrush" Value="{DynamicResource WarningBorderBrush}" />
+                      <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningTextBrush}" />
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding Status}" Value="Stopping">
-                      <Setter Property="Background" Value="{StaticResource StatusBusyBrush}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsPreparing}" Value="True">
-                      <Setter Property="Background" Value="{StaticResource StatusBusyBrush}" />
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Status}" Value="Online">
-                      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                    <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                      <Setter Property="Background" Value="{DynamicResource OnlineBadgeBrush}" />
+                      <Setter Property="BorderBrush" Value="{DynamicResource OnlineBadgeBrush}" />
+                      <Setter Property="TextElement.Foreground" Value="{DynamicResource OnlineBadgeTextBrush}" />
                     </DataTrigger>
                   </Style.Triggers>
                 </Style>
               </Border.Style>
-              <TextBlock Text="{Binding StatusText}" Foreground="White" FontWeight="SemiBold"
-                         AutomationProperties.LiveSetting="Polite" />
+              <StackPanel Orientation="Horizontal">
+                <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,6,0" />
+                <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold"
+                           AutomationProperties.LiveSetting="Polite" />
+              </StackPanel>
             </Border>
+
+            <!-- Start while stopped, Stop while running: one action at a time. -->
             <Button Content="{res:Text Server_Start}"
                     Command="{Binding StartCommand}"
-                    Style="{StaticResource PrimaryButton}"
-                    MinWidth="90" Margin="0,0,8,0" />
+                    MinWidth="90">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+            </Button>
             <Button Content="{res:Text Server_Stop}"
                     Command="{Binding StopCommand}"
-                    Padding="14,8" MinWidth="90" />
+                    MinWidth="90">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                      <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+            </Button>
           </StackPanel>
         </Grid>
 
-        <TextBlock DockPanel.Dock="Top"
-                   Text="{Binding ErrorText}"
-                   Foreground="{StaticResource ErrorBrush}"
-                   TextWrapping="Wrap"
-                   Margin="0,0,0,12">
-          <TextBlock.Style>
-            <Style TargetType="TextBlock">
+        <Border DockPanel.Dock="Top" Margin="0,0,0,16">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
               <Style.Triggers>
                 <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
                   <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
               </Style.Triggers>
             </Style>
-          </TextBlock.Style>
-        </TextBlock>
+          </Border.Style>
+          <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+        </Border>
 
         <TabControl>
           <TabItem Header="{res:Text Server_TabConsole}">
-            <DockPanel Margin="0,8,0,0">
+            <DockPanel>
               <!-- Command box -->
-              <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
+              <Grid DockPanel.Dock="Bottom" Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" />
                   <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Label Content="{res:Text Server_CommandLabel}" Target="{Binding ElementName=CommandBox}"
-                       VerticalAlignment="Center" Padding="0,0,8,0" />
-                <TextBox x:Name="CommandBox" Grid.Column="1"
-                         Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}"
+                         Tag="{res:Text Server_CommandPlaceholder}"
                          ToolTip="{res:Text Server_CommandHelp}"
+                         AutomationProperties.Name="{res:Text Server_CommandLabel}"
                          AutomationProperties.HelpText="{res:Text Server_CommandHelp}"
-                         FontFamily="Consolas" VerticalContentAlignment="Center" Padding="4">
+                         FontFamily="Consolas">
                   <TextBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding SendCommand}" />
                   </TextBox.InputBindings>
                 </TextBox>
-                <Button Grid.Column="2" Content="{res:Text Server_Send}"
+                <!-- Send is the green button while the server runs (Start is hidden then). -->
+                <Button Grid.Column="1" Content="{res:Text Server_Send}"
                         Command="{Binding SendCommand}"
-                        Padding="14,4" Margin="8,0,0,0" />
+                        MinWidth="72" Margin="8,0,0,0">
+                  <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                          <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}" />
+                          <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonBorderBrush}" />
+                          <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonTextBrush}" />
+                          <Setter Property="FontWeight" Value="SemiBold" />
+                        </DataTrigger>
+                        <MultiDataTrigger>
+                          <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsRunning}" Value="True" />
+                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+                          </MultiDataTrigger.Conditions>
+                          <Setter Property="Background" Value="{DynamicResource PrimaryButtonHoverBrush}" />
+                        </MultiDataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Button.Style>
+                </Button>
               </Grid>
 
-              <!-- Live console -->
-              <ListBox ItemsSource="{Binding ConsoleLines}"
-                       behaviors:AutoScroll.IsEnabled="True"
-                       Background="{StaticResource ConsoleBrush}"
-                       Foreground="{StaticResource ConsoleTextBrush}"
-                       FontFamily="Consolas" FontSize="12"
-                       BorderThickness="0"
-                       VirtualizingPanel.IsVirtualizing="True"
-                       VirtualizingPanel.VirtualizationMode="Recycling"
-                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                <ListBox.ItemTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                  </DataTemplate>
-                </ListBox.ItemTemplate>
-              </ListBox>
+              <!-- Live console: plain lines, warnings and errors colored. -->
+              <Border Background="{DynamicResource ConsoleBrush}" CornerRadius="6" Padding="12,10,4,10">
+                <ListBox ItemsSource="{Binding ConsoleLines}"
+                         behaviors:AutoScroll.IsEnabled="True"
+                         ItemContainerStyle="{StaticResource ConsoleLine}"
+                         Foreground="{DynamicResource ConsoleTextBrush}"
+                         FontFamily="Consolas" FontSize="12"
+                         Focusable="False"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         VirtualizingPanel.ScrollUnit="Pixel">
+                  <ListBox.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource {x:Type ScrollBar}}">
+                      <Setter Property="Foreground" Value="{DynamicResource ConsoleScrollThumbBrush}" />
+                    </Style>
+                  </ListBox.Resources>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,8,0">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding Converter={StaticResource LogLineLevel}}" Value="{x:Static hosting:LogLineLevel.Warning}">
+                                <Setter Property="Foreground" Value="{DynamicResource ConsoleWarnBrush}" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding Converter={StaticResource LogLineLevel}}" Value="{x:Static hosting:LogLineLevel.Error}">
+                                <Setter Property="Foreground" Value="{DynamicResource ConsoleErrorBrush}" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Border>
             </DockPanel>
           </TabItem>
 
           <TabItem Header="{Binding PlayersHeader}">
-            <Grid Margin="0,8,0,0">
-              <ListBox ItemsSource="{Binding Players}" BorderThickness="0" FontSize="14" />
-              <TextBlock Text="{res:Text Server_NoPlayers}"
-                         Foreground="{StaticResource MutedTextBrush}"
-                         HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.Style>
-                  <Style TargetType="TextBlock">
+            <Grid>
+              <ListBox ItemsSource="{Binding Players}" FontSize="14" />
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel.Style>
+                  <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Collapsed" />
                     <Style.Triggers>
                       <DataTrigger Binding="{Binding Players.Count}" Value="0">
@@ -259,8 +365,10 @@
                       </DataTrigger>
                     </Style.Triggers>
                   </Style>
-                </TextBlock.Style>
-              </TextBlock>
+                </StackPanel.Style>
+                <Image Style="{StaticResource Peanut}" Width="48" Height="48" Margin="0,0,0,12" />
+                <TextBlock Text="{res:Text Server_NoPlayers}" Style="{StaticResource MutedText}" />
+              </StackPanel>
             </Grid>
           </TabItem>
         </TabControl>
@@ -268,7 +376,7 @@
     </Grid>
 
     <!-- Shown while the world is saved before WaNut closes -->
-    <Grid Grid.ColumnSpan="2" Background="#CCFFFFFF">
+    <Grid Grid.ColumnSpan="2" Background="{DynamicResource OverlayBrush}">
       <Grid.Style>
         <Style TargetType="Grid">
           <Setter Property="Visibility" Value="Collapsed" />
@@ -280,7 +388,8 @@
         </Style>
       </Grid.Style>
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ProgressBar IsIndeterminate="True" Width="220" Height="6" Margin="0,0,0,12" />
+        <Image Style="{StaticResource BusyPeanut}" Width="64" Height="64" Margin="0,0,0,16" />
+        <ProgressBar IsIndeterminate="True" Width="220" Margin="0,0,0,12" />
         <TextBlock Text="{res:Text Main_SavingWorld}" FontSize="15" HorizontalAlignment="Center"
                    AutomationProperties.LiveSetting="Assertive" />
       </StackPanel>

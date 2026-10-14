@@ -49,12 +49,12 @@ public sealed partial class ServerViewModel : ObservableObject
     public ObservableCollection<string> Players { get; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(IsBusy), nameof(StatusText))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand), nameof(StopCommand), nameof(SendCommand))]
     private ServerStatus _status = ServerStatus.Stopped;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(IsBusy), nameof(StatusText))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
     private bool _isPreparing;
 
@@ -72,6 +72,9 @@ public sealed partial class ServerViewModel : ObservableObject
     public bool IsRunning => Status != ServerStatus.Stopped;
 
     public bool IsOnline => Status == ServerStatus.Online;
+
+    /// <summary>Getting ready, starting or saving: the moments the peanut wobbles.</summary>
+    public bool IsBusy => IsPreparing || Status is ServerStatus.Starting or ServerStatus.Stopping;
 
     public string PlayersHeader => string.Format(Text.Get("Server_TabPlayers"), Players.Count);
 

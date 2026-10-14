@@ -6,11 +6,17 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>WaNut</AssemblyName>
     <RootNamespace>WaNut.App</RootNamespace>
+    <ApplicationIcon>Assets\wanut.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\wanut.ico" />
+    <Resource Include="Assets\peanut-16.png" />
   </ItemGroup>
 
   <ItemGroup>

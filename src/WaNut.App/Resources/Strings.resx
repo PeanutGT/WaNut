@@ -16,10 +16,16 @@
     <value>WaNut</value>
   </data>
   <data name="Main_CreateServer" xml:space="preserve">
-    <value>Create Server</value>
+    <value>Create server</value>
+  </data>
+  <data name="Main_MyServers" xml:space="preserve">
+    <value>My servers</value>
   </data>
   <data name="Main_NoServers" xml:space="preserve">
-    <value>No servers yet. Create one to get started.</value>
+    <value>No servers yet</value>
+  </data>
+  <data name="Main_NoServersHint" xml:space="preserve">
+    <value>Make your first server in a few clicks, then invite your friends to play.</value>
   </data>
   <data name="Main_SelectServer" xml:space="preserve">
     <value>Select a server to see its details.</value>
@@ -107,6 +113,9 @@
   </data>
   <data name="Server_CommandHelp" xml:space="preserve">
     <value>Type a server command without the slash, for example: say Hello, op Steve, time set day</value>
+  </data>
+  <data name="Server_CommandPlaceholder" xml:space="preserve">
+    <value>Type a command, e.g. time set day</value>
   </data>
   <data name="Server_TabConsole" xml:space="preserve">
     <value>Console</value>

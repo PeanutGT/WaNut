@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:WaNut.App.Resources"
         Title="{res:Text CreateServer_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
         Width="520" SizeToContent="Height"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -16,33 +18,35 @@
   </Window.Resources>
 
   <StackPanel Margin="24">
-    <TextBlock Text="{res:Text CreateServer_Title}" FontSize="20" FontWeight="Bold" />
+    <StackPanel Orientation="Horizontal">
+      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
+      <TextBlock Text="{res:Text CreateServer_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </StackPanel>
 
     <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource FieldLabel}" />
     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-             IsEnabled="{Binding IsIdle}"
-             Padding="6,4" />
+             IsEnabled="{Binding IsIdle}" />
 
     <TextBlock Text="{res:Text CreateServer_TypeLabel}" Style="{StaticResource FieldLabel}" />
     <ListBox ItemsSource="{Binding ServerTypes}"
              SelectedItem="{Binding SelectedType}"
              IsEnabled="{Binding IsIdle}"
              AutomationProperties.Name="{res:Text CreateServer_TypeLabel}"
+             Background="{DynamicResource CardBrush}"
              BorderThickness="1"
-             BorderBrush="{StaticResource BorderBrush}"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+             Padding="4">
       <ListBox.ItemContainerStyle>
-        <Style TargetType="ListBoxItem">
+        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
           <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
           <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
-          <Setter Property="Padding" Value="8,6" />
+          <Setter Property="Padding" Value="10,7" />
         </Style>
       </ListBox.ItemContainerStyle>
       <ListBox.ItemTemplate>
         <DataTemplate>
           <StackPanel>
             <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-            <TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
           </StackPanel>
         </DataTemplate>
       </ListBox.ItemTemplate>
@@ -52,8 +56,7 @@
     <ComboBox ItemsSource="{Binding Versions}"
               SelectedItem="{Binding SelectedVersion}"
               DisplayMemberPath="Id"
-              IsEnabled="{Binding IsIdle}"
-              Padding="6,4" />
+              IsEnabled="{Binding IsIdle}" />
 
     <DockPanel Margin="0,14,0,6">
       <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
@@ -68,7 +71,7 @@
             IsSnapToTickEnabled="True"
             IsEnabled="{Binding IsIdle}" />
     <TextBlock Text="{res:Text CreateServer_MemoryHint}"
-               Foreground="{StaticResource MutedTextBrush}"
+               Style="{StaticResource MutedText}"
                TextWrapping="Wrap" Margin="0,4,0,0" />
 
     <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
@@ -80,24 +83,36 @@
 
     <StackPanel Margin="0,18,0,0"
                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-      <TextBlock Text="{Binding StatusText}" Margin="0,0,0,6" />
-      <ProgressBar Height="8"
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
+      </StackPanel>
+      <ProgressBar
                    Value="{Binding ProgressPercent, Mode=OneWay}"
                    IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
     </StackPanel>
 
-    <TextBlock Text="{Binding ErrorText}"
-               Foreground="#B91C1C"
-               TextWrapping="Wrap"
-               Margin="0,12,0,0" />
+    <Border Margin="0,14,0,0">
+      <Border.Style>
+        <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+    </Border>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
       <Button Content="{res:Text Common_Cancel}"
               Command="{Binding CancelCommand}"
-              Padding="14,8" Margin="0,0,8,0" />
+              MinWidth="80" Margin="0,0,8,0" />
       <Button Content="{res:Text CreateServer_Create}"
               Command="{Binding CreateCommand}"
               Style="{StaticResource PrimaryButton}"
+              MinWidth="80"
               IsDefault="True" />
     </StackPanel>
   </StackPanel>
