@@ -49,8 +49,8 @@ Different Minecraft versions require specific Java versions. **Never rely on the
 ### B. Automated Server Core Provisioning
 Users pick server type and version from dropdowns, fetched from official APIs:
 * **Vanilla:** Mojang Version Manifest (`piston-meta.mojang.com/mc/game/version_manifest_v2.json`); download `server.jar` and verify its SHA-1.
-* **PaperMC (revised):** Paper's **Fill v3 API** (`fill.papermc.io/v3/projects/paper`). The old v2 API is being retired. Verify SHA-256.
-* **Fabric:** Fabric Meta API (`meta.fabricmc.net/v2`), server launcher jar for game + loader + installer versions.
+* **PaperMC (revised):** Paper's **Fill v3 API** (`fill.papermc.io/v3/projects/paper`). The old v2 API is being retired. Use the newest STABLE build (BETA only when a version has no stable build yet) and verify SHA-256.
+* **Fabric:** versions from the Fabric Meta API (`meta.fabricmc.net/v2`). Meta's ready-made server jar has no checksum, so WaNut downloads the same launcher (`fabric-installer-<v>-server.jar`) from Fabric's Maven, verifies it against Maven's `.sha256`, and adds the `install.properties` (loader and game version) itself. The Vanilla `server.jar` (SHA-1 from Mojang) sits next to it.
 * **Forge / NeoForge:** later phase (decision 6).
 * Downloads are cached in `cache/` so a second server of the same version needs no download.
 
@@ -245,7 +245,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 1. ✓ Solution skeleton, Core tests running, empty main window.
 2. ✓ Create Server wizard with Vanilla: download Java + server.jar, write EULA.
 3. ✓ Start/stop with live console, command box, Online status, players list.
-4. Paper and Fabric support.
+4. ✓ Paper and Fabric support.
 5. Visual style: warm palette, dark mode, app icon, peanut mascot in empty and Starting/Saving states (section 4b).
 6. Game settings tab (`server.properties` editor with "More settings"; a default `server.properties` is written when a server is created) and Players tab additions (whitelist switch and list, OP list).
 7. Server tab (RAM slider, port, `online-mode`) and the App settings window with the Advanced mode switch; custom JVM arguments as the first advanced-only item.

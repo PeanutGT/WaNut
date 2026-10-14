@@ -12,13 +12,13 @@ namespace WaNut.App.ViewModels;
 
 public sealed partial class CreateServerViewModel : ObservableObject
 {
-    private readonly MojangVersionService _versions;
+    private readonly ServerVersionCatalog _catalog;
     private readonly ServerCreator _creator;
     private CancellationTokenSource? _cancellation;
 
-    public CreateServerViewModel(MojangVersionService versions, ServerCreator creator)
+    public CreateServerViewModel(ServerVersionCatalog catalog, ServerCreator creator)
     {
-        _versions = versions;
+        _catalog = catalog;
         _creator = creator;
 
         var totalMb = MemoryLimits.TotalPhysicalMb();
@@ -30,6 +30,16 @@ public sealed partial class CreateServerViewModel : ObservableObject
     public event Action<bool>? CloseRequested;
 
     public ObservableCollection<GameVersion> Versions { get; } = [];
+
+    public IReadOnlyList<ServerTypeOption> ServerTypes { get; } =
+    [
+        new(ServerType.Vanilla, Text.Get("CreateServer_TypeVanilla"), Text.Get("CreateServer_TypeVanillaHint")),
+        new(ServerType.Paper, Text.Get("CreateServer_TypePaper"), Text.Get("CreateServer_TypePaperHint")),
+        new(ServerType.Fabric, Text.Get("CreateServer_TypeFabric"), Text.Get("CreateServer_TypeFabricHint")),
+    ];
+
+    [ObservableProperty]
+    private ServerTypeOption? _selectedType;
 
     public int MinMemoryMb => MemoryLimits.MinimumMb;
 
@@ -80,22 +90,42 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
+    partial void OnSelectedTypeChanged(ServerTypeOption? value)
+    {
+        // A load already running picks up the new type when it finishes.
+        if (!LoadVersionsCommand.IsRunning)
+        {
+            LoadVersionsCommand.Execute(null);
+        }
+    }
+
     [RelayCommand]
     private async Task LoadVersionsAsync()
     {
+        SelectedType ??= ServerTypes[0];
         IsBusy = true;
         ErrorText = null;
         StatusText = Text.Get("CreateServer_LoadingVersions");
         try
         {
-            var releases = await _versions.GetReleasesAsync();
+            ServerType type;
+            IReadOnlyList<GameVersion> releases;
+            do
+            {
+                type = SelectedType.Type;
+                releases = await _catalog.GetVersionsAsync(type);
+            }
+            while (type != SelectedType.Type);
+
+            // Keep the chosen version when the new type offers it too.
+            var previous = SelectedVersion?.Id;
             Versions.Clear();
             foreach (var release in releases)
             {
                 Versions.Add(release);
             }
 
-            SelectedVersion = Versions.FirstOrDefault();
+            SelectedVersion = Versions.FirstOrDefault(v => v.Id == previous) ?? Versions.FirstOrDefault();
             StatusText = null;
         }
         catch (Exception)
@@ -110,7 +140,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         }
     }
 
-    private bool CanCreate() => IsIdle && EulaAccepted && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name);
+    private bool CanCreate() => IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name);
 
     [RelayCommand(CanExecute = nameof(CanCreate))]
     private async Task CreateAsync()
@@ -122,7 +152,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         try
         {
             Created = await _creator.CreateAsync(
-                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted),
+                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type),
                 progress,
                 _cancellation.Token);
         }
@@ -180,3 +210,6 @@ public sealed partial class CreateServerViewModel : ObservableObject
         ProgressFraction = progress.Fraction;
     }
 }
+
+/// <summary>One choice in the wizard's server type list.</summary>
+public sealed record ServerTypeOption(ServerType Type, string Title, string Description);
