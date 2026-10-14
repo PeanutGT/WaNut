@@ -43,7 +43,7 @@
     <value>Server type</value>
   </data>
   <data name="CreateServer_TypeVanilla" xml:space="preserve">
-    <value>Vanilla (official Minecraft server). Paper and Fabric are coming soon.</value>
+    <value>Vanilla</value>
   </data>
   <data name="CreateServer_VersionLabel" xml:space="preserve">
     <value>Minecraft version</value>
@@ -164,5 +164,26 @@ Choose No to keep waiting.</value>
   </data>
   <data name="Server_CommandFailed" xml:space="preserve">
     <value>Could not send the command: {0}</value>
+  </data>
+  <data name="CreateServer_TypeVanillaHint" xml:space="preserve">
+    <value>The official server, exactly like the game.</value>
+  </data>
+  <data name="CreateServer_TypePaper" xml:space="preserve">
+    <value>Paper</value>
+  </data>
+  <data name="CreateServer_TypePaperHint" xml:space="preserve">
+    <value>Runs faster and supports plugins. Put plugins in the plugins folder.</value>
+  </data>
+  <data name="CreateServer_TypeFabric" xml:space="preserve">
+    <value>Fabric</value>
+  </data>
+  <data name="CreateServer_TypeFabricHint" xml:space="preserve">
+    <value>Supports Fabric mods. Put mods in the mods folder; most mods also need Fabric API.</value>
+  </data>
+  <data name="Main_LoaderBuild" xml:space="preserve">
+    <value>build</value>
+  </data>
+  <data name="Main_LoaderVersion" xml:space="preserve">
+    <value>loader</value>
   </data>
 </root>

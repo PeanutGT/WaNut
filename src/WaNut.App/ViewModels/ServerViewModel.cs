@@ -34,6 +34,14 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public string Name => Metadata.Name;
 
+    /// <summary>"build 133" for Paper, "loader 0.19.5" for Fabric, empty for Vanilla.</summary>
+    public string LoaderText => Metadata switch
+    {
+        { LoaderVersion: null } => string.Empty,
+        { Type: ServerType.Paper } => $"{Text.Get("Main_LoaderBuild")} {Metadata.LoaderVersion}",
+        _ => $"{Text.Get("Main_LoaderVersion")} {Metadata.LoaderVersion}",
+    };
+
     public ServerProcess? Process { get; private set; }
 
     public ObservableCollection<string> ConsoleLines { get; } = [];

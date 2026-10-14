@@ -59,7 +59,7 @@ public sealed class LiveApiTests : IDisposable
     }
 
     [Fact]
-    public async Task VanillaServerCreator_RealDownloads_CreatesServerWithWorkingJava()
+    public async Task ServerCreator_RealDownloads_CreatesServerWithWorkingJava()
     {
         using var temp = new TempDir();
         var paths = new LauncherPaths(temp.Path);
@@ -68,7 +68,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
 
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Test", version, 2048, EulaAccepted: true));
@@ -89,8 +89,11 @@ public sealed class LiveApiTests : IDisposable
         }
     }
 
-    [Fact]
-    public async Task ServerProcess_RealVanillaServer_StartsOnlineAndStopsCleanly()
+    [Theory]
+    [InlineData(ServerType.Vanilla)]
+    [InlineData(ServerType.Paper)]
+    [InlineData(ServerType.Fabric)]
+    public async Task ServerProcess_RealServer_StartsOnlineAndStopsCleanly(ServerType type)
     {
         if (!OperatingSystem.IsWindows())
         {
@@ -104,15 +107,15 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new VanillaServerCreator(paths, versions, java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
-        var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true));
+        var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true, type));
         var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);
         var lines = new ConcurrentQueue<string>();
 
         using var server = new ServerHost().Start(metadata.Id, launch);
         server.OutputReceived += lines.Enqueue;
-        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online || !server.IsRunning, timeoutMs: 180_000);
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online || !server.IsRunning, timeoutMs: 300_000);
         Assert.Equal(ServerStatus.Online, server.Status);
         Assert.True(server.IsTrackedByJob);
 
@@ -123,5 +126,30 @@ public sealed class LiveApiTests : IDisposable
         Assert.True(stopped);
         Assert.Equal(0, await server.Exited);
         Assert.True(Directory.Exists(Path.Combine(store.InstanceDir(metadata.Id), "world")));
+    }
+
+    [Fact]
+    public async Task Paper_ReleaseVersions_HaveStableBuildWithSha256()
+    {
+        var paper = new PaperClient(_http);
+        var ids = await paper.GetVersionIdsAsync();
+
+        Assert.Contains("1.16.5", ids);
+        Assert.DoesNotContain(ids, id => id.Contains('-', StringComparison.Ordinal));
+        var build = await paper.GetBestBuildAsync("1.21.4");
+        Assert.Equal("STABLE", build.Channel);
+        Assert.Equal(64, build.Sha256.Length);
+    }
+
+    [Fact]
+    public async Task Fabric_LatestLauncher_MatchesMavenChecksum()
+    {
+        var fabric = new FabricClient(_http);
+        Assert.Contains("1.21.4", await fabric.GetStableGameVersionsAsync());
+
+        var launcher = await fabric.GetLatestLauncherAsync();
+        var bytes = await new FileDownloader(_http).DownloadBytesAsync(launcher.JarUrl, ExpectedHash.Sha256(launcher.Sha256));
+
+        Assert.True(bytes.Length > 50_000);
     }
 }

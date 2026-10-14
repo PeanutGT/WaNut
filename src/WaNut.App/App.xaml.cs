@@ -46,10 +46,13 @@ public partial class App : Application
         services.AddSingleton(_ => WaNutHttp.CreateClient(version));
         services.AddSingleton<FileDownloader>();
         services.AddSingleton<MojangVersionService>();
+        services.AddSingleton<PaperClient>();
+        services.AddSingleton<FabricClient>();
+        services.AddSingleton<ServerVersionCatalog>();
         services.AddSingleton<AdoptiumClient>();
         services.AddSingleton<JavaRuntimeManager>();
         services.AddSingleton<InstanceStore>();
-        services.AddSingleton<VanillaServerCreator>();
+        services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<ServerHost>();
 
