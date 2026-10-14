@@ -59,4 +59,5 @@
 
 ## 9. 文件
 - 產品設計與決策記錄在 `docs/blueprint.md`，決策改變時同步更新。
-- 本規範：`CONVENTIONS.md`。
+- 本規範：`docs/CONVENTIONS.md`。
+- 所有文件（.md）放在 `docs/`。只有 `README.md`、`CLAUDE.md`、`GEMINI.md` 留在根目錄，因為 GitHub、Claude 和 Gemini 只會從根目錄讀取它們。
