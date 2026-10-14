@@ -6,6 +6,7 @@ using WaNut.App.ViewModels;
 using WaNut.App.Views;
 using WaNut.Core;
 using WaNut.Core.Downloads;
+using WaNut.Core.Hosting;
 using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
@@ -49,8 +50,11 @@ public partial class App : Application
         services.AddSingleton<JavaRuntimeManager>();
         services.AddSingleton<InstanceStore>();
         services.AddSingleton<VanillaServerCreator>();
+        services.AddSingleton<ServerLaunchPlanner>();
+        services.AddSingleton<ServerHost>();
 
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<ServerController>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<CreateServerViewModel>();

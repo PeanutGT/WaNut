@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WaNut.Core\WaNut.Core.csproj" />
+    <ProjectReference Include="..\FakeMinecraftServer\FakeMinecraftServer.csproj" />
   </ItemGroup>
 
 </Project>
