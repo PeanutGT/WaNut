@@ -277,7 +277,8 @@
                   <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox x:Name="CommandBox"
+                         Text="{Binding CommandText, UpdateSourceTrigger=PropertyChanged}"
                          Tag="{res:Text Server_CommandPlaceholder}"
                          ToolTip="{res:Text Server_CommandHelp}"
                          AutomationProperties.Name="{res:Text Server_CommandLabel}"
