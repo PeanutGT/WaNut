@@ -14,6 +14,10 @@ public static class AutoScroll
     public static readonly DependencyProperty IsEnabledProperty = DependencyProperty.RegisterAttached(
         "IsEnabled", typeof(bool), typeof(AutoScroll), new PropertyMetadata(false, OnIsEnabledChanged));
 
+    // Per scroll viewer: true while the user is following the newest line.
+    private static readonly DependencyProperty IsFollowingProperty = DependencyProperty.RegisterAttached(
+        "IsFollowing", typeof(bool), typeof(AutoScroll), new PropertyMetadata(true));
+
     public static bool GetIsEnabled(DependencyObject element) => (bool)element.GetValue(IsEnabledProperty);
 
     public static void SetIsEnabled(DependencyObject element, bool value) => element.SetValue(IsEnabledProperty, value);
@@ -25,6 +29,9 @@ public static class AutoScroll
             return;
         }
 
+        // ScrollChanged bubbles up from the list's own scroll viewer.
+        list.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(OnScrollChanged));
+
         // Items follows ItemsSource, so this keeps working when another server is selected.
         ((INotifyCollectionChanged)list.Items).CollectionChanged += (_, args) =>
         {
@@ -35,15 +42,25 @@ public static class AutoScroll
         };
     }
 
-    private static void ScrollToEndIfFollowing(ItemsControl list)
+    private static void OnScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        if (FindScrollViewer(list) is not { } viewer)
+        if (e.OriginalSource is not ScrollViewer viewer)
         {
             return;
         }
 
-        // Checked before the new item is laid out, so "at the end" means the user was following along.
-        if (viewer.VerticalOffset >= viewer.ScrollableHeight - 1)
+        // Only a scroll that did not come from new content (the user, or a resize) changes whether we follow.
+        // Lines can arrive faster than layout runs, so checking the offset when a line is added would see a
+        // stale position and stop following for good.
+        if (e.ExtentHeightChange == 0)
+        {
+            viewer.SetValue(IsFollowingProperty, viewer.VerticalOffset >= viewer.ScrollableHeight - 1);
+        }
+    }
+
+    private static void ScrollToEndIfFollowing(ItemsControl list)
+    {
+        if (FindScrollViewer(list) is { } viewer && (bool)viewer.GetValue(IsFollowingProperty))
         {
             viewer.ScrollToEnd();
         }
