@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WaNut.App/WaNut.App.csproj" />
+    <Project Path="src/WaNut.Core/WaNut.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WaNut.Core.Tests/WaNut.Core.Tests.csproj" />
+  </Folder>
+</Solution>
