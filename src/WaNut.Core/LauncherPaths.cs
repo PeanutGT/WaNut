@@ -7,6 +7,9 @@ public sealed class LauncherPaths
 {
     public const string AppFolderName = "WaNut";
 
+    /// <summary>Points WaNut at another data folder, for testing without touching the real servers.</summary>
+    public const string DataDirVariable = "WANUT_DATA_DIR";
+
     public LauncherPaths(string root)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
@@ -28,8 +31,16 @@ public sealed class LauncherPaths
 
     public string ConfigFile { get; }
 
-    public static LauncherPaths CreateDefault()
+    public static LauncherPaths CreateDefault() => CreateDefault(Environment.GetEnvironmentVariable(DataDirVariable));
+
+    /// <summary>%APPDATA%\WaNut, unless <paramref name="dataDirOverride"/> names another folder.</summary>
+    public static LauncherPaths CreateDefault(string? dataDirOverride)
     {
+        if (!string.IsNullOrWhiteSpace(dataDirOverride))
+        {
+            return new LauncherPaths(Path.GetFullPath(dataDirOverride));
+        }
+
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         return new LauncherPaths(Path.Combine(appData, AppFolderName));
     }

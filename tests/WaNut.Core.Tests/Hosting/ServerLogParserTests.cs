@@ -51,4 +51,18 @@ public sealed class ServerLogParserTests
     {
         Assert.Equal("[12:00:00 INFO]: Hello", ServerLogParser.Clean("\u001b[32m[12:00:00 INFO]: Hello\u001b[0m"));
     }
+
+    [Theory]
+    [InlineData("[12:34:56] [Server thread/INFO]: Starting minecraft server version 1.21.1", LogLineLevel.Info)]
+    [InlineData("[12:34:56] [Server thread/WARN]: Can't keep up! Is the server overloaded?", LogLineLevel.Warning)]
+    [InlineData("[12:34:56 WARN]: Can't keep up!", LogLineLevel.Warning)]
+    [InlineData("[12:34:56] [Server thread/ERROR]: Encountered an unexpected exception", LogLineLevel.Error)]
+    [InlineData("[12:34:56 ERROR]: Could not pass event", LogLineLevel.Error)]
+    [InlineData("[12:34:56] [main/FATAL]: Failed to start the minecraft server", LogLineLevel.Error)]
+    [InlineData("\tat net.minecraft.server.Main.main(Main.java:1)", LogLineLevel.Info)]
+    [InlineData("[12:35:00] [Server thread/INFO]: <Alex> [x/ERROR]: hi", LogLineLevel.Info)]
+    public void GetLevel_Line_ReturnsLevelFromPrefix(string line, LogLineLevel expected)
+    {
+        Assert.Equal(expected, ServerLogParser.GetLevel(line));
+    }
 }
