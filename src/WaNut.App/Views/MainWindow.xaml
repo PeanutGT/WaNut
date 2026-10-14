@@ -30,10 +30,23 @@
                 Margin="0,16,0,0" />
 
         <Grid>
-          <ListBox x:Name="ServerList"
-                   ItemsSource="{Binding Servers}"
+          <ListBox ItemsSource="{Binding Servers}"
+                   SelectedItem="{Binding SelectedServer}"
                    Background="Transparent"
-                   BorderThickness="0" />
+                   BorderThickness="0"
+                   HorizontalContentAlignment="Stretch">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="4,6">
+                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Foreground="{StaticResource MutedTextBrush}">
+                    <Run Text="{Binding Type, Mode=OneWay}" />
+                    <Run Text="{Binding MinecraftVersion, Mode=OneWay}" />
+                  </TextBlock>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
           <TextBlock Text="{res:Text Main_NoServers}"
                      Foreground="{StaticResource MutedTextBrush}"
                      TextWrapping="Wrap"
@@ -55,11 +68,47 @@
     </Border>
 
     <!-- Server details -->
-    <TextBlock Grid.Column="1"
-               Text="{res:Text Main_SelectServer}"
-               Foreground="{StaticResource MutedTextBrush}"
-               FontSize="15"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" />
+    <Grid Grid.Column="1">
+      <TextBlock Text="{res:Text Main_SelectServer}"
+                 Foreground="{StaticResource MutedTextBrush}"
+                 FontSize="15"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding SelectedServer}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+
+      <!-- Start/stop and the console arrive in step 3. -->
+      <StackPanel Margin="32" DataContext="{Binding SelectedServer}">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Foreground="{StaticResource MutedTextBrush}" FontSize="14" Margin="0,4,0,0">
+          <Run Text="{Binding Type, Mode=OneWay}" />
+          <Run Text="{Binding MinecraftVersion, Mode=OneWay}" />
+          <Run Text="·" />
+          <Run Text="{res:Text Main_Java}" />
+          <Run Text="{Binding JavaMajor, Mode=OneWay}" />
+          <Run Text="·" />
+          <Run Text="{Binding MemoryMb, Mode=OneWay}" />
+          <Run Text="MB" />
+        </TextBlock>
+      </StackPanel>
+    </Grid>
   </Grid>
 </Window>
