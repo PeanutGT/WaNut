@@ -35,6 +35,12 @@
                    Background="Transparent"
                    BorderThickness="0"
                    HorizontalContentAlignment="Stretch">
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem">
+                <!-- Screen readers read the server name instead of the raw record text. -->
+                <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+              </Style>
+            </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <StackPanel Margin="4,6">
