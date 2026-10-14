@@ -21,7 +21,7 @@
 ## 3. 程式碼風格（C# / .NET 10）
 - 開啟 Nullable，警告視為錯誤（`TreatWarningsAsErrors`）。
 - 使用 file-scoped namespace，一個檔案一個型別。
-- 命名：型別、方法、屬性用 PascalCase；私有欄位用 `_camelCase`；非同步方法以 `Async` 結尾。
+- 命名：型別、方法、屬性、常數與 `static readonly` 欄位用 PascalCase；其他私有欄位用 `_camelCase`；非同步方法以 `Async` 結尾（測試方法除外，見第 7 節）。
 - 所有檔案、網路 I/O 都用 async，並接受 `CancellationToken`；不使用 `.Result` / `.Wait()`。
 - 程式碼、識別名稱、註解用英文；註解只寫「為什麼」，不重複程式碼在做什麼。
 - 格式以 `.editorconfig` 為準，PR 前執行 `dotnet format`。
@@ -37,6 +37,7 @@
 - 所有顯示給使用者的文字放在 `Resources/Strings.resx`，程式中不寫死字串。
 - 預設英文；之後新增 `Strings.zh-TW.resx` 即完成繁中翻譯。
 - 資源鍵命名：`<畫面>_<元件>`，例如 `CreateServer_Title`。
+- XAML 用 `{res:Text CreateServer_Title}` 讀取，C# 用 `Text.Get("CreateServer_Title")`。鍵打錯時畫面會顯示 `[鍵名]`。
 
 ## 6. 安全與資料保護
 - 關閉伺服器一律先送 `stop` 並等待結束；強制結束只在逾時後、經使用者同意才執行。
