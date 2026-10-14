@@ -28,6 +28,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 16 | Tone | Cute and playful, with the peanut mascot appearing often. Errors (crash, failed backup) and Advanced mode sections use plain, calm wording with the fix. One set of texts. |
 | 17 | Guided onboarding | After Phase 1. Phase 1 has only the Create Server wizard; a peanut-led guide comes once features are stable. |
 | 18 | References | Modrinth App (clean, modern UI) and Duolingo (mascot, guidance), as direction only. |
+| 19 | Modpack servers | Phase 2, with the mod browser and Forge. Modrinth `.mrpack` first; CurseForge starts as importing a server pack the user already downloaded. |
 
 ---
 
@@ -170,6 +171,9 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * [ ] UPnP port forwarding and built-in tunnel (playit.gg or similar).
 * [ ] Modrinth / CurseForge mod and plugin browser with version/loader filtering.
 * [ ] Forge / NeoForge support.
+* [ ] Modpack server install (decision 19):
+  * **Modrinth `.mrpack`:** read `modrinth.index.json`, keep only files whose `env.server` is not `unsupported`, verify each file's sha1/sha512, apply `overrides/` then `server-overrides/`, and pick the loader and Minecraft version from `dependencies`. Forge / NeoForge packs need Forge support first.
+  * **CurseForge:** import a server pack zip the user already downloaded. Automatic download is hard because the API needs a key and some authors block third-party downloads.
 
 ### Phase 3: Quality of Life & Safety
 * [ ] Scheduled backups and backup restore improvements.
@@ -243,5 +247,5 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ---
 
 ## Open Questions
-* Which settings are common, "More settings" or advanced-only (draft in `product/positioning.md`, awaiting Peanut).
+* Which settings are common, "More settings" or advanced-only (proposed layout in `product/feature-tiers.md`, awaiting Peanut).
 * Content of the guided onboarding (decision 17, after Phase 1).
