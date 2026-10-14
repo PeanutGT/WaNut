@@ -23,7 +23,6 @@
   <SolidColorBrush x:Key="PrimaryButtonTextBrush" Color="#1F1B16" />
   <SolidColorBrush x:Key="OnlineBadgeBrush" Color="#263320" />
   <SolidColorBrush x:Key="OnlineBadgeTextBrush" Color="#8FD16A" />
-  <SolidColorBrush x:Key="LinkBrush" Color="#8FD16A" />
   <SolidColorBrush x:Key="OfflineDotBrush" Color="#6B6257" />
   <SolidColorBrush x:Key="WarningBrush" Color="#3A2E1A" />
   <SolidColorBrush x:Key="WarningTextBrush" Color="#E8B65C" />

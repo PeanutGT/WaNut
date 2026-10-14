@@ -64,4 +64,22 @@ public sealed class LauncherPathsTests : IDisposable
 
         Assert.Equal(LauncherPaths.AppFolderName, Path.GetFileName(paths.Root));
     }
+
+    [Fact]
+    public void CreateDefault_WithOverride_UsesOverrideFolder()
+    {
+        var paths = LauncherPaths.CreateDefault(_root);
+
+        Assert.Equal(_root, paths.Root);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void CreateDefault_NoOverride_UsesWaNutFolder(string? dataDirOverride)
+    {
+        var paths = LauncherPaths.CreateDefault(dataDirOverride);
+
+        Assert.Equal(LauncherPaths.AppFolderName, Path.GetFileName(paths.Root));
+    }
 }

@@ -18,6 +18,9 @@ public enum AppTheme
 /// </summary>
 public sealed class ThemeService
 {
+    /// <summary>"light" or "dark" forces a theme, for testing both without changing the Windows setting.</summary>
+    public const string ThemeVariable = "WANUT_THEME";
+
     private const string PersonalizeKey = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
 
     // DwmSetWindowAttribute values. Caption and text colors need Windows 11; older versions ignore them.
@@ -55,6 +58,11 @@ public sealed class ThemeService
     /// <summary>Windows stores "apps use light theme" as 1 or 0; a missing value means light.</summary>
     public static AppTheme ReadWindowsTheme()
     {
+        if (Enum.TryParse<AppTheme>(Environment.GetEnvironmentVariable(ThemeVariable), ignoreCase: true, out var forced))
+        {
+            return forced;
+        }
+
         using var key = Registry.CurrentUser.OpenSubKey(PersonalizeKey);
         return key?.GetValue("AppsUseLightTheme") is 0 ? AppTheme.Dark : AppTheme.Light;
     }

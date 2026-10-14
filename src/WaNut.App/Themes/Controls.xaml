@@ -15,7 +15,7 @@
     <Setter Property="Control.Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border Margin="-2" CornerRadius="8" BorderThickness="2" BorderBrush="{DynamicResource AccentBrush}" SnapsToDevicePixels="True" />
+          <Border Margin="-2" CornerRadius="8" BorderThickness="2" BorderBrush="{DynamicResource MutedTextBrush}" SnapsToDevicePixels="True" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
@@ -198,7 +198,7 @@
               <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsKeyboardFocused" Value="True">
-              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource MutedTextBrush}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter Property="Opacity" Value="0.5" />
@@ -392,7 +392,8 @@
             <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
               <TabPanel IsItemsHost="True" Margin="0,0,0,-1" />
             </Border>
-            <ContentPresenter ContentSource="SelectedContent" Margin="0,12,0,0" />
+            <!-- The name lets screen readers and UI Automation reach the selected tab's content. -->
+            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="0,12,0,0" />
           </DockPanel>
         </ControlTemplate>
       </Setter.Value>
@@ -441,7 +442,7 @@
             </Grid.ColumnDefinitions>
             <Border x:Name="Box" Width="18" Height="18" CornerRadius="4" VerticalAlignment="Top" Margin="0,1,0,0"
                     Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-              <Path x:Name="Mark" Data="M 3.5 8.5 L 7 12 L 14 4.5" Stroke="{DynamicResource PrimaryButtonTextBrush}"
+              <Path x:Name="Mark" Data="M 3.5 8.5 L 7 12 L 14 4.5" Stroke="{DynamicResource CardBrush}"
                     StrokeThickness="2" Visibility="Collapsed" />
             </Border>
             <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
@@ -451,8 +452,8 @@
               <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource MutedTextBrush}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Box" Property="Background" Value="{DynamicResource PrimaryButtonBrush}" />
-              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource PrimaryButtonBorderBrush}" />
+              <Setter TargetName="Box" Property="Background" Value="{DynamicResource TextBrush}" />
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
               <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
@@ -465,7 +466,7 @@
   </Style>
 
   <Style TargetType="Hyperlink">
-    <Setter Property="Foreground" Value="{DynamicResource LinkBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
   </Style>
 
   <!-- Slider -->
@@ -499,7 +500,7 @@
                 <Thumb Width="18" Height="18" Cursor="Hand">
                   <Thumb.Template>
                     <ControlTemplate TargetType="Thumb">
-                      <Ellipse Fill="{DynamicResource PrimaryButtonBrush}" Stroke="{DynamicResource CardBrush}" StrokeThickness="2" />
+                      <Ellipse Fill="{DynamicResource TextBrush}" Stroke="{DynamicResource CardBrush}" StrokeThickness="2" />
                     </ControlTemplate>
                   </Thumb.Template>
                 </Thumb>
