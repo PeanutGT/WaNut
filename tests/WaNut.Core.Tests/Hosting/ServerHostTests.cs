@@ -54,7 +54,8 @@ public sealed class ServerHostTests : IDisposable
         var server = _host.Start("first", FakeServer.Launch(_temp.Path), p => p.OutputReceived += lines.Enqueue);
         await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online);
 
-        Assert.EndsWith("Starting minecraft server version fake", lines.First(), StringComparison.Ordinal);
+        // stdout and stderr are read on separate threads, so only the first stdout line is checked.
+        Assert.EndsWith("Starting minecraft server version fake", lines.First(l => l.Contains("]: ", StringComparison.Ordinal)), StringComparison.Ordinal);
     }
 
     [Fact]
