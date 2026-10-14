@@ -18,7 +18,7 @@
 - **不加 `Co-Authored-By` 或任何 AI（Claude、Gemini 等）署名**，AI 不出現在貢獻者名單。
 - Commit 作者為 Peanut 本機的 Git 帳號。
 
-## 3. 程式碼風格（C# / .NET 8）
+## 3. 程式碼風格（C# / .NET 10）
 - 開啟 Nullable，警告視為錯誤（`TreatWarningsAsErrors`）。
 - 使用 file-scoped namespace，一個檔案一個型別。
 - 命名：型別、方法、屬性用 PascalCase；私有欄位用 `_camelCase`；非同步方法以 `Async` 結尾。
