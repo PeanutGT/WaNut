@@ -8,9 +8,14 @@ public static class JavaVersionResolver
     public static int FallbackFor(string minecraftVersion)
     {
         var parts = minecraftVersion.Split('.');
+        if (parts.Length >= 1 && int.TryParse(parts[0], out var year) && year >= 26)
+        {
+            // Year-based versions (26.x) ship with Java 25 in Mojang's data.
+            return 25;
+        }
+
         if (parts.Length < 2 || parts[0] != "1" || !int.TryParse(parts[1], out var minor))
         {
-            // Year-based versions (26.x) and anything unrecognised: newest Java WaNut knows to be safe.
             return 21;
         }
 

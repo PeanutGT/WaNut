@@ -12,7 +12,8 @@ public sealed class JavaVersionResolverTests
     [InlineData("1.20.4", 17)]
     [InlineData("1.20.5", 21)]
     [InlineData("1.21.1", 21)]
-    [InlineData("26.1", 21)]
+    [InlineData("26.1", 25)]
+    [InlineData("26.3", 25)]
     [InlineData("nonsense", 21)]
     public void FallbackFor_Version_ReturnsExpectedJava(string minecraftVersion, int expected)
     {
