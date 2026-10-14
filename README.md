@@ -14,7 +14,7 @@ A Windows app for starting your own Minecraft: Java Edition server in a few clic
 See [docs/blueprint.md](docs/blueprint.md) for the full design.
 
 ## Building
-Requires Windows and the .NET 8 SDK.
+Requires Windows and the .NET 10 SDK.
 
 ```
 dotnet build

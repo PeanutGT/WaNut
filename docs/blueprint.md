@@ -22,6 +22,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 10 | Backup defaults | Keep the latest **5** backups; delete backups older than **30 days**. Both adjustable in settings. |
 | 11 | Oldest supported MC | **1.16.5**. Older versions are not offered in the version list. |
 | 12 | Installer | **Setup .exe** installer (works best with self-update). |
+| 13 | .NET version | **.NET 10 (LTS)** instead of .NET 8. |
 
 ---
 
@@ -90,7 +91,8 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 ## 4. Tech Stack
 
-**C# / .NET 8, WPF**, `CommunityToolkit.Mvvm`.
+**C# / .NET 10, WPF**, `CommunityToolkit.Mvvm`.
+* Target framework: net10.0 (LTS). Chosen over .NET 8 because .NET 8 support ends November 2026.
 * `System.Diagnostics.Process` for the server process; P/Invoke for Job Objects and memory.
 * Resource files (`.resx`) for all UI text (decision 2).
 * Self-update from GitHub Releases (decision 8); updater library to be picked (e.g. Velopack).

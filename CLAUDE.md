@@ -1,6 +1,6 @@
 # WaNut
 
-Windows desktop app (C# / .NET 8, WPF) that lets casual players create and run a Minecraft: Java Edition server in a few clicks.
+Windows desktop app (C# / .NET 10, WPF) that lets casual players create and run a Minecraft: Java Edition server in a few clicks.
 
 - Follow every rule in @CONVENTIONS.md.
 - Product spec and decisions: @docs/blueprint.md
