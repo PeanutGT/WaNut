@@ -25,6 +25,9 @@ public sealed record AppSettings
     /// <summary>True once the first-run setup window was finished, so it shows only once.</summary>
     public bool SetupDone { get; init; }
 
+    /// <summary>The UI language as a culture name ("en" or "zh-TW"); null or unknown means English.</summary>
+    public string? Language { get; init; }
+
     /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
     public string? InstancesDir { get; init; }
 }

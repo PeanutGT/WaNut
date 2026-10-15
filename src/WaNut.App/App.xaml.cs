@@ -29,6 +29,7 @@ public partial class App : Application
 
         var paths = LauncherPaths.CreateDefault();
         var store = new AppSettingsStore(paths);
+        WaNut.App.Resources.UiLanguage.Apply(store.Load().Language);
         if (!store.Load().SetupDone)
         {
             // The setup window opens before the main window, so closing it must not end the app.
