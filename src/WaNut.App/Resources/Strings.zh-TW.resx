@@ -843,4 +843,16 @@
   <data name="Language_ZhTw" xml:space="preserve">
     <value>繁體中文</value>
   </data>
+  <data name="AppSettings_Theme" xml:space="preserve">
+    <value>顏色</value>
+  </data>
+  <data name="AppSettings_ThemeSystem" xml:space="preserve">
+    <value>跟隨 Windows</value>
+  </data>
+  <data name="AppSettings_ThemeLight" xml:space="preserve">
+    <value>淺色</value>
+  </data>
+  <data name="AppSettings_ThemeDark" xml:space="preserve">
+    <value>深色</value>
+  </data>
 </root>

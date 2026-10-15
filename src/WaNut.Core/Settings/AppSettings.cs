@@ -28,6 +28,9 @@ public sealed record AppSettings
     /// <summary>The UI language as a culture name ("en" or "zh-TW"); null or unknown means English.</summary>
     public string? Language { get; init; }
 
+    /// <summary>Light, dark or following Windows.</summary>
+    public ThemeChoice Theme { get; init; }
+
     /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
     public string? InstancesDir { get; init; }
 }

@@ -865,4 +865,16 @@ Stop the server and update?</value>
   <data name="Language_ZhTw" xml:space="preserve">
     <value>繁體中文</value>
   </data>
+  <data name="AppSettings_Theme" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="AppSettings_ThemeSystem" xml:space="preserve">
+    <value>Follow Windows</value>
+  </data>
+  <data name="AppSettings_ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="AppSettings_ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
 </root>

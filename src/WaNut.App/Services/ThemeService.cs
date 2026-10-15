@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.Win32;
+using WaNut.Core.Settings;
 
 namespace WaNut.App.Services;
 
@@ -13,7 +14,7 @@ public enum AppTheme
 }
 
 /// <summary>
-/// Follows the Windows light/dark setting: swaps Themes/Light.xaml and Themes/Dark.xaml in the
+/// Follows the Windows light/dark setting, or the user's fixed choice: swaps Themes/Light.xaml and Themes/Dark.xaml in the
 /// application resources and colors each window's title bar to match.
 /// </summary>
 public sealed class ThemeService
@@ -30,6 +31,7 @@ public sealed class ThemeService
 
     private readonly Application _app;
     private ResourceDictionary? _current;
+    private ThemeChoice _choice;
 
     public ThemeService(Application app)
     {
@@ -38,10 +40,22 @@ public sealed class ThemeService
 
     public AppTheme Theme { get; private set; }
 
-    /// <summary>Applies the current Windows theme and keeps following it.</summary>
-    public void Start()
+    /// <summary>The user's choice in App settings. Changing it applies at once.</summary>
+    public ThemeChoice Choice
     {
-        Apply(ReadWindowsTheme());
+        get => _choice;
+        set
+        {
+            _choice = value;
+            Apply(CurrentTheme());
+        }
+    }
+
+    /// <summary>Applies the chosen theme and keeps following Windows while the choice is System.</summary>
+    public void Start(ThemeChoice choice)
+    {
+        _choice = choice;
+        Apply(CurrentTheme());
 
         // Every window, including dialogs opened later, gets a matching title bar once it is shown.
         EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler((sender, _) => ColorTitleBar((Window)sender)));
@@ -50,10 +64,17 @@ public sealed class ThemeService
         {
             if (e.Category == UserPreferenceCategory.General)
             {
-                _app.Dispatcher.BeginInvoke(() => Apply(ReadWindowsTheme()));
+                _app.Dispatcher.BeginInvoke(() => Apply(CurrentTheme()));
             }
         };
     }
+
+    private AppTheme CurrentTheme() => _choice switch
+    {
+        ThemeChoice.Light => AppTheme.Light,
+        ThemeChoice.Dark => AppTheme.Dark,
+        _ => ReadWindowsTheme(),
+    };
 
     /// <summary>Windows stores "apps use light theme" as 1 or 0; a missing value means light.</summary>
     public static AppTheme ReadWindowsTheme()
