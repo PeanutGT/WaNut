@@ -71,12 +71,16 @@
         <Border Style="{StaticResource WarningBanner}" Margin="0,14,0,0"
                 Visibility="{Binding ShowDowngradeWarning, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
-            <TextBlock Text="{res:Text Change_DowngradeWarning}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding DowngradeWarningText, Mode=OneTime}" TextWrapping="Wrap" />
             <CheckBox IsChecked="{Binding DowngradeAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,10,0,0">
               <TextBlock Text="{res:Text Change_DowngradeAccept}" TextWrapping="Wrap" />
             </CheckBox>
           </StackPanel>
         </Border>
+
+        <TextBlock Text="{res:Text Change_Cancelled}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,18,0,0"
+                   AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding WasCancelled, Converter={StaticResource BoolToVisibility}}" />
 
         <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
           <StackPanel Orientation="Horizontal" Margin="0,0,0,8">

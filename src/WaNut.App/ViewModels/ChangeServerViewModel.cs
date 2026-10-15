@@ -21,6 +21,7 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     private CancellationTokenSource? _cancellation;
     private InstanceMetadata _server = null!;
     private bool _worldExists;
+    private bool _closeWhenCancelled;
 
     public ChangeServerViewModel(ServerVersionCatalog catalog, ServerCreator creator)
     {
@@ -43,6 +44,8 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     public InstanceMetadata? Changed { get; private set; }
 
     public string CurrentText { get; private set; } = string.Empty;
+
+    public string DowngradeWarningText { get; private set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnchanged), nameof(IsDowngrade), nameof(ShowDowngradeWarning))]
@@ -73,6 +76,10 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorText;
 
+    /// <summary>Shown after the user stopped a change, so it is clear that nothing was changed.</summary>
+    [ObservableProperty]
+    private bool _wasCancelled;
+
     public bool IsIdle => !IsBusy;
 
     public bool IsChanging => _cancellation is not null;
@@ -99,6 +106,7 @@ public sealed partial class ChangeServerViewModel : ObservableObject
         _server = server;
         _worldExists = GameSettingsStore.WorldExists(instanceDir);
         CurrentText = $"{server.Type} {server.MinecraftVersion}";
+        DowngradeWarningText = string.Format(Text.Get("Change_DowngradeWarning"), CurrentText);
     }
 
     partial void OnSelectedTypeChanged(ServerTypeOption? value)
@@ -160,6 +168,7 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     {
         IsBusy = true;
         ErrorText = null;
+        WasCancelled = false;
         _cancellation = new CancellationTokenSource();
         CanCancelChange = true;
         OnPropertyChanged(nameof(CanCancelChange));
@@ -167,10 +176,12 @@ public sealed partial class ChangeServerViewModel : ObservableObject
         {
             Changed = await _creator.ChangeAsync(_server, SelectedType!.Type, SelectedVersion!, new Progress<CreateServerProgress>(ShowProgress), _cancellation.Token);
         }
-        catch (OperationCanceledException)
+        catch (Exception) when (_cancellation.IsCancellationRequested)
         {
+            // A cancelled download can surface as another exception type; either way nothing was changed.
             StatusText = null;
             ProgressFraction = null;
+            WasCancelled = true;
         }
         catch (DownloadVerificationException)
         {
@@ -197,6 +208,10 @@ public sealed partial class ChangeServerViewModel : ObservableObject
         {
             CloseRequested?.Invoke(true);
         }
+        else if (_closeWhenCancelled)
+        {
+            CloseRequested?.Invoke(false);
+        }
     }
 
     /// <summary>Stops a change that has not started replacing files yet, or closes the window when idle.</summary>
@@ -218,6 +233,16 @@ public sealed partial class ChangeServerViewModel : ObservableObject
         {
             _cancellation?.Cancel();
         }
+    }
+
+    /// <summary>
+    /// The window's close button during a change: stops it and closes once it has stopped. While files are being
+    /// replaced the change cannot stop, so the window closes when it finishes instead.
+    /// </summary>
+    public void CancelAndClose()
+    {
+        _closeWhenCancelled = true;
+        CancelChange();
     }
 
     private void ShowProgress(CreateServerProgress progress)

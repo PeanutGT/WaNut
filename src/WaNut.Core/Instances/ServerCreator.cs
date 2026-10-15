@@ -69,6 +69,7 @@ public sealed class ServerCreator(
         progress?.Report(new CreateServerProgress(CreateServerStage.WritingFiles));
         var settings = GameSettingsStore.Load(dir, server);
         ReplaceServerFiles(dir, server, type, files, vanilla.VersionId);
+        MoveDimensionFolders(dir, server, type, vanilla.VersionId);
 
         var changed = server with
         {
@@ -218,6 +219,47 @@ public sealed class ServerCreator(
             Directory.CreateDirectory(Path.Combine(dir, "mods"));
         }
     }
+
+    /// <summary>
+    /// Paper up to 1.21.x keeps the Nether and the End in their own folders ("world_nether/DIM-1",
+    /// "world_the_end/DIM1"); Vanilla and Fabric keep them inside the world ("world/DIM-1", "world/DIM1"). Moving
+    /// between the two layouts moves those folders too, or the new server would start with a fresh Nether and End.
+    /// From 26.x every type keeps all dimensions inside the world, and Paper upgrades its own old layout.
+    /// Runs after the change backup, which holds both layouts' folders.
+    /// </summary>
+    private static void MoveDimensionFolders(string dir, InstanceMetadata old, ServerType type, string gameVersion)
+    {
+        var fromSplit = old.Type == ServerType.Paper && IsLegacyLayout(old.MinecraftVersion);
+        var toSplit = type == ServerType.Paper && IsLegacyLayout(gameVersion);
+        if (fromSplit == toSplit || (!fromSplit && !IsLegacyLayout(old.MinecraftVersion)))
+        {
+            return;
+        }
+
+        var level = GameSettingsStore.LevelName(dir);
+        foreach (var (suffix, dimension) in new[] { ("_nether", "DIM-1"), ("_the_end", "DIM1") })
+        {
+            var inside = Path.Combine(dir, level, dimension);
+            var split = Path.Combine(dir, level + suffix, dimension);
+            var (from, to) = fromSplit ? (split, inside) : (inside, split);
+            if (!Directory.Exists(from))
+            {
+                continue;
+            }
+
+            // A leftover folder from an earlier switch is older than the one being moved, and the backup holds it.
+            if (Directory.Exists(to))
+            {
+                Directory.Delete(to, recursive: true);
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(to)!);
+            Directory.Move(from, to);
+        }
+    }
+
+    // Minecraft 1.x (up to 1.21.x); the year-based versions (26.x) use the new world layout.
+    private static bool IsLegacyLayout(string minecraftVersion) => GameFeatures.ParseVersion(minecraftVersion).Major == 1;
 
     private async Task<ServerFiles> DownloadServerFilesAsync(
         ServerType type,

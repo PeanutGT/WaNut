@@ -144,6 +144,9 @@
   <data name="Status_Stopping" xml:space="preserve">
     <value>Saving world…</value>
   </data>
+  <data name="Server_Crashed" xml:space="preserve">
+    <value>The server stopped unexpectedly (exit code {0}). The last lines in the Console usually say why.</value>
+  </data>
   <data name="Server_Exited" xml:space="preserve">
     <value>Server stopped (exit code {0}).</value>
   </data>
@@ -565,7 +568,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>Pick another type or version to change.</value>
   </data>
   <data name="Change_DowngradeWarning" xml:space="preserve">
-    <value>This is an older Minecraft version than the one your world was last saved in. Older versions can't always read newer worlds: chunks can be lost or the world can fail to load. If that happens, restore the backup WaNut makes now from the Backups tab.</value>
+    <value>This is an older Minecraft version than the one your world was last saved in. Older versions can't always read newer worlds: chunks can be lost or the world can fail to load. If that happens, change back to {0} here first, then restore the backup WaNut makes now from the Backups tab. Restoring a backup brings back the world only, not the server type or version.</value>
   </data>
   <data name="Change_DowngradeAccept" xml:space="preserve">
     <value>I understand, change to the older version anyway</value>
@@ -575,6 +578,9 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   </data>
   <data name="Change_Failed" xml:space="preserve">
     <value>The change failed: {0}</value>
+  </data>
+  <data name="Change_Cancelled" xml:space="preserve">
+    <value>Cancelled. Nothing was changed.</value>
   </data>
   <data name="Change_Done" xml:space="preserve">
     <value>All done! The server is now {0}.</value>

@@ -327,6 +327,61 @@ public sealed class ServerCreatorTests : IDisposable
         Assert.True(File.Exists(Path.Combine(dir, "mods", "some-mod.jar")));
     }
 
+    [Theory]
+    [InlineData(ServerType.Vanilla)]
+    [InlineData(ServerType.Fabric)]
+    public async Task ChangeAsync_FromPaper_MovesNetherAndEndIntoTheWorld(ServerType target)
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Paper);
+        WriteRegion(dir, "world_nether", "DIM-1", "nether");
+        WriteRegion(dir, "world_the_end", "DIM1", "end");
+        WriteRegion(dir, "world", "DIM-1", "stale nether from an earlier switch");
+
+        await CreateCreator().ChangeAsync(server, target, _version);
+
+        Assert.Equal("nether", ReadRegion(dir, "world", "DIM-1"));
+        Assert.Equal("end", ReadRegion(dir, "world", "DIM1"));
+        Assert.False(Directory.Exists(Path.Combine(dir, "world_nether", "DIM-1")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "world_the_end", "DIM1")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_ToPaper_MovesNetherAndEndIntoTheirOwnFolders()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+        WriteRegion(dir, "world", "DIM-1", "nether");
+        WriteRegion(dir, "world", "DIM1", "end");
+
+        await CreateCreator().ChangeAsync(server, ServerType.Paper, _version);
+
+        Assert.Equal("nether", ReadRegion(dir, "world_nether", "DIM-1"));
+        Assert.Equal("end", ReadRegion(dir, "world_the_end", "DIM1"));
+        Assert.False(Directory.Exists(Path.Combine(dir, "world", "DIM-1")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "world", "DIM1")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_BetweenVanillaAndFabric_LeavesDimensionsInPlace()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+        WriteRegion(dir, "world", "DIM-1", "nether");
+
+        await CreateCreator().ChangeAsync(server, ServerType.Fabric, _version);
+
+        Assert.Equal("nether", ReadRegion(dir, "world", "DIM-1"));
+        Assert.False(Directory.Exists(Path.Combine(dir, "world_nether")));
+    }
+
+    private static void WriteRegion(string dir, string world, string dimension, string content)
+    {
+        var region = Path.Combine(dir, world, dimension, "region");
+        Directory.CreateDirectory(region);
+        File.WriteAllText(Path.Combine(region, "r.0.0.mca"), content);
+    }
+
+    private static string ReadRegion(string dir, string world, string dimension) =>
+        File.ReadAllText(Path.Combine(dir, world, dimension, "region", "r.0.0.mca"));
+
     [Fact]
     public async Task ChangeAsync_OlderVersion_UsesItsJava()
     {

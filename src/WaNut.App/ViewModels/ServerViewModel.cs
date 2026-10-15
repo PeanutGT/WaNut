@@ -276,11 +276,22 @@ public sealed partial class ServerViewModel : ObservableObject
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
         process.Exited.ContinueWith(
-            t => _ui.Post(_ => AddConsoleLine(string.Format(Text.Get("Server_Exited"), t.Result)), null),
+            t => _ui.Post(_ => OnExited(process, t.Result), null),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnRanToCompletion,
             TaskScheduler.Default);
 
+    }
+
+    private void OnExited(ServerProcess process, int exitCode)
+    {
+        AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
+
+        // "stop" ends with exit code 0; anything else the user did not ask for is a crash.
+        if (exitCode != 0 && !process.WasKilled)
+        {
+            ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+        }
     }
 
     private void AddConsoleLine(string line)

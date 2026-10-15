@@ -19,11 +19,12 @@ public partial class ChangeServerWindow : Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        // Closing mid-change would leave the user unsure what happened: stop downloads first, and never stop while files are swapped.
+        // Closing mid-change would leave the user unsure what happened: the window stays until the change has
+        // stopped (or, while files are swapped, finished), then closes by itself.
         if (ViewModel.IsChanging)
         {
             e.Cancel = true;
-            ViewModel.CancelChange();
+            ViewModel.CancelAndClose();
         }
 
         base.OnClosing(e);

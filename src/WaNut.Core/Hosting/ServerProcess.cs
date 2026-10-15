@@ -35,6 +35,9 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
     /// <summary>Whether Windows will end the process if WaNut itself crashes.</summary>
     public bool IsTrackedByJob { get; private set; }
 
+    /// <summary>True once <see cref="Kill"/> was called, so a non-zero exit code is not mistaken for a crash.</summary>
+    public bool WasKilled { get; private set; }
+
     public IReadOnlyList<string> Players
     {
         get
@@ -159,6 +162,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
     /// <summary>Ends the process without saving. Only for when the user agreed after a stop timed out.</summary>
     public void Kill()
     {
+        WasKilled = true;
         try
         {
             _process?.Kill(entireProcessTree: true);
