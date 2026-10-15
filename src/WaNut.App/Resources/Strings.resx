@@ -144,6 +144,9 @@
   <data name="Status_Stopping" xml:space="preserve">
     <value>Saving world…</value>
   </data>
+  <data name="Server_Crashed" xml:space="preserve">
+    <value>The server stopped unexpectedly (exit code {0}). The last lines in the Console usually say why.</value>
+  </data>
   <data name="Server_Exited" xml:space="preserve">
     <value>Server stopped (exit code {0}).</value>
   </data>
@@ -517,7 +520,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>Backups to keep</value>
   </data>
   <data name="Backups_KeepCountHint" xml:space="preserve">
-    <value>The newest ones are kept. From 1 to 100. The default is 5. Copies made before a restore don't count here; they're deleted only by age.</value>
+    <value>The newest ones are kept. From 1 to 100. The default is 5. Copies made before a restore or a type/version change don't count here; they're deleted only by age.</value>
   </data>
   <data name="Backups_MaxAgeDays" xml:space="preserve">
     <value>Delete backups older than (days)</value>
@@ -536,5 +539,53 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   </data>
   <data name="Backups_DateFormat" xml:space="preserve">
     <value>MMM d, yyyy HH:mm:ss</value>
+  </data>
+  <data name="CreateServer_Stage_BackingUp" xml:space="preserve">
+    <value>Backing up the world…</value>
+  </data>
+  <data name="Change_Title" xml:space="preserve">
+    <value>Change type or version</value>
+  </data>
+  <data name="Change_Current" xml:space="preserve">
+    <value>Now:</value>
+  </data>
+  <data name="Change_Confirm" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="Change_Open" xml:space="preserve">
+    <value>Change type or version…</value>
+  </data>
+  <data name="Change_Section" xml:space="preserve">
+    <value>Server type and version</value>
+  </data>
+  <data name="Change_SectionHint" xml:space="preserve">
+    <value>Switch between Vanilla, Paper and Fabric, or move to another Minecraft version. Stop the server first.</value>
+  </data>
+  <data name="Change_Hint" xml:space="preserve">
+    <value>WaNut backs up the world first, then swaps the server files. Your world, settings, mods and plugins stay. Check that your mods or plugins work with the new version.</value>
+  </data>
+  <data name="Change_Unchanged" xml:space="preserve">
+    <value>Pick another type or version to change.</value>
+  </data>
+  <data name="Change_DowngradeWarning" xml:space="preserve">
+    <value>This is an older Minecraft version than the one your world was last saved in. Older versions can't always read newer worlds: chunks can be lost or the world can fail to load. If that happens, change back to {0} here first, then restore the backup WaNut makes now from the Backups tab. Restoring a backup brings back the world only, not the server type or version.</value>
+  </data>
+  <data name="Change_DowngradeAccept" xml:space="preserve">
+    <value>I understand, change to the older version anyway</value>
+  </data>
+  <data name="Change_BackupFailed" xml:space="preserve">
+    <value>WaNut couldn't back up the world, so nothing was changed. {0}</value>
+  </data>
+  <data name="Change_Failed" xml:space="preserve">
+    <value>The change failed: {0}</value>
+  </data>
+  <data name="Change_Cancelled" xml:space="preserve">
+    <value>Cancelled. Nothing was changed.</value>
+  </data>
+  <data name="Change_Done" xml:space="preserve">
+    <value>All done! The server is now {0}.</value>
+  </data>
+  <data name="Backups_Reason_Change" xml:space="preserve">
+    <value>Before a type or version change</value>
   </data>
 </root>

@@ -14,6 +14,14 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.ViewModel.Created : null;
     }
 
+    public InstanceMetadata? ShowChangeServer(InstanceMetadata server, string instanceDir)
+    {
+        var window = services.GetRequiredService<ChangeServerWindow>();
+        window.ViewModel.Initialize(server, instanceDir);
+        window.Owner = Application.Current.MainWindow;
+        return window.ShowDialog() == true ? window.ViewModel.Changed : null;
+    }
+
     public void ShowAppSettings()
     {
         var window = services.GetRequiredService<AppSettingsWindow>();

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Http;
@@ -68,7 +69,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
 
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Test", version, 2048, EulaAccepted: true));
@@ -107,7 +108,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true, type));
         var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);

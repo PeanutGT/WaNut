@@ -170,6 +170,14 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Backups hold the world only, not plugins, mods or config. From 26.x every dimension sits inside the level-name folder (`world/dimensions/minecraft/...`) for Vanilla, Paper and Fabric. Paper up to 1.21.x still splits off `world_nether` and `world_the_end`, so those are included when present.
 * If the backup before a start fails (e.g. a full disk), WaNut asks whether to start anyway.
 
+### Change type or version (Server tab, More settings)
+* Opens a window with the type list and version list from the Create Server wizard. Only while the server is stopped.
+* Order: download and verify the new files and Java first (a failed download changes nothing), then back up the world (a "change" backup, protected from the keep count like a restore copy), then swap the server files.
+* New files are copied in under temporary names before any old file is deleted. The jars' unpacked folders (`libraries/`, `versions/`, `.fabric/`, Paper's `cache/`) are removed so they come back for the new version.
+* Switching between Paper and Vanilla/Fabric on 1.21.x or older moves the Nether and End folders between Paper's layout (`world_nether/DIM-1`, `world_the_end/DIM1`) and the Vanilla one (`world/DIM-1`, `world/DIM1`). 26.x keeps them inside the world for every type, so nothing moves there.
+* The world, `server.properties`, whitelist, OP list, mods and plugins stay. Game settings are re-saved for the new version, since some moved between `server.properties` and game rules (e.g. pvp in 1.21.9).
+* Going to an older Minecraft version while a world exists shows a warning and needs an extra tick, because older versions can't always read newer worlds.
+
 ---
 
 ## 6. Phased Roadmap (revised)
@@ -255,7 +263,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 5. ✓ Visual style: warm palette, dark mode, app icon, peanut mascot in empty and Starting/Saving states (section 4b).
 6. ✓ Game settings tab (`server.properties` editor with "More settings"; a default `server.properties` is written when a server is created) and Players tab additions (whitelist switch and list, OP list).
 7. ✓ Server tab (RAM slider, port, `online-mode`) and the App settings window with the Advanced mode switch; custom JVM arguments as the first advanced-only item.
-8. Backups tab with cleanup; then "Change type or version" in the Server tab, which needs a backup first.
+8. ✓ Backups tab with cleanup; then "Change type or version" in the Server tab, which needs a backup first.
 9. Connect tab (IP list) and firewall rule.
 10. Installer and self-update; first GitHub Release.
 
