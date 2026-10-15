@@ -189,11 +189,13 @@ public sealed class BackupStoreTests : IDisposable
         Assert.Single(_store.List(Dir));
     }
 
-    [Fact]
-    public async Task Cleanup_RestoreSafetyCopies_DoNotCountTowardKeepCount()
+    [Theory]
+    [InlineData(BackupReason.Restore)]
+    [InlineData(BackupReason.Change)]
+    public async Task Cleanup_SafetyCopies_DoNotCountTowardKeepCount(BackupReason reason)
     {
         WriteWorld();
-        await BackUpAsync(BackupReason.Restore);
+        await BackUpAsync(reason);
         for (var i = 0; i < 3; i++)
         {
             _clock.Advance(TimeSpan.FromMinutes(1));
@@ -203,7 +205,7 @@ public sealed class BackupStoreTests : IDisposable
         _store.Cleanup(Dir, new BackupRules { KeepCount = 2, MaxAgeDays = 30 });
 
         Assert.Equal(
-            [BackupReason.Start, BackupReason.Start, BackupReason.Restore],
+            [BackupReason.Start, BackupReason.Start, reason],
             _store.List(Dir).Select(b => b.Reason));
     }
 

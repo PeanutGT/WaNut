@@ -5,6 +5,9 @@ public enum CreateServerStage
     ReadingVersion,
     DownloadingJava,
     DownloadingServer,
+
+    /// <summary>Changing type or version only: the world is backed up before any server file is replaced.</summary>
+    BackingUp,
     WritingFiles,
 }
 

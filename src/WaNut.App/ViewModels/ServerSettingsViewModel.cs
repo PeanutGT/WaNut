@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
+using WaNut.App.Services;
 using WaNut.Core.Hosting;
 using WaNut.Core.Jvm;
 using WaNut.Core.Settings;
@@ -16,12 +18,14 @@ namespace WaNut.App.ViewModels;
 public sealed partial class ServerSettingsViewModel : ObservableObject
 {
     private readonly ServerViewModel _server;
+    private readonly IDialogService _dialogs;
     private ServerSettings _loaded = new();
     private bool _loading;
 
-    public ServerSettingsViewModel(ServerViewModel server, AppSettingsViewModel app)
+    public ServerSettingsViewModel(ServerViewModel server, AppSettingsViewModel app, IDialogService dialogs)
     {
         _server = server;
+        _dialogs = dialogs;
         App = app;
         var totalMb = MemoryLimits.TotalPhysicalMb();
         MaxMemoryMb = Math.Max(MemoryLimits.MaxServerMb(totalMb), server.Metadata.MemoryMb);
@@ -54,6 +58,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _jvmArgumentsError;
+
+    [ObservableProperty]
+    private string? _changeDoneText;
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
@@ -90,8 +97,21 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>Opens the "Change type or version" window. Only while stopped, since server files are replaced.</summary>
+    [RelayCommand(CanExecute = nameof(CanEditProperties))]
+    private void ChangeTypeOrVersion()
+    {
+        ChangeDoneText = null;
+        if (_dialogs.ShowChangeServer(_server.Metadata, _server.InstanceDir) is { } changed)
+        {
+            _server.OnTypeOrVersionChanged(changed);
+            ChangeDoneText = string.Format(Text.Get("Change_Done"), _server.TypeAndVersionText);
+        }
+    }
+
     internal void OnServerStatusChanged()
     {
+        ChangeTypeOrVersionCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(ShowNextStartHint));
         if (_server.Status == ServerStatus.Stopped)

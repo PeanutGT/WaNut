@@ -32,7 +32,7 @@ public sealed partial class ServerViewModel : ObservableObject
         _ui = SynchronizationContext.Current ?? new SynchronizationContext();
         GameSettings = new GameSettingsViewModel(this);
         PlayerLists = new PlayerListsViewModel(this);
-        ServerSettings = new ServerSettingsViewModel(this, app);
+        ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         app.PropertyChanged += (_, e) =>
         {
@@ -47,7 +47,8 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public string InstanceDir => _store.InstanceDir(Metadata.Id);
 
-    public GameSettingsViewModel GameSettings { get; }
+    /// <summary>Replaced when the Minecraft version changes, since which settings are game rules depends on it.</summary>
+    public GameSettingsViewModel GameSettings { get; private set; }
 
     public PlayerListsViewModel PlayerLists { get; }
 
@@ -191,6 +192,18 @@ public sealed partial class ServerViewModel : ObservableObject
         _store.Save(metadata);
         Metadata = metadata;
         OnPropertyChanged(nameof(Metadata));
+        OnPropertyChanged(nameof(LoaderText));
+        OnPropertyChanged(nameof(TypeAndVersionText));
+    }
+
+    /// <summary>The server now has another type or Minecraft version: refresh every tab that depends on it.</summary>
+    internal void OnTypeOrVersionChanged(InstanceMetadata changed)
+    {
+        UpdateMetadata(changed);
+        GameSettings = new GameSettingsViewModel(this);
+        OnPropertyChanged(nameof(GameSettings));
+        PlayerLists.Reload();
+        Backups.Reload();
     }
 
     /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>

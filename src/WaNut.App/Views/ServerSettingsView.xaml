@@ -46,6 +46,25 @@
           </Border>
 
           <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Change_Section}" Style="{StaticResource Label}" />
+            <Button Content="{res:Text Change_Open}" Command="{Binding ChangeTypeOrVersionCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="{res:Text Change_SectionHint}" Style="{StaticResource Hint}" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+              <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding ChangeDoneText}" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </StackPanel.Style>
+              <Image Style="{StaticResource Peanut}" Width="22" Height="22" Margin="0,0,8,0" />
+              <TextBlock Text="{Binding ChangeDoneText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
             <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
                      AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />

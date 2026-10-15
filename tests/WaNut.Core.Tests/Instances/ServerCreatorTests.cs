@@ -1,8 +1,10 @@
 using System.Text;
 using Microsoft.Extensions.Time.Testing;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
+using WaNut.Core.Settings;
 using WaNut.Core.Tests.TestSupport;
 using WaNut.Core.Versions;
 
@@ -17,12 +19,21 @@ public sealed class ServerCreatorTests : IDisposable
     private static readonly byte[] PaperJar = Encoding.UTF8.GetBytes("paper jar bytes");
     private static readonly Uri PaperJarUrl = new("https://fill-data.papermc.io/v1/objects/p/paper-1.21.1-133.jar");
     private static readonly byte[] FabricJar = SampleData.FabricServerLauncherJar();
+    private static readonly Uri OldDetailsUrl = new("https://piston-meta.mojang.com/v1/packages/1.20.4.json");
+    private static readonly Uri OldJarUrl = new("https://piston-data.mojang.com/v1/objects/y/server.jar");
+    private static readonly byte[] OldJar = Encoding.UTF8.GetBytes("1.20.4 server jar bytes");
+    private static readonly Uri Zip17Url = new("https://example.com/jre17.zip");
+    private static readonly Uri NewDetailsUrl = new("https://piston-meta.mojang.com/v1/packages/1.21.10.json");
+    private static readonly Uri NewJarUrl = new("https://piston-data.mojang.com/v1/objects/z/server.jar");
+    private static readonly byte[] NewJar = Encoding.UTF8.GetBytes("1.21.10 server jar bytes");
 
     private readonly TempDir _temp = new();
     private readonly LauncherPaths _paths;
     private readonly StubHttpHandler _http;
     private readonly InstanceStore _store;
     private readonly GameVersion _version;
+    private readonly GameVersion _oldVersion;
+    private readonly GameVersion _newVersion;
 
     public ServerCreatorTests()
     {
@@ -46,6 +57,19 @@ public sealed class ServerCreatorTests : IDisposable
             .Add(FabricClient.ServerLauncherUrl("1.1.2"), FabricJar)
             .Add(new Uri(FabricClient.ServerLauncherUrl("1.1.2").AbsoluteUri + ".sha256"), Hashes.Sha256(FabricJar));
         _version = new GameVersion("1.21.1", DateTimeOffset.UnixEpoch, DetailsUrl, Hashes.Sha1(details));
+
+        var oldDetails = Encoding.UTF8.GetBytes(SampleData.VersionDetails(OldJarUrl.AbsoluteUri, Hashes.Sha1(OldJar), OldJar.Length, javaMajor: 17));
+        var zip17 = SampleData.JreZip(17);
+        var newDetails = Encoding.UTF8.GetBytes(SampleData.VersionDetails(NewJarUrl.AbsoluteUri, Hashes.Sha1(NewJar), NewJar.Length, javaMajor: 21));
+        _http
+            .Add(OldDetailsUrl, oldDetails)
+            .Add(OldJarUrl, OldJar)
+            .Add(AdoptiumClient.LatestJreUrl(17), SampleData.AdoptiumLatest(17, Zip17Url.AbsoluteUri, Hashes.Sha256(zip17), zip17.Length))
+            .Add(Zip17Url, zip17)
+            .Add(NewDetailsUrl, newDetails)
+            .Add(NewJarUrl, NewJar);
+        _oldVersion = new GameVersion("1.20.4", DateTimeOffset.UnixEpoch, OldDetailsUrl, Hashes.Sha1(oldDetails));
+        _newVersion = new GameVersion("1.21.10", DateTimeOffset.UnixEpoch, NewDetailsUrl, Hashes.Sha1(newDetails));
     }
 
     public void Dispose() => _temp.Dispose();
@@ -56,7 +80,8 @@ public sealed class ServerCreatorTests : IDisposable
         var downloader = new FileDownloader(client);
         var java = new JavaRuntimeManager(_paths, new AdoptiumClient(client), downloader);
         var clock = new FakeTimeProvider(new DateTimeOffset(2026, 10, 14, 12, 0, 0, TimeSpan.Zero));
-        return new ServerCreator(_paths, new MojangVersionService(client, downloader), new PaperClient(client), new FabricClient(client), java, downloader, _store, clock);
+        return new ServerCreator(
+            _paths, new MojangVersionService(client, downloader), new PaperClient(client), new FabricClient(client), java, downloader, _store, new BackupStore(clock), clock);
     }
 
     [Fact]
@@ -223,6 +248,164 @@ public sealed class ServerCreatorTests : IDisposable
         Assert.Equal(
             [CreateServerStage.ReadingVersion, CreateServerStage.DownloadingJava, CreateServerStage.DownloadingServer, CreateServerStage.WritingFiles],
             stages);
+    }
+
+    private async Task<(InstanceMetadata Server, string Dir)> CreateWithWorldAsync(ServerType type = ServerType.Vanilla)
+    {
+        var server = await CreateCreator().CreateAsync(new CreateServerRequest("Changing", _version, 4096, EulaAccepted: true, type));
+        var dir = _store.InstanceDir(server.Id);
+        Directory.CreateDirectory(Path.Combine(dir, "world"));
+        File.WriteAllText(Path.Combine(dir, "world", "level.dat"), "my world");
+        Directory.CreateDirectory(Path.Combine(dir, "libraries", "old"));
+        Directory.CreateDirectory(Path.Combine(dir, "versions", "1.21.1"));
+        return (server, dir);
+    }
+
+    [Fact]
+    public async Task ChangeAsync_VanillaToPaper_SwapsJarAndKeepsWorld()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Paper, _version);
+
+        Assert.Equal(ServerType.Paper, changed.Type);
+        Assert.Equal("133", changed.LoaderVersion);
+        Assert.Equal("server.jar", changed.ServerJar);
+        Assert.Equal(PaperJar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
+        Assert.Equal("my world", File.ReadAllText(Path.Combine(dir, "world", "level.dat")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "libraries")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "versions")));
+        Assert.Empty(Directory.GetFiles(dir, "*.wanut-new"));
+        Assert.Equal(ServerType.Paper, _store.LoadAll().Single().Type);
+    }
+
+    [Fact]
+    public async Task ChangeAsync_BacksUpTheWorldFirst()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+
+        await CreateCreator().ChangeAsync(server, ServerType.Paper, _version);
+
+        var backup = Assert.Single(new BackupStore(TimeProvider.System).List(dir));
+        Assert.Equal(BackupReason.Change, backup.Reason);
+        using var zip = System.IO.Compression.ZipFile.OpenRead(backup.FilePath);
+        Assert.Contains(zip.Entries, e => e.FullName == "world/level.dat");
+    }
+
+    [Fact]
+    public async Task ChangeAsync_PaperToFabric_AddsLauncherAndRemovesPaperCache()
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Paper);
+        Directory.CreateDirectory(Path.Combine(dir, "cache"));
+        File.WriteAllText(Path.Combine(dir, "cache", "mojang_1.21.1.jar"), "x");
+        Directory.CreateDirectory(Path.Combine(dir, "plugins"));
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Fabric, _version);
+
+        Assert.Equal(FabricClient.LauncherFileName, changed.ServerJar);
+        Assert.Equal("0.19.5", changed.LoaderVersion);
+        Assert.Equal(Jar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
+        Assert.True(Directory.Exists(Path.Combine(dir, "mods")));
+        Assert.True(Directory.Exists(Path.Combine(dir, "plugins")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "cache")));
+        using var launcher = System.IO.Compression.ZipFile.OpenRead(Path.Combine(dir, FabricClient.LauncherFileName));
+        using var reader = new StreamReader(launcher.GetEntry("install.properties")!.Open());
+        Assert.Equal("fabric-loader-version=0.19.5\ngame-version=1.21.1\n", reader.ReadToEnd());
+    }
+
+    [Fact]
+    public async Task ChangeAsync_FabricToVanilla_RemovesLauncherKeepsMods()
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Fabric);
+        File.WriteAllText(Path.Combine(dir, "mods", "some-mod.jar"), "mod");
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Vanilla, _version);
+
+        Assert.Equal("server.jar", changed.ServerJar);
+        Assert.Null(changed.LoaderVersion);
+        Assert.False(File.Exists(Path.Combine(dir, FabricClient.LauncherFileName)));
+        Assert.True(File.Exists(Path.Combine(dir, "mods", "some-mod.jar")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_OlderVersion_UsesItsJava()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Vanilla, _oldVersion);
+
+        Assert.Equal("1.20.4", changed.MinecraftVersion);
+        Assert.Equal(17, changed.JavaMajor);
+        Assert.Equal(OldJar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_PvpMovesFromPropertiesToGameRule()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+        var path = Path.Combine(dir, "server.properties");
+        File.WriteAllText(path, File.ReadAllText(path) + "pvp=false\n");
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Vanilla, _newVersion);
+
+        Assert.False(changed.GameRules["pvp"]);
+        Assert.Contains("gamerule pvp false", GameSettingsStore.RuleCommands(changed));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_DownloadFails_ChangesNothing()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+        _http.Add(PaperClient.BuildsUrl("1.21.1"), SampleData.PaperBuilds((133, "STABLE", PaperJarUrl.AbsoluteUri, new string('0', 64))));
+
+        await Assert.ThrowsAsync<DownloadVerificationException>(() => CreateCreator().ChangeAsync(server, ServerType.Paper, _version));
+
+        Assert.Equal(Jar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
+        Assert.True(Directory.Exists(Path.Combine(dir, "libraries")));
+        Assert.Empty(new BackupStore(TimeProvider.System).List(dir));
+        Assert.Equal(ServerType.Vanilla, _store.LoadAll().Single().Type);
+    }
+
+    [Fact]
+    public async Task ChangeAsync_SameTypeAndVersion_Throws()
+    {
+        var (server, _) = await CreateWithWorldAsync();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => CreateCreator().ChangeAsync(server, ServerType.Vanilla, _version));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_HandEditedJarPath_NeverDeletesOutsideTheFolder()
+    {
+        var (server, dir) = await CreateWithWorldAsync();
+        var outside = Path.Combine(_paths.InstancesDir, "keep-me.jar");
+        File.WriteAllText(outside, "not WaNut's");
+
+        await CreateCreator().ChangeAsync(server with { ServerJar = "../keep-me.jar" }, ServerType.Paper, _version);
+
+        Assert.True(File.Exists(outside));
+    }
+
+    [Theory]
+    [InlineData("1.21.1", "1.20.4", true)]
+    [InlineData("26.3", "1.21.10", true)]
+    [InlineData("1.21.1", "1.21.1", false)]
+    [InlineData("1.21.1", "26.3", false)]
+    [InlineData("1.21", "1.21.1", false)]
+    public void IsDowngrade_ComparesVersionNumbers(string current, string target, bool expected)
+    {
+        var server = new InstanceMetadata
+        {
+            Id = "x",
+            Name = "x",
+            Type = ServerType.Vanilla,
+            MinecraftVersion = current,
+            JavaMajor = 21,
+            MemoryMb = 2048,
+            CreatedAt = DateTimeOffset.UnixEpoch,
+        };
+
+        Assert.Equal(expected, ServerCreator.IsDowngrade(server, target));
     }
 
     private sealed class InlineProgress(Action<CreateServerProgress> handler) : IProgress<CreateServerProgress>
