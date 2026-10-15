@@ -774,6 +774,9 @@ Stop the server and update?</value>
   <data name="Update_Downloading" xml:space="preserve">
     <value>Downloading the update…</value>
   </data>
+  <data name="Update_WaitForStart" xml:space="preserve">
+    <value>A server is getting ready to start. Try the update again once it's running or stopped.</value>
+  </data>
   <data name="Update_Restarting" xml:space="preserve">
     <value>Restarting WaNut…</value>
   </data>

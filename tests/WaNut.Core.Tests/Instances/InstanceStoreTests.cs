@@ -21,6 +21,12 @@ public sealed class InstanceStoreTests : IDisposable
     [InlineData("我的伺服器", "server")]
     [InlineData("a/b\\c:d", "a-b-c-d")]
     [InlineData("---", "server")]
+    [InlineData("CON", "server-con")]
+    [InlineData("con.1", "server-con.1")]
+    [InlineData("Com3", "server-com3")]
+    [InlineData("lpt9", "server-lpt9")]
+    [InlineData("com0", "com0")]
+    [InlineData("console", "console")]
     public void ToFolderName_Name_ReturnsSafeFolderName(string name, string expected)
     {
         Assert.Equal(expected, InstanceStore.ToFolderName(name));

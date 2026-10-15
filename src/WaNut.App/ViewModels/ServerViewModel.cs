@@ -49,6 +49,7 @@ public sealed partial class ServerViewModel : ObservableObject
                 ServerSettings.OnAdvancedModeChanged();
             }
         };
+        controller.PreparingChanged += (_, _) => StartCommand.NotifyCanExecuteChanged();
     }
 
     public InstanceMetadata Metadata { get; private set; }
@@ -134,7 +135,7 @@ public sealed partial class ServerViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanStart))]
     private Task StartAsync() => _controller.StartAsync(this);
 
-    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking;
+    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && _controller.Preparing is null;
 
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);
