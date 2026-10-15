@@ -20,6 +20,7 @@
   <ItemGroup>
     <Resource Include="Assets\wanut.ico" />
     <Resource Include="Assets\peanut-16.png" />
+    <Resource Include="Assets\Scenes\*.png" />
   </ItemGroup>
 
   <ItemGroup>
