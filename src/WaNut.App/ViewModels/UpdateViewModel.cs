@@ -89,19 +89,9 @@ public sealed partial class UpdateViewModel : ObservableObject
             return;
         }
 
-        if (_controller.HasRunningServer)
+        if (!await StopServerForUpdateAsync())
         {
-            if (!_dialogs.Confirm(Text.Get("Update_StopServerConfirm")))
-            {
-                return;
-            }
-
-            await _controller.ShutdownAsync();
-            if (_controller.HasRunningServer)
-            {
-                // The user chose not to force-close a server that didn't stop; keep it running.
-                return;
-            }
+            return;
         }
 
         IsWorking = true;
@@ -110,6 +100,14 @@ public sealed partial class UpdateViewModel : ObservableObject
         try
         {
             await _updater.DownloadAsync(update, new Progress<int>(p => DownloadPercent = p));
+
+            // A server may have been started while the update downloaded; restarting must not cut it off.
+            StatusText = null;
+            if (!await StopServerForUpdateAsync())
+            {
+                return;
+            }
+
             StatusText = Text.Get("Update_Restarting");
             _updater.ApplyAndRestart(update);
         }
@@ -122,6 +120,32 @@ public sealed partial class UpdateViewModel : ObservableObject
         {
             IsWorking = false;
         }
+    }
+
+    /// <summary>Asks to stop a running or starting server and waits for it. Returns false when the update should wait.</summary>
+    private async Task<bool> StopServerForUpdateAsync()
+    {
+        if (_controller.Preparing is not null)
+        {
+            // Mid-backup or mid-Java-download: not safe to restart, and nothing to stop yet.
+            StatusText = Text.Get("Update_WaitForStart");
+            return false;
+        }
+
+        if (!_controller.HasRunningServer)
+        {
+            return true;
+        }
+
+        if (!_dialogs.Confirm(Text.Get("Update_StopServerConfirm")))
+        {
+            return false;
+        }
+
+        await _controller.ShutdownAsync();
+
+        // False when the user chose not to force-close a server that didn't stop; it keeps running.
+        return !_controller.HasRunningServer;
     }
 
     [RelayCommand]

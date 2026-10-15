@@ -21,8 +21,20 @@ public sealed class ServerController(
     /// <summary>The server whose process is running, or null when none is.</summary>
     public ServerViewModel? Running { get; private set; }
 
+    /// <summary>The server being backed up or getting its Java before it starts, or null.</summary>
+    public ServerViewModel? Preparing { get; private set; }
+
+    /// <summary>Raised when <see cref="Preparing"/> changes, so every server can grey out its Start button.</summary>
+    public event EventHandler? PreparingChanged;
+
     public async Task StartAsync(ServerViewModel server)
     {
+        // One server at a time (decision 5) includes one getting ready: its backup and Java download come first.
+        if (Preparing is not null)
+        {
+            return;
+        }
+
         if (Running is { } other && other != server && other.IsRunning)
         {
             if (!dialogs.Confirm(string.Format(Text.Get("Server_StopOtherConfirm"), other.Name, server.Name)))
@@ -34,6 +46,7 @@ public sealed class ServerController(
         }
 
         server.BeginPreparing();
+        SetPreparing(server);
         try
         {
             if (!await BackUpBeforeStartAsync(server))
@@ -63,8 +76,15 @@ public sealed class ServerController(
         }
         finally
         {
+            SetPreparing(null);
             server.EndPreparing();
         }
+    }
+
+    private void SetPreparing(ServerViewModel? server)
+    {
+        Preparing = server;
+        PreparingChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>

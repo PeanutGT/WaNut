@@ -31,6 +31,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 19 | Modpack servers | Phase 2, with the mod browser and Forge. Modrinth `.mrpack` first; CurseForge starts as importing a server pack the user already downloaded. |
 | 20 | Settings layout | Tabs first, then tiers (always visible / More settings / Advanced mode), per section 4b. Whitelist, OP list and the RAM slider are always visible; changing type or version backs up first and warns on downgrade. |
 | 21 | New server whitelist | **On** by default for every new server, on every Minecraft version. The Players tab warns while the list is empty. |
+| 22 | Code signing | Setup.exe is **not signed** for now. Windows shows a SmartScreen warning on first install. |
 
 ---
 
@@ -268,7 +269,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 6. ✓ Game settings tab (`server.properties` editor with "More settings"; a default `server.properties` is written when a server is created) and Players tab additions (whitelist switch and list, OP list).
 7. ✓ Server tab (RAM slider, port, `online-mode`) and the App settings window with the Advanced mode switch; custom JVM arguments as the first advanced-only item.
 8. ✓ Backups tab with cleanup; then "Change type or version" in the Server tab, which needs a backup first.
-9. Connect tab (IP list) and firewall rule.
+9. ✓ Connect tab (IP list) and firewall rule.
 10. ✓ Installer and self-update; first GitHub Release (v0.1.0).
 11. First-run setup window: desktop shortcut (the installer only adds a Start menu shortcut), servers folder, update check.
 12. ✓ Move the servers folder later from App settings (More settings), carrying existing servers across.

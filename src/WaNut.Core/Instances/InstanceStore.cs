@@ -100,6 +100,13 @@ public sealed class InstanceStore(LauncherPaths paths)
         }
 
         var id = builder.ToString().Trim('-', '.');
-        return id.Length == 0 ? "server" : id[..Math.Min(id.Length, 48)].TrimEnd('-', '.');
+        id = id.Length == 0 ? "server" : id[..Math.Min(id.Length, 48)].TrimEnd('-', '.');
+
+        // Windows refuses folders named after devices, also with an extension ("con", "con.1").
+        return IsReservedName(id.Split('.')[0]) ? "server-" + id : id;
     }
+
+    private static bool IsReservedName(string stem) =>
+        stem is "con" or "prn" or "aux" or "nul"
+        || (stem.Length == 4 && (stem.StartsWith("com", StringComparison.Ordinal) || stem.StartsWith("lpt", StringComparison.Ordinal)) && stem[3] is >= '1' and <= '9');
 }

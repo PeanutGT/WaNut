@@ -304,17 +304,30 @@ public sealed partial class BackupStore(TimeProvider clock)
         }
         catch
         {
+            // Each folder is put back on its own, so one that can't move doesn't stop the rest; the original error is rethrown.
             foreach (var name in movedIn)
             {
-                Directory.Move(Path.Combine(instanceDir, name), Path.Combine(incoming, name));
+                TryMove(Path.Combine(instanceDir, name), Path.Combine(incoming, name));
             }
 
             foreach (var name in movedOut)
             {
-                Directory.Move(Path.Combine(outgoing, name), Path.Combine(instanceDir, name));
+                TryMove(Path.Combine(outgoing, name), Path.Combine(instanceDir, name));
             }
 
             throw;
+        }
+    }
+
+    private static void TryMove(string from, string to)
+    {
+        try
+        {
+            Directory.Move(from, to);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Left where it is; the folder still exists on disk and can be moved back by hand.
         }
     }
 
