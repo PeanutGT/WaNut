@@ -5,9 +5,10 @@ namespace WaNut.App.Views;
 
 public partial class AppSettingsWindow : Window
 {
-    public AppSettingsWindow(AppSettingsViewModel viewModel)
+    public AppSettingsWindow(AppSettingsViewModel viewModel, UpdateViewModel updates)
     {
         InitializeComponent();
         DataContext = viewModel;
+        UpdatePanel.DataContext = updates;
     }
 }

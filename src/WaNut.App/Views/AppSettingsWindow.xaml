@@ -16,6 +16,31 @@
       <TextBlock Text="{res:Text AppSettings_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
 
+    <!-- Updates -->
+    <TextBlock Text="{res:Text Update_Section}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+    <StackPanel x:Name="UpdatePanel">
+      <!-- DataContext: UpdateViewModel -->
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="{res:Text Update_CheckNow}" Command="{Binding CheckNowCommand}" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding VersionText}" VerticalAlignment="Center" />
+      </DockPanel>
+      <TextBlock Text="{Binding StatusText}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                 AutomationProperties.LiveSetting="Polite">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding StatusText}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+    </StackPanel>
+    <CheckBox Content="{res:Text Update_CheckOnStart}" IsChecked="{Binding CheckForUpdates}" Margin="0,10,0,0" />
+    <TextBlock Text="{res:Text Update_CheckOnStartHint}" Style="{StaticResource MutedText}"
+               FontSize="12" TextWrapping="Wrap" Margin="26,2,0,18" />
+
     <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
     <CheckBox Content="{res:Text AppSettings_AdvancedMode}" IsChecked="{Binding AdvancedMode}" />
     <TextBlock Text="{res:Text AppSettings_AdvancedModeHint}" Style="{StaticResource MutedText}"

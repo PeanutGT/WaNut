@@ -13,6 +13,9 @@ A Windows app for starting your own Minecraft: Java Edition server in a few clic
 
 See [docs/blueprint.md](docs/blueprint.md) for the full design.
 
+## Installing
+Download `WaNut-win-Setup.exe` from the [latest release](https://github.com/PeanutGT/WaNut/releases/latest) and run it. WaNut installs for your Windows account only, so no administrator approval is needed, and it updates itself when a new version comes out. Your servers and worlds live in `%APPDATA%\WaNut` and are kept when WaNut updates or is uninstalled.
+
 ## Building
 Requires Windows and the .NET 10 SDK.
 

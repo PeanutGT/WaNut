@@ -14,8 +14,15 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly ServerController _controller;
     private readonly BackupStore _backups;
 
-    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller, AppSettingsViewModel appSettings, BackupStore backups)
+    public MainViewModel(
+        InstanceStore store,
+        IDialogService dialogs,
+        ServerController controller,
+        AppSettingsViewModel appSettings,
+        BackupStore backups,
+        UpdateViewModel updates)
     {
+        Updates = updates;
         _store = store;
         _dialogs = dialogs;
         _controller = controller;
@@ -27,6 +34,8 @@ public sealed partial class MainViewModel : ObservableObject
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
 
     public AppSettingsViewModel AppSettings { get; }
+
+    public UpdateViewModel Updates { get; }
 
     [ObservableProperty]
     private ServerViewModel? _selectedServer;
