@@ -17,7 +17,14 @@ namespace WaNut.App.ViewModels;
 /// </summary>
 public sealed partial class ConnectViewModel : ObservableObject
 {
-    public static readonly Uri RadminVpnSite = new("https://www.radmin-vpn.com/");
+    // Only these fixed sites can be opened from the guide.
+    private static readonly Dictionary<string, Uri> ToolSites = new()
+    {
+        [nameof(AdapterKind.RadminVpn)] = new("https://www.radmin-vpn.com/"),
+        [nameof(AdapterKind.ZeroTier)] = new("https://www.zerotier.com/"),
+        [nameof(AdapterKind.Tailscale)] = new("https://tailscale.com/"),
+        [nameof(AdapterKind.Hamachi)] = new("https://vpn.net/"),
+    };
 
     private readonly ServerViewModel _server;
     private readonly FirewallService _firewall;
@@ -127,7 +134,13 @@ public sealed partial class ConnectViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static void OpenRadminSite() => Process.Start(new ProcessStartInfo(RadminVpnSite.AbsoluteUri) { UseShellExecute = true });
+    private static void OpenSite(string? tool)
+    {
+        if (tool is not null && ToolSites.TryGetValue(tool, out var site))
+        {
+            Process.Start(new ProcessStartInfo(site.AbsoluteUri) { UseShellExecute = true });
+        }
+    }
 
     /// <summary>The start of a server asked about the firewall; show the outcome here too.</summary>
     internal void OnFirewallAsked(FirewallChange change)

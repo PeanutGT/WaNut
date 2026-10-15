@@ -177,25 +177,37 @@
         </TextBlock.Style>
       </TextBlock>
 
-      <!-- More settings: the Radmin VPN guide -->
+      <!-- More settings: playing over a virtual LAN tool -->
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
         <StackPanel Margin="4,8,0,0">
-          <TextBlock Text="{res:Text Connect_RadminTitle}" Style="{StaticResource Label}" />
-          <TextBlock Text="{res:Text Connect_RadminIntro}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminHost}" FontWeight="SemiBold" Margin="0,6,0,6" />
+          <TextBlock Text="{res:Text Connect_GuideTitle}" Style="{StaticResource Label}" />
+          <TextBlock Text="{res:Text Connect_GuideIntro}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideHost}" FontWeight="SemiBold" Margin="0,6,0,6" />
+          <TextBlock Text="{res:Text Connect_GuideStep1}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideStep2}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideStep3}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideFriends}" FontWeight="SemiBold" Margin="0,6,0,6" />
+          <TextBlock Text="{res:Text Connect_GuideStep4}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideStep5}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_GuideTools}" FontWeight="SemiBold" Margin="0,6,0,6" />
           <TextBlock Style="{StaticResource Step}">
-            <Run Text="{res:Text Connect_RadminStep1}" />
-            <Hyperlink Command="{Binding OpenRadminSiteCommand}"><Run Text="{res:Text Connect_RadminSite}" /></Hyperlink><Run Text="{res:Text Connect_RadminStep1End}" />
+            <Run Text="{res:Text Connect_ToolRadmin}" />
+            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="RadminVpn"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
           </TextBlock>
-          <TextBlock Text="{res:Text Connect_RadminStep2}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminStep3}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminStep4}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminStep5}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminFriends}" FontWeight="SemiBold" Margin="0,6,0,6" />
-          <TextBlock Text="{res:Text Connect_RadminStep6}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminStep7}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RadminNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
-          <TextBlock Text="{res:Text Connect_RadminTrouble}" Style="{StaticResource Hint}" />
+          <TextBlock Style="{StaticResource Step}">
+            <Run Text="{res:Text Connect_ToolZeroTier}" />
+            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="ZeroTier"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+          </TextBlock>
+          <TextBlock Style="{StaticResource Step}">
+            <Run Text="{res:Text Connect_ToolTailscale}" />
+            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Tailscale"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+          </TextBlock>
+          <TextBlock Style="{StaticResource Step}">
+            <Run Text="{res:Text Connect_ToolHamachi}" />
+            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Hamachi"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+          </TextBlock>
+          <TextBlock Text="{res:Text Connect_GuideNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
+          <TextBlock Text="{res:Text Connect_GuideTrouble}" Style="{StaticResource Hint}" />
         </StackPanel>
       </Expander>
     </StackPanel>
