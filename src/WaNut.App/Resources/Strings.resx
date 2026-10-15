@@ -517,7 +517,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>Backups to keep</value>
   </data>
   <data name="Backups_KeepCountHint" xml:space="preserve">
-    <value>The newest ones are kept. From 1 to 100. The default is 5.</value>
+    <value>The newest ones are kept. From 1 to 100. The default is 5. Copies made before a restore don't count here; they're deleted only by age.</value>
   </data>
   <data name="Backups_MaxAgeDays" xml:space="preserve">
     <value>Delete backups older than (days)</value>
