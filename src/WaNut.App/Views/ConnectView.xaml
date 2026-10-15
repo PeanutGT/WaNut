@@ -1,0 +1,198 @@
+<UserControl x:Class="WaNut.App.Views.ConnectView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources">
+  <!-- DataContext: ConnectViewModel -->
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+    <Style x:Key="Label" TargetType="TextBlock">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+    <Style x:Key="Step" TargetType="TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <!-- A plain list: no selection of its own, but each row is a list item screen readers can enter. -->
+    <Style x:Key="PlainList" TargetType="ListBox">
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBox">
+            <ItemsPresenter />
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ItemContainerStyle">
+        <Setter.Value>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                  <ContentPresenter />
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+      <DockPanel Margin="0,0,0,4">
+        <Button DockPanel.Dock="Right" Content="{res:Text Connect_Refresh}" Command="{Binding RefreshCommand}" VerticalAlignment="Top" />
+        <TextBlock Text="{res:Text Connect_Intro}" TextWrapping="Wrap" Margin="0,0,12,0" />
+      </DockPanel>
+      <TextBlock Text="{res:Text Connect_WhitelistHint}" Style="{StaticResource Hint}" Margin="0,0,0,14" />
+
+      <!-- Copied: the peanut cheers. -->
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding CopiedText}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <Image Style="{StaticResource Peanut}" Width="22" Height="22" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding CopiedText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+
+      <!-- Errors: plain wording, no peanut (decision 16). -->
+      <Border Margin="0,0,0,14">
+        <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+      </Border>
+
+      <!-- Addresses -->
+      <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Addresses}" AutomationProperties.Name="{res:Text Server_TabConnect}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+              <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{res:Text Connect_Copy}" Padding="12,3" VerticalAlignment="Center"
+                        AutomationProperties.Name="{Binding CopyLabel}"
+                        Command="{Binding DataContext.CopyCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                        CommandParameter="{Binding}" />
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                  <TextBox Text="{Binding Endpoint, Mode=OneWay}" IsReadOnly="True" FontFamily="Consolas" FontSize="15"
+                           BorderThickness="0" Background="Transparent" Padding="0" Margin="0,2,0,0"
+                           Foreground="{DynamicResource TextBrush}" AutomationProperties.Name="{Binding AccessibleName}" />
+                  <TextBlock Text="{Binding Hint}" Style="{StaticResource Hint}" Margin="0,2,0,0" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <!-- No network -->
+      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Addresses.Count}" Value="0">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <Image Style="{StaticResource Peanut}" Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Top" />
+        <StackPanel MaxWidth="480">
+          <TextBlock Text="{res:Text Connect_Empty}" FontSize="14" FontWeight="SemiBold" />
+          <TextBlock Text="{res:Text Connect_EmptyHint}" Style="{StaticResource Hint}" Margin="0,2,0,0" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Windows Firewall -->
+      <TextBlock Text="{res:Text Connect_Firewall}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+      <StackPanel Orientation="Horizontal">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding ShowFirewallProblem}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding FirewallText}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <Image Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
+          <Image.Style>
+            <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowFirewallOk}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Image.Style>
+        </Image>
+        <TextBlock Text="{Binding FirewallText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+
+      <Border Style="{StaticResource WarningBanner}" Visibility="{Binding ShowFirewallProblem, Converter={StaticResource Visible}}">
+        <StackPanel>
+          <TextBlock Text="{Binding FirewallText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          <Button Content="{res:Text Connect_FirewallAllow}" Command="{Binding AllowFirewallCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+          <TextBlock Text="{res:Text Connect_FirewallAllowHint}" Style="{StaticResource Hint}" />
+        </StackPanel>
+      </Border>
+
+      <TextBlock Text="{Binding FirewallMessage}" Margin="0,6,0,0" AutomationProperties.LiveSetting="Polite">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource Hint}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding FirewallMessage}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+
+      <!-- More settings: the Radmin VPN guide -->
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
+        <StackPanel Margin="4,8,0,0">
+          <TextBlock Text="{res:Text Connect_RadminTitle}" Style="{StaticResource Label}" />
+          <TextBlock Text="{res:Text Connect_RadminIntro}" Style="{StaticResource Step}" />
+          <TextBlock Style="{StaticResource Step}">
+            <Run Text="{res:Text Connect_RadminStep1}" />
+            <Hyperlink Command="{Binding OpenRadminSiteCommand}"><Run Text="{res:Text Connect_RadminSite}" /></Hyperlink>
+          </TextBlock>
+          <TextBlock Text="{res:Text Connect_RadminStep2}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminStep3}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminStep4}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminStep5}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminTrouble}" Style="{StaticResource Hint}" />
+        </StackPanel>
+      </Expander>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

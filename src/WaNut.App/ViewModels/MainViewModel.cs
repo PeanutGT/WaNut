@@ -13,9 +13,20 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IDialogService _dialogs;
     private readonly ServerController _controller;
     private readonly BackupStore _backups;
+    private readonly FirewallService _firewall;
+    private readonly IClipboardService _clipboard;
 
-    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller, AppSettingsViewModel appSettings, BackupStore backups)
+    public MainViewModel(
+        InstanceStore store,
+        IDialogService dialogs,
+        ServerController controller,
+        AppSettingsViewModel appSettings,
+        BackupStore backups,
+        FirewallService firewall,
+        IClipboardService clipboard)
     {
+        _firewall = firewall;
+        _clipboard = clipboard;
         _store = store;
         _dialogs = dialogs;
         _controller = controller;
@@ -73,7 +84,7 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard));
         }
     }
 }

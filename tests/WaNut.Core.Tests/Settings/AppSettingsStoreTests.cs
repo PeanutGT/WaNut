@@ -28,6 +28,24 @@ public sealed class AppSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void SaveThenLoad_FirewallAsked_RoundTrips()
+    {
+        var store = new AppSettingsStore(new LauncherPaths(_dir.Path));
+
+        store.Save(new AppSettings { FirewallAsked = [@"C:\WaNut\runtimes\java-21\bin\java.exe"] });
+
+        Assert.Equal([@"C:\WaNut\runtimes\java-21\bin\java.exe"], store.Load().FirewallAsked);
+    }
+
+    [Fact]
+    public void Load_OlderFileWithoutFirewallAsked_GivesEmptyList()
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "config.json"), "{\"advancedMode\": true, \"firewallAsked\": null}");
+
+        Assert.Empty(new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().FirewallAsked);
+    }
+
+    [Fact]
     public void Load_DamagedFile_GivesDefaults()
     {
         File.WriteAllText(Path.Combine(_dir.Path, "config.json"), "{ not json");

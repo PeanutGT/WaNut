@@ -24,7 +24,14 @@ public sealed partial class ServerViewModel : ObservableObject
     private readonly SynchronizationContext _ui;
 
     public ServerViewModel(
-        InstanceMetadata metadata, ServerController controller, InstanceStore store, AppSettingsViewModel app, BackupStore backups, IDialogService dialogs)
+        InstanceMetadata metadata,
+        ServerController controller,
+        InstanceStore store,
+        AppSettingsViewModel app,
+        BackupStore backups,
+        IDialogService dialogs,
+        FirewallService firewall,
+        IClipboardService clipboard)
     {
         Metadata = metadata;
         _controller = controller;
@@ -34,6 +41,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
+        Connect = new ConnectViewModel(this, firewall, clipboard);
         app.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(AppSettingsViewModel.AdvancedMode))
@@ -55,6 +63,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public ServerSettingsViewModel ServerSettings { get; }
 
     public BackupsViewModel Backups { get; }
+
+    public ConnectViewModel Connect { get; }
 
     public string Id => Metadata.Id;
 

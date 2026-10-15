@@ -9,12 +9,14 @@ namespace WaNut.App.ViewModels;
 public sealed partial class AppSettingsViewModel : ObservableObject
 {
     private readonly AppSettingsStore _store;
+    private AppSettings _saved;
     private bool _loading;
 
     public AppSettingsViewModel(AppSettingsStore store)
     {
         _store = store;
         var settings = store.Load();
+        _saved = settings;
         _loading = true;
         AdvancedMode = settings.AdvancedMode;
         BackupKeepCount = settings.Backups.KeepCount;
@@ -35,6 +37,17 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private string? _errorText;
 
     public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays };
+
+    public bool WasFirewallAsked(string javaExe) => _saved.FirewallAsked.Contains(javaExe, StringComparer.OrdinalIgnoreCase);
+
+    public void MarkFirewallAsked(string javaExe)
+    {
+        if (!WasFirewallAsked(javaExe))
+        {
+            _saved = _saved with { FirewallAsked = [.. _saved.FirewallAsked, javaExe] };
+            Save();
+        }
+    }
 
     partial void OnAdvancedModeChanged(bool value) => Save();
 
@@ -74,7 +87,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _store.Save(new AppSettings { AdvancedMode = AdvancedMode, Backups = BackupRules });
+            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules };
+            _store.Save(_saved);
             ErrorText = null;
         }
         catch (IOException e)

@@ -72,6 +72,8 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Show the PC's IPv4 addresses with a **Copy** button, labelled by adapter (e.g. "Wi-Fi", "Radmin VPN", "ZeroTier", "Tailscale") so the user knows which one to give friends.
 * Show the port (default `25565`) next to it, in the `IP:port` form players paste into Minecraft.
 * **Windows Defender Firewall rule:** still needed for LAN and Radmin VPN, otherwise Windows can silently block friends. On first launch of a server, ask once for administrator approval (UAC) and add an inbound rule per bundled `java.exe` (rules apply to a program file, not a folder).
+* The rule covers every network profile: Windows usually files Radmin VPN, and often the home network too, as "Public". WaNut also removes inbound block rules for its own `java.exe` (left behind when Windows' own prompt was cancelled), since a block rule wins over any allow rule. The question comes once per `java.exe` (remembered in `config.json`); the Connect tab shows the firewall state and can add the rule later. Setting `WANUT_FIREWALL_DRY_RUN=1` writes the PowerShell it would run to `firewall-dry-run.ps1` in the data folder instead of asking for UAC.
+* The address list hides disconnected adapters, `169.254.x.x` addresses and virtual-machine adapters (Hyper-V/WSL, VirtualBox, VMware, Bluetooth). Radmin VPN, ZeroTier, Tailscale and Hamachi are recognised by their adapter description, because adapter names are translated on non-English Windows ("乙太網路").
 * A short in-app guide: "Playing with friends over Radmin VPN".
 
 ### Later phases: over the internet without extra tools

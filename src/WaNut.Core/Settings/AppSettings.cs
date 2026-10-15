@@ -12,6 +12,12 @@ public sealed record AppSettings
 
     /// <summary>Backup cleanup rules, shared by every server.</summary>
     public BackupRules Backups { get; init; } = new();
+
+    /// <summary>
+    /// The java.exe files WaNut already asked about letting through Windows Firewall, so the question comes once
+    /// per Java, not on every start. The Connect tab can still add the rule later.
+    /// </summary>
+    public IReadOnlyList<string> FirewallAsked { get; init; } = [];
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)
@@ -33,7 +39,7 @@ public sealed class AppSettingsStore(LauncherPaths paths)
         try
         {
             var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(paths.ConfigFile), JsonOptions) ?? new AppSettings();
-            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized() };
+            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized(), FirewallAsked = settings.FirewallAsked ?? [] };
         }
         catch (JsonException)
         {

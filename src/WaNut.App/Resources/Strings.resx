@@ -588,4 +588,134 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   <data name="Backups_Reason_Change" xml:space="preserve">
     <value>Before a type or version change</value>
   </data>
+  <data name="Server_TabConnect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="Connect_Intro" xml:space="preserve">
+    <value>Give your friends one of these addresses. In Minecraft they go to Multiplayer, then Add Server, and paste it into Server Address.</value>
+  </data>
+  <data name="Connect_WhitelistHint" xml:space="preserve">
+    <value>New servers only let in players on the whitelist, so add your friends' names on the Players tab first.</value>
+  </data>
+  <data name="Connect_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Connect_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Connect_CopyLabel" xml:space="preserve">
+    <value>Copy the {0} address {1}</value>
+  </data>
+  <data name="Connect_Copied" xml:space="preserve">
+    <value>Copied {0}! Send it to your friends.</value>
+  </data>
+  <data name="Connect_CopyFailed" xml:space="preserve">
+    <value>The address couldn't be copied because another program is using the clipboard. Try again in a moment.</value>
+  </data>
+  <data name="Connect_ListFailed" xml:space="preserve">
+    <value>WaNut couldn't read this PC's network adapters: {0}</value>
+  </data>
+  <data name="Connect_Empty" xml:space="preserve">
+    <value>No network found</value>
+  </data>
+  <data name="Connect_EmptyHint" xml:space="preserve">
+    <value>Connect to Wi-Fi, or start Radmin VPN, ZeroTier or Tailscale, then press Refresh.</value>
+  </data>
+  <data name="Connect_Kind_RadminVpn" xml:space="preserve">
+    <value>Radmin VPN</value>
+  </data>
+  <data name="Connect_Kind_ZeroTier" xml:space="preserve">
+    <value>ZeroTier</value>
+  </data>
+  <data name="Connect_Kind_Tailscale" xml:space="preserve">
+    <value>Tailscale</value>
+  </data>
+  <data name="Connect_Kind_Hamachi" xml:space="preserve">
+    <value>Hamachi</value>
+  </data>
+  <data name="Connect_Hint_Lan" xml:space="preserve">
+    <value>For friends on the same Wi-Fi or router as you.</value>
+  </data>
+  <data name="Connect_Hint_RadminVpn" xml:space="preserve">
+    <value>For friends in your Radmin VPN network.</value>
+  </data>
+  <data name="Connect_Hint_ZeroTier" xml:space="preserve">
+    <value>For friends in your ZeroTier network.</value>
+  </data>
+  <data name="Connect_Hint_Tailscale" xml:space="preserve">
+    <value>For friends in your Tailscale network.</value>
+  </data>
+  <data name="Connect_Hint_Hamachi" xml:space="preserve">
+    <value>For friends in your Hamachi network.</value>
+  </data>
+  <data name="Connect_Firewall" xml:space="preserve">
+    <value>Windows Firewall</value>
+  </data>
+  <data name="Connect_FirewallChecking" xml:space="preserve">
+    <value>Checking Windows Firewall…</value>
+  </data>
+  <data name="Connect_Firewall_Allowed" xml:space="preserve">
+    <value>Windows Firewall lets your friends in.</value>
+  </data>
+  <data name="Connect_Firewall_NotAllowed" xml:space="preserve">
+    <value>Windows Firewall may block your friends. Allow WaNut's Java through it so they can join.</value>
+  </data>
+  <data name="Connect_Firewall_Blocked" xml:space="preserve">
+    <value>Windows Firewall has a rule that blocks WaNut's Java, so friends can't join.</value>
+  </data>
+  <data name="Connect_Firewall_Unknown" xml:space="preserve">
+    <value>WaNut couldn't read the Windows Firewall rules. If friends can't join, check that Java is allowed in Windows Security.</value>
+  </data>
+  <data name="Connect_FirewallAllow" xml:space="preserve">
+    <value>Allow through firewall</value>
+  </data>
+  <data name="Connect_FirewallAllowHint" xml:space="preserve">
+    <value>Windows asks for administrator approval. WaNut then adds one rule for its own Java and removes any rule that blocks it.</value>
+  </data>
+  <data name="Connect_FirewallDeclined" xml:space="preserve">
+    <value>Nothing was changed. You can allow it here any time.</value>
+  </data>
+  <data name="Connect_FirewallFailed" xml:space="preserve">
+    <value>Windows Firewall wasn't changed. You can add the rule yourself in Windows Security: allow inbound connections for {0}.</value>
+  </data>
+  <data name="Connect_FirewallNoJava" xml:space="preserve">
+    <value>This server's Java isn't downloaded yet. Start the server once, then check again.</value>
+  </data>
+  <data name="Connect_RadminTitle" xml:space="preserve">
+    <value>Playing with friends over Radmin VPN</value>
+  </data>
+  <data name="Connect_RadminIntro" xml:space="preserve">
+    <value>Radmin VPN puts you and your friends on one pretend home network over the internet. It's free and needs no router settings.</value>
+  </data>
+  <data name="Connect_RadminStep1" xml:space="preserve">
+    <value>1. You and each friend install Radmin VPN from</value>
+  </data>
+  <data name="Connect_RadminSite" xml:space="preserve">
+    <value>radmin-vpn.com</value>
+  </data>
+  <data name="Connect_RadminStep2" xml:space="preserve">
+    <value>2. You: in Radmin VPN choose Network, then Create new network. Pick a name and a password.</value>
+  </data>
+  <data name="Connect_RadminStep3" xml:space="preserve">
+    <value>3. Friends: choose Network, then Join existing network, and type the same name and password.</value>
+  </data>
+  <data name="Connect_RadminStep4" xml:space="preserve">
+    <value>4. Start your server here, press Copy next to Radmin VPN above and send the address to your friends.</value>
+  </data>
+  <data name="Connect_RadminStep5" xml:space="preserve">
+    <value>5. Friends: in Minecraft choose Multiplayer, then Add Server, paste the address and join.</value>
+  </data>
+  <data name="Connect_RadminTrouble" xml:space="preserve">
+    <value>Friends can't join? Check that they're on the whitelist, that Windows Firewall lets them in (above), and that everyone has the same Minecraft version.</value>
+  </data>
+  <data name="Firewall_Ask" xml:space="preserve">
+    <value>Let your friends join through Windows Firewall?
+
+Windows asks for administrator approval next. WaNut then adds one rule that lets its own Java {0} accept connections from friends. You can also do this later on the Connect tab.</value>
+  </data>
+  <data name="Firewall_AskBlocked" xml:space="preserve">
+    <value>Windows Firewall is blocking WaNut's Java, so friends can't join. Fix it now?
+
+Windows asks for administrator approval next. WaNut then removes the blocking rule and adds one that lets its own Java {0} accept connections. You can also do this later on the Connect tab.</value>
+  </data>
 </root>
