@@ -89,12 +89,12 @@ public sealed partial class ServerViewModel : ObservableObject
     public ObservableCollection<string> Players { get; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(IsBusy), nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(IsBusy), nameof(StatusText), nameof(StatusScene))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand), nameof(StopCommand), nameof(SendCommand))]
     private ServerStatus _status = ServerStatus.Stopped;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBusy), nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(IsBusy), nameof(StatusText), nameof(StatusScene))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
     private bool _isPreparing;
 
@@ -120,6 +120,15 @@ public sealed partial class ServerViewModel : ObservableObject
 
     /// <summary>Getting ready, starting, saving, or backing up: the moments the peanut wobbles.</summary>
     public bool IsBusy => IsPreparing || Backups.IsWorking || Status is ServerStatus.Starting or ServerStatus.Stopping;
+
+    /// <summary>The peanut next to the status: asleep, starting (also while preparing or backing up), cheering, saving.</summary>
+    public string StatusScene => Status switch
+    {
+        ServerStatus.Online => "online",
+        ServerStatus.Stopping => "saving",
+        ServerStatus.Starting => "starting",
+        _ => IsBusy ? "starting" : "stopped",
+    };
 
     public string PlayersHeader => string.Format(Text.Get("Server_TabPlayers"), Players.Count);
 
@@ -188,6 +197,7 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(IsBusy));
         OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(StatusScene));
         StartCommand.NotifyCanExecuteChanged();
     }
 

@@ -6,6 +6,7 @@
         xmlns:converters="clr-namespace:WaNut.App.Converters"
         xmlns:hosting="clr-namespace:WaNut.Core.Hosting;assembly=WaNut.Core"
         xmlns:views="clr-namespace:WaNut.App.Views"
+        xmlns:controls="clr-namespace:WaNut.App.Controls"
         Title="{res:Text App_Title}"
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
@@ -80,7 +81,7 @@
                 Visibility="{Binding ShowCard, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
             <StackPanel Orientation="Horizontal">
-              <Image Style="{StaticResource Peanut}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Top" />
+              <controls:PixelScene Scene="updating" Width="32" Height="32" Margin="0,0,8,0" VerticalAlignment="Top" />
               <TextBlock Text="{Binding CardText}" TextWrapping="Wrap" MaxWidth="150" FontWeight="SemiBold"
                          AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
@@ -153,7 +154,7 @@
       <!-- No servers yet: the peanut and one big green button -->
       <StackPanel Style="{StaticResource ShownWhenNoServers}"
                   HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
-        <Image Style="{StaticResource Peanut}" Width="96" Height="96" Margin="0,0,0,20" />
+        <controls:PixelScene Scene="no-servers" Width="128" Height="128" Margin="0,0,0,20" />
         <TextBlock Text="{res:Text Main_NoServers}" FontSize="20" FontWeight="SemiBold"
                    HorizontalAlignment="Center" />
         <TextBlock Text="{res:Text Main_NoServersHint}" Style="{StaticResource MutedText}"
@@ -216,19 +217,8 @@
             </TextBlock>
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-            <!-- The peanut wobbles while the server gets ready, starts or saves. -->
-            <Image Width="22" Height="22" Margin="0,0,8,0">
-              <Image.Style>
-                <Style TargetType="Image" BasedOn="{StaticResource BusyPeanut}">
-                  <Setter Property="Visibility" Value="Collapsed" />
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                      <Setter Property="Visibility" Value="Visible" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </Image.Style>
-            </Image>
+            <!-- The peanut acts out the status: asleep, starting, cheering, saving. -->
+            <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,8,0" />
 
             <!-- Status pill -->
             <Border CornerRadius="11" Padding="10,3" Margin="0,0,12,0" VerticalAlignment="Center" BorderThickness="1">

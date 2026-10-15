@@ -221,4 +221,8 @@ public sealed partial class CreateServerViewModel : ObservableObject
 }
 
 /// <summary>One choice in the wizard's server type list.</summary>
-public sealed record ServerTypeOption(ServerType Type, string Title, string Description);
+public sealed record ServerTypeOption(ServerType Type, string Title, string Description)
+{
+    /// <summary>The pixel icon for this type, e.g. "type-paper".</summary>
+    public string Scene => $"type-{Type.ToString().ToLowerInvariant()}";
+}
