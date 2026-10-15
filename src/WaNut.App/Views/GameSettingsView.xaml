@@ -1,0 +1,125 @@
+<UserControl x:Class="WaNut.App.Views.GameSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources">
+  <!-- DataContext: GameSettingsViewModel -->
+  <UserControl.Resources>
+    <Style x:Key="Label" TargetType="TextBlock">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+    <!-- When a control gets focus, the whole item scrolls into view, so its heading is never left above the top. -->
+    <Style x:Key="Item" TargetType="StackPanel">
+      <Setter Property="Margin" Value="0,0,0,18" />
+      <EventSetter Event="RequestBringIntoView" Handler="Item_RequestBringIntoView" />
+    </Style>
+    <Style x:Key="CheckHint" TargetType="TextBlock" BasedOn="{StaticResource Hint}">
+      <Setter Property="Margin" Value="26,2,0,0" />
+    </Style>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+      <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
+              Visibility="{Binding ShowStopHint, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Game_StopToChange}" TextWrapping="Wrap" />
+      </Border>
+
+      <!-- Always visible -->
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Game_Mode}" Style="{StaticResource Label}" />
+        <ComboBox ItemsSource="{Binding GameModes}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                  SelectedValue="{Binding GameMode}" IsEnabled="{Binding CanEditProperties}"
+                  AutomationProperties.Name="{res:Text Game_Mode}" Width="220" HorizontalAlignment="Left" />
+        <TextBlock Text="{res:Text Game_ModeHint}" Style="{StaticResource Hint}" />
+      </StackPanel>
+
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Game_Difficulty}" Style="{StaticResource Label}" />
+        <ComboBox ItemsSource="{Binding Difficulties}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                  SelectedValue="{Binding Difficulty}" IsEnabled="{Binding CanEditProperties}"
+                  AutomationProperties.Name="{res:Text Game_Difficulty}" Width="220" HorizontalAlignment="Left" />
+      </StackPanel>
+
+      <StackPanel Style="{StaticResource Item}">
+        <CheckBox Content="{res:Text Game_Pvp}" IsChecked="{Binding Pvp}" IsEnabled="{Binding CanEditPvp}" />
+        <CheckBox Content="{res:Text Game_KeepInventory}" IsChecked="{Binding KeepInventory}" Margin="0,10,0,0" />
+      </StackPanel>
+
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Game_MaxPlayers}" Style="{StaticResource Label}" />
+        <TextBox Text="{Binding MaxPlayers}" IsEnabled="{Binding CanEditProperties}"
+                 AutomationProperties.Name="{res:Text Game_MaxPlayers}" Width="100" HorizontalAlignment="Left" />
+      </StackPanel>
+
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Game_Motd}" Style="{StaticResource Label}" />
+        <TextBox Text="{Binding Motd}" IsEnabled="{Binding CanEditProperties}" MaxLength="200"
+                 AutomationProperties.Name="{res:Text Game_Motd}" />
+        <TextBlock Text="{res:Text Game_MotdHint}" Style="{StaticResource Hint}" />
+      </StackPanel>
+
+      <!-- More settings. Slider bounds match GameSettingsViewModel.MinDistance/MaxDistance; they are written
+           as numbers here because Slider needs doubles and x:Static of an int const crashes at load. -->
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,0">
+        <StackPanel Margin="4,8,0,0">
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Game_ViewDistance}" Style="{StaticResource Label}" />
+            <DockPanel IsEnabled="{Binding CanEditProperties}">
+              <TextBlock DockPanel.Dock="Right" Width="80" Margin="12,0,0,0" VerticalAlignment="Center"
+                         Text="{Binding ViewDistance, StringFormat={res:Text Game_Chunks}}" />
+              <Slider Minimum="3" Maximum="32"
+                      IsSnapToTickEnabled="True" TickFrequency="1" SmallChange="1" LargeChange="4"
+                      Value="{Binding ViewDistance, Delay=400}"
+                      AutomationProperties.Name="{res:Text Game_ViewDistance}" />
+            </DockPanel>
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}" Visibility="{Binding HasSimulationDistance, Converter={StaticResource Visible}}">
+            <TextBlock Text="{res:Text Game_SimulationDistance}" Style="{StaticResource Label}" />
+            <DockPanel IsEnabled="{Binding CanEditProperties}">
+              <TextBlock DockPanel.Dock="Right" Width="80" Margin="12,0,0,0" VerticalAlignment="Center"
+                         Text="{Binding SimulationDistance, StringFormat={res:Text Game_Chunks}}" />
+              <Slider Minimum="3" Maximum="32"
+                      IsSnapToTickEnabled="True" TickFrequency="1" SmallChange="1" LargeChange="4"
+                      Value="{Binding SimulationDistance, Delay=400}"
+                      AutomationProperties.Name="{res:Text Game_SimulationDistance}" />
+            </DockPanel>
+            <TextBlock Text="{res:Text Game_DistanceHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Game_SpawnProtection}" Style="{StaticResource Label}" />
+            <TextBox Text="{Binding SpawnProtection}" IsEnabled="{Binding CanEditProperties}"
+                     AutomationProperties.Name="{res:Text Game_SpawnProtection}" Width="100" HorizontalAlignment="Left" />
+            <TextBlock Text="{res:Text Game_SpawnProtectionHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <CheckBox Content="{res:Text Game_CommandBlocks}" IsChecked="{Binding CommandBlocks}" IsEnabled="{Binding CanEditCommandBlocks}" />
+            <CheckBox Content="{res:Text Game_SpawnMonsters}" IsChecked="{Binding SpawnMonsters}" IsEnabled="{Binding CanEditSpawnMonsters}" Margin="0,10,0,0" />
+            <CheckBox Content="{res:Text Game_AllowFlight}" IsChecked="{Binding AllowFlight}" IsEnabled="{Binding CanEditProperties}" Margin="0,10,0,0" />
+            <TextBlock Text="{res:Text Game_AllowFlightHint}" Style="{StaticResource CheckHint}" />
+            <CheckBox Content="{res:Text Game_Hardcore}" IsChecked="{Binding Hardcore}" IsEnabled="{Binding CanEditProperties}" Margin="0,10,0,0" />
+            <TextBlock Text="{res:Text Game_HardcoreHint}" Style="{StaticResource CheckHint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Game_Seed}" Style="{StaticResource Label}" />
+            <TextBox Text="{Binding Seed}" IsEnabled="{Binding CanEditSeed}" IsReadOnly="{Binding ShowSeedLocked}"
+                     AutomationProperties.Name="{res:Text Game_Seed}" />
+            <TextBlock Text="{res:Text Game_SeedHint}" Style="{StaticResource Hint}" />
+            <TextBlock Text="{res:Text Game_SeedLocked}" Style="{StaticResource Hint}"
+                       Visibility="{Binding ShowSeedLocked, Converter={StaticResource Visible}}" />
+          </StackPanel>
+        </StackPanel>
+      </Expander>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

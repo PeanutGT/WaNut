@@ -27,4 +27,13 @@ public sealed record InstanceMetadata
     public string ServerJar { get; init; } = "server.jar";
 
     public required DateTimeOffset CreatedAt { get; init; }
+
+    /// <summary>
+    /// Game rules the user set in WaNut (keyed by <see cref="Settings.GameSettingsStore.RuleKey"/>, e.g. "keepInventory"). They are sent to the
+    /// server every time it comes online, because a game rule can only be changed while the server runs.
+    /// </summary>
+    public IReadOnlyDictionary<string, bool> GameRules { get; init; } = new Dictionary<string, bool>();
+
+    /// <summary>Console commands waiting for the next start, such as "whitelist add Steve" added while stopped.</summary>
+    public IReadOnlyList<string> PendingCommands { get; init; } = [];
 }

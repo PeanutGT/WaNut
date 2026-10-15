@@ -19,16 +19,26 @@ public sealed partial class ServerViewModel : ObservableObject
     public const int MaxConsoleLines = 2000;
 
     private readonly ServerController _controller;
+    private readonly InstanceStore _store;
     private readonly SynchronizationContext _ui;
 
-    public ServerViewModel(InstanceMetadata metadata, ServerController controller)
+    public ServerViewModel(InstanceMetadata metadata, ServerController controller, InstanceStore store)
     {
         Metadata = metadata;
         _controller = controller;
+        _store = store;
         _ui = SynchronizationContext.Current ?? new SynchronizationContext();
+        GameSettings = new GameSettingsViewModel(this);
+        PlayerLists = new PlayerListsViewModel(this);
     }
 
-    public InstanceMetadata Metadata { get; }
+    public InstanceMetadata Metadata { get; private set; }
+
+    public string InstanceDir => _store.InstanceDir(Metadata.Id);
+
+    public GameSettingsViewModel GameSettings { get; }
+
+    public PlayerListsViewModel PlayerLists { get; }
 
     public string Id => Metadata.Id;
 
@@ -133,6 +143,69 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
 
     internal void ShowError(string message) => ErrorText = message;
+
+    /// <summary>Saves changed metadata, such as game rules or queued commands, to instance.json.</summary>
+    internal void UpdateMetadata(InstanceMetadata metadata)
+    {
+        _store.Save(metadata);
+        Metadata = metadata;
+    }
+
+    /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>
+    internal async Task SendCommandAsync(string command)
+    {
+        if (Process is not { IsRunning: true } process)
+        {
+            return;
+        }
+
+        AddConsoleLine("> " + command);
+        try
+        {
+            await process.SendCommandAsync(command);
+        }
+        catch (Exception e) when (e is IOException or InvalidOperationException)
+        {
+            ErrorText = string.Format(Text.Get("Server_CommandFailed"), e.Message);
+        }
+    }
+
+    partial void OnStatusChanged(ServerStatus value)
+    {
+        GameSettings.OnServerStatusChanged();
+        PlayerLists.OnServerStatusChanged();
+        if (value == ServerStatus.Online)
+        {
+            _ = ApplyOnOnlineAsync();
+        }
+    }
+
+    /// <summary>
+    /// Game rules can only be set while the server runs, and whitelist or OP changes made while it was stopped
+    /// wait for it too. Both go out as soon as it is online.
+    /// </summary>
+    private async Task ApplyOnOnlineAsync()
+    {
+        var pending = Metadata.PendingCommands;
+        foreach (var command in Core.Settings.GameSettingsStore.RuleCommands(Metadata).Concat(pending))
+        {
+            await SendCommandAsync(command);
+        }
+
+        if (pending.Count > 0)
+        {
+            try
+            {
+                UpdateMetadata(Metadata with { PendingCommands = [] });
+            }
+            catch (IOException e)
+            {
+                ErrorText = string.Format(Text.Get("Settings_SaveFailed"), e.Message);
+            }
+
+            PlayerLists.RefreshSoon();
+        }
+    }
 
     /// <summary>Follows a process that is about to start. Its events arrive on background threads and are moved to the UI thread.</summary>
     internal void Attach(ServerProcess process)
