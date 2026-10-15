@@ -742,4 +742,58 @@ Windows asks for administrator approval next. WaNut then removes the blocking ru
   <data name="Connect_GuideTrouble" xml:space="preserve">
     <value>Friends can't join? Check that they're on the whitelist, that Windows Firewall lets them in (above), and that everyone has the same Minecraft version. If the tool itself can't reach your PC (most have a Ping option), the problem is the tool's connection, not the server.</value>
   </data>
+  <data name="Update_Section" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="Update_CurrentVersion" xml:space="preserve">
+    <value>You're using WaNut {0}.</value>
+  </data>
+  <data name="Update_CheckNow" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Update_CheckOnStart" xml:space="preserve">
+    <value>Check for updates when WaNut starts</value>
+  </data>
+  <data name="Update_CheckOnStartHint" xml:space="preserve">
+    <value>WaNut looks for a new version on GitHub and asks before installing it.</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>A fresh WaNut {0} is ready!</value>
+  </data>
+  <data name="Update_Now" xml:space="preserve">
+    <value>Update now</value>
+  </data>
+  <data name="Update_Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="Update_StopServerConfirm" xml:space="preserve">
+    <value>Updating restarts WaNut, so the running server will be stopped first (the world is saved).
+
+Stop the server and update?</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Downloading the update…</value>
+  </data>
+  <data name="Update_Restarting" xml:space="preserve">
+    <value>Restarting WaNut…</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>The update couldn't be installed. WaNut is unchanged.
+
+{0}</value>
+  </data>
+  <data name="Update_NotInstalled" xml:space="preserve">
+    <value>Updates work only in the installed WaNut. This copy was started from a build folder.</value>
+  </data>
+  <data name="Update_Checking" xml:space="preserve">
+    <value>Looking for a new version…</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>You have the newest WaNut. Crunchy!</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>WaNut couldn't check for updates. Check your internet connection and try again.
+
+{0}</value>
+  </data>
 </root>

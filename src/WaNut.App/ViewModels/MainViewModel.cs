@@ -23,10 +23,12 @@ public sealed partial class MainViewModel : ObservableObject
         AppSettingsViewModel appSettings,
         BackupStore backups,
         FirewallService firewall,
-        IClipboardService clipboard)
+        IClipboardService clipboard,
+        UpdateViewModel updates)
     {
         _firewall = firewall;
         _clipboard = clipboard;
+        Updates = updates;
         _store = store;
         _dialogs = dialogs;
         _controller = controller;
@@ -38,6 +40,8 @@ public sealed partial class MainViewModel : ObservableObject
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
 
     public AppSettingsViewModel AppSettings { get; }
+
+    public UpdateViewModel Updates { get; }
 
     [ObservableProperty]
     private ServerViewModel? _selectedServer;

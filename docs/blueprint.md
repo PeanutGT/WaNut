@@ -105,7 +105,9 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Target framework: net10.0 (LTS). Chosen over .NET 8 because .NET 8 support ends November 2026.
 * `System.Diagnostics.Process` for the server process; P/Invoke for Job Objects and memory.
 * Resource files (`.resx`) for all UI text (decision 2).
-* Self-update from GitHub Releases (decision 8); updater library to be picked (e.g. Velopack).
+* Self-update from GitHub Releases (decision 8) with **Velopack**: the Setup.exe installs per user into `%LOCALAPPDATA%\WaNut` (no UAC), and each update is checked against the SHA-256 in the release feed. Server data stays in `%APPDATA%\WaNut\`, so updating or uninstalling never touches worlds.
+  * WaNut checks on start (can be turned off in App settings) and shows a peanut card in the sidebar; "Update now" stops a running server the normal way first, then downloads and restarts.
+  * Releases are built by `.github/workflows/release.yml` only when a `v*` tag is pushed (e.g. `v0.1.0`). Setting `WANUT_UPDATE_SOURCE` to a folder or https URL with a Velopack feed tests updates without a published release.
 * Later: `Open.Nat` (UPnP).
 
 ---
@@ -242,7 +244,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 | `LogParser` | Detects Online, player join/leave from console lines. |
 | `Backups` | Zips worlds before start, applies keep-5 / 30-day cleanup, restores. |
 | `Network` | Lists IPv4 addresses per adapter (Wi-Fi, Radmin VPN...), adds the firewall rule (with UAC). |
-| `Updates` | Checks GitHub Releases and applies updates (library such as Velopack). |
+| `Updates` | Checks GitHub Releases and applies updates (Velopack). |
 
 ### Screens (WaNut.App)
 1. **Main window:** server list on the left; on the right the selected server's status badge, Start/Stop, Open folder, and tabs: Console, Players, Game settings, Server, Backups, Connect (section 4b).

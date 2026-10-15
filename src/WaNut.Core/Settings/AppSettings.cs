@@ -18,6 +18,9 @@ public sealed record AppSettings
     /// per Java, not on every start. The Connect tab can still add the rule later.
     /// </summary>
     public IReadOnlyList<string> FirewallAsked { get; init; } = [];
+
+    /// <summary>Looks for a new WaNut release on GitHub each time WaNut starts.</summary>
+    public bool CheckForUpdates { get; init; } = true;
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)
