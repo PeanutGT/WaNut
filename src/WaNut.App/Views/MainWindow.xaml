@@ -367,6 +367,10 @@
           <TabItem Header="{res:Text Server_TabServer}">
             <views:ServerSettingsView DataContext="{Binding ServerSettings}" />
           </TabItem>
+
+          <TabItem Header="{res:Text Server_TabBackups}">
+            <views:BackupsView DataContext="{Binding Backups}" />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Grid>

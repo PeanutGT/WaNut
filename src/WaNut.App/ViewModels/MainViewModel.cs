@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Services;
+using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 
 namespace WaNut.App.ViewModels;
@@ -11,12 +12,14 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly InstanceStore _store;
     private readonly IDialogService _dialogs;
     private readonly ServerController _controller;
+    private readonly BackupStore _backups;
 
-    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller, AppSettingsViewModel appSettings)
+    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller, AppSettingsViewModel appSettings, BackupStore backups)
     {
         _store = store;
         _dialogs = dialogs;
         _controller = controller;
+        _backups = backups;
         AppSettings = appSettings;
         Reload();
     }
@@ -70,7 +73,7 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs));
         }
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using WaNut.App.Resources;
 using WaNut.App.ViewModels;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 
@@ -11,7 +12,8 @@ namespace WaNut.App.Services;
 /// <summary>
 /// Starts and stops servers for the screens: one server at a time, and never a forced close without asking.
 /// </summary>
-public sealed class ServerController(ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs)
+public sealed class ServerController(
+    ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -34,6 +36,11 @@ public sealed class ServerController(ServerHost host, ServerLaunchPlanner planne
         server.BeginPreparing();
         try
         {
+            if (!await BackUpBeforeStartAsync(server))
+            {
+                return;
+            }
+
             var progress = new Progress<DownloadProgress>(server.ReportJavaDownload);
             var launch = await planner.PrepareAsync(server.Metadata, progress);
             host.Start(server.Id, launch, server.Attach);
@@ -50,6 +57,55 @@ public sealed class ServerController(ServerHost host, ServerLaunchPlanner planne
         finally
         {
             server.EndPreparing();
+        }
+    }
+
+    /// <summary>
+    /// Backs the world up and applies the cleanup rules (decision 7). If the backup fails, the user decides whether
+    /// to start anyway. Returns false to cancel the start.
+    /// </summary>
+    private async Task<bool> BackUpBeforeStartAsync(ServerViewModel server)
+    {
+        string problem;
+        server.Backups.ErrorText = null;
+        server.Backups.DoneText = null;
+        try
+        {
+            var backup = await backups.CreateAsync(server.InstanceDir, BackupReason.Start, new Progress<double>(server.ReportBackup));
+            if (backup is not null)
+            {
+                CleanUp(server);
+            }
+
+            return true;
+        }
+        catch (BackupException e)
+        {
+            problem = Text.Get($"Backups_Problem_{e.Problem}");
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            problem = e.Message;
+        }
+        finally
+        {
+            server.EndBackup();
+            server.Backups.Reload();
+        }
+
+        return dialogs.Confirm(string.Format(Text.Get("Server_BackupFailedConfirm"), problem));
+    }
+
+    private void CleanUp(ServerViewModel server)
+    {
+        try
+        {
+            backups.Cleanup(server.InstanceDir, app.BackupRules);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // The new backup is safe; an old one that could not be deleted is tried again next time.
+            server.Backups.ErrorText = string.Format(Text.Get("Backups_CleanupFailed"), e.Message);
         }
     }
 

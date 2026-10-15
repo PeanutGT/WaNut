@@ -420,4 +420,121 @@ Choose No to keep waiting.</value>
   <data name="Common_Close" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Server_TabBackups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Status_BackingUp" xml:space="preserve">
+    <value>Backing up world… {0:0}%</value>
+  </data>
+  <data name="Server_BackupFailedConfirm" xml:space="preserve">
+    <value>WaNut couldn't back up the world before starting.
+
+{0}
+
+Start the server anyway, without a fresh backup?</value>
+  </data>
+  <data name="Backups_BackUpNow" xml:space="preserve">
+    <value>Back up now</value>
+  </data>
+  <data name="Backups_OpenFolder" xml:space="preserve">
+    <value>Open backups folder</value>
+  </data>
+  <data name="Backups_Hint" xml:space="preserve">
+    <value>WaNut backs up the world every time the server starts. Backups hold the world only, not plugins, mods or settings.</value>
+  </data>
+  <data name="Backups_StopToChange" xml:space="preserve">
+    <value>Stop the server to back up or restore.</value>
+  </data>
+  <data name="Backups_Working" xml:space="preserve">
+    <value>Backing up world…</value>
+  </data>
+  <data name="Backups_Restoring" xml:space="preserve">
+    <value>Restoring world…</value>
+  </data>
+  <data name="Backups_Done" xml:space="preserve">
+    <value>Backed up! Your world is safe.</value>
+  </data>
+  <data name="Backups_NoWorldYet" xml:space="preserve">
+    <value>There's no world to back up yet. Start the server once to create it.</value>
+  </data>
+  <data name="Backups_Restored" xml:space="preserve">
+    <value>Restored the world from {0}. The world from before is kept as a backup too.</value>
+  </data>
+  <data name="Backups_Total" xml:space="preserve">
+    <value>Backups: {0} · {1} in total</value>
+  </data>
+  <data name="Backups_ListFailed" xml:space="preserve">
+    <value>Couldn't read the backups folder: {0}</value>
+  </data>
+  <data name="Backups_OpenFolderFailed" xml:space="preserve">
+    <value>Couldn't open the backups folder: {0}</value>
+  </data>
+  <data name="Backups_Failed" xml:space="preserve">
+    <value>The backup failed: {0}</value>
+  </data>
+  <data name="Backups_RestoreFailed" xml:space="preserve">
+    <value>The restore failed, so the current world was left as it was: {0}</value>
+  </data>
+  <data name="Backups_CleanupFailed" xml:space="preserve">
+    <value>An old backup couldn't be deleted: {0} WaNut will try again next time.</value>
+  </data>
+  <data name="Backups_Problem_UnsafeWorldName" xml:space="preserve">
+    <value>The world name (level-name in server.properties) isn't a plain folder name, so WaNut won't back it up. Change it to a simple name such as world.</value>
+  </data>
+  <data name="Backups_Problem_DamagedBackup" xml:space="preserve">
+    <value>This backup file is damaged or wasn't made by WaNut, so it can't be restored. The current world was not changed.</value>
+  </data>
+  <data name="Backups_Problem_BackupMissing" xml:space="preserve">
+    <value>This backup file is gone. It may have been moved or deleted.</value>
+  </data>
+  <data name="Backups_RestoreConfirm" xml:space="preserve">
+    <value>Restore {0} to the backup from {1}?
+
+The current world will be replaced. WaNut backs it up first, so you can go back.</value>
+  </data>
+  <data name="Backups_RestoreLabel" xml:space="preserve">
+    <value>Restore the backup from {0} ({1})</value>
+  </data>
+  <data name="Backups_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Backups_Reason_Start" xml:space="preserve">
+    <value>Before start</value>
+  </data>
+  <data name="Backups_Reason_Manual" xml:space="preserve">
+    <value>Backed up by you</value>
+  </data>
+  <data name="Backups_Reason_Restore" xml:space="preserve">
+    <value>Before a restore</value>
+  </data>
+  <data name="Backups_Empty" xml:space="preserve">
+    <value>No backups yet</value>
+  </data>
+  <data name="Backups_EmptyHint" xml:space="preserve">
+    <value>The first one is made the next time the server starts.</value>
+  </data>
+  <data name="Backups_KeepCount" xml:space="preserve">
+    <value>Backups to keep</value>
+  </data>
+  <data name="Backups_KeepCountHint" xml:space="preserve">
+    <value>The newest ones are kept. From 1 to 100. The default is 5. Copies made before a restore don't count here; they're deleted only by age.</value>
+  </data>
+  <data name="Backups_MaxAgeDays" xml:space="preserve">
+    <value>Delete backups older than (days)</value>
+  </data>
+  <data name="Backups_MaxAgeDaysHint" xml:space="preserve">
+    <value>From 1 to 3650. The default is 30. The newest backup is always kept, however old.</value>
+  </data>
+  <data name="Backups_RulesShared" xml:space="preserve">
+    <value>These rules apply to every server.</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Backups_DateFormat" xml:space="preserve">
+    <value>MMM d, yyyy HH:mm:ss</value>
+  </data>
 </root>

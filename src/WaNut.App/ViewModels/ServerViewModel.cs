@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
@@ -22,7 +23,8 @@ public sealed partial class ServerViewModel : ObservableObject
     private readonly InstanceStore _store;
     private readonly SynchronizationContext _ui;
 
-    public ServerViewModel(InstanceMetadata metadata, ServerController controller, InstanceStore store, AppSettingsViewModel app)
+    public ServerViewModel(
+        InstanceMetadata metadata, ServerController controller, InstanceStore store, AppSettingsViewModel app, BackupStore backups, IDialogService dialogs)
     {
         Metadata = metadata;
         _controller = controller;
@@ -31,6 +33,7 @@ public sealed partial class ServerViewModel : ObservableObject
         GameSettings = new GameSettingsViewModel(this);
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app);
+        Backups = new BackupsViewModel(this, backups, app, dialogs);
         app.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(AppSettingsViewModel.AdvancedMode))
@@ -49,6 +52,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public PlayerListsViewModel PlayerLists { get; }
 
     public ServerSettingsViewModel ServerSettings { get; }
+
+    public BackupsViewModel Backups { get; }
 
     public string Id => Metadata.Id;
 
@@ -85,6 +90,11 @@ public sealed partial class ServerViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private double? _javaDownloadFraction;
 
+    /// <summary>Set while the world is backed up before a start.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusText))]
+    private double? _backupFraction;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SendCommand))]
     private string _commandText = string.Empty;
@@ -96,21 +106,24 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public bool IsOnline => Status == ServerStatus.Online;
 
-    /// <summary>Getting ready, starting or saving: the moments the peanut wobbles.</summary>
-    public bool IsBusy => IsPreparing || Status is ServerStatus.Starting or ServerStatus.Stopping;
+    /// <summary>Getting ready, starting, saving, or backing up: the moments the peanut wobbles.</summary>
+    public bool IsBusy => IsPreparing || Backups.IsWorking || Status is ServerStatus.Starting or ServerStatus.Stopping;
 
     public string PlayersHeader => string.Format(Text.Get("Server_TabPlayers"), Players.Count);
 
     public string StatusText => IsPreparing
-        ? JavaDownloadFraction is { } fraction
-            ? string.Format(Text.Get("Status_DownloadingJava"), fraction * 100)
-            : Text.Get("Status_Preparing")
-        : Text.Get($"Status_{Status}");
+        ? (BackupFraction, JavaDownloadFraction) switch
+        {
+            ({ } backup, _) => string.Format(Text.Get("Status_BackingUp"), backup * 100),
+            (_, { } java) => string.Format(Text.Get("Status_DownloadingJava"), java * 100),
+            _ => Text.Get("Status_Preparing"),
+        }
+        : Backups.IsWorking ? Backups.WorkText : Text.Get($"Status_{Status}");
 
     [RelayCommand(CanExecute = nameof(CanStart))]
     private Task StartAsync() => _controller.StartAsync(this);
 
-    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing;
+    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking;
 
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);
@@ -151,7 +164,22 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         IsPreparing = false;
         JavaDownloadFraction = null;
+        BackupFraction = null;
     }
+
+    internal void ReportBackup(double fraction) => BackupFraction = fraction;
+
+    internal void EndBackup() => BackupFraction = null;
+
+    /// <summary>A backup or restore from the Backups tab started or finished.</summary>
+    internal void OnBackupWorkChanged()
+    {
+        OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(StatusText));
+        StartCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsPreparingChanged(bool value) => Backups.OnServerStatusChanged();
 
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
 
@@ -189,6 +217,7 @@ public sealed partial class ServerViewModel : ObservableObject
         GameSettings.OnServerStatusChanged();
         PlayerLists.OnServerStatusChanged();
         ServerSettings.OnServerStatusChanged();
+        Backups.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
             _ = ApplyOnOnlineAsync();

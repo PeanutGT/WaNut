@@ -1,3 +1,4 @@
+using WaNut.Core.Backups;
 using WaNut.Core.Settings;
 using WaNut.Core.Tests.TestSupport;
 
@@ -32,5 +33,38 @@ public sealed class AppSettingsStoreTests : IDisposable
         File.WriteAllText(Path.Combine(_dir.Path, "config.json"), "{ not json");
 
         Assert.False(new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().AdvancedMode);
+    }
+
+    [Fact]
+    public void Load_NoFile_BackupDefaultsAreFiveAndThirtyDays()
+    {
+        var rules = new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().Backups;
+
+        Assert.Equal(5, rules.KeepCount);
+        Assert.Equal(30, rules.MaxAgeDays);
+    }
+
+    [Fact]
+    public void SaveThenLoad_BackupRulesRoundTrip()
+    {
+        var store = new AppSettingsStore(new LauncherPaths(_dir.Path));
+
+        store.Save(new AppSettings { Backups = new BackupRules { KeepCount = 10, MaxAgeDays = 7 } });
+
+        Assert.Equal(new BackupRules { KeepCount = 10, MaxAgeDays = 7 }, store.Load().Backups);
+    }
+
+    [Theory]
+    [InlineData("{ \"backups\": null }", 5, 30)]
+    [InlineData("{ \"backups\": { \"keepCount\": 0, \"maxAgeDays\": -3 } }", 1, 1)]
+    [InlineData("{ \"advancedMode\": true }", 5, 30)]
+    public void Load_HandEditedBackupRules_AreMadeValid(string json, int keep, int days)
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "config.json"), json);
+
+        var rules = new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().Backups;
+
+        Assert.Equal(keep, rules.KeepCount);
+        Assert.Equal(days, rules.MaxAgeDays);
     }
 }

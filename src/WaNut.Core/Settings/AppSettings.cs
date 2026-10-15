@@ -1,4 +1,5 @@
 using System.Text.Json;
+using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 
 namespace WaNut.Core.Settings;
@@ -8,6 +9,9 @@ public sealed record AppSettings
 {
     /// <summary>Shows the advanced-only items, such as custom JVM arguments.</summary>
     public bool AdvancedMode { get; init; }
+
+    /// <summary>Backup cleanup rules, shared by every server.</summary>
+    public BackupRules Backups { get; init; } = new();
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)
@@ -28,7 +32,8 @@ public sealed class AppSettingsStore(LauncherPaths paths)
 
         try
         {
-            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(paths.ConfigFile), JsonOptions) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(paths.ConfigFile), JsonOptions) ?? new AppSettings();
+            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized() };
         }
         catch (JsonException)
         {

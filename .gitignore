@@ -282,6 +282,9 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
+# WaNut's own backup code is not a Visual Studio upgrade backup.
+!src/WaNut.Core/Backups/
+!tests/WaNut.Core.Tests/Backups/
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/
