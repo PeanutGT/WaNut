@@ -25,6 +25,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         BackupKeepCount = settings.Backups.KeepCount;
         BackupMaxAgeDays = settings.Backups.MaxAgeDays;
         CheckForUpdates = settings.CheckForUpdates;
+        Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
         _loading = false;
     }
@@ -43,6 +44,17 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _errorText;
+
+    /// <summary>A culture name from <see cref="UiLanguages"/>. Applied the next time WaNut starts.</summary>
+    [ObservableProperty]
+    private string _language = UiLanguages.English;
+
+    /// <summary>Each language under its own name, so someone who can't read the current one can still find theirs.</summary>
+    public IReadOnlyList<KeyValuePair<string, string>> Languages { get; } =
+    [
+        new(UiLanguages.English, Resources.Text.Get("Language_English")),
+        new(UiLanguages.TraditionalChinese, Resources.Text.Get("Language_ZhTw")),
+    ];
 
     [ObservableProperty]
     private ThemeChoice _theme;
@@ -70,6 +82,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     partial void OnAdvancedModeChanged(bool value) => Save();
 
     partial void OnCheckForUpdatesChanged(bool value) => Save();
+
+    partial void OnLanguageChanged(string value) => Save();
 
     partial void OnThemeChanged(ThemeChoice value)
     {
@@ -117,7 +131,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Theme = Theme };
+            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme };
             _store.Save(_saved);
             ErrorText = null;
         }

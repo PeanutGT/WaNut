@@ -1,0 +1,858 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Title" xml:space="preserve">
+    <value>WaNut</value>
+  </data>
+  <data name="Main_CreateServer" xml:space="preserve">
+    <value>建立伺服器</value>
+  </data>
+  <data name="Main_MyServers" xml:space="preserve">
+    <value>我的伺服器</value>
+  </data>
+  <data name="Main_NoServers" xml:space="preserve">
+    <value>還沒有伺服器</value>
+  </data>
+  <data name="Main_NoServersHint" xml:space="preserve">
+    <value>點幾下就能做出第一個伺服器，然後邀朋友一起玩！</value>
+  </data>
+  <data name="Main_SelectServer" xml:space="preserve">
+    <value>選一個伺服器來查看詳細資訊。</value>
+  </data>
+  <data name="Main_Java" xml:space="preserve">
+    <value>Java</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="CreateServer_Title" xml:space="preserve">
+    <value>建立伺服器</value>
+  </data>
+  <data name="CreateServer_DefaultName" xml:space="preserve">
+    <value>我的伺服器</value>
+  </data>
+  <data name="CreateServer_NameLabel" xml:space="preserve">
+    <value>伺服器名稱</value>
+  </data>
+  <data name="CreateServer_TypeLabel" xml:space="preserve">
+    <value>伺服器類型</value>
+  </data>
+  <data name="CreateServer_TypeVanilla" xml:space="preserve">
+    <value>原版（Vanilla）</value>
+  </data>
+  <data name="CreateServer_VersionLabel" xml:space="preserve">
+    <value>Minecraft 版本</value>
+  </data>
+  <data name="CreateServer_MemoryLabel" xml:space="preserve">
+    <value>記憶體（RAM）</value>
+  </data>
+  <data name="CreateServer_MemoryValue" xml:space="preserve">
+    <value>{0:0.#} GB</value>
+  </data>
+  <data name="CreateServer_MemoryHint" xml:space="preserve">
+    <value>上限是這台電腦記憶體的 75%，讓 Windows 和 Minecraft 都跑得順。</value>
+  </data>
+  <data name="CreateServer_EulaPrefix" xml:space="preserve">
+    <value>我同意</value>
+  </data>
+  <data name="CreateServer_EulaLink" xml:space="preserve">
+    <value>Minecraft 終端使用者授權合約（EULA）</value>
+  </data>
+  <data name="CreateServer_Create" xml:space="preserve">
+    <value>建立</value>
+  </data>
+  <data name="CreateServer_LoadingVersions" xml:space="preserve">
+    <value>正在載入 Minecraft 版本…</value>
+  </data>
+  <data name="CreateServer_VersionsFailed" xml:space="preserve">
+    <value>無法載入 Minecraft 版本清單。請檢查網路連線，再重新開啟這個視窗。</value>
+  </data>
+  <data name="CreateServer_Stage_ReadingVersion" xml:space="preserve">
+    <value>正在讀取版本資訊…</value>
+  </data>
+  <data name="CreateServer_Stage_DownloadingJava" xml:space="preserve">
+    <value>正在下載 Java（只有第一次需要）…</value>
+  </data>
+  <data name="CreateServer_Stage_DownloadingServer" xml:space="preserve">
+    <value>正在下載 Minecraft 伺服器…</value>
+  </data>
+  <data name="CreateServer_Stage_WritingFiles" xml:space="preserve">
+    <value>正在設定伺服器資料夾…</value>
+  </data>
+  <data name="CreateServer_ChecksumFailed" xml:space="preserve">
+    <value>下載的檔案損壞或被更改（雜湊值不符），所以沒有使用。請再試一次。</value>
+  </data>
+  <data name="CreateServer_Failed" xml:space="preserve">
+    <value>無法建立伺服器：{0}</value>
+  </data>
+  <data name="Main_SavingWorld" xml:space="preserve">
+    <value>關閉前正在儲存世界…</value>
+  </data>
+  <data name="Server_Start" xml:space="preserve">
+    <value>啟動</value>
+  </data>
+  <data name="Server_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Server_Send" xml:space="preserve">
+    <value>送出</value>
+  </data>
+  <data name="Server_CommandLabel" xml:space="preserve">
+    <value>指令</value>
+  </data>
+  <data name="Server_CommandHelp" xml:space="preserve">
+    <value>輸入伺服器指令，不用加斜線，例如：say Hello、op Steve、time set day</value>
+  </data>
+  <data name="Server_CommandPlaceholder" xml:space="preserve">
+    <value>輸入指令，例如 time set day</value>
+  </data>
+  <data name="Server_TabConsole" xml:space="preserve">
+    <value>主控台</value>
+  </data>
+  <data name="Server_TabPlayers" xml:space="preserve">
+    <value>玩家（{0}）</value>
+  </data>
+  <data name="Server_NoPlayers" xml:space="preserve">
+    <value>目前沒有人在線上。</value>
+  </data>
+  <data name="Status_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Status_Preparing" xml:space="preserve">
+    <value>正在檢查 Java…</value>
+  </data>
+  <data name="Status_DownloadingJava" xml:space="preserve">
+    <value>正在下載 Java… {0:0}%</value>
+  </data>
+  <data name="Status_Starting" xml:space="preserve">
+    <value>啟動中…</value>
+  </data>
+  <data name="Status_Online" xml:space="preserve">
+    <value>線上</value>
+  </data>
+  <data name="Status_Stopping" xml:space="preserve">
+    <value>正在儲存世界…</value>
+  </data>
+  <data name="Server_Crashed" xml:space="preserve">
+    <value>伺服器意外停止（結束代碼 {0}）。主控台最後幾行通常會說明原因。</value>
+  </data>
+  <data name="Server_Exited" xml:space="preserve">
+    <value>伺服器已停止（結束代碼 {0}）。</value>
+  </data>
+  <data name="Server_StopOtherConfirm" xml:space="preserve">
+    <value>「{0}」正在執行，一次只能執行一個伺服器。\n\n要停止「{0}」並啟動「{1}」嗎？</value>
+  </data>
+  <data name="Server_ForceStopConfirm" xml:space="preserve">
+    <value>「{0}」已經儲存了 {1} 秒還沒結束。\n\n要強制關閉嗎？上次儲存之後的進度可能會遺失。\n\n選「否」繼續等待。</value>
+  </data>
+  <data name="Server_Error_ServerJarMissing" xml:space="preserve">
+    <value>這個伺服器的資料夾裡沒有 server.jar，所以無法啟動。</value>
+  </data>
+  <data name="Server_Error_EulaNotAccepted" xml:space="preserve">
+    <value>這個伺服器還沒同意 Minecraft EULA，所以無法啟動。</value>
+  </data>
+  <data name="Server_Error_AnotherServerRunning" xml:space="preserve">
+    <value>已經有另一個伺服器在執行，請先停止它。</value>
+  </data>
+  <data name="Server_StartFailed" xml:space="preserve">
+    <value>無法啟動伺服器：{0}</value>
+  </data>
+  <data name="Server_CommandFailed" xml:space="preserve">
+    <value>無法送出指令：{0}</value>
+  </data>
+  <data name="CreateServer_TypeVanillaHint" xml:space="preserve">
+    <value>官方伺服器，跟遊戲完全一樣。</value>
+  </data>
+  <data name="CreateServer_TypePaper" xml:space="preserve">
+    <value>Paper</value>
+  </data>
+  <data name="CreateServer_TypePaperHint" xml:space="preserve">
+    <value>跑得更快，支援插件。把插件放進 plugins 資料夾。</value>
+  </data>
+  <data name="CreateServer_TypeFabric" xml:space="preserve">
+    <value>Fabric</value>
+  </data>
+  <data name="CreateServer_TypeFabricHint" xml:space="preserve">
+    <value>支援 Fabric 模組。把模組放進 mods 資料夾；大多數模組還需要 Fabric API。</value>
+  </data>
+  <data name="Main_LoaderBuild" xml:space="preserve">
+    <value>build</value>
+  </data>
+  <data name="Main_LoaderVersion" xml:space="preserve">
+    <value>loader</value>
+  </data>
+  <data name="Server_TabGame" xml:space="preserve">
+    <value>遊戲設定</value>
+  </data>
+  <data name="Settings_MoreSettings" xml:space="preserve">
+    <value>更多設定</value>
+  </data>
+  <data name="Settings_SaveFailed" xml:space="preserve">
+    <value>無法儲存設定：{0}</value>
+  </data>
+  <data name="Settings_LoadFailed" xml:space="preserve">
+    <value>無法讀取設定：{0}</value>
+  </data>
+  <data name="Game_StopToChange" xml:space="preserve">
+    <value>停止伺服器後才能更改灰色的設定。死亡不掉落和其他遊戲規則會立即生效。</value>
+  </data>
+  <data name="Game_Mode" xml:space="preserve">
+    <value>遊戲模式</value>
+  </data>
+  <data name="Game_ModeHint" xml:space="preserve">
+    <value>第一次加入的玩家會以這個模式開始。</value>
+  </data>
+  <data name="Game_ModeSurvival" xml:space="preserve">
+    <value>生存</value>
+  </data>
+  <data name="Game_ModeCreative" xml:space="preserve">
+    <value>創造</value>
+  </data>
+  <data name="Game_ModeAdventure" xml:space="preserve">
+    <value>冒險</value>
+  </data>
+  <data name="Game_ModeSpectator" xml:space="preserve">
+    <value>旁觀</value>
+  </data>
+  <data name="Game_Difficulty" xml:space="preserve">
+    <value>難度</value>
+  </data>
+  <data name="Game_DifficultyPeaceful" xml:space="preserve">
+    <value>和平</value>
+  </data>
+  <data name="Game_DifficultyEasy" xml:space="preserve">
+    <value>簡單</value>
+  </data>
+  <data name="Game_DifficultyNormal" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="Game_DifficultyHard" xml:space="preserve">
+    <value>困難</value>
+  </data>
+  <data name="Game_Pvp" xml:space="preserve">
+    <value>玩家可以互相攻擊（PvP）</value>
+  </data>
+  <data name="Game_KeepInventory" xml:space="preserve">
+    <value>死亡不掉落物品</value>
+  </data>
+  <data name="Game_MaxPlayers" xml:space="preserve">
+    <value>最多玩家數</value>
+  </data>
+  <data name="Game_Motd" xml:space="preserve">
+    <value>伺服器訊息</value>
+  </data>
+  <data name="Game_MotdHint" xml:space="preserve">
+    <value>顯示在 Minecraft 伺服器列表中伺服器名稱的下方。</value>
+  </data>
+  <data name="Game_ViewDistance" xml:space="preserve">
+    <value>視野距離</value>
+  </data>
+  <data name="Game_SimulationDistance" xml:space="preserve">
+    <value>模擬距離</value>
+  </data>
+  <data name="Game_DistanceHint" xml:space="preserve">
+    <value>單位是區塊。電腦較慢時，數字調低會比較順。</value>
+  </data>
+  <data name="Game_Chunks" xml:space="preserve">
+    <value>{0} 個區塊</value>
+  </data>
+  <data name="Game_SpawnProtection" xml:space="preserve">
+    <value>重生點保護</value>
+  </data>
+  <data name="Game_SpawnProtectionHint" xml:space="preserve">
+    <value>重生點周圍這麼多格內，只有管理員能建造。0 表示關閉。</value>
+  </data>
+  <data name="Game_CommandBlocks" xml:space="preserve">
+    <value>啟用指令方塊</value>
+  </data>
+  <data name="Game_AllowFlight" xml:space="preserve">
+    <value>允許飛行</value>
+  </data>
+  <data name="Game_AllowFlightHint" xml:space="preserve">
+    <value>如果有模組或插件讓玩家飛行，請開啟，玩家才不會因此被踢出。</value>
+  </data>
+  <data name="Game_SpawnMonsters" xml:space="preserve">
+    <value>生成怪物</value>
+  </data>
+  <data name="Game_Hardcore" xml:space="preserve">
+    <value>極限模式</value>
+  </data>
+  <data name="Game_HardcoreHint" xml:space="preserve">
+    <value>只有一條命：死亡的玩家會變成旁觀者。</value>
+  </data>
+  <data name="Game_Seed" xml:space="preserve">
+    <value>世界種子碼</value>
+  </data>
+  <data name="Game_SeedHint" xml:space="preserve">
+    <value>留空就會產生隨機世界。</value>
+  </data>
+  <data name="Game_SeedLocked" xml:space="preserve">
+    <value>世界已經存在，種子碼不能再更改。</value>
+  </data>
+  <data name="Players_Online" xml:space="preserve">
+    <value>目前線上</value>
+  </data>
+  <data name="Players_Whitelist" xml:space="preserve">
+    <value>白名單</value>
+  </data>
+  <data name="Players_WhitelistOn" xml:space="preserve">
+    <value>只有白名單上的玩家可以加入</value>
+  </data>
+  <data name="Players_WhitelistEmpty" xml:space="preserve">
+    <value>白名單已開啟但是空的，所以沒有人能加入。請加入朋友和你自己的名字。</value>
+  </data>
+  <data name="Players_NamePlaceholder" xml:space="preserve">
+    <value>玩家名稱</value>
+  </data>
+  <data name="Players_AddToWhitelist" xml:space="preserve">
+    <value>加入白名單</value>
+  </data>
+  <data name="Players_Operators" xml:space="preserve">
+    <value>管理員（OP）</value>
+  </data>
+  <data name="Players_OperatorsHint" xml:space="preserve">
+    <value>管理員可以使用所有指令，例如 gamemode、kick 和 stop。</value>
+  </data>
+  <data name="Players_AddOperator" xml:space="preserve">
+    <value>新增管理員</value>
+  </data>
+  <data name="Players_Add" xml:space="preserve">
+    <value>新增</value>
+  </data>
+  <data name="Players_Remove" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Players_RemoveName" xml:space="preserve">
+    <value>移除 {0}</value>
+  </data>
+  <data name="Players_EmptyList" xml:space="preserve">
+    <value>還沒有人。</value>
+  </data>
+  <data name="Players_InvalidName" xml:space="preserve">
+    <value>玩家名稱是 1 到 16 個英文字母、數字或底線。</value>
+  </data>
+  <data name="Players_Pending" xml:space="preserve">
+    <value>伺服器停止時做的變更，會在下次啟動時套用。</value>
+  </data>
+  <data name="Players_KickBanHint" xml:space="preserve">
+    <value>要踢出或封鎖玩家，請在主控台輸入 kick &lt;名稱&gt; 或 ban &lt;名稱&gt;。輸入 pardon &lt;名稱&gt; 可以解除封鎖。</value>
+  </data>
+  <data name="CreateServer_OwnerLabel" xml:space="preserve">
+    <value>你的 Minecraft 名稱（可不填）</value>
+  </data>
+  <data name="CreateServer_OwnerPlaceholder" xml:space="preserve">
+    <value>留空即可跳過</value>
+  </data>
+  <data name="CreateServer_OwnerHint" xml:space="preserve">
+    <value>白名單已開啟，只有名單上的玩家能加入。你的名字會在伺服器第一次啟動時加入白名單並設為管理員。也可以跳過，之後再到「玩家」分頁新增。</value>
+  </data>
+  <data name="Server_TabServer" xml:space="preserve">
+    <value>伺服器</value>
+  </data>
+  <data name="Server_NextStartHint" xml:space="preserve">
+    <value>這裡的變更會在伺服器下次啟動時生效。</value>
+  </data>
+  <data name="Server_StopToChange" xml:space="preserve">
+    <value>停止伺服器後才能更改連接埠或帳號驗證。</value>
+  </data>
+  <data name="Server_Port" xml:space="preserve">
+    <value>連接埠</value>
+  </data>
+  <data name="Server_PortHint" xml:space="preserve">
+    <value>朋友用你的位址加上這個數字加入，例如 192.168.1.5:{0}。預設是 {1}。</value>
+  </data>
+  <data name="Server_OnlineMode" xml:space="preserve">
+    <value>驗證玩家的 Minecraft 帳號（正版驗證）</value>
+  </data>
+  <data name="Server_OnlineModeHint" xml:space="preserve">
+    <value>防止別人冒用其他玩家的名字加入。</value>
+  </data>
+  <data name="Server_OnlineModeWarning" xml:space="preserve">
+    <value>帳號驗證已關閉。任何人都能用任何名字加入，包括你或管理員的名字，還能接管那位玩家的物品和進度。除非你清楚為什麼需要，否則請不要關閉。</value>
+  </data>
+  <data name="Settings_AdvancedSection" xml:space="preserve">
+    <value>進階</value>
+  </data>
+  <data name="Server_JvmArguments" xml:space="preserve">
+    <value>自訂 JVM 參數</value>
+  </data>
+  <data name="Server_JvmArgumentsHint" xml:space="preserve">
+    <value>加在 WaNut 自己的 Java 選項之後。選項之間用空格分隔；含空格的值請加上引號。下次啟動時生效。</value>
+  </data>
+  <data name="Server_JvmArgumentsHiddenNote" xml:space="preserve">
+    <value>這個伺服器有自訂 JVM 參數，它們仍然有效；在 App 設定開啟進階模式即可查看或修改。</value>
+  </data>
+  <data name="Server_JvmProblem_NotAnOption" xml:space="preserve">
+    <value>每個選項都必須以「-」開頭，例如 -XX:+UseLargePages。參數沒有儲存。</value>
+  </data>
+  <data name="Server_JvmProblem_Memory" xml:space="preserve">
+    <value>請用記憶體滑桿設定記憶體，不要用 -Xmx 或 -Xms。參數沒有儲存。</value>
+  </data>
+  <data name="Server_JvmProblem_NotAllowed" xml:space="preserve">
+    <value>伺服器 jar 由 WaNut 決定，所以不能使用 -jar、-cp、-version 和 -help。參數沒有儲存。</value>
+  </data>
+  <data name="Server_JvmProblem_UnclosedQuote" xml:space="preserve">
+    <value>有引號沒有關閉。參數沒有儲存。</value>
+  </data>
+  <data name="AppSettings_Title" xml:space="preserve">
+    <value>App 設定</value>
+  </data>
+  <data name="AppSettings_AdvancedMode" xml:space="preserve">
+    <value>進階模式</value>
+  </data>
+  <data name="AppSettings_AdvancedModeHint" xml:space="preserve">
+    <value>為有經驗的玩家顯示額外選項，例如每個伺服器「伺服器」分頁裡的自訂 JVM 參數。</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Server_TabBackups" xml:space="preserve">
+    <value>備份</value>
+  </data>
+  <data name="Status_BackingUp" xml:space="preserve">
+    <value>正在備份世界… {0:0}%</value>
+  </data>
+  <data name="Server_BackupFailedConfirm" xml:space="preserve">
+    <value>WaNut 啟動前無法備份世界。\n\n{0}\n\n仍要在沒有新備份的情況下啟動伺服器嗎？</value>
+  </data>
+  <data name="Backups_BackUpNow" xml:space="preserve">
+    <value>立即備份</value>
+  </data>
+  <data name="Backups_OpenFolder" xml:space="preserve">
+    <value>開啟備份資料夾</value>
+  </data>
+  <data name="Backups_Hint" xml:space="preserve">
+    <value>每次啟動伺服器時，WaNut 都會備份世界。備份只包含世界，不含插件、模組或設定。</value>
+  </data>
+  <data name="Backups_StopToChange" xml:space="preserve">
+    <value>停止伺服器後才能備份或還原。</value>
+  </data>
+  <data name="Backups_Working" xml:space="preserve">
+    <value>正在備份世界…</value>
+  </data>
+  <data name="Backups_Restoring" xml:space="preserve">
+    <value>正在還原世界…</value>
+  </data>
+  <data name="Backups_Done" xml:space="preserve">
+    <value>備份好了！你的世界很安全。</value>
+  </data>
+  <data name="Backups_NoWorldYet" xml:space="preserve">
+    <value>還沒有世界可以備份。先啟動一次伺服器來產生世界。</value>
+  </data>
+  <data name="Backups_Restored" xml:space="preserve">
+    <value>已從 {0} 還原世界。原本的世界也另外保留了一份備份。</value>
+  </data>
+  <data name="Backups_Total" xml:space="preserve">
+    <value>備份：{0} 個，共 {1}</value>
+  </data>
+  <data name="Backups_ListFailed" xml:space="preserve">
+    <value>無法讀取備份資料夾：{0}</value>
+  </data>
+  <data name="Backups_OpenFolderFailed" xml:space="preserve">
+    <value>無法開啟備份資料夾：{0}</value>
+  </data>
+  <data name="Backups_Failed" xml:space="preserve">
+    <value>備份失敗：{0}</value>
+  </data>
+  <data name="Backups_RestoreFailed" xml:space="preserve">
+    <value>還原失敗，目前的世界維持不變：{0}</value>
+  </data>
+  <data name="Backups_CleanupFailed" xml:space="preserve">
+    <value>無法刪除一個舊備份：{0} WaNut 下次會再試一次。</value>
+  </data>
+  <data name="Backups_Problem_UnsafeWorldName" xml:space="preserve">
+    <value>世界名稱（server.properties 裡的 level-name）不是單純的資料夾名稱，所以 WaNut 不會備份它。請改成像 world 這樣的簡單名稱。</value>
+  </data>
+  <data name="Backups_Problem_DamagedBackup" xml:space="preserve">
+    <value>這個備份檔已損壞，或不是 WaNut 建立的，所以無法還原。目前的世界沒有改變。</value>
+  </data>
+  <data name="Backups_Problem_BackupMissing" xml:space="preserve">
+    <value>這個備份檔不見了，可能被移動或刪除了。</value>
+  </data>
+  <data name="Backups_RestoreConfirm" xml:space="preserve">
+    <value>要把 {0} 還原到 {1} 的備份嗎？\n\n目前的世界會被取代。WaNut 會先備份它，所以可以再改回來。</value>
+  </data>
+  <data name="Backups_RestoreLabel" xml:space="preserve">
+    <value>還原 {0} 的備份（{1}）</value>
+  </data>
+  <data name="Backups_Restore" xml:space="preserve">
+    <value>還原</value>
+  </data>
+  <data name="Backups_Reason_Start" xml:space="preserve">
+    <value>啟動前</value>
+  </data>
+  <data name="Backups_Reason_Manual" xml:space="preserve">
+    <value>你手動備份</value>
+  </data>
+  <data name="Backups_Reason_Restore" xml:space="preserve">
+    <value>還原前</value>
+  </data>
+  <data name="Backups_Empty" xml:space="preserve">
+    <value>還沒有備份</value>
+  </data>
+  <data name="Backups_EmptyHint" xml:space="preserve">
+    <value>下次啟動伺服器時會建立第一個備份。</value>
+  </data>
+  <data name="Backups_KeepCount" xml:space="preserve">
+    <value>保留的備份數量</value>
+  </data>
+  <data name="Backups_KeepCountHint" xml:space="preserve">
+    <value>保留最新的幾個，範圍 1 到 100，預設 5。還原前或更改類型／版本前的備份不算在內，它們只會依天數刪除。</value>
+  </data>
+  <data name="Backups_MaxAgeDays" xml:space="preserve">
+    <value>刪除幾天前的備份</value>
+  </data>
+  <data name="Backups_MaxAgeDaysHint" xml:space="preserve">
+    <value>範圍 1 到 3650，預設 30。最新的備份不論多舊都會保留。</value>
+  </data>
+  <data name="Backups_RulesShared" xml:space="preserve">
+    <value>這些規則適用於所有伺服器。</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="Backups_DateFormat" xml:space="preserve">
+    <value>yyyy/M/d HH:mm:ss</value>
+  </data>
+  <data name="CreateServer_Stage_BackingUp" xml:space="preserve">
+    <value>正在備份世界…</value>
+  </data>
+  <data name="Change_Title" xml:space="preserve">
+    <value>更改類型或版本</value>
+  </data>
+  <data name="Change_Current" xml:space="preserve">
+    <value>目前：</value>
+  </data>
+  <data name="Change_Confirm" xml:space="preserve">
+    <value>更改</value>
+  </data>
+  <data name="Change_Open" xml:space="preserve">
+    <value>更改類型或版本…</value>
+  </data>
+  <data name="Change_Section" xml:space="preserve">
+    <value>伺服器類型與版本</value>
+  </data>
+  <data name="Change_SectionHint" xml:space="preserve">
+    <value>在原版、Paper 和 Fabric 之間切換，或換成其他 Minecraft 版本。請先停止伺服器。</value>
+  </data>
+  <data name="Change_Hint" xml:space="preserve">
+    <value>WaNut 會先備份世界，再替換伺服器檔案。你的世界、設定、模組和插件都會保留。請確認模組或插件支援新版本。</value>
+  </data>
+  <data name="Change_Unchanged" xml:space="preserve">
+    <value>請選擇不同的類型或版本。</value>
+  </data>
+  <data name="Change_DowngradeWarning" xml:space="preserve">
+    <value>這個 Minecraft 版本比世界上次儲存時的版本舊。舊版本不一定讀得了新世界：區塊可能遺失，或世界無法載入。如果發生這種情況，請先在這裡改回 {0}，再從「備份」分頁還原 WaNut 現在建立的備份。還原備份只會還原世界，不會還原伺服器類型或版本。</value>
+  </data>
+  <data name="Change_DowngradeAccept" xml:space="preserve">
+    <value>我了解，仍然改成舊版本</value>
+  </data>
+  <data name="Change_BackupFailed" xml:space="preserve">
+    <value>WaNut 無法備份世界，所以什麼都沒有更改。{0}</value>
+  </data>
+  <data name="Change_Failed" xml:space="preserve">
+    <value>更改失敗：{0}</value>
+  </data>
+  <data name="Change_Cancelled" xml:space="preserve">
+    <value>已取消，什麼都沒有更改。</value>
+  </data>
+  <data name="Change_Done" xml:space="preserve">
+    <value>完成！伺服器現在是 {0}。</value>
+  </data>
+  <data name="Backups_Reason_Change" xml:space="preserve">
+    <value>更改類型或版本前</value>
+  </data>
+  <data name="Server_TabConnect" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="Connect_Intro" xml:space="preserve">
+    <value>把其中一個位址給朋友。他們在 Minecraft 選「多人遊戲」→「新增伺服器」，貼到「伺服器位址」。</value>
+  </data>
+  <data name="Connect_WhitelistHint" xml:space="preserve">
+    <value>新伺服器只讓白名單上的玩家進入，請先在「玩家」分頁加入朋友的名字。</value>
+  </data>
+  <data name="Connect_Refresh" xml:space="preserve">
+    <value>重新整理</value>
+  </data>
+  <data name="Connect_Copy" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="Connect_CopyLabel" xml:space="preserve">
+    <value>複製 {0} 的位址 {1}</value>
+  </data>
+  <data name="Connect_Copied" xml:space="preserve">
+    <value>已複製 {0}！傳給你的朋友吧。</value>
+  </data>
+  <data name="Connect_CopyFailed" xml:space="preserve">
+    <value>剪貼簿正被其他程式使用，無法複製位址。請稍後再試。</value>
+  </data>
+  <data name="Connect_ListFailed" xml:space="preserve">
+    <value>WaNut 無法讀取這台電腦的網路介面卡：{0}</value>
+  </data>
+  <data name="Connect_Empty" xml:space="preserve">
+    <value>找不到網路</value>
+  </data>
+  <data name="Connect_EmptyHint" xml:space="preserve">
+    <value>連上 Wi-Fi，或開啟 Radmin VPN、ZeroTier 或 Tailscale，再按「重新整理」。</value>
+  </data>
+  <data name="Connect_Kind_RadminVpn" xml:space="preserve">
+    <value>Radmin VPN</value>
+  </data>
+  <data name="Connect_Kind_ZeroTier" xml:space="preserve">
+    <value>ZeroTier</value>
+  </data>
+  <data name="Connect_Kind_Tailscale" xml:space="preserve">
+    <value>Tailscale</value>
+  </data>
+  <data name="Connect_Kind_Hamachi" xml:space="preserve">
+    <value>Hamachi</value>
+  </data>
+  <data name="Connect_Hint_Lan" xml:space="preserve">
+    <value>給跟你連同一個 Wi-Fi 或路由器，或在同一個 VPN 工具裡的朋友。</value>
+  </data>
+  <data name="Connect_Hint_RadminVpn" xml:space="preserve">
+    <value>給在你 Radmin VPN 網路裡的朋友。</value>
+  </data>
+  <data name="Connect_Hint_ZeroTier" xml:space="preserve">
+    <value>給在你 ZeroTier 網路裡的朋友。</value>
+  </data>
+  <data name="Connect_Hint_Tailscale" xml:space="preserve">
+    <value>給在你 Tailscale 網路裡的朋友。</value>
+  </data>
+  <data name="Connect_Hint_Hamachi" xml:space="preserve">
+    <value>給在你 Hamachi 網路裡的朋友。</value>
+  </data>
+  <data name="Connect_Firewall" xml:space="preserve">
+    <value>Windows 防火牆</value>
+  </data>
+  <data name="Connect_FirewallChecking" xml:space="preserve">
+    <value>正在檢查 Windows 防火牆…</value>
+  </data>
+  <data name="Connect_Firewall_Allowed" xml:space="preserve">
+    <value>Windows 防火牆允許朋友連進來。</value>
+  </data>
+  <data name="Connect_Firewall_NotAllowed" xml:space="preserve">
+    <value>Windows 防火牆可能會擋住朋友。允許 WaNut 的 Java 通過，朋友才能加入。</value>
+  </data>
+  <data name="Connect_Firewall_Blocked" xml:space="preserve">
+    <value>Windows 防火牆有一條規則封鎖了 WaNut 的 Java，所以朋友無法加入。</value>
+  </data>
+  <data name="Connect_Firewall_Unknown" xml:space="preserve">
+    <value>WaNut 無法讀取 Windows 防火牆規則。如果朋友無法加入，請到 Windows 安全性確認 Java 已被允許。</value>
+  </data>
+  <data name="Connect_FirewallAllow" xml:space="preserve">
+    <value>允許通過防火牆</value>
+  </data>
+  <data name="Connect_FirewallAllowHint" xml:space="preserve">
+    <value>Windows 會要求系統管理員同意。接著 WaNut 會為自己的 Java 新增一條規則，並移除封鎖它的規則。</value>
+  </data>
+  <data name="Connect_FirewallDeclined" xml:space="preserve">
+    <value>什麼都沒有更改，你隨時可以在這裡允許。伺服器啟動時，Windows 也可能跳出自己的視窗詢問：如果取消，Windows 會封鎖 WaNut 的 Java，這裡的按鈕也能修好。</value>
+  </data>
+  <data name="Connect_FirewallFailed" xml:space="preserve">
+    <value>Windows 防火牆沒有更改。你可以自己在 Windows 安全性新增規則：允許 {0} 的輸入連線。</value>
+  </data>
+  <data name="Connect_FirewallNoJava" xml:space="preserve">
+    <value>這個伺服器的 Java 還沒下載。先啟動一次伺服器，再回來檢查。</value>
+  </data>
+  <data name="Firewall_Ask" xml:space="preserve">
+    <value>要讓朋友通過 Windows 防火牆加入嗎？\n\n接下來 Windows 會要求系統管理員同意。WaNut 會新增一條規則，讓自己的 Java {0} 接受朋友的連線。之後也可以在「連線」分頁設定。</value>
+  </data>
+  <data name="Firewall_AskBlocked" xml:space="preserve">
+    <value>Windows 防火牆正在封鎖 WaNut 的 Java，所以朋友無法加入。要現在修好嗎？\n\n接下來 Windows 會要求系統管理員同意。WaNut 會移除封鎖規則，並新增一條讓自己的 Java {0} 接受連線的規則。之後也可以在「連線」分頁設定。</value>
+  </data>
+  <data name="Connect_GuideTitle" xml:space="preserve">
+    <value>透過網路和朋友一起玩</value>
+  </data>
+  <data name="Connect_GuideIntro" xml:space="preserve">
+    <value>不在同一個 Wi-Fi 的朋友，可以透過虛擬區網工具加入。你和朋友在工具裡加入同一個網路，這個分頁就會顯示你在那個網路的位址。用哪個工具都可以，選朋友已經在用的就好。</value>
+  </data>
+  <data name="Connect_GuideHost" xml:space="preserve">
+    <value>你（主機）</value>
+  </data>
+  <data name="Connect_GuideStep1" xml:space="preserve">
+    <value>1. 安裝跟朋友一樣的工具，開啟後建立一個網路（或加入朋友建立的網路）。</value>
+  </data>
+  <data name="Connect_GuideStep2" xml:space="preserve">
+    <value>2. 在這裡的「玩家」分頁，把每位朋友的 Minecraft 名稱加入白名單。</value>
+  </data>
+  <data name="Connect_GuideStep3" xml:space="preserve">
+    <value>3. 啟動伺服器。這個分頁上方會出現該工具的一行：按「複製」，把位址傳給朋友。</value>
+  </data>
+  <data name="Connect_GuideFriends" xml:space="preserve">
+    <value>你的朋友</value>
+  </data>
+  <data name="Connect_GuideStep4" xml:space="preserve">
+    <value>4. 安裝同一個工具，開啟並加入你的網路。</value>
+  </data>
+  <data name="Connect_GuideStep5" xml:space="preserve">
+    <value>5. 在 Minecraft（版本要跟伺服器相同）選「多人遊戲」→「新增伺服器」，把位址貼到「伺服器位址」，按「完成」後加入。</value>
+  </data>
+  <data name="Connect_GuideTools" xml:space="preserve">
+    <value>常用工具要點哪裡</value>
+  </data>
+  <data name="Connect_ToolRadmin" xml:space="preserve">
+    <value>Radmin VPN（免費）：選 Network →「Create Network」，設定名稱和至少 6 個字元的密碼。朋友選 Network →「Join Network」。位址以 26. 開頭。</value>
+  </data>
+  <data name="Connect_ToolZeroTier" xml:space="preserve">
+    <value>ZeroTier（免費）：在 my.zerotier.com 建立網路。大家用 Network ID 加入，再由你在 Auth 下勾選每位新成員。</value>
+  </data>
+  <data name="Connect_ToolTailscale" xml:space="preserve">
+    <value>Tailscale（需要登入）：在你的電腦登入，再從 Tailscale 管理主控台把電腦分享給每位朋友。位址以 100. 開頭。</value>
+  </data>
+  <data name="Connect_ToolHamachi" xml:space="preserve">
+    <value>Hamachi（最多 5 人免費）：選 Network →「Create a new network」。朋友選「Join an existing network」。位址以 25. 開頭。</value>
+  </data>
+  <data name="Connect_ToolSite" xml:space="preserve">
+    <value>網站</value>
+  </data>
+  <data name="Connect_GuideNotListed" xml:space="preserve">
+    <value>上方沒看到你的工具？確認它已開啟並加入網路，再按「重新整理」。WaNut 不認得的工具，會以 Windows 給它的介面卡名稱顯示。</value>
+  </data>
+  <data name="Connect_GuideTrouble" xml:space="preserve">
+    <value>朋友無法加入？確認他們在白名單上、Windows 防火牆允許連線（見上方），而且大家的 Minecraft 版本相同。如果連工具本身都連不到你的電腦（多數工具有 Ping 功能），問題在工具的連線，不在伺服器。</value>
+  </data>
+  <data name="Update_Section" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Update_CurrentVersion" xml:space="preserve">
+    <value>你正在使用 WaNut {0}。</value>
+  </data>
+  <data name="Update_CheckNow" xml:space="preserve">
+    <value>檢查更新</value>
+  </data>
+  <data name="Update_CheckOnStart" xml:space="preserve">
+    <value>WaNut 啟動時檢查更新</value>
+  </data>
+  <data name="Update_CheckOnStartHint" xml:space="preserve">
+    <value>WaNut 會到 GitHub 找新版本，安裝前會先問你。</value>
+  </data>
+  <data name="Update_Available" xml:space="preserve">
+    <value>新鮮的 WaNut {0} 準備好了！</value>
+  </data>
+  <data name="Update_Now" xml:space="preserve">
+    <value>立即更新</value>
+  </data>
+  <data name="Update_Later" xml:space="preserve">
+    <value>稍後</value>
+  </data>
+  <data name="Update_StopServerConfirm" xml:space="preserve">
+    <value>更新會重新啟動 WaNut，所以會先停止正在執行的伺服器（世界會儲存）。\n\n要停止伺服器並更新嗎？</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>正在下載更新…</value>
+  </data>
+  <data name="Update_WaitForStart" xml:space="preserve">
+    <value>有伺服器正準備啟動。等它啟動完成或停止後再試一次更新。</value>
+  </data>
+  <data name="Update_Restarting" xml:space="preserve">
+    <value>正在重新啟動 WaNut…</value>
+  </data>
+  <data name="Update_Failed" xml:space="preserve">
+    <value>無法安裝更新，WaNut 維持不變。\n\n{0}</value>
+  </data>
+  <data name="Update_NotInstalled" xml:space="preserve">
+    <value>只有安裝版的 WaNut 能更新。這個是從建置資料夾啟動的。</value>
+  </data>
+  <data name="Update_Checking" xml:space="preserve">
+    <value>正在尋找新版本…</value>
+  </data>
+  <data name="Update_UpToDate" xml:space="preserve">
+    <value>你用的是最新的 WaNut，香脆！</value>
+  </data>
+  <data name="Update_CheckFailed" xml:space="preserve">
+    <value>WaNut 無法檢查更新。請檢查網路連線後再試一次。\n\n{0}</value>
+  </data>
+  <data name="Setup_Title" xml:space="preserve">
+    <value>歡迎使用 WaNut！</value>
+  </data>
+  <data name="Setup_Intro" xml:space="preserve">
+    <value>開始前先做幾個簡單的選擇。之後可以在 App 設定更改更新檢查。</value>
+  </data>
+  <data name="Setup_DesktopShortcut" xml:space="preserve">
+    <value>在桌面建立 WaNut 捷徑</value>
+  </data>
+  <data name="Setup_ServersFolder" xml:space="preserve">
+    <value>伺服器和世界要存放在哪裡</value>
+  </data>
+  <data name="Setup_ServersFolderHint" xml:space="preserve">
+    <value>世界可能會越來越大，請選一個空間充足的磁碟。</value>
+  </data>
+  <data name="Setup_Browse" xml:space="preserve">
+    <value>選擇…</value>
+  </data>
+  <data name="Setup_Finish" xml:space="preserve">
+    <value>出發吧！</value>
+  </data>
+  <data name="Setup_Failed" xml:space="preserve">
+    <value>無法儲存設定：{0}</value>
+  </data>
+  <data name="ServersFolder_Move" xml:space="preserve">
+    <value>移動…</value>
+  </data>
+  <data name="ServersFolder_Open" xml:space="preserve">
+    <value>開啟</value>
+  </data>
+  <data name="ServersFolder_Hint" xml:space="preserve">
+    <value>移動時會把所有伺服器和世界一起帶走。完成後 WaNut 會重新啟動。</value>
+  </data>
+  <data name="ServersFolder_StopFirst" xml:space="preserve">
+    <value>請先停止正在執行的伺服器，再移動伺服器資料夾。</value>
+  </data>
+  <data name="ServersFolder_SameFolder" xml:space="preserve">
+    <value>你的伺服器已經在那個資料夾了。</value>
+  </data>
+  <data name="ServersFolder_NestedFolder" xml:space="preserve">
+    <value>新資料夾不能在目前的伺服器資料夾裡面，反過來也不行。請選別的位置。</value>
+  </data>
+  <data name="ServersFolder_TargetNotEmpty" xml:space="preserve">
+    <value>那裡已經有一個裝了檔案的「WaNut servers」資料夾。請選別的位置，或先清空那個資料夾。</value>
+  </data>
+  <data name="ServersFolder_Confirm" xml:space="preserve">
+    <value>要把所有伺服器和世界移到 {0} 嗎？完成後 WaNut 會重新啟動。</value>
+  </data>
+  <data name="ServersFolder_Moving" xml:space="preserve">
+    <value>正在移動 {0}…</value>
+  </data>
+  <data name="ServersFolder_Failed" xml:space="preserve">
+    <value>無法移動伺服器，它們仍留在原本的資料夾：{0}</value>
+  </data>
+  <data name="AppSettings_Language" xml:space="preserve">
+    <value>語言</value>
+  </data>
+  <data name="AppSettings_LanguageHint" xml:space="preserve">
+    <value>重新啟動 WaNut 後生效。</value>
+  </data>
+  <data name="Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Language_ZhTw" xml:space="preserve">
+    <value>繁體中文</value>
+  </data>
+  <data name="AppSettings_Theme" xml:space="preserve">
+    <value>顏色</value>
+  </data>
+  <data name="AppSettings_ThemeSystem" xml:space="preserve">
+    <value>跟隨 Windows</value>
+  </data>
+  <data name="AppSettings_ThemeLight" xml:space="preserve">
+    <value>淺色</value>
+  </data>
+  <data name="AppSettings_ThemeDark" xml:space="preserve">
+    <value>深色</value>
+  </data>
+</root>

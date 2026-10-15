@@ -33,6 +33,7 @@ public partial class App : Application
         base.OnStartup(e);
         var paths = LauncherPaths.CreateDefault();
         var store = new AppSettingsStore(paths);
+        WaNut.App.Resources.UiLanguage.Apply(store.Load().Language);
         _theme.Start(store.Load().Theme);
         if (!store.Load().SetupDone)
         {
