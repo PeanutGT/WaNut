@@ -30,6 +30,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 18 | References | Modrinth App (clean, modern UI) and Duolingo (mascot, guidance), as direction only. |
 | 19 | Modpack servers | Phase 2, with the mod browser and Forge. Modrinth `.mrpack` first; CurseForge starts as importing a server pack the user already downloaded. |
 | 20 | Settings layout | Tabs first, then tiers (always visible / More settings / Advanced mode), per section 4b. Whitelist, OP list and the RAM slider are always visible; changing type or version backs up first and warns on downgrade. |
+| 21 | New server whitelist | **On** by default for every new server, on every Minecraft version. The Players tab warns while the list is empty. |
 
 ---
 

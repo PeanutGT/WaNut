@@ -72,7 +72,7 @@ public sealed class ServerCreatorTests : IDisposable
         Assert.Equal(4096, metadata.MemoryMb);
         Assert.Equal(Jar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
         Assert.True(EulaFile.IsAccepted(dir));
-        Assert.Contains("white-list=false", await File.ReadAllTextAsync(Path.Combine(dir, "server.properties")), StringComparison.Ordinal);
+        Assert.Contains("white-list=true", await File.ReadAllTextAsync(Path.Combine(dir, "server.properties")), StringComparison.Ordinal);
         Assert.Equivalent(metadata, Assert.Single(_store.LoadAll()), strict: true);
     }
 
