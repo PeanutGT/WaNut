@@ -28,6 +28,27 @@ public sealed class AppSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void Load_NoFile_SetupNotDoneAndDefaultInstancesFolder()
+    {
+        var settings = new AppSettingsStore(new LauncherPaths(_dir.Path)).Load();
+
+        Assert.False(settings.SetupDone);
+        Assert.Null(settings.InstancesDir);
+    }
+
+    [Fact]
+    public void SaveThenLoad_SetupChoices_RoundTrip()
+    {
+        var store = new AppSettingsStore(new LauncherPaths(_dir.Path));
+
+        store.Save(new AppSettings { SetupDone = true, InstancesDir = @"D:\WaNut servers" });
+
+        var loaded = store.Load();
+        Assert.True(loaded.SetupDone);
+        Assert.Equal(@"D:\WaNut servers", loaded.InstancesDir);
+    }
+
+    [Fact]
     public void SaveThenLoad_FirewallAsked_RoundTrips()
     {
         var store = new AppSettingsStore(new LauncherPaths(_dir.Path));

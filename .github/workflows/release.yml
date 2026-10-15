@@ -45,7 +45,7 @@ jobs:
         run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pack
-        run: vpk pack --packId WaNut --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe WaNut.exe --packTitle WaNut --packAuthors PeanutGT --icon src/WaNut.App/Assets/wanut.ico
+        run: vpk pack --packId WaNut --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe WaNut.exe --packTitle WaNut --packAuthors PeanutGT --icon src/WaNut.App/Assets/wanut.ico --shortcuts StartMenuRoot
 
       - name: Upload release
         run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "WaNut ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}

@@ -27,7 +27,17 @@ public partial class App : Application
         base.OnStartup(e);
         new ThemeService(this).Start();
 
-        _services = ConfigureServices();
+        var paths = LauncherPaths.CreateDefault();
+        var store = new AppSettingsStore(paths);
+        if (!store.Load().SetupDone)
+        {
+            // The setup window opens before the main window, so closing it must not end the app.
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            new SetupWindow(new SetupViewModel(paths, store)).ShowDialog();
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
+        }
+
+        _services = ConfigureServices(paths.WithInstancesDir(store.Load().InstancesDir));
         _services.GetRequiredService<LauncherPaths>().EnsureCreated();
 
         var mainWindow = _services.GetRequiredService<MainWindow>();
@@ -46,12 +56,12 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private static ServiceProvider ConfigureServices()
+    private static ServiceProvider ConfigureServices(LauncherPaths paths)
     {
         var services = new ServiceCollection();
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
 
-        services.AddSingleton(LauncherPaths.CreateDefault());
+        services.AddSingleton(paths);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(_ => WaNutHttp.CreateClient(version));
         services.AddSingleton<FileDownloader>();
