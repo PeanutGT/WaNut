@@ -188,15 +188,15 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 ## 6. Phased Roadmap (revised)
 
 ### Phase 1: MVP
-* [ ] English UI built on resource files; "Create Server" wizard (name, MC version, Vanilla/Paper/Fabric, RAM slider).
-* [ ] Adoptium JRE downloader (Java version from Mojang data); Mojang / Paper (v3) / Fabric jar fetcher with checksum checks and cache.
-* [ ] `eula.txt` creation and basic `server.properties` editor.
-* [ ] Process controller: live console, command box, Online status, player list, graceful `stop`, Job Object failsafe.
-* [ ] LAN / virtual-LAN address panel with Copy button, and Windows Firewall rule.
-* [ ] Automatic backup before start, with cleanup rules.
-* [ ] Self-update from GitHub Releases.
-* [ ] Visual style (warm palette, dark mode, icon, peanut mascot).
-* [ ] "More settings" expanders; Advanced mode switch with custom JVM arguments.
+* [x] English UI built on resource files; "Create Server" wizard (name, MC version, Vanilla/Paper/Fabric, RAM slider).
+* [x] Adoptium JRE downloader (Java version from Mojang data); Mojang / Paper (v3) / Fabric jar fetcher with checksum checks and cache.
+* [x] `eula.txt` creation and basic `server.properties` editor.
+* [x] Process controller: live console, command box, Online status, player list, graceful `stop`, Job Object failsafe.
+* [x] LAN / virtual-LAN address panel with Copy button, and Windows Firewall rule.
+* [x] Automatic backup before start, with cleanup rules.
+* [x] Self-update from GitHub Releases.
+* [x] Visual style (warm palette, dark mode, icon, peanut mascot).
+* [x] "More settings" expanders; Advanced mode switch with custom JVM arguments.
 
 ### Phase 2: Easy Multiplayer & Customization
 * [ ] Traditional Chinese translation.
