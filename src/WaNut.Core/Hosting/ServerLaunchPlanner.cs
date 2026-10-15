@@ -28,6 +28,8 @@ public sealed class ServerLaunchPlanner(InstanceStore store, JavaRuntimeManager 
 
         // Normally installed when the server was created; downloaded again if the runtime folder was removed.
         var javaExe = await java.EnsureInstalledAsync(server.JavaMajor, javaProgress, cancellationToken).ConfigureAwait(false);
-        return new ServerLaunch(javaExe, JvmArguments.Build(server.JavaMajor, server.MemoryMb, server.ServerJar), dir);
+        // Saved options were checked when typed; if they no longer parse, start without them rather than not at all.
+        var custom = JvmArguments.ParseCustom(server.CustomJvmArguments, out _) ?? [];
+        return new ServerLaunch(javaExe, JvmArguments.Build(server.JavaMajor, server.MemoryMb, server.ServerJar, custom), dir);
     }
 }

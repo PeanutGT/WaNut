@@ -247,9 +247,9 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 2. ✓ Create Server wizard with Vanilla: download Java + server.jar, write EULA.
 3. ✓ Start/stop with live console, command box, Online status, players list.
 4. ✓ Paper and Fabric support.
-5. Visual style: warm palette, dark mode, app icon, peanut mascot in empty and Starting/Saving states (section 4b).
+5. ✓ Visual style: warm palette, dark mode, app icon, peanut mascot in empty and Starting/Saving states (section 4b).
 6. ✓ Game settings tab (`server.properties` editor with "More settings"; a default `server.properties` is written when a server is created) and Players tab additions (whitelist switch and list, OP list).
-7. Server tab (RAM slider, port, `online-mode`) and the App settings window with the Advanced mode switch; custom JVM arguments as the first advanced-only item.
+7. ✓ Server tab (RAM slider, port, `online-mode`) and the App settings window with the Advanced mode switch; custom JVM arguments as the first advanced-only item.
 8. Backups tab with cleanup; then "Change type or version" in the Server tab, which needs a backup first.
 9. Connect tab (IP list) and firewall rule.
 10. Installer and self-update; first GitHub Release.

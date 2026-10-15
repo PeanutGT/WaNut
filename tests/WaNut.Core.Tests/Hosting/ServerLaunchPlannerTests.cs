@@ -76,6 +76,29 @@ public sealed class ServerLaunchPlannerTests : IDisposable
     }
 
     [Fact]
+    public async Task PrepareAsync_CustomJvmArguments_GoBeforeTheJar()
+    {
+        InstallFakeJava();
+        var server = CreateServer() with { CustomJvmArguments = "-XX:+UseLargePages -Dmy.flag=\"a b\"" };
+
+        var launch = await new ServerLaunchPlanner(_store, _java).PrepareAsync(server);
+
+        Assert.Equal(["-XX:+UseLargePages", "-Dmy.flag=a b", "-jar", "server.jar", "nogui"], launch.Arguments.TakeLast(5));
+    }
+
+    [Fact]
+    public async Task PrepareAsync_InvalidCustomJvmArguments_AreLeftOut()
+    {
+        InstallFakeJava();
+        var server = CreateServer() with { CustomJvmArguments = "-Xmx99G" };
+
+        var launch = await new ServerLaunchPlanner(_store, _java).PrepareAsync(server);
+
+        Assert.DoesNotContain("-Xmx99G", launch.Arguments);
+        Assert.Contains("-Xmx2048M", launch.Arguments);
+    }
+
+    [Fact]
     public async Task PrepareAsync_JarMissing_ThrowsServerJarMissing()
     {
         InstallFakeJava();

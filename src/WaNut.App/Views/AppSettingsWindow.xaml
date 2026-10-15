@@ -1,0 +1,40 @@
+<Window x:Class="WaNut.App.Views.AppSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WaNut.App.Resources"
+        Title="{res:Text AppSettings_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
+        Width="480" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+  <!-- DataContext: AppSettingsViewModel -->
+  <StackPanel Margin="24">
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
+      <TextBlock Text="{res:Text AppSettings_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+    <CheckBox Content="{res:Text AppSettings_AdvancedMode}" IsChecked="{Binding AdvancedMode}" />
+    <TextBlock Text="{res:Text AppSettings_AdvancedModeHint}" Style="{StaticResource MutedText}"
+               FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
+
+    <Border Margin="0,14,0,0">
+      <Border.Style>
+        <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+    </Border>
+
+    <Button Content="{res:Text Common_Close}" IsCancel="True" IsDefault="True"
+            HorizontalAlignment="Right" MinWidth="80" Margin="0,24,0,0" />
+  </StackPanel>
+</Window>

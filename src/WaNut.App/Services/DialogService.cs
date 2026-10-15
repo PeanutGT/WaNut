@@ -15,6 +15,13 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.ViewModel.Created : null;
     }
 
+    public void ShowAppSettings()
+    {
+        var window = services.GetRequiredService<AppSettingsWindow>();
+        window.Owner = Application.Current.MainWindow;
+        window.ShowDialog();
+    }
+
     public bool Confirm(string message)
     {
         var owner = Application.Current.MainWindow;

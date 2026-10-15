@@ -7,6 +7,9 @@ public interface IDialogService
     /// <summary>Shows the Create Server wizard. Returns the new server, or null if the user cancelled.</summary>
     InstanceMetadata? ShowCreateServer();
 
+    /// <summary>Shows the App settings window.</summary>
+    void ShowAppSettings();
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 }

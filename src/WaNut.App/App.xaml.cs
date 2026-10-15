@@ -10,6 +10,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
+using WaNut.Core.Settings;
 using WaNut.Core.Versions;
 
 namespace WaNut.App;
@@ -56,13 +57,16 @@ public partial class App : Application
         services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<ServerHost>();
+        services.AddSingleton<AppSettingsStore>();
 
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
+        services.AddSingleton<AppSettingsViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<CreateServerViewModel>();
         services.AddTransient<CreateServerWindow>();
+        services.AddTransient<AppSettingsWindow>();
 
         return services.BuildServiceProvider();
     }

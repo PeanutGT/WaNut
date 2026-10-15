@@ -22,7 +22,7 @@ public sealed partial class ServerViewModel : ObservableObject
     private readonly InstanceStore _store;
     private readonly SynchronizationContext _ui;
 
-    public ServerViewModel(InstanceMetadata metadata, ServerController controller, InstanceStore store)
+    public ServerViewModel(InstanceMetadata metadata, ServerController controller, InstanceStore store, AppSettingsViewModel app)
     {
         Metadata = metadata;
         _controller = controller;
@@ -30,6 +30,14 @@ public sealed partial class ServerViewModel : ObservableObject
         _ui = SynchronizationContext.Current ?? new SynchronizationContext();
         GameSettings = new GameSettingsViewModel(this);
         PlayerLists = new PlayerListsViewModel(this);
+        ServerSettings = new ServerSettingsViewModel(this, app);
+        app.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(AppSettingsViewModel.AdvancedMode))
+            {
+                ServerSettings.OnAdvancedModeChanged();
+            }
+        };
     }
 
     public InstanceMetadata Metadata { get; private set; }
@@ -39,6 +47,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public GameSettingsViewModel GameSettings { get; }
 
     public PlayerListsViewModel PlayerLists { get; }
+
+    public ServerSettingsViewModel ServerSettings { get; }
 
     public string Id => Metadata.Id;
 
@@ -149,6 +159,7 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         _store.Save(metadata);
         Metadata = metadata;
+        OnPropertyChanged(nameof(Metadata));
     }
 
     /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>
@@ -174,6 +185,7 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         GameSettings.OnServerStatusChanged();
         PlayerLists.OnServerStatusChanged();
+        ServerSettings.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
             _ = ApplyOnOnlineAsync();

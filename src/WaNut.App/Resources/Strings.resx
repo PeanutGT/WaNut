@@ -360,4 +360,64 @@ Choose No to keep waiting.</value>
   <data name="CreateServer_OwnerHint" xml:space="preserve">
     <value>The whitelist is on, so only listed players can join. Your name is added to it and made an operator the first time the server starts. You can skip this and add players later on the Players tab.</value>
   </data>
+  <data name="Server_TabServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Server_NextStartHint" xml:space="preserve">
+    <value>Changes here take effect the next time the server starts.</value>
+  </data>
+  <data name="Server_StopToChange" xml:space="preserve">
+    <value>Stop the server to change the port or account checks.</value>
+  </data>
+  <data name="Server_Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Server_PortHint" xml:space="preserve">
+    <value>Friends join with your address and this number, like 192.168.1.5:25565. The default is 25565.</value>
+  </data>
+  <data name="Server_OnlineMode" xml:space="preserve">
+    <value>Check players' Minecraft accounts (online mode)</value>
+  </data>
+  <data name="Server_OnlineModeHint" xml:space="preserve">
+    <value>Keeps people from joining under someone else's name.</value>
+  </data>
+  <data name="Server_OnlineModeWarning" xml:space="preserve">
+    <value>Account checks are off. Anyone can join using any name, including yours or an operator's, and can take over that player's items and progress. Only turn this off if you know why you need it.</value>
+  </data>
+  <data name="Settings_AdvancedSection" xml:space="preserve">
+    <value>ADVANCED</value>
+  </data>
+  <data name="Server_JvmArguments" xml:space="preserve">
+    <value>Custom JVM arguments</value>
+  </data>
+  <data name="Server_JvmArgumentsHint" xml:space="preserve">
+    <value>Added after WaNut's own Java options. Separate options with spaces; use quotes around a value with spaces. Takes effect at the next start.</value>
+  </data>
+  <data name="Server_JvmArgumentsHiddenNote" xml:space="preserve">
+    <value>This server has custom JVM arguments. They still apply; turn on Advanced mode in App settings to see or change them.</value>
+  </data>
+  <data name="Server_JvmProblem_NotAnOption" xml:space="preserve">
+    <value>Each option must start with "-", for example -XX:+UseLargePages. The arguments were not saved.</value>
+  </data>
+  <data name="Server_JvmProblem_Memory" xml:space="preserve">
+    <value>Set memory with the RAM slider instead of -Xmx or -Xms. The arguments were not saved.</value>
+  </data>
+  <data name="Server_JvmProblem_NotAllowed" xml:space="preserve">
+    <value>WaNut chooses the server jar, so -jar, -cp, -version and -help are not allowed. The arguments were not saved.</value>
+  </data>
+  <data name="Server_JvmProblem_UnclosedQuote" xml:space="preserve">
+    <value>A quote is not closed. The arguments were not saved.</value>
+  </data>
+  <data name="AppSettings_Title" xml:space="preserve">
+    <value>App settings</value>
+  </data>
+  <data name="AppSettings_AdvancedMode" xml:space="preserve">
+    <value>Advanced mode</value>
+  </data>
+  <data name="AppSettings_AdvancedModeHint" xml:space="preserve">
+    <value>Shows extra options for experienced users, such as custom JVM arguments on each server's Server tab.</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
 </root>

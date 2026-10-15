@@ -12,15 +12,18 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IDialogService _dialogs;
     private readonly ServerController _controller;
 
-    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller)
+    public MainViewModel(InstanceStore store, IDialogService dialogs, ServerController controller, AppSettingsViewModel appSettings)
     {
         _store = store;
         _dialogs = dialogs;
         _controller = controller;
+        AppSettings = appSettings;
         Reload();
     }
 
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
+
+    public AppSettingsViewModel AppSettings { get; }
 
     [ObservableProperty]
     private ServerViewModel? _selectedServer;
@@ -45,6 +48,9 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenAppSettings() => _dialogs.ShowAppSettings();
+
+    [RelayCommand]
     private void CreateServer()
     {
         var created = _dialogs.ShowCreateServer();
@@ -64,7 +70,7 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings));
         }
     }
 }
