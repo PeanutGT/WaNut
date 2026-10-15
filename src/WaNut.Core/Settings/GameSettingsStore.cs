@@ -166,7 +166,8 @@ public static class GameSettingsStore
 
     private static string RuleCommand(string name, bool value) => $"gamerule {name} {FormatBool(value)}";
 
-    private static string LevelName(string instanceDir)
+    /// <summary>The world folder name from server.properties ("world" by default).</summary>
+    public static string LevelName(string instanceDir)
     {
         var name = PropertiesFile.Load(Path.Combine(instanceDir, PropertiesFileName)).Get("level-name");
         return string.IsNullOrWhiteSpace(name) ? "world" : name;

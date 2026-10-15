@@ -5,6 +5,7 @@ using WaNut.App.Services;
 using WaNut.App.ViewModels;
 using WaNut.App.Views;
 using WaNut.Core;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Http;
@@ -58,6 +59,7 @@ public partial class App : Application
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
+        services.AddSingleton<BackupStore>();
 
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();

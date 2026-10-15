@@ -1,31 +1,80 @@
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WaNut.Core.Backups;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;
 
-/// <summary>WaNut's own settings. One instance for the whole app, so every server tab sees Advanced mode change at once.</summary>
+/// <summary>WaNut's own settings. One instance for the whole app, so every server tab sees a change at once.</summary>
 public sealed partial class AppSettingsViewModel : ObservableObject
 {
     private readonly AppSettingsStore _store;
+    private bool _loading;
 
     public AppSettingsViewModel(AppSettingsStore store)
     {
         _store = store;
-        _advancedMode = store.Load().AdvancedMode;
+        var settings = store.Load();
+        _loading = true;
+        AdvancedMode = settings.AdvancedMode;
+        BackupKeepCount = settings.Backups.KeepCount;
+        BackupMaxAgeDays = settings.Backups.MaxAgeDays;
+        _loading = false;
     }
 
     [ObservableProperty]
     private bool _advancedMode;
 
     [ObservableProperty]
+    private int _backupKeepCount;
+
+    [ObservableProperty]
+    private int _backupMaxAgeDays;
+
+    [ObservableProperty]
     private string? _errorText;
 
-    partial void OnAdvancedModeChanged(bool value)
+    public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays };
+
+    partial void OnAdvancedModeChanged(bool value) => Save();
+
+    partial void OnBackupKeepCountChanged(int oldValue, int newValue)
     {
+        if (!_loading && !BackupRules.IsValidKeepCount(newValue))
+        {
+            // An out-of-range number snaps back instead of being saved.
+            _loading = true;
+            BackupKeepCount = oldValue;
+            _loading = false;
+            return;
+        }
+
+        Save();
+    }
+
+    partial void OnBackupMaxAgeDaysChanged(int oldValue, int newValue)
+    {
+        if (!_loading && !BackupRules.IsValidMaxAgeDays(newValue))
+        {
+            _loading = true;
+            BackupMaxAgeDays = oldValue;
+            _loading = false;
+            return;
+        }
+
+        Save();
+    }
+
+    private void Save()
+    {
+        if (_loading)
+        {
+            return;
+        }
+
         try
         {
-            _store.Save(new AppSettings { AdvancedMode = value });
+            _store.Save(new AppSettings { AdvancedMode = AdvancedMode, Backups = BackupRules });
             ErrorText = null;
         }
         catch (IOException e)
