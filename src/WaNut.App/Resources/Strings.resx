@@ -820,4 +820,34 @@ Stop the server and update?</value>
   <data name="Setup_Failed" xml:space="preserve">
     <value>The setup could not be saved: {0}</value>
   </data>
+  <data name="ServersFolder_Move" xml:space="preserve">
+    <value>Move…</value>
+  </data>
+  <data name="ServersFolder_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="ServersFolder_Hint" xml:space="preserve">
+    <value>Moving takes every server and world along. WaNut restarts when it's done.</value>
+  </data>
+  <data name="ServersFolder_StopFirst" xml:space="preserve">
+    <value>Stop the running server first, then move the servers folder.</value>
+  </data>
+  <data name="ServersFolder_SameFolder" xml:space="preserve">
+    <value>Your servers are already in that folder.</value>
+  </data>
+  <data name="ServersFolder_NestedFolder" xml:space="preserve">
+    <value>The new folder can't be inside the current servers folder, or the other way round. Pick another place.</value>
+  </data>
+  <data name="ServersFolder_TargetNotEmpty" xml:space="preserve">
+    <value>That place already has a "WaNut servers" folder with files in it. Pick another place, or empty that folder first.</value>
+  </data>
+  <data name="ServersFolder_Confirm" xml:space="preserve">
+    <value>Move all servers and worlds to {0}? WaNut restarts when it's done.</value>
+  </data>
+  <data name="ServersFolder_Moving" xml:space="preserve">
+    <value>Moving {0}…</value>
+  </data>
+  <data name="ServersFolder_Failed" xml:space="preserve">
+    <value>The servers could not be moved, so they stay in the old folder: {0}</value>
+  </data>
 </root>

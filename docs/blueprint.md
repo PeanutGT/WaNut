@@ -1,4 +1,4 @@
-# WaNut — Minecraft: Java Edition Server Launcher Blueprint (Windows)
+﻿# WaNut — Minecraft: Java Edition Server Launcher Blueprint (Windows)
 
 > Revision 3 (2026-10-14). Revised with Peanut from the original blueprint; revision 3 adds the positioning decisions (14–20).
 > Repository: https://github.com/PeanutGT/WaNut
@@ -271,7 +271,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 9. Connect tab (IP list) and firewall rule.
 10. ✓ Installer and self-update; first GitHub Release (v0.1.0).
 11. First-run setup window: desktop shortcut (the installer only adds a Start menu shortcut), servers folder, update check.
-12. Move the servers folder later from App settings (More settings), carrying existing servers across.
+12. ✓ Move the servers folder later from App settings (More settings), carrying existing servers across.
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
