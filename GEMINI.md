@@ -1,4 +1,4 @@
-# WaNut
+﻿# WaNut
 
 Windows desktop app (C# / .NET 10, WPF) that lets casual players create and run a Minecraft: Java Edition server in a few clicks.
 
@@ -7,6 +7,7 @@ Windows desktop app (C# / .NET 10, WPF) that lets casual players create and run 
 - Product spec and decisions: @./docs/blueprint.md
 - Never add AI co-author lines or AI attribution (Gemini, Claude or other) to commits or PRs.
 - Never push directly to `main`; work on a branch and open a PR for Peanut to review.
+- Before starting a task, use any available skill or extension that fits it instead of ad-hoc work.
 
 ## Commands
 - Build: `dotnet build`
