@@ -1,5 +1,6 @@
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Settings;
 
@@ -9,12 +10,14 @@ namespace WaNut.App.ViewModels;
 public sealed partial class AppSettingsViewModel : ObservableObject
 {
     private readonly AppSettingsStore _store;
+    private readonly ThemeService _themeService;
     private AppSettings _saved;
     private bool _loading;
 
-    public AppSettingsViewModel(AppSettingsStore store)
+    public AppSettingsViewModel(AppSettingsStore store, ThemeService theme)
     {
         _store = store;
+        _themeService = theme;
         var settings = store.Load();
         _saved = settings;
         _loading = true;
@@ -22,6 +25,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         BackupKeepCount = settings.Backups.KeepCount;
         BackupMaxAgeDays = settings.Backups.MaxAgeDays;
         CheckForUpdates = settings.CheckForUpdates;
+        Theme = settings.Theme;
         _loading = false;
     }
 
@@ -40,6 +44,16 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorText;
 
+    [ObservableProperty]
+    private ThemeChoice _theme;
+
+    public IReadOnlyList<KeyValuePair<ThemeChoice, string>> Themes { get; } =
+    [
+        new(ThemeChoice.System, Resources.Text.Get("AppSettings_ThemeSystem")),
+        new(ThemeChoice.Light, Resources.Text.Get("AppSettings_ThemeLight")),
+        new(ThemeChoice.Dark, Resources.Text.Get("AppSettings_ThemeDark")),
+    ];
+
     public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays };
 
     public bool WasFirewallAsked(string javaExe) => _saved.FirewallAsked.Contains(javaExe, StringComparer.OrdinalIgnoreCase);
@@ -56,6 +70,16 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     partial void OnAdvancedModeChanged(bool value) => Save();
 
     partial void OnCheckForUpdatesChanged(bool value) => Save();
+
+    partial void OnThemeChanged(ThemeChoice value)
+    {
+        if (!_loading)
+        {
+            _themeService.Choice = value;
+        }
+
+        Save();
+    }
 
     partial void OnBackupKeepCountChanged(int oldValue, int newValue)
     {
@@ -93,7 +117,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates };
+            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Theme = Theme };
             _store.Save(_saved);
             ErrorText = null;
         }

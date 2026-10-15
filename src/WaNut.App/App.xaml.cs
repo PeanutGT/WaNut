@@ -20,15 +20,20 @@ namespace WaNut.App;
 
 public partial class App : Application
 {
+    private readonly ThemeService _theme;
     private ServiceProvider? _services;
+
+    public App()
+    {
+        _theme = new ThemeService(this);
+    }
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        new ThemeService(this).Start();
-
         var paths = LauncherPaths.CreateDefault();
         var store = new AppSettingsStore(paths);
+        _theme.Start(store.Load().Theme);
         if (!store.Load().SetupDone)
         {
             // The setup window opens before the main window, so closing it must not end the app.
@@ -37,7 +42,7 @@ public partial class App : Application
             ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
 
-        _services = ConfigureServices(paths.WithInstancesDir(store.Load().InstancesDir));
+        _services = ConfigureServices(paths.WithInstancesDir(store.Load().InstancesDir), _theme);
         _services.GetRequiredService<LauncherPaths>().EnsureCreated();
 
         var mainWindow = _services.GetRequiredService<MainWindow>();
@@ -56,12 +61,13 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private static ServiceProvider ConfigureServices(LauncherPaths paths)
+    private static ServiceProvider ConfigureServices(LauncherPaths paths, ThemeService theme)
     {
         var services = new ServiceCollection();
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
 
         services.AddSingleton(paths);
+        services.AddSingleton(theme);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(_ => WaNutHttp.CreateClient(version));
         services.AddSingleton<FileDownloader>();
