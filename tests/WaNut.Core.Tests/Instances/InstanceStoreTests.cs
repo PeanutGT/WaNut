@@ -60,7 +60,7 @@ public sealed class InstanceStoreTests : IDisposable
     {
         var saved = Sample("test", "Test", DateTimeOffset.UnixEpoch) with
         {
-            GameRules = new Dictionary<string, bool> { ["KeepInventory"] = true },
+            GameRules = new Dictionary<string, bool> { ["keepInventory"] = true },
             PendingCommands = ["whitelist add Notch"],
         };
 

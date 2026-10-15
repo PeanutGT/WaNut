@@ -15,6 +15,33 @@
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="Margin" Value="0,0,0,8" />
     </Style>
+    <!-- A plain list: no selection or scrolling of its own, but each row is a list item screen readers can enter. -->
+    <Style x:Key="PlainList" TargetType="ListBox">
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBox">
+            <ItemsPresenter />
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Setter Property="ItemContainerStyle">
+        <Setter.Value>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+            <Setter Property="Template">
+              <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                  <ContentPresenter />
+                </ControlTemplate>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </Setter.Value>
+      </Setter>
+    </Style>
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -77,19 +104,19 @@
         <ContentControl.ContentTemplate>
           <DataTemplate>
             <StackPanel>
-              <ItemsControl ItemsSource="{Binding Whitelist}" AutomationProperties.Name="{res:Text Players_Whitelist}">
-                <ItemsControl.ItemTemplate>
+              <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Whitelist}" AutomationProperties.Name="{res:Text Players_Whitelist}">
+                <ListBox.ItemTemplate>
                   <DataTemplate>
                     <DockPanel Margin="0,2">
                       <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
                               AutomationProperties.Name="{Binding RemoveLabel}"
-                              Command="{Binding DataContext.RemoveFromWhitelistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                              Command="{Binding DataContext.RemoveFromWhitelistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
                       <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
                     </DockPanel>
                   </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
+                </ListBox.ItemTemplate>
+              </ListBox>
               <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
@@ -118,19 +145,19 @@
               <TextBlock Text="{res:Text Players_Operators}" FontSize="15" FontWeight="SemiBold" Margin="0,28,0,4" />
               <TextBlock Text="{res:Text Players_OperatorsHint}" Style="{StaticResource MutedText}" FontSize="12"
                          TextWrapping="Wrap" Margin="0,0,0,8" />
-              <ItemsControl ItemsSource="{Binding Operators}" AutomationProperties.Name="{res:Text Players_Operators}">
-                <ItemsControl.ItemTemplate>
+              <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Operators}" AutomationProperties.Name="{res:Text Players_Operators}">
+                <ListBox.ItemTemplate>
                   <DataTemplate>
                     <DockPanel Margin="0,2">
                       <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
                               AutomationProperties.Name="{Binding RemoveLabel}"
-                              Command="{Binding DataContext.RemoveOperatorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                              Command="{Binding DataContext.RemoveOperatorCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
                       <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
                     </DockPanel>
                   </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
+                </ListBox.ItemTemplate>
+              </ListBox>
               <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">

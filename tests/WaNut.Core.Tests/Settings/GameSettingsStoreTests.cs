@@ -73,7 +73,7 @@ public sealed class GameSettingsStoreTests : IDisposable
     public void Load_Version26_ReadsRulesFromMetadataNotProperties()
     {
         WriteProperties("pvp=false\n");
-        var metadata = Metadata("26.3") with { GameRules = new Dictionary<string, bool> { ["SpawnMonsters"] = false } };
+        var metadata = Metadata("26.3") with { GameRules = new Dictionary<string, bool> { ["spawnMonsters"] = false } };
 
         var settings = GameSettingsStore.Load(_dir.Path, metadata);
 
@@ -115,7 +115,7 @@ public sealed class GameSettingsStoreTests : IDisposable
         var saved = GameSettingsStore.Save(_dir.Path, metadata, loaded, loaded with { Pvp = false, KeepInventory = true });
 
         Assert.Contains("pvp=false", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
-        Assert.Equal(new Dictionary<string, bool> { ["KeepInventory"] = true }, saved.GameRules);
+        Assert.Equal(new Dictionary<string, bool> { ["keepInventory"] = true }, saved.GameRules);
         Assert.Equal(["gamerule keepInventory true"], GameSettingsStore.RuleCommands(saved));
     }
 

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using WaNut.Core.Instances;
 using WaNut.Core.Properties;
 
@@ -22,7 +23,7 @@ public static class GameSettingsStore
         var defaults = new GameSettings();
 
         bool Flag(RuleSetting setting, string key) => features.IsGameRule(setting)
-            ? metadata.GameRules.TryGetValue(setting.ToString(), out var value) ? value : features.DefaultValue(setting)
+            ? metadata.GameRules.TryGetValue(RuleKey(setting), out var value) ? value : features.DefaultValue(setting)
             : ParseBool(properties.Get(key)) ?? features.DefaultValue(setting);
 
         return new GameSettings
@@ -72,7 +73,7 @@ public static class GameSettingsStore
             {
                 if (before != after)
                 {
-                    rules[setting.ToString()] = after;
+                    rules[RuleKey(setting)] = after;
                 }
             }
             else
@@ -115,7 +116,7 @@ public static class GameSettingsStore
         var commands = new List<string>();
         foreach (var setting in Enum.GetValues<RuleSetting>())
         {
-            if (metadata.GameRules.TryGetValue(setting.ToString(), out var value) && features.RuleName(setting) is { } name)
+            if (metadata.GameRules.TryGetValue(RuleKey(setting), out var value) && features.RuleName(setting) is { } name)
             {
                 commands.Add(RuleCommand(name, value));
             }
@@ -159,6 +160,9 @@ public static class GameSettingsStore
         yield return (RuleSetting.CommandBlocks, before.CommandBlocks, after.CommandBlocks);
         yield return (RuleSetting.SpawnMonsters, before.SpawnMonsters, after.SpawnMonsters);
     }
+
+    /// <summary>The key in instance.json, camelCase like the rest of the file: "keepInventory".</summary>
+    public static string RuleKey(RuleSetting setting) => JsonNamingPolicy.CamelCase.ConvertName(setting.ToString());
 
     private static string RuleCommand(string name, bool value) => $"gamerule {name} {FormatBool(value)}";
 

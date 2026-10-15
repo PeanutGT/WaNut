@@ -11,7 +11,11 @@ using WaNut.Core.Settings;
 namespace WaNut.App.ViewModels;
 
 /// <summary>A name on the whitelist or OP list, with the text a screen reader says for its Remove button.</summary>
-public sealed record PlayerEntry(string Name, string RemoveLabel);
+public sealed record PlayerEntry(string Name, string RemoveLabel)
+{
+    // Screen readers read the row as the player's name.
+    public override string ToString() => Name;
+}
 
 /// <summary>
 /// The whitelist and OP list on the Players tab. While the server is online, changes go to it as commands; while

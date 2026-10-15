@@ -13,8 +13,10 @@
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="Margin" Value="0,4,0,0" />
     </Style>
+    <!-- When a control gets focus, the whole item scrolls into view, so its heading is never left above the top. -->
     <Style x:Key="Item" TargetType="StackPanel">
       <Setter Property="Margin" Value="0,0,0,18" />
+      <EventSetter Event="RequestBringIntoView" Handler="Item_RequestBringIntoView" />
     </Style>
     <Style x:Key="CheckHint" TargetType="TextBlock" BasedOn="{StaticResource Hint}">
       <Setter Property="Margin" Value="26,2,0,0" />
@@ -110,7 +112,7 @@
 
           <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Game_Seed}" Style="{StaticResource Label}" />
-            <TextBox Text="{Binding Seed}" IsEnabled="{Binding CanEditSeed}"
+            <TextBox Text="{Binding Seed}" IsEnabled="{Binding CanEditSeed}" IsReadOnly="{Binding ShowSeedLocked}"
                      AutomationProperties.Name="{res:Text Game_Seed}" />
             <TextBlock Text="{res:Text Game_SeedHint}" Style="{StaticResource Hint}" />
             <TextBlock Text="{res:Text Game_SeedLocked}" Style="{StaticResource Hint}"

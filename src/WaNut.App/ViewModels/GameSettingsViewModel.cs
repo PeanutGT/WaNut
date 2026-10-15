@@ -8,7 +8,11 @@ using WaNut.Core.Settings;
 namespace WaNut.App.ViewModels;
 
 /// <summary>A choice in a drop-down: the value and the text shown for it.</summary>
-public sealed record Option<T>(T Value, string Label);
+public sealed record Option<T>(T Value, string Label)
+{
+    // The closed box and screen readers show the item's text, not the record's.
+    public override string ToString() => Label;
+}
 
 /// <summary>
 /// The Game settings tab. Every change is saved right away. server.properties is only read by the server when it

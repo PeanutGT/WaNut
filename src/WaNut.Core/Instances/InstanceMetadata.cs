@@ -29,7 +29,7 @@ public sealed record InstanceMetadata
     public required DateTimeOffset CreatedAt { get; init; }
 
     /// <summary>
-    /// Game rules the user set in WaNut (keyed by <see cref="Settings.RuleSetting"/> name). They are sent to the
+    /// Game rules the user set in WaNut (keyed by <see cref="Settings.GameSettingsStore.RuleKey"/>, e.g. "keepInventory"). They are sent to the
     /// server every time it comes online, because a game rule can only be changed while the server runs.
     /// </summary>
     public IReadOnlyDictionary<string, bool> GameRules { get; init; } = new Dictionary<string, bool>();
