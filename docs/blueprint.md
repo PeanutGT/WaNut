@@ -274,6 +274,16 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 11. First-run setup window: desktop shortcut (the installer only adds a Start menu shortcut), servers folder, update check.
 12. ✓ Move the servers folder later from App settings (More settings), carrying existing servers across.
 
+### Phase 2 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
+13. Traditional Chinese: `Strings.zh-TW.resx` for every key, a language choice in App settings (English by default, applied after restart), and a test that every English key has a zh-TW entry. Claude translates, Peanut reviews.
+14. Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
+15. Modrinth `.mrpack` modpack server install (decision 19), reusing step 14's downloader.
+16. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
+17. CurseForge server-pack import from a zip the user already downloaded.
+18. UPnP port forwarding (`Open.Nat`) on the Connect tab, with a clear message when the router refuses or CGNAT is detected.
+19. Built-in tunnel (playit.gg or similar) with a copyable address.
+20. Peanut-led guided onboarding (decision 17), once the steps above are stable.
+
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
 * Core unit tests run on every push (GitHub Actions on a Windows runner, which also builds the WPF app).
