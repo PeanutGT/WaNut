@@ -182,14 +182,19 @@
         <StackPanel Margin="4,8,0,0">
           <TextBlock Text="{res:Text Connect_RadminTitle}" Style="{StaticResource Label}" />
           <TextBlock Text="{res:Text Connect_RadminIntro}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminHost}" FontWeight="SemiBold" Margin="0,6,0,6" />
           <TextBlock Style="{StaticResource Step}">
             <Run Text="{res:Text Connect_RadminStep1}" />
-            <Hyperlink Command="{Binding OpenRadminSiteCommand}"><Run Text="{res:Text Connect_RadminSite}" /></Hyperlink>
+            <Hyperlink Command="{Binding OpenRadminSiteCommand}"><Run Text="{res:Text Connect_RadminSite}" /></Hyperlink><Run Text="{res:Text Connect_RadminStep1End}" />
           </TextBlock>
           <TextBlock Text="{res:Text Connect_RadminStep2}" Style="{StaticResource Step}" />
           <TextBlock Text="{res:Text Connect_RadminStep3}" Style="{StaticResource Step}" />
           <TextBlock Text="{res:Text Connect_RadminStep4}" Style="{StaticResource Step}" />
           <TextBlock Text="{res:Text Connect_RadminStep5}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminFriends}" FontWeight="SemiBold" Margin="0,6,0,6" />
+          <TextBlock Text="{res:Text Connect_RadminStep6}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminStep7}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RadminNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
           <TextBlock Text="{res:Text Connect_RadminTrouble}" Style="{StaticResource Hint}" />
         </StackPanel>
       </Expander>
