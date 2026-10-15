@@ -175,9 +175,7 @@
           <StackPanel>
             <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
             <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0">
-              <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
-              <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
-              <Run Text="{Binding LoaderText, Mode=OneWay}" />
+              <Run Text="{Binding TypeAndVersionText, Mode=OneWay}" />
               <Run Text="·" />
               <Run Text="{res:Text Main_Java}" />
               <Run Text="{Binding Metadata.JavaMajor, Mode=OneWay}" />

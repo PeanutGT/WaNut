@@ -42,6 +42,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     private int _memoryMb;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PortHint))]
     private int _port;
 
     [ObservableProperty]
@@ -55,6 +56,8 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     private string? _jvmArgumentsError;
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
+
+    public string PortHint => string.Format(Text.Get("Server_PortHint"), Port, ServerSettings.DefaultPort);
 
     public bool CanEditProperties => _server.Status == ServerStatus.Stopped;
 

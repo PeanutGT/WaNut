@@ -49,7 +49,7 @@
             <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
             <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
                      AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />
-            <TextBlock Text="{res:Text Server_PortHint}" Style="{StaticResource Hint}" />
+            <TextBlock Text="{Binding PortHint}" Style="{StaticResource Hint}" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">

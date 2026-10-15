@@ -62,6 +62,9 @@ public sealed partial class ServerViewModel : ObservableObject
         _ => $"{Text.Get("Main_LoaderVersion")} {Metadata.LoaderVersion}",
     };
 
+    /// <summary>"Vanilla 26.3", "Paper 26.3 build 133".</summary>
+    public string TypeAndVersionText => string.Join(' ', new[] { Metadata.Type.ToString(), Metadata.MinecraftVersion, LoaderText }.Where(s => s.Length > 0));
+
     public ServerProcess? Process { get; private set; }
 
     public ObservableCollection<string> ConsoleLines { get; } = [];

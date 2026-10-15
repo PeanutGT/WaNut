@@ -373,7 +373,7 @@ Choose No to keep waiting.</value>
     <value>Port</value>
   </data>
   <data name="Server_PortHint" xml:space="preserve">
-    <value>Friends join with your address and this number, like 192.168.1.5:25565. The default is 25565.</value>
+    <value>Friends join with your address and this number, like 192.168.1.5:{0}. The default is {1}.</value>
   </data>
   <data name="Server_OnlineMode" xml:space="preserve">
     <value>Check players' Minecraft accounts (online mode)</value>
