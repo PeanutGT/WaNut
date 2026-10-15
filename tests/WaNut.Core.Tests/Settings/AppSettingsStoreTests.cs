@@ -36,6 +36,24 @@ public sealed class AppSettingsStoreTests : IDisposable
     }
 
     [Fact]
+    public void Load_OlderConfigWithoutUpdateSetting_ChecksForUpdates()
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "config.json"), "{ \"advancedMode\": true }");
+
+        Assert.True(new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().CheckForUpdates);
+    }
+
+    [Fact]
+    public void SaveThenLoad_UpdateCheckOffRoundTrips()
+    {
+        var store = new AppSettingsStore(new LauncherPaths(_dir.Path));
+
+        store.Save(new AppSettings { CheckForUpdates = false });
+
+        Assert.False(store.Load().CheckForUpdates);
+    }
+
+    [Fact]
     public void Load_NoFile_BackupDefaultsAreFiveAndThirtyDays()
     {
         var rules = new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().Backups;

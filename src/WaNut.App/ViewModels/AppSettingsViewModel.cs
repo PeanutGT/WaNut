@@ -19,6 +19,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         AdvancedMode = settings.AdvancedMode;
         BackupKeepCount = settings.Backups.KeepCount;
         BackupMaxAgeDays = settings.Backups.MaxAgeDays;
+        CheckForUpdates = settings.CheckForUpdates;
         _loading = false;
     }
 
@@ -32,11 +33,16 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private int _backupMaxAgeDays;
 
     [ObservableProperty]
+    private bool _checkForUpdates;
+
+    [ObservableProperty]
     private string? _errorText;
 
     public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays };
 
     partial void OnAdvancedModeChanged(bool value) => Save();
+
+    partial void OnCheckForUpdatesChanged(bool value) => Save();
 
     partial void OnBackupKeepCountChanged(int oldValue, int newValue)
     {
@@ -74,7 +80,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _store.Save(new AppSettings { AdvancedMode = AdvancedMode, Backups = BackupRules });
+            _store.Save(new AppSettings { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates });
             ErrorText = null;
         }
         catch (IOException e)

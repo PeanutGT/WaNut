@@ -12,6 +12,7 @@ using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
 using WaNut.Core.Settings;
+using WaNut.Core.Updates;
 using WaNut.Core.Versions;
 
 namespace WaNut.App;
@@ -31,6 +32,11 @@ public partial class App : Application
         var mainWindow = _services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
+
+        if (_services.GetRequiredService<AppSettingsViewModel>().CheckForUpdates)
+        {
+            _ = _services.GetRequiredService<UpdateViewModel>().CheckOnStartupAsync();
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -60,10 +66,12 @@ public partial class App : Application
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
+        services.AddSingleton<AppUpdater>();
 
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
         services.AddSingleton<AppSettingsViewModel>();
+        services.AddSingleton<UpdateViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<CreateServerViewModel>();

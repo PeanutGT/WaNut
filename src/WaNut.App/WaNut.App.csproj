@@ -7,11 +7,14 @@
     <AssemblyName>WaNut</AssemblyName>
     <RootNamespace>WaNut.App</RootNamespace>
     <ApplicationIcon>Assets\wanut.ico</ApplicationIcon>
+    <!-- Program.Main runs Velopack's install and update hooks before the WPF app starts. -->
+    <StartupObject>WaNut.App.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
 
   <ItemGroup>

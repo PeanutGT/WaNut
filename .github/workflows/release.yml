@@ -1,0 +1,51 @@
+name: Release
+
+# Runs only when Peanut pushes a version tag such as v0.1.0. It builds the Setup.exe installer and the update
+# packages with Velopack and attaches them to a GitHub Release, where installed copies of WaNut find them.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Read version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') {
+            throw "Tag '${{ github.ref_name }}' is not a version like v1.2.3."
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: |
+          dotnet build -c Release
+          dotnet test -c Release --no-build --filter "Category!=Network"
+
+      - name: Publish
+        run: dotnet publish src/WaNut.App/WaNut.App.csproj -c Release -r win-x64 --self-contained -p:Version=${{ steps.version.outputs.version }} -o publish
+
+      - name: Install Velopack CLI
+        run: dotnet tool install -g vpk --version 1.2.161
+
+      # Earlier releases let Velopack build small delta updates on top of them.
+      - name: Download previous release
+        run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pack
+        run: vpk pack --packId WaNut --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe WaNut.exe --packTitle WaNut --packAuthors PeanutGT --icon src/WaNut.App/Assets/wanut.ico
+
+      - name: Upload release
+        run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "WaNut ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}

@@ -14,6 +14,7 @@
         WindowStartupLocation="CenterScreen">
   <Window.Resources>
     <converters:LogLineLevelConverter x:Key="LogLineLevel" />
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!-- Status dot: gray when stopped, amber while busy, green when online. -->
     <Style x:Key="StatusDot" TargetType="Ellipse">
@@ -73,6 +74,36 @@
         <Button DockPanel.Dock="Bottom" Content="{res:Text AppSettings_Title}"
                 Command="{Binding OpenAppSettingsCommand}"
                 HorizontalAlignment="Stretch" Margin="0,8,0,0" />
+
+        <!-- A new WaNut version: the peanut brings the news. -->
+        <Border DockPanel.Dock="Bottom" DataContext="{Binding Updates}" Style="{StaticResource NoticeBanner}" Margin="0,12,0,0"
+                Visibility="{Binding ShowCard, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <Image Style="{StaticResource Peanut}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Top" />
+              <TextBlock Text="{Binding CardText}" TextWrapping="Wrap" MaxWidth="150" FontWeight="SemiBold"
+                         AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}">
+              <Button Content="{res:Text Update_Now}" Command="{Binding UpdateNowCommand}" Style="{StaticResource PrimaryButton}" />
+              <Button Content="{res:Text Update_Later}" Command="{Binding LaterCommand}" Margin="8,0,0,0" />
+            </StackPanel>
+            <ProgressBar Margin="0,8,0,0" Height="6" Minimum="0" Maximum="100" Value="{Binding DownloadPercent, Mode=OneWay}"
+                         AutomationProperties.Name="{Binding StatusText}"
+                         Visibility="{Binding IsWorking, Converter={StaticResource BoolToVisibility}}" />
+            <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" FontSize="12" Margin="0,6,0,0" MaxWidth="180" HorizontalAlignment="Left">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding StatusText}" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+          </StackPanel>
+        </Border>
 
         <!-- With no servers yet, the big button in the middle takes over. -->
         <Border DockPanel.Dock="Bottom" Style="{StaticResource HiddenWhenNoServers}" Margin="0,12,0,0">

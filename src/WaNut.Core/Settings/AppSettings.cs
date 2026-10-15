@@ -12,6 +12,9 @@ public sealed record AppSettings
 
     /// <summary>Backup cleanup rules, shared by every server.</summary>
     public BackupRules Backups { get; init; } = new();
+
+    /// <summary>Looks for a new WaNut release on GitHub each time WaNut starts.</summary>
+    public bool CheckForUpdates { get; init; } = true;
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)
