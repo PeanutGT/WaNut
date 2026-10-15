@@ -853,4 +853,16 @@ Stop the server and update?</value>
   <data name="ServersFolder_Failed" xml:space="preserve">
     <value>The servers could not be moved, so they stay in the old folder: {0}</value>
   </data>
+  <data name="AppSettings_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="AppSettings_LanguageHint" xml:space="preserve">
+    <value>Takes effect after WaNut restarts.</value>
+  </data>
+  <data name="Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Language_ZhTw" xml:space="preserve">
+    <value>繁體中文</value>
+  </data>
 </root>
