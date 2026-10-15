@@ -6,6 +6,7 @@
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
         Width="520" SizeToContent="Height"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
@@ -17,110 +18,9 @@
     </Style>
   </Window.Resources>
 
-  <StackPanel Margin="24">
-    <StackPanel Orientation="Horizontal">
-      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
-      <TextBlock Text="{res:Text CreateServer_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-    </StackPanel>
-
-    <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource FieldLabel}" />
-    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-             IsEnabled="{Binding IsIdle}" />
-
-    <TextBlock Text="{res:Text CreateServer_TypeLabel}" Style="{StaticResource FieldLabel}" />
-    <ListBox ItemsSource="{Binding ServerTypes}"
-             SelectedItem="{Binding SelectedType}"
-             IsEnabled="{Binding IsIdle}"
-             AutomationProperties.Name="{res:Text CreateServer_TypeLabel}"
-             Background="{DynamicResource CardBrush}"
-             BorderThickness="1"
-             Padding="4">
-      <ListBox.ItemContainerStyle>
-        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-          <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
-          <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
-          <Setter Property="Padding" Value="10,7" />
-        </Style>
-      </ListBox.ItemContainerStyle>
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <StackPanel>
-            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-            <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
-          </StackPanel>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
-
-    <TextBlock Text="{res:Text CreateServer_VersionLabel}" Style="{StaticResource FieldLabel}" />
-    <ComboBox ItemsSource="{Binding Versions}"
-              SelectedItem="{Binding SelectedVersion}"
-              DisplayMemberPath="Id"
-              IsEnabled="{Binding IsIdle}" />
-
-    <DockPanel Margin="0,14,0,6">
-      <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
-      <TextBlock Text="{res:Text CreateServer_MemoryLabel}" FontWeight="SemiBold" />
-    </DockPanel>
-    <Slider Minimum="{Binding MinMemoryMb}"
-            Maximum="{Binding MaxMemoryMb}"
-            Value="{Binding MemoryMb}"
-            TickFrequency="{Binding MemoryStepMb}"
-            SmallChange="{Binding MemoryStepMb}"
-            LargeChange="{Binding MemoryStepMb}"
-            IsSnapToTickEnabled="True"
-            IsEnabled="{Binding IsIdle}" />
-    <TextBlock Text="{res:Text CreateServer_MemoryHint}"
-               Style="{StaticResource MutedText}"
-               TextWrapping="Wrap" Margin="0,4,0,0" />
-
-    <TextBlock Text="{res:Text CreateServer_OwnerLabel}" Style="{StaticResource FieldLabel}" />
-    <TextBox Text="{Binding OwnerName, UpdateSourceTrigger=PropertyChanged}"
-             Tag="{res:Text CreateServer_OwnerPlaceholder}"
-             AutomationProperties.Name="{res:Text CreateServer_OwnerLabel}"
-             AutomationProperties.HelpText="{res:Text CreateServer_OwnerHint}"
-             MaxLength="16" InputMethod.IsInputMethodEnabled="False"
-             IsEnabled="{Binding IsIdle}" />
-    <TextBlock Text="{res:Text CreateServer_OwnerHint}"
-               Style="{StaticResource MutedText}"
-               TextWrapping="Wrap" Margin="0,4,0,0" />
-    <TextBlock Text="{res:Text Players_InvalidName}"
-               Foreground="{DynamicResource ErrorTextBrush}"
-               TextWrapping="Wrap" Margin="0,4,0,0"
-               Visibility="{Binding OwnerNameInvalid, Converter={StaticResource BoolToVisibility}}" />
-
-    <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
-      <TextBlock TextWrapping="Wrap">
-        <Run Text="{res:Text CreateServer_EulaPrefix}" />
-        <Hyperlink Command="{Binding OpenEulaCommand}"><Run Text="{res:Text CreateServer_EulaLink}" /></Hyperlink>
-      </TextBlock>
-    </CheckBox>
-
-    <StackPanel Margin="0,18,0,0"
-                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
-        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
-      </StackPanel>
-      <ProgressBar
-                   Value="{Binding ProgressPercent, Mode=OneWay}"
-                   IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
-    </StackPanel>
-
-    <Border Margin="0,14,0,0">
-      <Border.Style>
-        <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
-              <Setter Property="Visibility" Value="Collapsed" />
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </Border.Style>
-      <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
-    </Border>
-
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+  <!-- On a short screen the form scrolls, and Cancel/Create stay visible below it. -->
+  <DockPanel Margin="24,24,24,24">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
       <Button Content="{res:Text Common_Cancel}"
               Command="{Binding CancelCommand}"
               MinWidth="80" Margin="0,0,8,0" />
@@ -130,5 +30,113 @@
               MinWidth="80"
               IsDefault="True" />
     </StackPanel>
-  </StackPanel>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
+          <TextBlock Text="{res:Text CreateServer_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource FieldLabel}" />
+        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                 AutomationProperties.Name="{res:Text CreateServer_NameLabel}"
+                 IsEnabled="{Binding IsIdle}" />
+
+        <TextBlock Text="{res:Text CreateServer_TypeLabel}" Style="{StaticResource FieldLabel}" />
+        <ListBox ItemsSource="{Binding ServerTypes}"
+                 SelectedItem="{Binding SelectedType}"
+                 IsEnabled="{Binding IsIdle}"
+                 AutomationProperties.Name="{res:Text CreateServer_TypeLabel}"
+                 Background="{DynamicResource CardBrush}"
+                 BorderThickness="1"
+                 Padding="4">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+              <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+              <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+              <Setter Property="Padding" Value="10,7" />
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Text="{res:Text CreateServer_VersionLabel}" Style="{StaticResource FieldLabel}" />
+        <ComboBox ItemsSource="{Binding Versions}"
+                  SelectedItem="{Binding SelectedVersion}"
+                  DisplayMemberPath="Id"
+                  IsEnabled="{Binding IsIdle}" />
+
+        <DockPanel Margin="0,14,0,6">
+          <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
+          <TextBlock Text="{res:Text CreateServer_MemoryLabel}" FontWeight="SemiBold" />
+        </DockPanel>
+        <Slider Minimum="{Binding MinMemoryMb}"
+                Maximum="{Binding MaxMemoryMb}"
+                Value="{Binding MemoryMb}"
+                TickFrequency="{Binding MemoryStepMb}"
+                SmallChange="{Binding MemoryStepMb}"
+                LargeChange="{Binding MemoryStepMb}"
+                IsSnapToTickEnabled="True"
+                IsEnabled="{Binding IsIdle}" />
+        <TextBlock Text="{res:Text CreateServer_MemoryHint}"
+                   Style="{StaticResource MutedText}"
+                   TextWrapping="Wrap" Margin="0,4,0,0" />
+
+        <TextBlock Text="{res:Text CreateServer_OwnerLabel}" Style="{StaticResource FieldLabel}" />
+        <TextBox Text="{Binding OwnerName, UpdateSourceTrigger=PropertyChanged}"
+                 Tag="{res:Text CreateServer_OwnerPlaceholder}"
+                 AutomationProperties.Name="{res:Text CreateServer_OwnerLabel}"
+                 AutomationProperties.HelpText="{res:Text CreateServer_OwnerHint}"
+                 MaxLength="16" InputMethod.IsInputMethodEnabled="False"
+                 IsEnabled="{Binding IsIdle}" />
+        <TextBlock Text="{res:Text CreateServer_OwnerHint}"
+                   Style="{StaticResource MutedText}"
+                   TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock Text="{res:Text Players_InvalidName}"
+                   Foreground="{DynamicResource ErrorTextBrush}"
+                   TextWrapping="Wrap" Margin="0,4,0,0"
+                   Visibility="{Binding OwnerNameInvalid, Converter={StaticResource BoolToVisibility}}" />
+
+        <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
+          <TextBlock TextWrapping="Wrap">
+            <Run Text="{res:Text CreateServer_EulaPrefix}" />
+            <Hyperlink Command="{Binding OpenEulaCommand}"><Run Text="{res:Text CreateServer_EulaLink}" /></Hyperlink>
+          </TextBlock>
+        </CheckBox>
+
+        <StackPanel Margin="0,18,0,0"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
+          </StackPanel>
+          <ProgressBar
+                       Value="{Binding ProgressPercent, Mode=OneWay}"
+                       IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
+        </StackPanel>
+
+        <Border Margin="0,14,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
 </Window>
