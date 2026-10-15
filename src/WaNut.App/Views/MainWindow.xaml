@@ -85,7 +85,7 @@
                          AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}">
-              <Button Content="{res:Text Update_Now}" Command="{Binding UpdateNowCommand}" Style="{StaticResource PrimaryButton}" />
+              <Button Content="{res:Text Update_Now}" Command="{Binding UpdateNowCommand}" FontWeight="SemiBold" />
               <Button Content="{res:Text Update_Later}" Command="{Binding LaterCommand}" Margin="8,0,0,0" />
             </StackPanel>
             <ProgressBar Margin="0,8,0,0" Height="6" Minimum="0" Maximum="100" Value="{Binding DownloadPercent, Mode=OneWay}"
