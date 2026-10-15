@@ -91,6 +91,7 @@ public partial class App : Application
         services.AddTransient<CreateServerViewModel>();
         services.AddTransient<CreateServerWindow>();
         services.AddTransient<AppSettingsWindow>();
+        services.AddTransient<ServersFolderViewModel>();
         services.AddTransient<ChangeServerViewModel>();
         services.AddTransient<ChangeServerWindow>();
 

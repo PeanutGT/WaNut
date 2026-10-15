@@ -41,6 +41,44 @@
     <TextBlock Text="{res:Text Update_CheckOnStartHint}" Style="{StaticResource MutedText}"
                FontSize="12" TextWrapping="Wrap" Margin="26,2,0,18" />
 
+    <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,18">
+      <StackPanel x:Name="ServersFolderPanel" Margin="4,8,0,0">
+        <!-- DataContext: ServersFolderViewModel -->
+        <TextBlock Text="{res:Text Setup_ServersFolder}" Margin="0,0,0,6" />
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="{res:Text ServersFolder_Move}" Command="{Binding MoveCommand}" Margin="8,0,0,0" />
+          <Button DockPanel.Dock="Right" Content="{res:Text ServersFolder_Open}" Command="{Binding OpenFolderCommand}" Margin="8,0,0,0" />
+          <TextBox Text="{Binding InstancesDir, Mode=OneWay}" IsReadOnly="True" VerticalContentAlignment="Center" />
+        </DockPanel>
+        <TextBlock Text="{res:Text ServersFolder_Hint}" Style="{StaticResource MutedText}"
+                   FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock Text="{Binding StatusText}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
+                   AutomationProperties.LiveSetting="Polite">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+    </Expander>
+
     <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
     <CheckBox Content="{res:Text AppSettings_AdvancedMode}" IsChecked="{Binding AdvancedMode}" />
     <TextBlock Text="{res:Text AppSettings_AdvancedModeHint}" Style="{StaticResource MutedText}"
