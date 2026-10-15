@@ -72,8 +72,34 @@ public sealed class ServerCreatorTests : IDisposable
         Assert.Equal(4096, metadata.MemoryMb);
         Assert.Equal(Jar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
         Assert.True(EulaFile.IsAccepted(dir));
-        Assert.Contains("white-list=false", await File.ReadAllTextAsync(Path.Combine(dir, "server.properties")), StringComparison.Ordinal);
+        Assert.Contains("white-list=true", await File.ReadAllTextAsync(Path.Combine(dir, "server.properties")), StringComparison.Ordinal);
         Assert.Equivalent(metadata, Assert.Single(_store.LoadAll()), strict: true);
+    }
+
+    [Fact]
+    public async Task CreateAsync_OwnerName_QueuesWhitelistAndOp()
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: " Peanut_GT "));
+
+        Assert.Equal(["whitelist add Peanut_GT", "op Peanut_GT"], metadata.PendingCommands);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task CreateAsync_OwnerSkipped_QueuesNothing(string? owner)
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: owner));
+
+        Assert.Empty(metadata.PendingCommands);
+    }
+
+    [Fact]
+    public async Task CreateAsync_InvalidOwnerName_Throws()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: "op x; stop")));
     }
 
     [Fact]

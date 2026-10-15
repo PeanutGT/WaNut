@@ -150,13 +150,13 @@ public sealed class GameSettingsStoreTests : IDisposable
     }
 
     [Fact]
-    public void WriteDefaults_SetsMotdAndTurnsWhitelistOff()
+    public void WriteDefaults_SetsMotdAndTurnsWhitelistOn()
     {
         GameSettingsStore.WriteDefaults(_dir.Path, "Peanut's world 花生");
 
         var settings = GameSettingsStore.Load(_dir.Path, Metadata("26.3"));
         Assert.Equal("Peanut's world 花生", settings.Motd);
-        Assert.Contains("white-list=false", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
+        Assert.Contains("white-list=true", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
         Assert.DoesNotContain("management-server", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
     }
 

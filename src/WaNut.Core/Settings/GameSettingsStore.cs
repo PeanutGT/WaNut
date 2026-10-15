@@ -147,9 +147,9 @@ public static class GameSettingsStore
         var properties = PropertiesFile.Parse(string.Empty);
         properties.Set("motd", serverName);
 
-        // 26.x turns the whitelist on by default, which with an empty list lets nobody in. Friends should be
-        // able to join a new server; the Players tab turns it on with a list.
-        properties.Set("white-list", "false");
+        // Peanut's choice (blueprint decision 21): every new server starts with the whitelist on, on every
+        // version, so strangers cannot join. The Players tab warns until someone is on the list.
+        properties.Set("white-list", "true");
         properties.Save(Path.Combine(instanceDir, PropertiesFileName));
     }
 

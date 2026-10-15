@@ -1,5 +1,6 @@
 using WaNut.Core.Downloads;
 using WaNut.Core.Java;
+using WaNut.Core.Players;
 using WaNut.Core.Settings;
 using WaNut.Core.Versions;
 
@@ -33,6 +34,12 @@ public sealed class ServerCreator(
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(request.Name);
+        var owner = string.IsNullOrWhiteSpace(request.OwnerName) ? null : request.OwnerName.Trim();
+        if (owner is not null && !PlayerLists.IsValidName(owner))
+        {
+            // The name becomes part of a console command, so only real player names get through.
+            throw new ArgumentException("Not a valid Minecraft player name.", nameof(request));
+        }
 
         // Mojang's data gives the Java version for every server type (blueprint 1.A).
         progress?.Report(new CreateServerProgress(CreateServerStage.ReadingVersion));
@@ -59,6 +66,9 @@ public sealed class ServerCreator(
                 LoaderVersion = files.LoaderVersion,
                 ServerJar = files.LaunchJar,
                 CreatedAt = now,
+                PendingCommands = owner is null
+                    ? []
+                    : [PlayerLists.AddCommand(PlayerList.Whitelist, owner), PlayerLists.AddCommand(PlayerList.Operators, owner)],
             };
 
             foreach (var (cached, fileName) in files.Copies)
