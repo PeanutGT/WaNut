@@ -67,6 +67,8 @@ public sealed class ServerController(
     private async Task<bool> BackUpBeforeStartAsync(ServerViewModel server)
     {
         string problem;
+        server.Backups.ErrorText = null;
+        server.Backups.DoneText = null;
         try
         {
             var backup = await backups.CreateAsync(server.InstanceDir, BackupReason.Start, new Progress<double>(server.ReportBackup));

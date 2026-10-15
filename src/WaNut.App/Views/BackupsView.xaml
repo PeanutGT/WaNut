@@ -32,6 +32,7 @@
           <Style TargetType="ListBoxItem">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
             <Setter Property="Template">
               <Setter.Value>

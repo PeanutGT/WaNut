@@ -77,6 +77,19 @@ public sealed partial class BackupsViewModel : ObservableObject
         OnPropertyChanged(nameof(TotalSizeText));
     }
 
+    /// <summary>The tab was opened: rescan, since backups may have been added or removed in Explorer, and drop old messages.</summary>
+    public void OnShown()
+    {
+        if (IsWorking)
+        {
+            return;
+        }
+
+        ErrorText = null;
+        DoneText = null;
+        Reload();
+    }
+
     internal void OnServerStatusChanged()
     {
         OnPropertyChanged(nameof(CanChange));

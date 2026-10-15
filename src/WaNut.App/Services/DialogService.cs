@@ -1,6 +1,5 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
-using WaNut.App.Resources;
 using WaNut.App.Views;
 using WaNut.Core.Instances;
 
@@ -24,10 +23,16 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public bool Confirm(string message)
     {
-        var owner = Application.Current.MainWindow;
-        var result = owner is { IsVisible: true }
-            ? MessageBox.Show(owner, message, Text.Get("App_Title"), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No)
-            : MessageBox.Show(message, Text.Get("App_Title"), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
-        return result == MessageBoxResult.Yes;
+        var window = new ConfirmWindow(message);
+        if (Application.Current.MainWindow is { IsVisible: true } owner)
+        {
+            window.Owner = owner;
+        }
+        else
+        {
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
+
+        return window.ShowDialog() == true;
     }
 }

@@ -163,7 +163,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 ### Backups (decision 7)
 * Before each start, zip `world/` (and the Nether/End folders) into `backups/<timestamp>.zip`.
 * Cleanup rules in settings: keep the last N backups (default 5) and delete backups older than X days (default 30).
-* Restore a backup from the UI (server must be stopped). Restoring backs up the current world first, so a restore can be undone.
+* Restore a backup from the UI (server must be stopped). Restoring backs up the current world first, so a restore can be undone. These safety copies don't count toward the keep count (they still expire by age), so a few starts after a restore can't delete the only way back.
 * Backups and restores run only while the server is stopped; a running server keeps writing its region files. "Back up now" is greyed out while it runs.
 * The newest backup is always kept, even when it is older than X days, so a server left alone for months still has one.
 * The cleanup rules live in `config.json` and apply to every server. They are edited under "More settings" on the Backups tab.

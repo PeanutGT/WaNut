@@ -99,7 +99,8 @@ public sealed partial class BackupStore(TimeProvider clock)
     /// <summary>
     /// Deletes backups beyond the newest <see cref="BackupRules.KeepCount"/> and those older than
     /// <see cref="BackupRules.MaxAgeDays"/>. The newest backup is always kept, however old, so a server left alone
-    /// for months still has one.
+    /// for months still has one. The copies made before a restore do not count toward the keep count, so a few
+    /// starts after a restore cannot delete the only way back; they still expire by age.
     /// </summary>
     public IReadOnlyList<BackupInfo> Cleanup(string instanceDir, BackupRules rules)
     {
@@ -107,12 +108,20 @@ public sealed partial class BackupStore(TimeProvider clock)
         var oldest = clock.GetUtcNow() - TimeSpan.FromDays(rules.MaxAgeDays);
         var deleted = new List<BackupInfo>();
         var backups = List(instanceDir);
-        for (var i = 1; i < backups.Count; i++)
+        var counted = 0;
+        for (var i = 0; i < backups.Count; i++)
         {
-            if (i >= rules.KeepCount || backups[i].CreatedAt < oldest)
+            var backup = backups[i];
+            var isSafetyCopy = backup.Reason == BackupReason.Restore;
+            var tooMany = !isSafetyCopy && counted >= rules.KeepCount;
+            if (i > 0 && (tooMany || backup.CreatedAt < oldest))
             {
-                File.Delete(backups[i].FilePath);
-                deleted.Add(backups[i]);
+                File.Delete(backup.FilePath);
+                deleted.Add(backup);
+            }
+            else if (!isSafetyCopy)
+            {
+                counted++;
             }
         }
 

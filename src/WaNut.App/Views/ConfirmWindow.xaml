@@ -1,0 +1,21 @@
+<Window x:Class="WaNut.App.Views.ConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WaNut.App.Resources"
+        Title="{res:Text App_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
+        Width="440" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+  <!-- A yes/no question in WaNut's own look and language, instead of a Windows message box whose buttons follow the PC's language. -->
+  <StackPanel Margin="24">
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="14" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+      <Button x:Name="YesButton" Content="{res:Text Common_Yes}" MinWidth="80" Margin="0,0,8,0" Click="OnYes" />
+      <!-- "No" is the safe answer, so Enter and Esc both pick it. -->
+      <Button x:Name="NoButton" Content="{res:Text Common_No}" MinWidth="80" IsDefault="True" IsCancel="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

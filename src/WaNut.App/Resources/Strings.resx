@@ -493,7 +493,7 @@ Start the server anyway, without a fresh backup?</value>
 The current world will be replaced. WaNut backs it up first, so you can go back.</value>
   </data>
   <data name="Backups_RestoreLabel" xml:space="preserve">
-    <value>Restore the backup from {0}</value>
+    <value>Restore the backup from {0} ({1})</value>
   </data>
   <data name="Backups_Restore" xml:space="preserve">
     <value>Restore</value>
@@ -527,5 +527,14 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   </data>
   <data name="Backups_RulesShared" xml:space="preserve">
     <value>These rules apply to every server.</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Backups_DateFormat" xml:space="preserve">
+    <value>MMM d, yyyy HH:mm:ss</value>
   </data>
 </root>

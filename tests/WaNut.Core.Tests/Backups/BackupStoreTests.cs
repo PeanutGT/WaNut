@@ -190,6 +190,37 @@ public sealed class BackupStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task Cleanup_RestoreSafetyCopies_DoNotCountTowardKeepCount()
+    {
+        WriteWorld();
+        await BackUpAsync(BackupReason.Restore);
+        for (var i = 0; i < 3; i++)
+        {
+            _clock.Advance(TimeSpan.FromMinutes(1));
+            await BackUpAsync(BackupReason.Start);
+        }
+
+        _store.Cleanup(Dir, new BackupRules { KeepCount = 2, MaxAgeDays = 30 });
+
+        Assert.Equal(
+            [BackupReason.Start, BackupReason.Start, BackupReason.Restore],
+            _store.List(Dir).Select(b => b.Reason));
+    }
+
+    [Fact]
+    public async Task Cleanup_OldRestoreSafetyCopy_ExpiresByAge()
+    {
+        WriteWorld();
+        await BackUpAsync(BackupReason.Restore);
+        _clock.Advance(TimeSpan.FromDays(40));
+        await BackUpAsync(BackupReason.Start);
+
+        _store.Cleanup(Dir, new BackupRules());
+
+        Assert.Equal([BackupReason.Start], _store.List(Dir).Select(b => b.Reason));
+    }
+
+    [Fact]
     public async Task Cleanup_LeavesOtherZipsAlone()
     {
         WriteWorld();
