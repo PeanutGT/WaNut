@@ -11,6 +11,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
+using WaNut.Core.Network;
 using WaNut.Core.Settings;
 using WaNut.Core.Updates;
 using WaNut.Core.Versions;
@@ -66,6 +67,9 @@ public partial class App : Application
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
+        services.AddSingleton<IFirewall, WindowsFirewall>();
+        services.AddSingleton<FirewallService>();
+        services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<AppUpdater>();
 
         services.AddSingleton<IDialogService, DialogService>();

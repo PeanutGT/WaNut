@@ -72,7 +72,9 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Show the PC's IPv4 addresses with a **Copy** button, labelled by adapter (e.g. "Wi-Fi", "Radmin VPN", "ZeroTier", "Tailscale") so the user knows which one to give friends.
 * Show the port (default `25565`) next to it, in the `IP:port` form players paste into Minecraft.
 * **Windows Defender Firewall rule:** still needed for LAN and Radmin VPN, otherwise Windows can silently block friends. On first launch of a server, ask once for administrator approval (UAC) and add an inbound rule per bundled `java.exe` (rules apply to a program file, not a folder).
-* A short in-app guide: "Playing with friends over Radmin VPN".
+* The rule covers every network profile: Windows usually files Radmin VPN, and often the home network too, as "Public". WaNut also removes inbound block rules for its own `java.exe` (left behind when Windows' own prompt was cancelled), since a block rule wins over any allow rule. The question comes once per `java.exe` (remembered in `config.json`); the Connect tab shows the firewall state and can add the rule later. Setting `WANUT_FIREWALL_DRY_RUN=1` writes the PowerShell it would run to `firewall-dry-run.ps1` in the data folder instead of asking for UAC.
+* The address list hides disconnected adapters, `169.254.x.x` addresses and virtual-machine adapters (Hyper-V/WSL, VirtualBox, VMware, Bluetooth). Radmin VPN, ZeroTier, Tailscale and Hamachi are recognised by their adapter description, because adapter names are translated on non-English Windows ("乙太網路").
+* A short in-app guide, "Playing with friends over the internet", under More settings on the Connect tab. It is tool-neutral (the main tool differs by region): general steps for host and friends, then one line per common tool (Radmin VPN, ZeroTier, Tailscale, Hamachi) naming where to click. Any adapter with a usable IPv4 is listed, under its Windows name when WaNut doesn't know the tool.
 
 ### Later phases: over the internet without extra tools
 | Method | How It Works on Windows | Pros | Cons |
@@ -126,7 +128,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
 | Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off) | Custom JVM arguments, choose Java manually, use your own server.jar |
 | Backups | Backup list, restore, back up now | Keep count, delete after days | |
-| Connect | IPv4 per adapter with Copy | Radmin VPN guide | |
+| Connect | IPv4 per adapter with Copy | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
 | App settings | | Instances folder, update check | Advanced mode switch; clear download cache |
 
   Phase 1 Advanced mode contains only custom JVM arguments; the other advanced items come later.

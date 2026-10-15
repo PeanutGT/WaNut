@@ -588,6 +588,160 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   <data name="Backups_Reason_Change" xml:space="preserve">
     <value>Before a type or version change</value>
   </data>
+  <data name="Server_TabConnect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="Connect_Intro" xml:space="preserve">
+    <value>Give your friends one of these addresses. In Minecraft they go to Multiplayer, then Add Server, and paste it into Server Address.</value>
+  </data>
+  <data name="Connect_WhitelistHint" xml:space="preserve">
+    <value>New servers only let in players on the whitelist, so add your friends' names on the Players tab first.</value>
+  </data>
+  <data name="Connect_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Connect_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Connect_CopyLabel" xml:space="preserve">
+    <value>Copy the {0} address {1}</value>
+  </data>
+  <data name="Connect_Copied" xml:space="preserve">
+    <value>Copied {0}! Send it to your friends.</value>
+  </data>
+  <data name="Connect_CopyFailed" xml:space="preserve">
+    <value>The address couldn't be copied because another program is using the clipboard. Try again in a moment.</value>
+  </data>
+  <data name="Connect_ListFailed" xml:space="preserve">
+    <value>WaNut couldn't read this PC's network adapters: {0}</value>
+  </data>
+  <data name="Connect_Empty" xml:space="preserve">
+    <value>No network found</value>
+  </data>
+  <data name="Connect_EmptyHint" xml:space="preserve">
+    <value>Connect to Wi-Fi, or start Radmin VPN, ZeroTier or Tailscale, then press Refresh.</value>
+  </data>
+  <data name="Connect_Kind_RadminVpn" xml:space="preserve">
+    <value>Radmin VPN</value>
+  </data>
+  <data name="Connect_Kind_ZeroTier" xml:space="preserve">
+    <value>ZeroTier</value>
+  </data>
+  <data name="Connect_Kind_Tailscale" xml:space="preserve">
+    <value>Tailscale</value>
+  </data>
+  <data name="Connect_Kind_Hamachi" xml:space="preserve">
+    <value>Hamachi</value>
+  </data>
+  <data name="Connect_Hint_Lan" xml:space="preserve">
+    <value>For friends on the same Wi-Fi or router as you, or in the same VPN tool.</value>
+  </data>
+  <data name="Connect_Hint_RadminVpn" xml:space="preserve">
+    <value>For friends in your Radmin VPN network.</value>
+  </data>
+  <data name="Connect_Hint_ZeroTier" xml:space="preserve">
+    <value>For friends in your ZeroTier network.</value>
+  </data>
+  <data name="Connect_Hint_Tailscale" xml:space="preserve">
+    <value>For friends in your Tailscale network.</value>
+  </data>
+  <data name="Connect_Hint_Hamachi" xml:space="preserve">
+    <value>For friends in your Hamachi network.</value>
+  </data>
+  <data name="Connect_Firewall" xml:space="preserve">
+    <value>Windows Firewall</value>
+  </data>
+  <data name="Connect_FirewallChecking" xml:space="preserve">
+    <value>Checking Windows Firewall…</value>
+  </data>
+  <data name="Connect_Firewall_Allowed" xml:space="preserve">
+    <value>Windows Firewall lets your friends in.</value>
+  </data>
+  <data name="Connect_Firewall_NotAllowed" xml:space="preserve">
+    <value>Windows Firewall may block your friends. Allow WaNut's Java through it so they can join.</value>
+  </data>
+  <data name="Connect_Firewall_Blocked" xml:space="preserve">
+    <value>Windows Firewall has a rule that blocks WaNut's Java, so friends can't join.</value>
+  </data>
+  <data name="Connect_Firewall_Unknown" xml:space="preserve">
+    <value>WaNut couldn't read the Windows Firewall rules. If friends can't join, check that Java is allowed in Windows Security.</value>
+  </data>
+  <data name="Connect_FirewallAllow" xml:space="preserve">
+    <value>Allow through firewall</value>
+  </data>
+  <data name="Connect_FirewallAllowHint" xml:space="preserve">
+    <value>Windows asks for administrator approval. WaNut then adds one rule for its own Java and removes any rule that blocks it.</value>
+  </data>
+  <data name="Connect_FirewallDeclined" xml:space="preserve">
+    <value>Nothing was changed. You can allow it here any time. Windows may also ask with its own window when the server starts: if you cancel that one, Windows blocks WaNut's Java, and the button here fixes that too.</value>
+  </data>
+  <data name="Connect_FirewallFailed" xml:space="preserve">
+    <value>Windows Firewall wasn't changed. You can add the rule yourself in Windows Security: allow inbound connections for {0}.</value>
+  </data>
+  <data name="Connect_FirewallNoJava" xml:space="preserve">
+    <value>This server's Java isn't downloaded yet. Start the server once, then check again.</value>
+  </data>
+  <data name="Firewall_Ask" xml:space="preserve">
+    <value>Let your friends join through Windows Firewall?
+
+Windows asks for administrator approval next. WaNut then adds one rule that lets its own Java {0} accept connections from friends. You can also do this later on the Connect tab.</value>
+  </data>
+  <data name="Firewall_AskBlocked" xml:space="preserve">
+    <value>Windows Firewall is blocking WaNut's Java, so friends can't join. Fix it now?
+
+Windows asks for administrator approval next. WaNut then removes the blocking rule and adds one that lets its own Java {0} accept connections. You can also do this later on the Connect tab.</value>
+  </data>
+  <data name="Connect_GuideTitle" xml:space="preserve">
+    <value>Playing with friends over the internet</value>
+  </data>
+  <data name="Connect_GuideIntro" xml:space="preserve">
+    <value>Friends who aren't on your Wi-Fi can join through a virtual LAN tool. You and your friends join one network in it, and this tab then shows your address in that network. Any tool works, so pick the one your friends already use.</value>
+  </data>
+  <data name="Connect_GuideHost" xml:space="preserve">
+    <value>You (the host)</value>
+  </data>
+  <data name="Connect_GuideStep1" xml:space="preserve">
+    <value>1. Install the same tool as your friends, turn it on, and create a network (or join the one a friend made).</value>
+  </data>
+  <data name="Connect_GuideStep2" xml:space="preserve">
+    <value>2. On the Players tab here, add each friend's Minecraft name to the whitelist.</value>
+  </data>
+  <data name="Connect_GuideStep3" xml:space="preserve">
+    <value>3. Start the server. A line for the tool appears at the top of this tab: press Copy and send that address to your friends.</value>
+  </data>
+  <data name="Connect_GuideFriends" xml:space="preserve">
+    <value>Your friends</value>
+  </data>
+  <data name="Connect_GuideStep4" xml:space="preserve">
+    <value>4. Install the same tool, turn it on and join your network.</value>
+  </data>
+  <data name="Connect_GuideStep5" xml:space="preserve">
+    <value>5. In Minecraft (the same version as the server) choose Multiplayer, then Add Server, paste the address into Server Address, then Done, and join.</value>
+  </data>
+  <data name="Connect_GuideTools" xml:space="preserve">
+    <value>Where to click in common tools</value>
+  </data>
+  <data name="Connect_ToolRadmin" xml:space="preserve">
+    <value>Radmin VPN (free): choose Network, then Create Network, with a name and a password of at least 6 characters. Friends choose Network, then Join Network. Addresses start with 26.</value>
+  </data>
+  <data name="Connect_ToolZeroTier" xml:space="preserve">
+    <value>ZeroTier (free): create a network at my.zerotier.com. Everyone joins it with its Network ID, then you tick each new member under Auth.</value>
+  </data>
+  <data name="Connect_ToolTailscale" xml:space="preserve">
+    <value>Tailscale (sign-in needed): sign in on your PC, then share your PC with each friend from the Tailscale admin console. Addresses start with 100.</value>
+  </data>
+  <data name="Connect_ToolHamachi" xml:space="preserve">
+    <value>Hamachi (free for up to 5 people): choose Network, then Create a new network. Friends choose Join an existing network. Addresses start with 25.</value>
+  </data>
+  <data name="Connect_ToolSite" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="Connect_GuideNotListed" xml:space="preserve">
+    <value>Your tool isn't listed at the top? Check that it's turned on and in a network, then press Refresh. A tool WaNut doesn't know shows under the name Windows gives its adapter.</value>
+  </data>
+  <data name="Connect_GuideTrouble" xml:space="preserve">
+    <value>Friends can't join? Check that they're on the whitelist, that Windows Firewall lets them in (above), and that everyone has the same Minecraft version. If the tool itself can't reach your PC (most have a Ping option), the problem is the tool's connection, not the server.</value>
+  </data>
   <data name="Update_Section" xml:space="preserve">
     <value>Updates</value>
   </data>
