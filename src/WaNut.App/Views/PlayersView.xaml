@@ -1,0 +1,167 @@
+<UserControl x:Class="WaNut.App.Views.PlayersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources">
+  <!-- DataContext: ServerViewModel -->
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+    <Style x:Key="Heading" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+      <!-- Online now -->
+      <TextBlock Text="{res:Text Players_Online}" Style="{StaticResource Heading}" />
+      <ItemsControl ItemsSource="{Binding Players}" Margin="0,0,0,4"
+                    AutomationProperties.Name="{res:Text Players_Online}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal" Margin="0,3">
+              <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+              <TextBlock Text="{Binding}" FontSize="14" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Players.Count}" Value="0">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <Image Style="{StaticResource Peanut}" Width="24" Height="24" Margin="0,0,8,0" />
+        <TextBlock Text="{res:Text Server_NoPlayers}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
+      </StackPanel>
+
+      <Border Margin="0,16,0,0">
+        <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding PlayerLists.NameError}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <TextBlock Text="{Binding PlayerLists.NameError}" TextWrapping="Wrap" />
+      </Border>
+
+      <Border Style="{StaticResource NoticeBanner}" Margin="0,16,0,0"
+              Visibility="{Binding PlayerLists.HasPendingChanges, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Players_Pending}" TextWrapping="Wrap" />
+      </Border>
+
+      <!-- Whitelist -->
+      <TextBlock Text="{res:Text Players_Whitelist}" Style="{StaticResource Heading}" Margin="0,24,0,8" />
+      <CheckBox Content="{res:Text Players_WhitelistOn}" IsChecked="{Binding PlayerLists.WhitelistOn}"
+                IsEnabled="{Binding PlayerLists.CanChangeWhitelistSwitch}" Margin="0,0,0,10" />
+      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,10"
+              Visibility="{Binding PlayerLists.ShowEmptyWhitelistWarning, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Players_WhitelistEmpty}" TextWrapping="Wrap" />
+      </Border>
+      <ContentControl Content="{Binding PlayerLists}">
+        <ContentControl.ContentTemplate>
+          <DataTemplate>
+            <StackPanel>
+              <ItemsControl ItemsSource="{Binding Whitelist}" AutomationProperties.Name="{res:Text Players_Whitelist}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <DockPanel Margin="0,2">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
+                              AutomationProperties.Name="{Binding RemoveLabel}"
+                              Command="{Binding DataContext.RemoveFromWhitelistCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                              CommandParameter="{Binding}" />
+                      <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Whitelist.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <DockPanel Margin="0,8,0,0">
+                <Button DockPanel.Dock="Right" Content="{res:Text Players_Add}" Command="{Binding AddToWhitelistCommand}"
+                        AutomationProperties.Name="{res:Text Players_AddToWhitelist}" MinWidth="72" Margin="8,0,0,0" />
+                <TextBox Text="{Binding NewWhitelistName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16"
+                         Tag="{res:Text Players_NamePlaceholder}" AutomationProperties.Name="{res:Text Players_AddToWhitelist}"
+                         InputMethod.IsInputMethodEnabled="False">
+                  <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding AddToWhitelistCommand}" />
+                  </TextBox.InputBindings>
+                </TextBox>
+              </DockPanel>
+
+              <!-- Operators -->
+              <TextBlock Text="{res:Text Players_Operators}" FontSize="15" FontWeight="SemiBold" Margin="0,28,0,4" />
+              <TextBlock Text="{res:Text Players_OperatorsHint}" Style="{StaticResource MutedText}" FontSize="12"
+                         TextWrapping="Wrap" Margin="0,0,0,8" />
+              <ItemsControl ItemsSource="{Binding Operators}" AutomationProperties.Name="{res:Text Players_Operators}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <DockPanel Margin="0,2">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
+                              AutomationProperties.Name="{Binding RemoveLabel}"
+                              Command="{Binding DataContext.RemoveOperatorCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                              CommandParameter="{Binding}" />
+                      <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Operators.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <DockPanel Margin="0,8,0,0">
+                <Button DockPanel.Dock="Right" Content="{res:Text Players_Add}" Command="{Binding AddOperatorCommand}"
+                        AutomationProperties.Name="{res:Text Players_AddOperator}" MinWidth="72" Margin="8,0,0,0" />
+                <TextBox Text="{Binding NewOperatorName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16"
+                         Tag="{res:Text Players_NamePlaceholder}" AutomationProperties.Name="{res:Text Players_AddOperator}"
+                         InputMethod.IsInputMethodEnabled="False">
+                  <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding AddOperatorCommand}" />
+                  </TextBox.InputBindings>
+                </TextBox>
+              </DockPanel>
+            </StackPanel>
+          </DataTemplate>
+        </ContentControl.ContentTemplate>
+      </ContentControl>
+
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
+        <TextBlock Text="{res:Text Players_KickBanHint}" Style="{StaticResource Hint}" Margin="4,0,0,0" />
+      </Expander>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -195,4 +195,160 @@ Choose No to keep waiting.</value>
   <data name="Main_LoaderVersion" xml:space="preserve">
     <value>loader</value>
   </data>
+  <data name="Server_TabGame" xml:space="preserve">
+    <value>Game settings</value>
+  </data>
+  <data name="Settings_MoreSettings" xml:space="preserve">
+    <value>More settings</value>
+  </data>
+  <data name="Settings_SaveFailed" xml:space="preserve">
+    <value>Could not save the settings: {0}</value>
+  </data>
+  <data name="Settings_LoadFailed" xml:space="preserve">
+    <value>Could not read the settings: {0}</value>
+  </data>
+  <data name="Game_StopToChange" xml:space="preserve">
+    <value>Stop the server to change the greyed-out settings. Keep inventory and the other game rules change right away.</value>
+  </data>
+  <data name="Game_Mode" xml:space="preserve">
+    <value>Game mode</value>
+  </data>
+  <data name="Game_ModeHint" xml:space="preserve">
+    <value>Players joining for the first time start in this mode.</value>
+  </data>
+  <data name="Game_ModeSurvival" xml:space="preserve">
+    <value>Survival</value>
+  </data>
+  <data name="Game_ModeCreative" xml:space="preserve">
+    <value>Creative</value>
+  </data>
+  <data name="Game_ModeAdventure" xml:space="preserve">
+    <value>Adventure</value>
+  </data>
+  <data name="Game_ModeSpectator" xml:space="preserve">
+    <value>Spectator</value>
+  </data>
+  <data name="Game_Difficulty" xml:space="preserve">
+    <value>Difficulty</value>
+  </data>
+  <data name="Game_DifficultyPeaceful" xml:space="preserve">
+    <value>Peaceful</value>
+  </data>
+  <data name="Game_DifficultyEasy" xml:space="preserve">
+    <value>Easy</value>
+  </data>
+  <data name="Game_DifficultyNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Game_DifficultyHard" xml:space="preserve">
+    <value>Hard</value>
+  </data>
+  <data name="Game_Pvp" xml:space="preserve">
+    <value>Players can hurt each other (PvP)</value>
+  </data>
+  <data name="Game_KeepInventory" xml:space="preserve">
+    <value>Keep items after dying</value>
+  </data>
+  <data name="Game_MaxPlayers" xml:space="preserve">
+    <value>Max players</value>
+  </data>
+  <data name="Game_Motd" xml:space="preserve">
+    <value>Server message</value>
+  </data>
+  <data name="Game_MotdHint" xml:space="preserve">
+    <value>Shown under the server's name in Minecraft's server list.</value>
+  </data>
+  <data name="Game_ViewDistance" xml:space="preserve">
+    <value>View distance</value>
+  </data>
+  <data name="Game_SimulationDistance" xml:space="preserve">
+    <value>Simulation distance</value>
+  </data>
+  <data name="Game_DistanceHint" xml:space="preserve">
+    <value>In chunks. Lower numbers run smoother on a slower PC.</value>
+  </data>
+  <data name="Game_Chunks" xml:space="preserve">
+    <value>{0} chunks</value>
+  </data>
+  <data name="Game_SpawnProtection" xml:space="preserve">
+    <value>Spawn protection</value>
+  </data>
+  <data name="Game_SpawnProtectionHint" xml:space="preserve">
+    <value>Only operators can build this many blocks around spawn. 0 turns it off.</value>
+  </data>
+  <data name="Game_CommandBlocks" xml:space="preserve">
+    <value>Command blocks work</value>
+  </data>
+  <data name="Game_AllowFlight" xml:space="preserve">
+    <value>Allow flying</value>
+  </data>
+  <data name="Game_AllowFlightHint" xml:space="preserve">
+    <value>Turn on if a mod or plugin lets players fly, so they are not kicked for it.</value>
+  </data>
+  <data name="Game_SpawnMonsters" xml:space="preserve">
+    <value>Monsters spawn</value>
+  </data>
+  <data name="Game_Hardcore" xml:space="preserve">
+    <value>Hardcore</value>
+  </data>
+  <data name="Game_HardcoreHint" xml:space="preserve">
+    <value>One life only: players who die become spectators.</value>
+  </data>
+  <data name="Game_Seed" xml:space="preserve">
+    <value>World seed</value>
+  </data>
+  <data name="Game_SeedHint" xml:space="preserve">
+    <value>Leave empty for a random world.</value>
+  </data>
+  <data name="Game_SeedLocked" xml:space="preserve">
+    <value>The world already exists, so its seed can no longer change.</value>
+  </data>
+  <data name="Players_Online" xml:space="preserve">
+    <value>Online now</value>
+  </data>
+  <data name="Players_Whitelist" xml:space="preserve">
+    <value>Whitelist</value>
+  </data>
+  <data name="Players_WhitelistOn" xml:space="preserve">
+    <value>Only players on the whitelist can join</value>
+  </data>
+  <data name="Players_WhitelistEmpty" xml:space="preserve">
+    <value>The whitelist is on but empty, so nobody can join. Add your friends' names and your own.</value>
+  </data>
+  <data name="Players_NamePlaceholder" xml:space="preserve">
+    <value>Player name</value>
+  </data>
+  <data name="Players_AddToWhitelist" xml:space="preserve">
+    <value>Add to whitelist</value>
+  </data>
+  <data name="Players_Operators" xml:space="preserve">
+    <value>Operators</value>
+  </data>
+  <data name="Players_OperatorsHint" xml:space="preserve">
+    <value>Operators can use every command, such as gamemode, kick and stop.</value>
+  </data>
+  <data name="Players_AddOperator" xml:space="preserve">
+    <value>Add operator</value>
+  </data>
+  <data name="Players_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Players_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Players_RemoveName" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="Players_EmptyList" xml:space="preserve">
+    <value>Nobody yet.</value>
+  </data>
+  <data name="Players_InvalidName" xml:space="preserve">
+    <value>Player names are 1 to 16 letters, numbers or underscores.</value>
+  </data>
+  <data name="Players_Pending" xml:space="preserve">
+    <value>Changes made while the server is stopped are applied the next time it starts.</value>
+  </data>
+  <data name="Players_KickBanHint" xml:space="preserve">
+    <value>To kick or ban a player, type kick &lt;name&gt; or ban &lt;name&gt; in the Console. pardon &lt;name&gt; lets them back in.</value>
+  </data>
 </root>

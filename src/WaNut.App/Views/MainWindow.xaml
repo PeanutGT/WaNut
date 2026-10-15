@@ -5,6 +5,7 @@
         xmlns:behaviors="clr-namespace:WaNut.App.Behaviors"
         xmlns:converters="clr-namespace:WaNut.App.Converters"
         xmlns:hosting="clr-namespace:WaNut.Core.Hosting;assembly=WaNut.Core"
+        xmlns:views="clr-namespace:WaNut.App.Views"
         Title="{res:Text App_Title}"
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
@@ -354,23 +355,11 @@
           </TabItem>
 
           <TabItem Header="{Binding PlayersHeader}">
-            <Grid>
-              <ListBox ItemsSource="{Binding Players}" FontSize="14" />
-              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel.Style>
-                  <Style TargetType="StackPanel">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                    <Style.Triggers>
-                      <DataTrigger Binding="{Binding Players.Count}" Value="0">
-                        <Setter Property="Visibility" Value="Visible" />
-                      </DataTrigger>
-                    </Style.Triggers>
-                  </Style>
-                </StackPanel.Style>
-                <Image Style="{StaticResource Peanut}" Width="48" Height="48" Margin="0,0,0,12" />
-                <TextBlock Text="{res:Text Server_NoPlayers}" Style="{StaticResource MutedText}" />
-              </StackPanel>
-            </Grid>
+            <views:PlayersView />
+          </TabItem>
+
+          <TabItem Header="{res:Text Server_TabGame}">
+            <views:GameSettingsView DataContext="{Binding GameSettings}" />
           </TabItem>
         </TabControl>
       </DockPanel>

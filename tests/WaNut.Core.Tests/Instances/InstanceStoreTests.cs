@@ -52,7 +52,23 @@ public sealed class InstanceStoreTests : IDisposable
         _store.Save(saved);
         var loaded = Assert.Single(_store.LoadAll());
 
-        Assert.Equal(saved, loaded);
+        Assert.Equivalent(saved, loaded, strict: true);
+    }
+
+    [Fact]
+    public void SaveThenLoadAll_KeepsGameRulesAndPendingCommands()
+    {
+        var saved = Sample("test", "Test", DateTimeOffset.UnixEpoch) with
+        {
+            GameRules = new Dictionary<string, bool> { ["KeepInventory"] = true },
+            PendingCommands = ["whitelist add Notch"],
+        };
+
+        _store.Save(saved);
+        var loaded = Assert.Single(_store.LoadAll());
+
+        Assert.Equal(saved.GameRules, loaded.GameRules);
+        Assert.Equal(saved.PendingCommands, loaded.PendingCommands);
     }
 
     [Fact]

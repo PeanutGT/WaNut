@@ -64,7 +64,7 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store));
         }
     }
 }

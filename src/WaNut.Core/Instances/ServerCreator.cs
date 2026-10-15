@@ -1,5 +1,6 @@
 using WaNut.Core.Downloads;
 using WaNut.Core.Java;
+using WaNut.Core.Settings;
 using WaNut.Core.Versions;
 
 namespace WaNut.Core.Instances;
@@ -72,6 +73,7 @@ public sealed class ServerCreator(
             }
 
             EulaFile.WriteAccepted(dir, now);
+            GameSettingsStore.WriteDefaults(dir, metadata.Name);
             store.Save(metadata);
             return metadata;
         }
