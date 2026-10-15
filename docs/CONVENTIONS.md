@@ -1,4 +1,4 @@
-# WaNut 開發規範
+﻿# WaNut 開發規範
 
 這份文件是 WaNut 所有開發工作（人、Claude、Gemini）都要遵守的規則。`CLAUDE.md` 和 `GEMINI.md` 都指向這份文件。規則有變動時，先改這份文件，再改程式。
 
@@ -9,6 +9,7 @@
   - 其他：`feat/<簡述>`、`fix/<簡述>`、`docs/<簡述>`
 - 每個分支開一個 PR，由 Peanut 審查與合併（Squash merge）。Claude 不自行合併。
 - PR 說明包含：改了什麼（Before / After）、怎麼測試的、介面變動附截圖。
+- Commit 訊息、PR 標題與 PR 說明一律用英文。
 
 ## 2. Commit 規則
 - 使用 [Conventional Commits](https://www.conventionalcommits.org/) 格式，以英文撰寫：
