@@ -74,6 +74,21 @@
                Style="{StaticResource MutedText}"
                TextWrapping="Wrap" Margin="0,4,0,0" />
 
+    <TextBlock Text="{res:Text CreateServer_OwnerLabel}" Style="{StaticResource FieldLabel}" />
+    <TextBox Text="{Binding OwnerName, UpdateSourceTrigger=PropertyChanged}"
+             Tag="{res:Text CreateServer_OwnerPlaceholder}"
+             AutomationProperties.Name="{res:Text CreateServer_OwnerLabel}"
+             AutomationProperties.HelpText="{res:Text CreateServer_OwnerHint}"
+             MaxLength="16" InputMethod.IsInputMethodEnabled="False"
+             IsEnabled="{Binding IsIdle}" />
+    <TextBlock Text="{res:Text CreateServer_OwnerHint}"
+               Style="{StaticResource MutedText}"
+               TextWrapping="Wrap" Margin="0,4,0,0" />
+    <TextBlock Text="{res:Text Players_InvalidName}"
+               Foreground="{DynamicResource ErrorTextBrush}"
+               TextWrapping="Wrap" Margin="0,4,0,0"
+               Visibility="{Binding OwnerNameInvalid, Converter={StaticResource BoolToVisibility}}" />
+
     <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
       <TextBlock TextWrapping="Wrap">
         <Run Text="{res:Text CreateServer_EulaPrefix}" />

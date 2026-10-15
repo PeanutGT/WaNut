@@ -351,4 +351,13 @@ Choose No to keep waiting.</value>
   <data name="Players_KickBanHint" xml:space="preserve">
     <value>To kick or ban a player, type kick &lt;name&gt; or ban &lt;name&gt; in the Console. pardon &lt;name&gt; lets them back in.</value>
   </data>
+  <data name="CreateServer_OwnerLabel" xml:space="preserve">
+    <value>Your Minecraft name (optional)</value>
+  </data>
+  <data name="CreateServer_OwnerPlaceholder" xml:space="preserve">
+    <value>Leave empty to skip</value>
+  </data>
+  <data name="CreateServer_OwnerHint" xml:space="preserve">
+    <value>The whitelist is on, so only listed players can join. Your name is added to it and made an operator the first time the server starts. You can skip this and add players later on the Players tab.</value>
+  </data>
 </root>

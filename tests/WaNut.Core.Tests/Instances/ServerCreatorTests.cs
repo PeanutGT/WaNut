@@ -77,6 +77,32 @@ public sealed class ServerCreatorTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateAsync_OwnerName_QueuesWhitelistAndOp()
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: " Peanut_GT "));
+
+        Assert.Equal(["whitelist add Peanut_GT", "op Peanut_GT"], metadata.PendingCommands);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public async Task CreateAsync_OwnerSkipped_QueuesNothing(string? owner)
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: owner));
+
+        Assert.Empty(metadata.PendingCommands);
+    }
+
+    [Fact]
+    public async Task CreateAsync_InvalidOwnerName_Throws()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            CreateCreator().CreateAsync(new CreateServerRequest("Mine", _version, 2048, EulaAccepted: true, OwnerName: "op x; stop")));
+    }
+
+    [Fact]
     public async Task CreateAsync_Paper_UsesNewestStableBuildAsServerJar()
     {
         var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Paper", _version, 4096, EulaAccepted: true, ServerType.Paper));

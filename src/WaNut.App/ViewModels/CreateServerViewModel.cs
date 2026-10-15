@@ -6,6 +6,7 @@ using WaNut.App.Resources;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
+using WaNut.Core.Players;
 using WaNut.Core.Versions;
 
 namespace WaNut.App.ViewModels;
@@ -57,6 +58,12 @@ public sealed partial class CreateServerViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
     private GameVersion? _selectedVersion;
 
+    /// <summary>The host's Minecraft name; empty skips it.</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    [NotifyPropertyChangedFor(nameof(OwnerNameInvalid))]
+    private string _ownerName = string.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MemoryText))]
     private int _memoryMb;
@@ -81,6 +88,8 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private string? _errorText;
 
     public bool IsIdle => !IsBusy;
+
+    public bool OwnerNameInvalid => OwnerName.Trim().Length > 0 && !PlayerLists.IsValidName(OwnerName.Trim());
 
     public bool IsCreating => _cancellation is not null;
 
@@ -140,7 +149,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         }
     }
 
-    private bool CanCreate() => IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name);
+    private bool CanCreate() => IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name) && !OwnerNameInvalid;
 
     [RelayCommand(CanExecute = nameof(CanCreate))]
     private async Task CreateAsync()
@@ -152,7 +161,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         try
         {
             Created = await _creator.CreateAsync(
-                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type),
+                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName),
                 progress,
                 _cancellation.Token);
         }
