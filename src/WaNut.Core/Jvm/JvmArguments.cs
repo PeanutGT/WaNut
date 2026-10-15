@@ -18,7 +18,8 @@ public static class JvmArguments
         "-Dsun.stderr.encoding=UTF-8",
     ];
 
-    public static IReadOnlyList<string> Build(int javaMajor, int memoryMb, string jarFile)
+    /// <param name="customArguments">Advanced mode's extra JVM options, added after WaNut's own so they can override them.</param>
+    public static IReadOnlyList<string> Build(int javaMajor, int memoryMb, string jarFile, IReadOnlyList<string>? customArguments = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(javaMajor, 8);
         ArgumentOutOfRangeException.ThrowIfLessThan(memoryMb, 512);
@@ -27,8 +28,89 @@ public static class JvmArguments
         var args = new List<string> { $"-Xms{memoryMb}M", $"-Xmx{memoryMb}M" };
         args.AddRange(GarbageCollectorFlags(javaMajor, memoryMb));
         args.AddRange(EncodingFlags);
+        args.AddRange(customArguments ?? []);
         args.AddRange(["-jar", jarFile, "nogui"]);
         return args;
+    }
+
+    /// <summary>
+    /// Splits custom JVM options the way a command line would: spaces separate them, double quotes keep spaces
+    /// inside one. Returns null when an option is not allowed, so a typo cannot stop the server from starting.
+    /// </summary>
+    public static IReadOnlyList<string>? ParseCustom(string? text, out CustomArgumentProblem problem)
+    {
+        problem = CustomArgumentProblem.None;
+        var result = new List<string>();
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return result;
+        }
+
+        var current = new System.Text.StringBuilder();
+        var inQuotes = false;
+        var hasToken = false;
+        foreach (var c in text)
+        {
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+                hasToken = true;
+            }
+            else if (char.IsWhiteSpace(c) && !inQuotes)
+            {
+                if (hasToken)
+                {
+                    result.Add(current.ToString());
+                    current.Clear();
+                    hasToken = false;
+                }
+            }
+            else
+            {
+                current.Append(c);
+                hasToken = true;
+            }
+        }
+
+        if (inQuotes)
+        {
+            problem = CustomArgumentProblem.UnclosedQuote;
+            return null;
+        }
+
+        if (hasToken)
+        {
+            result.Add(current.ToString());
+        }
+
+        foreach (var arg in result)
+        {
+            problem = Check(arg);
+            if (problem != CustomArgumentProblem.None)
+            {
+                return null;
+            }
+        }
+
+        return result;
+    }
+
+    private static CustomArgumentProblem Check(string arg)
+    {
+        if (!arg.StartsWith('-') || arg.Length < 2)
+        {
+            return CustomArgumentProblem.NotAnOption;
+        }
+
+        // The RAM slider owns the heap size, and WaNut picks the jar.
+        if (arg.StartsWith("-Xmx", StringComparison.Ordinal) || arg.StartsWith("-Xms", StringComparison.Ordinal))
+        {
+            return CustomArgumentProblem.Memory;
+        }
+
+        return arg is "-jar" or "-cp" or "-classpath" or "--class-path" or "-version" or "--version" or "-help" or "--help" or "-?"
+            ? CustomArgumentProblem.NotAllowed
+            : CustomArgumentProblem.None;
     }
 
     public static IReadOnlyList<string> GarbageCollectorFlags(int javaMajor, int memoryMb) => javaMajor switch
@@ -68,4 +150,20 @@ public static class JvmArguments
             "-Daikars.new.flags=true",
         ];
     }
+}
+
+public enum CustomArgumentProblem
+{
+    None,
+
+    /// <summary>Every JVM option starts with "-"; anything else would be read as the program to run.</summary>
+    NotAnOption,
+
+    /// <summary>-Xmx / -Xms: the RAM slider sets these.</summary>
+    Memory,
+
+    /// <summary>-jar, -cp and options that print something and exit.</summary>
+    NotAllowed,
+
+    UnclosedQuote,
 }

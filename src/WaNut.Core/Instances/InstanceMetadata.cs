@@ -34,6 +34,9 @@ public sealed record InstanceMetadata
     /// </summary>
     public IReadOnlyDictionary<string, bool> GameRules { get; init; } = new Dictionary<string, bool>();
 
+    /// <summary>Extra JVM options from Advanced mode, as the user typed them. Empty for none.</summary>
+    public string CustomJvmArguments { get; init; } = string.Empty;
+
     /// <summary>Console commands waiting for the next start, such as "whitelist add Steve" added while stopped.</summary>
     public IReadOnlyList<string> PendingCommands { get; init; } = [];
 }

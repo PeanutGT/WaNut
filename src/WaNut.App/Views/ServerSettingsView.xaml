@@ -1,0 +1,94 @@
+<UserControl x:Class="WaNut.App.Views.ServerSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources">
+  <!-- DataContext: ServerSettingsViewModel -->
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+    <Style x:Key="Label" TargetType="TextBlock">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+    <Style x:Key="Item" TargetType="StackPanel">
+      <Setter Property="Margin" Value="0,0,0,18" />
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+      <!-- Always visible -->
+      <StackPanel Style="{StaticResource Item}">
+        <DockPanel Margin="0,0,0,6">
+          <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
+          <TextBlock Text="{res:Text CreateServer_MemoryLabel}" FontWeight="SemiBold" />
+        </DockPanel>
+        <Slider Minimum="{Binding MinMemoryMb}" Maximum="{Binding MaxMemoryMb}"
+                Value="{Binding MemoryMb, Delay=400}"
+                TickFrequency="{Binding MemoryStepMb}" SmallChange="{Binding MemoryStepMb}" LargeChange="{Binding MemoryStepMb}"
+                IsSnapToTickEnabled="True"
+                AutomationProperties.Name="{res:Text CreateServer_MemoryLabel}" />
+        <TextBlock Text="{res:Text CreateServer_MemoryHint}" Style="{StaticResource Hint}" />
+        <TextBlock Text="{res:Text Server_NextStartHint}" Style="{StaticResource Hint}"
+                   Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}" />
+      </StackPanel>
+
+      <!-- More settings -->
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,18">
+        <StackPanel Margin="4,8,0,0">
+          <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
+                  Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}">
+            <TextBlock Text="{res:Text Server_StopToChange}" TextWrapping="Wrap" />
+          </Border>
+
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
+            <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
+                     AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />
+            <TextBlock Text="{Binding PortHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <CheckBox Content="{res:Text Server_OnlineMode}" IsChecked="{Binding OnlineMode}" IsEnabled="{Binding CanEditProperties}" />
+            <TextBlock Text="{res:Text Server_OnlineModeHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+            <Border Style="{StaticResource WarningBanner}" Margin="0,10,0,0"
+                    Visibility="{Binding ShowOnlineModeWarning, Converter={StaticResource Visible}}">
+              <TextBlock Text="{res:Text Server_OnlineModeWarning}" TextWrapping="Wrap" />
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </Expander>
+
+      <!-- Advanced mode only: plain wording, no peanut (decision 16). -->
+      <StackPanel Visibility="{Binding App.AdvancedMode, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+        <TextBlock Text="{res:Text Server_JvmArguments}" Style="{StaticResource Label}" />
+        <TextBox Text="{Binding CustomJvmArguments}" FontFamily="Consolas"
+                 Tag="-XX:+UseLargePages"
+                 AutomationProperties.Name="{res:Text Server_JvmArguments}"
+                 AutomationProperties.HelpText="{res:Text Server_JvmArgumentsHint}"
+                 InputMethod.IsInputMethodEnabled="False" />
+        <TextBlock Text="{res:Text Server_JvmArgumentsHint}" Style="{StaticResource Hint}" />
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding JvmArgumentsError}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding JvmArgumentsError}" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+
+      <TextBlock Text="{res:Text Server_JvmArgumentsHiddenNote}" Style="{StaticResource Hint}"
+                 Visibility="{Binding ShowHiddenJvmArgumentsNote, Converter={StaticResource Visible}}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
