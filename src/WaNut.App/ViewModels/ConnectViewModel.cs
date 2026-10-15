@@ -64,12 +64,16 @@ public sealed partial class ConnectViewModel : ObservableObject
 
     public bool CanAllowFirewall => !IsCheckingFirewall && ShowFirewallProblem;
 
-    /// <summary>The tab was opened: adapters come and go (Radmin VPN connects, Wi-Fi changes), and the port may have changed.</summary>
+    /// <summary>
+    /// The tab was opened: adapters come and go (Radmin VPN connects, Wi-Fi changes), and the port may have changed.
+    /// The firewall note stays, since it may answer the question asked when the server started.
+    /// </summary>
     public void OnShown()
     {
         CopiedText = null;
         ErrorText = null;
-        Refresh();
+        LoadAddresses();
+        _ = CheckFirewallAsync(keepMessage: true);
     }
 
     [RelayCommand]

@@ -673,7 +673,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>Windows asks for administrator approval. WaNut then adds one rule for its own Java and removes any rule that blocks it.</value>
   </data>
   <data name="Connect_FirewallDeclined" xml:space="preserve">
-    <value>Nothing was changed. You can allow it here any time.</value>
+    <value>Nothing was changed. You can allow it here any time. Windows may also ask with its own window when the server starts: if you cancel that one, Windows blocks WaNut's Java, and the button here fixes that too.</value>
   </data>
   <data name="Connect_FirewallFailed" xml:space="preserve">
     <value>Windows Firewall wasn't changed. You can add the rule yourself in Windows Security: allow inbound connections for {0}.</value>
@@ -700,7 +700,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>3. Friends: choose Network, then Join existing network, and type the same name and password.</value>
   </data>
   <data name="Connect_RadminStep4" xml:space="preserve">
-    <value>4. Start your server here, press Copy next to Radmin VPN above and send the address to your friends.</value>
+    <value>4. Start your server here, press Copy next to Radmin VPN above and send the address to your friends. Radmin VPN not listed? Open it and check that you're in a network: your address there starts with 26.</value>
   </data>
   <data name="Connect_RadminStep5" xml:space="preserve">
     <value>5. Friends: in Minecraft choose Multiplayer, then Add Server, paste the address and join.</value>
