@@ -26,6 +26,25 @@ public sealed class LauncherPathsTests : IDisposable
         Assert.Equal(Path.Combine(_root, "config.json"), paths.ConfigFile);
     }
 
+    [Fact]
+    public void WithInstancesDir_GivenFolder_MovesOnlyInstances()
+    {
+        var elsewhere = Path.Combine(_root, "elsewhere");
+
+        var paths = new LauncherPaths(_root).WithInstancesDir(elsewhere);
+
+        Assert.Equal(elsewhere, paths.InstancesDir);
+        Assert.Equal(Path.Combine(_root, "config.json"), paths.ConfigFile);
+    }
+
+    [Fact]
+    public void WithInstancesDir_Null_UsesDefaultInstancesFolder()
+    {
+        var paths = new LauncherPaths(_root).WithInstancesDir(null);
+
+        Assert.Equal(Path.Combine(_root, "instances"), paths.InstancesDir);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

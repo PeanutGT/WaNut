@@ -21,6 +21,12 @@ public sealed record AppSettings
 
     /// <summary>Looks for a new WaNut release on GitHub each time WaNut starts.</summary>
     public bool CheckForUpdates { get; init; } = true;
+
+    /// <summary>True once the first-run setup window was finished, so it shows only once.</summary>
+    public bool SetupDone { get; init; }
+
+    /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
+    public string? InstancesDir { get; init; }
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)

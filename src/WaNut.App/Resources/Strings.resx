@@ -796,4 +796,28 @@ Stop the server and update?</value>
 
 {0}</value>
   </data>
+  <data name="Setup_Title" xml:space="preserve">
+    <value>Welcome to WaNut!</value>
+  </data>
+  <data name="Setup_Intro" xml:space="preserve">
+    <value>A few quick choices before we start. You can change the update check later in App settings.</value>
+  </data>
+  <data name="Setup_DesktopShortcut" xml:space="preserve">
+    <value>Put a WaNut shortcut on the desktop</value>
+  </data>
+  <data name="Setup_ServersFolder" xml:space="preserve">
+    <value>Where to keep your servers and worlds</value>
+  </data>
+  <data name="Setup_ServersFolderHint" xml:space="preserve">
+    <value>Worlds can grow large, so pick a drive with room to spare.</value>
+  </data>
+  <data name="Setup_Browse" xml:space="preserve">
+    <value>Choose…</value>
+  </data>
+  <data name="Setup_Finish" xml:space="preserve">
+    <value>Let's go!</value>
+  </data>
+  <data name="Setup_Failed" xml:space="preserve">
+    <value>The setup could not be saved: {0}</value>
+  </data>
 </root>
