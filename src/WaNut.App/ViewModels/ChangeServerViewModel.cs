@@ -32,12 +32,7 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     /// <summary>Raised when the window should close; true means the server was changed.</summary>
     public event Action<bool>? CloseRequested;
 
-    public IReadOnlyList<ServerTypeOption> ServerTypes { get; } =
-    [
-        new(ServerType.Vanilla, Text.Get("CreateServer_TypeVanilla"), Text.Get("CreateServer_TypeVanillaHint")),
-        new(ServerType.Paper, Text.Get("CreateServer_TypePaper"), Text.Get("CreateServer_TypePaperHint")),
-        new(ServerType.Fabric, Text.Get("CreateServer_TypeFabric"), Text.Get("CreateServer_TypeFabricHint")),
-    ];
+    public IReadOnlyList<ServerTypeOption> ServerTypes { get; } = ServerTypeOption.All();
 
     public ObservableCollection<GameVersion> Versions { get; } = [];
 
@@ -48,7 +43,7 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     public string DowngradeWarningText { get; private set; } = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnchanged), nameof(IsDowngrade), nameof(ShowDowngradeWarning))]
+    [NotifyPropertyChangedFor(nameof(IsUnchanged), nameof(IsDowngrade), nameof(ShowDowngradeWarning), nameof(ShowModsMovedNote), nameof(ModsMovedText))]
     [NotifyCanExecuteChangedFor(nameof(ChangeCommand))]
     private ServerTypeOption? _selectedType;
 
@@ -97,6 +92,13 @@ public sealed partial class ChangeServerViewModel : ObservableObject
 
     /// <summary>Only a world that exists can be harmed by an older version.</summary>
     public bool ShowDowngradeWarning => IsDowngrade && _worldExists;
+
+    /// <summary>One mod loader can't load another's mods, so the change renames the mods folder.</summary>
+    public bool ShowModsMovedNote => _server is not null && SelectedType is not null && ServerCreator.MovesMods(_server.Type, SelectedType.Type);
+
+    public string ModsMovedText => ShowModsMovedNote
+        ? string.Format(Text.Get("Change_ModsMoved"), _server!.Type, SelectedType!.Title, $"mods-{_server.Type.ToString().ToLowerInvariant()}")
+        : string.Empty;
 
     public void Initialize(InstanceMetadata server, string instanceDir)
     {

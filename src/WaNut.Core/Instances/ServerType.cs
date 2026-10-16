@@ -5,4 +5,6 @@ public enum ServerType
     Vanilla,
     Paper,
     Fabric,
+    Forge,
+    NeoForge,
 }

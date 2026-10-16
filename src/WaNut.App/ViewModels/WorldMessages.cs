@@ -64,7 +64,7 @@ internal static class WorldMessages
     {
         try
         {
-            var result = await library.InstallCopiesAsync(instanceDir, ModPlatform.For(ServerType.Fabric)!, gameVersion, source.ModPaths, progress, cancellationToken);
+            var result = await library.InstallCopiesAsync(instanceDir, ModPlatform.For(source.ModServerType!.Value)!, gameVersion, source.ModPaths, progress, cancellationToken);
             return ModNotes(result);
         }
         catch (OperationCanceledException)

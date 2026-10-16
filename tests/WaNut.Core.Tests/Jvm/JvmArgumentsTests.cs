@@ -21,6 +21,15 @@ public sealed class JvmArgumentsTests
         Assert.Equal(["-jar", "server.jar", "nogui"], args.TakeLast(3));
     }
 
+    [Fact]
+    public void Build_ArgumentFile_PassesItWithoutJar()
+    {
+        var args = JvmArguments.Build(21, 2048, "@libraries/net/minecraftforge/forge/1.21.1-52.0.38/win_args.txt");
+
+        Assert.Equal(["@libraries/net/minecraftforge/forge/1.21.1-52.0.38/win_args.txt", "nogui"], args.TakeLast(2));
+        Assert.DoesNotContain("-jar", args);
+    }
+
     [Theory]
     [InlineData(8)]
     [InlineData(17)]

@@ -67,6 +67,9 @@
         <TextBlock Text="{res:Text Change_Unchanged}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,8,0,0"
                    Visibility="{Binding IsUnchanged, Converter={StaticResource BoolToVisibility}}" />
 
+        <TextBlock Text="{Binding ModsMovedText}" TextWrapping="Wrap" Margin="0,8,0,0"
+                   Visibility="{Binding ShowModsMovedNote, Converter={StaticResource BoolToVisibility}}" />
+
         <!-- Going back to an older version: a plain warning and a second, deliberate tick. -->
         <Border Style="{StaticResource WarningBanner}" Margin="0,14,0,0"
                 Visibility="{Binding ShowDowngradeWarning, Converter={StaticResource BoolToVisibility}}">

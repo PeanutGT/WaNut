@@ -77,7 +77,10 @@
                   Command="{Binding PickModpackCommand}"
                   IsEnabled="{Binding IsIdle}"
                   HorizontalAlignment="Left" Padding="12,4" />
-          <TextBlock Text="{Binding ModpackSummary}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          <DockPanel Margin="0,8,0,0">
+            <controls:PixelScene Scene="type-modpack" Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Top" />
+            <TextBlock Text="{Binding ModpackSummary}" TextWrapping="Wrap" />
+          </DockPanel>
           <TextBlock Text="{res:Text Modpack_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0" />
           <Border Margin="0,8,0,0">
             <Border.Style>

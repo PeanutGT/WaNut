@@ -70,16 +70,41 @@ public sealed class ModpackReaderTests
         Assert.Equal(ExpectedHash.Sha1(Sha1), Assert.Single(Parse(json).Files).Hash);
     }
 
-    [Theory]
-    [InlineData("forge")]
-    [InlineData("neoforge")]
-    [InlineData("quilt-loader")]
-    public void Parse_OtherLoader_ThrowsUnsupportedLoader(string loader)
+    [Fact]
+    public void Parse_QuiltPack_ThrowsUnsupportedLoader()
     {
-        var e = Assert.Throws<ModpackException>(() => Parse(Index(dependencies: $$"""{"minecraft":"1.20.1","{{loader}}":"47.1.0"}""")));
+        var e = Assert.Throws<ModpackException>(() => Parse(Index(dependencies: """{"minecraft":"1.20.1","quilt-loader":"0.26.0"}""")));
 
         Assert.Equal(ModpackProblem.UnsupportedLoader, e.Problem);
-        Assert.Equal(loader, e.Detail);
+        Assert.Equal("quilt-loader", e.Detail);
+    }
+
+    [Theory]
+    [InlineData("forge", "47.3.0", ServerType.Forge)]
+    [InlineData("neoforge", "21.1.209", ServerType.NeoForge)]
+    public void Parse_ForgeOrNeoForgePack_ReadsTypeAndLoaderVersion(string key, string version, ServerType expected)
+    {
+        var pack = Parse(Index(dependencies: $$"""{"minecraft":"1.20.1","{{key}}":"{{version}}"}"""));
+
+        Assert.Equal(expected, pack.Type);
+        Assert.Equal(version, pack.LoaderVersion);
+    }
+
+    [Fact]
+    public void Parse_TwoLoaders_ThrowsNotAModpack()
+    {
+        var e = Assert.Throws<ModpackException>(() =>
+            Parse(Index(dependencies: """{"minecraft":"1.20.1","forge":"47.3.0","fabric-loader":"0.16.10"}""")));
+
+        Assert.Equal(ModpackProblem.NotAModpack, e.Problem);
+    }
+
+    [Fact]
+    public void Parse_ForgeVersionWithSlash_ThrowsNotAModpack()
+    {
+        var e = Assert.Throws<ModpackException>(() => Parse(Index(dependencies: """{"minecraft":"1.20.1","forge":"../47"}""")));
+
+        Assert.Equal(ModpackProblem.NotAModpack, e.Problem);
     }
 
     [Theory]

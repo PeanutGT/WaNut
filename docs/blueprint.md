@@ -15,7 +15,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 3 | Playing with friends | Phase 1 targets LAN and virtual-LAN tools (Radmin VPN, ZeroTier, Tailscale). Built-in tunnel (playit.gg) and UPnP move later. |
 | 4 | File location | `%APPDATA%\WaNut\` by default. Settings let the user move the `instances/` folder (e.g. to drive D:). "Open folder" button on every server. |
 | 5 | Concurrent servers | One running server at a time. Multiple servers may exist; only one runs. Revisit later. |
-| 6 | Forge / NeoForge | Later phase. Phase 1: Vanilla, Paper, Fabric. |
+| 6 | Forge / NeoForge | Later phase. Phase 1: Vanilla, Paper, Fabric. Added in step 17 (Phase 2). |
 | 7 | Backups | Phase 1: automatic world backup before each start, with automatic cleanup (keep last N, delete older than X days). |
 | 8 | Self-update | Yes. The launcher checks GitHub Releases of PeanutGT/WaNut and updates itself. |
 | 9 | Git attribution | Commits and PRs carry no Claude co-author line, so Claude does not appear among the repository's contributors. |
@@ -58,7 +58,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * **Vanilla:** Mojang Version Manifest (`piston-meta.mojang.com/mc/game/version_manifest_v2.json`); download `server.jar` and verify its SHA-1.
 * **PaperMC (revised):** Paper's **Fill v3 API** (`fill.papermc.io/v3/projects/paper`). The old v2 API is being retired. Use the newest STABLE build (BETA only when a version has no stable build yet) and verify SHA-256.
 * **Fabric:** versions from the Fabric Meta API (`meta.fabricmc.net/v2`). Meta's ready-made server jar has no checksum, so WaNut downloads the same launcher (`fabric-installer-<v>-server.jar`) from Fabric's Maven, verifies it against Maven's `.sha256`, and adds the `install.properties` (loader and game version) itself. The Vanilla `server.jar` (SHA-1 from Mojang) sits next to it.
-* **Forge / NeoForge:** later phase (decision 6).
+* **Forge / NeoForge (step 17):** versions from Forge's `promotions_slim.json` (the recommended build, else the latest) and NeoForged's Maven version list (NeoForge from 1.20.2; the newest stable build, else the newest beta). WaNut downloads the installer, verifies it against Maven's `.sha1`, and runs `java -jar <installer> --installServer <dir>` with the server's own Java; the installer fetches Minecraft's jar and the libraries itself and checks their hashes. The install is done once per loader version in `cache/forge|neoforge/<version>/server` and copied into each server. From 1.17 the server starts from the argument file the installer writes (`java <WaNut's JVM flags> @libraries/.../win_args.txt nogui`, so `user_jvm_args.txt` is not used); Forge for 1.16.5 starts its `forge-<version>.jar`.
 * Downloads are cached in `cache/` so a second server of the same version needs no download.
 
 ### C. EULA & Smart JVM Arguments
@@ -218,6 +218,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Order: download and verify the new files and Java first (a failed download changes nothing), then back up the world (a "change" backup, protected from the keep count like a restore copy), then swap the server files.
 * New files are copied in under temporary names before any old file is deleted. The jars' unpacked folders (`libraries/`, `versions/`, `.fabric/`, Paper's `cache/`) are removed so they come back for the new version.
 * Switching between Paper and Vanilla/Fabric on 1.21.x or older moves the Nether and End folders between Paper's layout (`world_nether/DIM-1`, `world_the_end/DIM1`) and the Vanilla one (`world/DIM-1`, `world/DIM1`). 26.x keeps them inside the world for every type, so nothing moves there.
+* Switching between mod loaders (Fabric, Forge, NeoForge) renames `mods/` to `mods-<old type>` (then `-2`, `-3`…) and leaves an empty `mods/`, since one loader can't load another's mods; the window says so first. Going to Vanilla or Paper leaves `mods/` alone.
 * The world, `server.properties`, whitelist, OP list, mods and plugins stay. Game settings are re-saved for the new version, since some moved between `server.properties` and game rules (e.g. pvp in 1.21.9).
 * Going to an older Minecraft version while a world exists shows a warning and needs an extra tick, because older versions can't always read newer worlds.
 
@@ -241,9 +242,9 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * [ ] Peanut-led guided onboarding (decision 17).
 * [ ] UPnP port forwarding and built-in tunnel (playit.gg or similar).
 * [ ] Modrinth / CurseForge mod and plugin browser with version/loader filtering.
-* [ ] Forge / NeoForge support.
+* [x] Forge / NeoForge support.
 * [ ] Modpack server install (decision 19):
-  * **Modrinth `.mrpack`:** read `modrinth.index.json`, keep only files whose `env.server` is not `unsupported`, verify each file's sha1/sha512, apply `overrides/` then `server-overrides/`, and pick the loader and Minecraft version from `dependencies`. Forge / NeoForge packs need Forge support first.
+  * **Modrinth `.mrpack`:** read `modrinth.index.json`, keep only files whose `env.server` is not `unsupported`, verify each file's sha1/sha512, apply `overrides/` then `server-overrides/`, and pick the loader and Minecraft version from `dependencies`. Forge and NeoForge packs install the loader version the pack names; Quilt packs are refused.
   * **CurseForge:** import a server pack zip the user already downloaded. Automatic download is hard because the API needs a key and some authors block third-party downloads.
 
 ### Phase 3: Quality of Life & Safety
@@ -322,7 +323,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 15.1. ✓ Delete a server from the Server tab (More settings), keeping a world zip by default (section 5, "Delete server").
 15.2. ✓ Misc big update (decision 27, section 5 "Misc big update").
 16. ✓ Modrinth `.mrpack` modpack server install (decision 19): "From a modpack" in the Create Server wizard (Fabric and Vanilla packs; Forge, NeoForge and Quilt packs are refused until step 17).
-17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
+17. ✓ Forge / NeoForge support in the Create Server wizard and "Change type or version"; Forge / NeoForge modpacks; the Mods tab and "Install the mods too" for Forge / NeoForge (section 1.B, section 5 "Change type or version").
 18. CurseForge server-pack import from a zip the user already downloaded.
 19. UPnP port forwarding (`Open.Nat`) on the Connect tab, with a clear message when the router refuses or CGNAT is detected.
 20. Built-in tunnel (playit.gg or similar) with a copyable address.

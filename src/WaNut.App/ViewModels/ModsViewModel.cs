@@ -14,7 +14,7 @@ using WaNut.Core.Mods;
 namespace WaNut.App.ViewModels;
 
 /// <summary>
-/// The Mods tab: the jars in the server's mods (Fabric) or plugins (Paper) folder, and a Modrinth search limited to
+/// The Mods tab: the jars in the server's mods (Fabric, Forge, NeoForge) or plugins (Paper) folder, and a Modrinth search limited to
 /// the server's loader and Minecraft version. Installing and removing wait until the server is stopped, because
 /// Windows locks the jars of a running server and new ones only load on start.
 /// </summary>
@@ -53,7 +53,7 @@ public sealed partial class ModsViewModel : ObservableObject
 
     public string FindHeader => Text.Get(IsPlugins ? "Mods_FindPlugins" : "Mods_FindMods");
 
-    public string FilterText => string.Format(Text.Get(IsPlugins ? "Mods_FilterPlugins" : "Mods_FilterMods"), _server.Metadata.MinecraftVersion);
+    public string FilterText => string.Format(Text.Get(IsPlugins ? "Mods_FilterPlugins" : "Mods_FilterMods"), _server.Metadata.MinecraftVersion, Text.Get($"CreateServer_Type{_server.Metadata.Type}"));
 
     [ObservableProperty]
     private string _query = string.Empty;

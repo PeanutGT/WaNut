@@ -12,8 +12,8 @@ namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// "Replace with another world" on the Backups tab. The server's current world is backed up first, like a
-/// restore, so the replacement can be undone from the backup list. A world played with Fabric mods can bring its
-/// mods to a Fabric server too.
+/// restore, so the replacement can be undone from the backup list. A world played with Fabric, Forge or NeoForge
+/// mods can bring its mods to a server of the same type too.
 /// </summary>
 public sealed partial class ImportWorldViewModel : ObservableObject
 {

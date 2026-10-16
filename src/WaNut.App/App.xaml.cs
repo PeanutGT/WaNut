@@ -80,6 +80,9 @@ public partial class App : Application
         services.AddSingleton<MojangVersionService>();
         services.AddSingleton<PaperClient>();
         services.AddSingleton<FabricClient>();
+        services.AddSingleton<ForgeClient>();
+        services.AddSingleton<NeoForgeClient>();
+        services.AddSingleton<ForgeInstallerRunner>();
         services.AddSingleton<ServerVersionCatalog>();
         services.AddSingleton<AdoptiumClient>();
         services.AddSingleton<JavaRuntimeManager>();

@@ -9,7 +9,7 @@ namespace WaNut.Core.Instances;
 /// </param>
 /// <param name="World">The seed and terrain of the new world; null for a random Normal world.</param>
 /// <param name="LoaderVersion">
-/// Fabric only: the Fabric Loader version to set up, as a modpack asks for; null for the latest stable one.
+/// The Fabric, Forge or NeoForge version to set up, as a modpack asks for; null for the one WaNut picks.
 /// </param>
 public sealed record CreateServerRequest(
     string Name,

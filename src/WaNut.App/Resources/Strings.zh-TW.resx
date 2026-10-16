@@ -547,7 +547,7 @@
     <value>伺服器類型與版本</value>
   </data>
   <data name="Change_SectionHint" xml:space="preserve">
-    <value>在原版、Paper 和 Fabric 之間切換，或換成其他 Minecraft 版本。請先停止伺服器。</value>
+    <value>在原版、Paper、Fabric、Forge 和 NeoForge 之間切換，或換成其他 Minecraft 版本。請先停止伺服器。</value>
   </data>
   <data name="Change_Hint" xml:space="preserve">
     <value>WaNut 會先備份世界，再替換伺服器檔案。你的世界、設定、模組和插件都會保留。請確認模組或插件支援新版本。</value>
@@ -1108,7 +1108,7 @@
     <value>插件</value>
   </data>
   <data name="Mods_Vanilla" xml:space="preserve">
-    <value>Vanilla 伺服器不能載入模組或插件。想加的話，到「伺服器 › 更多設定 › 更改類型或版本」把這台伺服器換成 Fabric（模組）或 Paper（插件）。</value>
+    <value>Vanilla 伺服器不能載入模組或插件。想加的話，到「伺服器 › 更多設定 › 更改類型或版本」把這台伺服器換成 Fabric、Forge、NeoForge（模組）或 Paper（插件）。</value>
   </data>
   <data name="Mods_StopToChange" xml:space="preserve">
     <value>停止伺服器後才能新增或移除檔案。現在還是可以先逛逛。</value>
@@ -1159,7 +1159,7 @@
     <value>在 Modrinth 找插件</value>
   </data>
   <data name="Mods_FilterMods" xml:space="preserve">
-    <value>只顯示 Minecraft {0} 可在伺服器上使用的 Fabric 模組。</value>
+    <value>只顯示 Minecraft {0} 可在伺服器上使用的 {1} 模組。</value>
   </data>
   <data name="Mods_FilterPlugins" xml:space="preserve">
     <value>只顯示 Minecraft {0} 的 Paper、Spigot 和 Bukkit 插件。</value>
@@ -1388,7 +1388,7 @@
     <value>複製邀請</value>
   </data>
   <data name="Invite_Hint" xml:space="preserve">
-    <value>複製一段訊息，裡面有伺服器名稱、版本和位址，可以直接貼到 Discord 或 LINE。Fabric 伺服器還會列出模組。</value>
+    <value>複製一段訊息，裡面有伺服器名稱、版本和位址，可以直接貼到 Discord 或 LINE。有模組的伺服器還會列出模組。</value>
   </data>
   <data name="Invite_NoteLabel" xml:space="preserve">
     <value>給朋友的備註（可不填，所有伺服器共用）</value>
@@ -1415,7 +1415,7 @@
     <value>備註：{0}</value>
   </data>
   <data name="Invite_Mods" xml:space="preserve">
-    <value>請安裝同版本的 Fabric 和這些模組（其中有些可能只需要裝在伺服器）：</value>
+    <value>請安裝同版本的 {0} 和這些模組（其中有些可能只需要裝在伺服器）：</value>
   </data>
   <data name="Discord_Section" xml:space="preserve">
     <value>Discord 通知</value>
@@ -1552,8 +1552,8 @@
   <data name="World_InstallMods" xml:space="preserve">
     <value>一併安裝模組</value>
   </data>
-  <data name="World_ModsPickFabric" xml:space="preserve">
-    <value>選 Fabric 伺服器，WaNut 就能一併安裝這些模組。</value>
+  <data name="World_ModsPickLoader" xml:space="preserve">
+    <value>選 {0} 伺服器，WaNut 就能一併安裝這些模組。</value>
   </data>
   <data name="World_InstallingMods" xml:space="preserve">
     <value>正在安裝模組…</value>
@@ -1610,12 +1610,30 @@
     <value>這不是 Modrinth 模組包。請從模組包的 Modrinth 頁面下載 .mrpack 檔案。</value>
   </data>
   <data name="Modpack_Problem_UnsupportedLoader" xml:space="preserve">
-    <value>這個模組包需要 {0}，WaNut 還不支援。Fabric 和 Vanilla 模組包可以使用。</value>
+    <value>這個模組包需要 {0}，WaNut 還不支援。Fabric、Forge、NeoForge 和 Vanilla 模組包可以使用。</value>
   </data>
   <data name="Modpack_Problem_UnsafeFile" xml:space="preserve">
     <value>這個模組包裡有 WaNut 不會安裝的檔案（會放到伺服器資料夾外面，或來自不明網站）。</value>
   </data>
   <data name="Modpack_Installing" xml:space="preserve">
     <value>正在安裝模組包…</value>
+  </data>
+  <data name="CreateServer_TypeForge" xml:space="preserve">
+    <value>Forge</value>
+  </data>
+  <data name="CreateServer_TypeForgeHint" xml:space="preserve">
+    <value>老牌的模組載入器，很多大型模組和舊模組包都要用它。把模組放進 mods 資料夾。</value>
+  </data>
+  <data name="CreateServer_TypeNeoForge" xml:space="preserve">
+    <value>NeoForge</value>
+  </data>
+  <data name="CreateServer_TypeNeoForgeHint" xml:space="preserve">
+    <value>Forge 的新分支，支援 1.20.2 以後的版本，很多新模組都用它。把模組放進 mods 資料夾。</value>
+  </data>
+  <data name="CreateServer_Stage_InstallingLoader" xml:space="preserve">
+    <value>正在安裝模組載入器（可能要幾分鐘）…</value>
+  </data>
+  <data name="Change_ModsMoved" xml:space="preserve">
+    <value>{0} 的模組不能在 {1} 上使用，所以 mods 資料夾會改名成「{2}」，不會刪除任何東西。請到 Mods 分頁安裝 {1} 的模組。</value>
   </data>
 </root>
