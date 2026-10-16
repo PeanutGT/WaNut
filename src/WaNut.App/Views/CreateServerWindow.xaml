@@ -168,6 +168,74 @@
           </TextBlock>
         </StackPanel>
 
+        <!-- More settings: only for a world the server generates; an imported world keeps its own seed and terrain. -->
+        <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,18,0,0">
+          <Expander.Style>
+            <Style TargetType="Expander" BasedOn="{StaticResource {x:Type Expander}}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsImport}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Expander.Style>
+          <StackPanel Margin="4,0,0,0">
+            <TextBlock Text="{res:Text Game_Seed}" Style="{StaticResource FieldLabel}" />
+            <TextBox Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="{res:Text Game_Seed}"
+                     AutomationProperties.HelpText="{res:Text Game_SeedHint}"
+                     IsEnabled="{Binding IsIdle}" />
+            <TextBlock Text="{res:Text Game_SeedHint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+
+            <TextBlock Text="{res:Text CreateServer_WorldTypeLabel}" Style="{StaticResource FieldLabel}" />
+            <ComboBox ItemsSource="{Binding WorldTypes}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                      SelectedValue="{Binding WorldType}"
+                      AutomationProperties.Name="{res:Text CreateServer_WorldTypeLabel}"
+                      IsEnabled="{Binding IsIdle}" Width="220" HorizontalAlignment="Left" />
+
+            <StackPanel Visibility="{Binding IsSuperflat, Converter={StaticResource BoolToVisibility}}">
+              <TextBlock Text="{res:Text CreateServer_FlatPresetLabel}" Style="{StaticResource FieldLabel}" />
+              <ComboBox ItemsSource="{Binding FlatPresets}" DisplayMemberPath="Label" SelectedValuePath="Value"
+                        SelectedValue="{Binding FlatPreset}"
+                        AutomationProperties.Name="{res:Text CreateServer_FlatPresetLabel}"
+                        IsEnabled="{Binding IsIdle}" Width="220" HorizontalAlignment="Left" />
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+
+        <!-- Advanced mode only: plain wording, no peanut (decision 16). -->
+        <StackPanel Margin="0,18,0,0">
+          <StackPanel.Style>
+            <Style TargetType="StackPanel">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <MultiDataTrigger>
+                  <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding App.AdvancedMode}" Value="True" />
+                    <Condition Binding="{Binding IsSuperflat}" Value="True" />
+                    <Condition Binding="{Binding IsImport}" Value="False" />
+                  </MultiDataTrigger.Conditions>
+                  <Setter Property="Visibility" Value="Visible" />
+                </MultiDataTrigger>
+              </Style.Triggers>
+            </Style>
+          </StackPanel.Style>
+          <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,6" />
+          <TextBlock Text="{res:Text CreateServer_CustomGenerator}" FontWeight="SemiBold" Margin="0,0,0,6" />
+          <TextBox Text="{Binding CustomGenerator, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas"
+                   AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" MaxHeight="160"
+                   VerticalScrollBarVisibility="Auto"
+                   AutomationProperties.Name="{res:Text CreateServer_CustomGenerator}"
+                   AutomationProperties.HelpText="{res:Text CreateServer_CustomGeneratorHint}"
+                   InputMethod.IsInputMethodEnabled="False"
+                   IsEnabled="{Binding IsIdle}" />
+          <TextBlock Text="{res:Text CreateServer_CustomGeneratorHint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Text="{res:Text CreateServer_CustomGeneratorInvalid}"
+                     Foreground="{DynamicResource ErrorTextBrush}"
+                     TextWrapping="Wrap" Margin="0,4,0,0"
+                     Visibility="{Binding CustomGeneratorInvalid, Converter={StaticResource BoolToVisibility}}" />
+        </StackPanel>
+
         <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
           <TextBlock TextWrapping="Wrap">
             <Run Text="{res:Text CreateServer_EulaPrefix}" />

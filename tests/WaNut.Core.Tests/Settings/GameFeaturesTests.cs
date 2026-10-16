@@ -24,6 +24,18 @@ public sealed class GameFeaturesTests
     }
 
     [Theory]
+    [InlineData("1.18.1", false, false)]
+    [InlineData("1.18.2", true, false)]
+    [InlineData("1.19", true, true)]
+    [InlineData("26.3", true, true)]
+    public void WorldGeneration_FollowsVersion(string version, bool structureSets, bool worldPresets)
+    {
+        var features = GameFeatures.For(version);
+        Assert.Equal(structureSets, features.HasStructureSets);
+        Assert.Equal(worldPresets, features.HasWorldPresets);
+    }
+
+    [Theory]
     [InlineData("1.21.1")]
     [InlineData("1.21.8")]
     public void OldVersion_UsesPropertiesAndCamelCaseRules(string version)

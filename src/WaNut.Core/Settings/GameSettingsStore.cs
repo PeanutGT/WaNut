@@ -141,11 +141,18 @@ public static class GameSettingsStore
         return commands;
     }
 
-    /// <summary>Writes the server.properties a new server starts with. Minecraft adds every other key on its first start.</summary>
-    public static void WriteDefaults(string instanceDir, string serverName)
+    /// <summary>
+    /// Writes the server.properties a new server starts with. Minecraft adds every other key on its first start.
+    /// <paramref name="world"/> sets the seed and terrain of the world it will generate.
+    /// </summary>
+    public static void WriteDefaults(string instanceDir, string serverName, string minecraftVersion, WorldGeneration? world = null)
     {
         var properties = PropertiesFile.Parse(string.Empty);
         properties.Set("motd", serverName);
+        foreach (var (key, value) in (world ?? new WorldGeneration()).Properties(minecraftVersion))
+        {
+            properties.Set(key, value);
+        }
 
         // Peanut's choice (blueprint decision 21): every new server starts with the whitelist on, on every
         // version, so strangers cannot join. The Players tab warns until someone is on the list.

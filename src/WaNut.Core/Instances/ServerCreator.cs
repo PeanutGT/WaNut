@@ -148,7 +148,7 @@ public sealed class ServerCreator(
             }
 
             EulaFile.WriteAccepted(dir, now);
-            GameSettingsStore.WriteDefaults(dir, metadata.Name);
+            GameSettingsStore.WriteDefaults(dir, metadata.Name, vanilla.VersionId, request.World);
             store.Save(metadata);
             return metadata;
         }
