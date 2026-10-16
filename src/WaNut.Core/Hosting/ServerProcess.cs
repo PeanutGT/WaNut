@@ -32,6 +32,9 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
 
     public bool IsRunning => Status != ServerStatus.Stopped;
 
+    /// <summary>True from the moment the process has ended, before its players are cleared and its status changes.</summary>
+    public bool HasExited { get; private set; }
+
     /// <summary>Whether Windows will end the process if WaNut itself crashes.</summary>
     public bool IsTrackedByJob { get; private set; }
 
@@ -205,6 +208,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
         // Also waits until the redirected output has been read to the end.
         await process.WaitForExitAsync().ConfigureAwait(false);
         var exitCode = process.ExitCode;
+        HasExited = true;
 
         bool hadPlayers;
         lock (_gate)

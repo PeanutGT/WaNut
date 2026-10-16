@@ -1417,4 +1417,67 @@
   <data name="Invite_Mods" xml:space="preserve">
     <value>請安裝同版本的 Fabric 和這些模組（其中有些可能只需要裝在伺服器）：</value>
   </data>
+  <data name="Discord_Section" xml:space="preserve">
+    <value>Discord 通知</value>
+  </data>
+  <data name="Discord_Intro" xml:space="preserve">
+    <value>伺服器上線、關閉、當機，或朋友加入時，自動在 Discord 頻道發訊息。在 Discord：頻道設定 → 整合 → Webhook → 新 Webhook → 複製 Webhook 網址。</value>
+  </data>
+  <data name="Discord_UrlLabel" xml:space="preserve">
+    <value>Webhook 網址</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>傳送測試</value>
+  </data>
+  <data name="Discord_UrlInvalid" xml:space="preserve">
+    <value>這不是 Discord 的 webhook 網址。網址開頭是 https://discord.com/api/webhooks/。</value>
+  </data>
+  <data name="Discord_Secret" xml:space="preserve">
+    <value>請把這個網址當成密碼：拿到它的人都能在你的頻道發訊息。WaNut 只把它存在這台電腦。</value>
+  </data>
+  <data name="Discord_EventsLabel" xml:space="preserve">
+    <value>在這些時候發訊息：</value>
+  </data>
+  <data name="Discord_EventOnline" xml:space="preserve">
+    <value>伺服器上線</value>
+  </data>
+  <data name="Discord_EventStopped" xml:space="preserve">
+    <value>伺服器關閉</value>
+  </data>
+  <data name="Discord_EventCrashed" xml:space="preserve">
+    <value>伺服器當機</value>
+  </data>
+  <data name="Discord_EventJoined" xml:space="preserve">
+    <value>有人加入</value>
+  </data>
+  <data name="Discord_EventLeft" xml:space="preserve">
+    <value>有人離開</value>
+  </data>
+  <data name="Discord_Sending" xml:space="preserve">
+    <value>傳送中…</value>
+  </data>
+  <data name="Discord_TestMessage" xml:space="preserve">
+    <value>🥜 WaNut 連上了！伺服器的消息會出現在這裡。</value>
+  </data>
+  <data name="Discord_TestSent" xml:space="preserve">
+    <value>傳送了！看看你的 Discord 頻道。</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>無法傳送測試訊息：{0}</value>
+  </data>
+  <data name="Discord_Online" xml:space="preserve">
+    <value>🟢 **{0}** 上線了，快來玩！</value>
+  </data>
+  <data name="Discord_Stopped" xml:space="preserve">
+    <value>⚪ **{0}** 已經關閉。</value>
+  </data>
+  <data name="Discord_Crashed" xml:space="preserve">
+    <value>🔴 **{0}** 當機了。</value>
+  </data>
+  <data name="Discord_PlayerJoined" xml:space="preserve">
+    <value>➕ {1} 加入了 **{0}**。</value>
+  </data>
+  <data name="Discord_PlayerLeft" xml:space="preserve">
+    <value>➖ {1} 離開了 **{0}**。</value>
+  </data>
 </root>

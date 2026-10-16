@@ -1439,4 +1439,67 @@ Stop the server and update?</value>
   <data name="Invite_Mods" xml:space="preserve">
     <value>Install Fabric for the same version and these mods (a few may only be needed on the server):</value>
   </data>
+  <data name="Discord_Section" xml:space="preserve">
+    <value>Discord notifications</value>
+  </data>
+  <data name="Discord_Intro" xml:space="preserve">
+    <value>Post a message to a Discord channel when a server comes online, stops or crashes, or when friends join. In Discord: channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.</value>
+  </data>
+  <data name="Discord_UrlLabel" xml:space="preserve">
+    <value>Webhook URL</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>Send test</value>
+  </data>
+  <data name="Discord_UrlInvalid" xml:space="preserve">
+    <value>That isn't a Discord webhook URL. It starts with https://discord.com/api/webhooks/.</value>
+  </data>
+  <data name="Discord_Secret" xml:space="preserve">
+    <value>Treat this URL like a password: anyone who has it can post in your channel. WaNut keeps it only on this PC.</value>
+  </data>
+  <data name="Discord_EventsLabel" xml:space="preserve">
+    <value>Send a message when:</value>
+  </data>
+  <data name="Discord_EventOnline" xml:space="preserve">
+    <value>A server comes online</value>
+  </data>
+  <data name="Discord_EventStopped" xml:space="preserve">
+    <value>A server stops</value>
+  </data>
+  <data name="Discord_EventCrashed" xml:space="preserve">
+    <value>A server crashes</value>
+  </data>
+  <data name="Discord_EventJoined" xml:space="preserve">
+    <value>Someone joins</value>
+  </data>
+  <data name="Discord_EventLeft" xml:space="preserve">
+    <value>Someone leaves</value>
+  </data>
+  <data name="Discord_Sending" xml:space="preserve">
+    <value>Sending…</value>
+  </data>
+  <data name="Discord_TestMessage" xml:space="preserve">
+    <value>🥜 WaNut is connected! Server news will show up here.</value>
+  </data>
+  <data name="Discord_TestSent" xml:space="preserve">
+    <value>Sent! Check your Discord channel.</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>Couldn't send the test message: {0}</value>
+  </data>
+  <data name="Discord_Online" xml:space="preserve">
+    <value>🟢 **{0}** is online. Come play!</value>
+  </data>
+  <data name="Discord_Stopped" xml:space="preserve">
+    <value>⚪ **{0}** has stopped.</value>
+  </data>
+  <data name="Discord_Crashed" xml:space="preserve">
+    <value>🔴 **{0}** crashed.</value>
+  </data>
+  <data name="Discord_PlayerJoined" xml:space="preserve">
+    <value>➕ {1} joined **{0}**.</value>
+  </data>
+  <data name="Discord_PlayerLeft" xml:space="preserve">
+    <value>➖ {1} left **{0}**.</value>
+  </data>
 </root>

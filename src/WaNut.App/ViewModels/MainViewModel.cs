@@ -17,6 +17,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly FirewallService _firewall;
     private readonly IClipboardService _clipboard;
     private readonly ModLibrary _mods;
+    private readonly DiscordNotifier _discord;
 
     public MainViewModel(
         InstanceStore store,
@@ -27,8 +28,10 @@ public sealed partial class MainViewModel : ObservableObject
         FirewallService firewall,
         IClipboardService clipboard,
         UpdateViewModel updates,
-        ModLibrary mods)
+        ModLibrary mods,
+        DiscordNotifier discord)
     {
+        _discord = discord;
         _mods = mods;
         _firewall = firewall;
         _clipboard = clipboard;
@@ -98,7 +101,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private ServerViewModel NewServer(InstanceMetadata metadata)
     {
-        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods);
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods, _discord);
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
         return server;

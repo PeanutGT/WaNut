@@ -11,6 +11,7 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Notifications;
 
 namespace WaNut.App.ViewModels;
 
@@ -24,6 +25,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     private readonly ServerController _controller;
     private readonly InstanceStore _store;
+    private readonly DiscordNotifier _discord;
     private readonly SynchronizationContext _ui;
 
     // Console lines from the server's threads and WaNut's own lines share one queue, so they stay in order, and a
@@ -50,8 +52,10 @@ public sealed partial class ServerViewModel : ObservableObject
         IDialogService dialogs,
         FirewallService firewall,
         IClipboardService clipboard,
-        ModLibrary mods)
+        ModLibrary mods,
+        DiscordNotifier discord)
     {
+        _discord = discord;
         Metadata = metadata;
         _controller = controller;
         _store = store;
@@ -325,6 +329,7 @@ public sealed partial class ServerViewModel : ObservableObject
         if (value == ServerStatus.Online)
         {
             _wasOnline = true;
+            Notify(DiscordEvent.Online, "Discord_Online");
             _ = ApplyOnOnlineAsync();
         }
     }
@@ -421,10 +426,12 @@ public sealed partial class ServerViewModel : ObservableObject
         // "stop" ends with exit code 0; anything else the user did not ask for is a crash.
         if (exitCode == 0 || process.WasKilled)
         {
+            Notify(DiscordEvent.Stopped, "Discord_Stopped");
             return;
         }
 
         ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+        Notify(DiscordEvent.Crashed, "Discord_Crashed");
         if (!Metadata.AutoRestart || !_wasOnline)
         {
             return;
@@ -477,8 +484,28 @@ public sealed partial class ServerViewModel : ObservableObject
         }
     }
 
+    private void Notify(DiscordEvent kind, string key, string? player = null) =>
+        _discord.Notify(kind, string.Format(Text.Get(key), DiscordWebhook.Escape(Name), player is null ? null : DiscordWebhook.Escape(player)));
+
     private void SyncPlayers(ServerProcess process)
     {
+        var before = Players.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var after = process.Players;
+
+        // When the server stops, everyone "leaves" at once; that is not news worth a message each.
+        if (!process.HasExited)
+        {
+            foreach (var joined in after.Where(p => !before.Contains(p)))
+            {
+                Notify(DiscordEvent.PlayerJoined, "Discord_PlayerJoined", joined);
+            }
+
+            foreach (var left in before.Where(p => !after.Contains(p, StringComparer.OrdinalIgnoreCase)))
+            {
+                Notify(DiscordEvent.PlayerLeft, "Discord_PlayerLeft", left);
+            }
+        }
+
         Players.Clear();
         foreach (var player in process.Players)
         {

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
+using WaNut.Core.Notifications;
 
 namespace WaNut.Core.Settings;
 
@@ -34,6 +35,9 @@ public sealed record AppSettings
     /// <summary>The host's note on invite cards, such as the Radmin VPN network name and password. Null for none.</summary>
     public string? InviteNote { get; init; }
 
+    /// <summary>Discord notifications for server events.</summary>
+    public DiscordSettings Discord { get; init; } = new();
+
     /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
     public string? InstancesDir { get; init; }
 }
@@ -57,7 +61,7 @@ public sealed class AppSettingsStore(LauncherPaths paths)
         try
         {
             var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(paths.ConfigFile), JsonOptions) ?? new AppSettings();
-            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized(), FirewallAsked = settings.FirewallAsked ?? [] };
+            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized(), FirewallAsked = settings.FirewallAsked ?? [], Discord = settings.Discord ?? new() };
         }
         catch (JsonException)
         {
