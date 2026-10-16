@@ -17,4 +17,7 @@ public enum BackupReason
 
     /// <summary>The world as it was just before another world was imported over it.</summary>
     Import,
+
+    /// <summary>The world as it was just before it was deleted for a fresh one.</summary>
+    Reset,
 }

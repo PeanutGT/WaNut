@@ -32,6 +32,9 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
 
     public bool IsRunning => Status != ServerStatus.Stopped;
 
+    /// <summary>True from the moment the process has ended, before its players are cleared and its status changes.</summary>
+    public bool HasExited { get; private set; }
+
     /// <summary>Whether Windows will end the process if WaNut itself crashes.</summary>
     public bool IsTrackedByJob { get; private set; }
 
@@ -159,6 +162,27 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
         }
     }
 
+    /// <summary>The process's current memory and CPU time, or null when it is not running or Windows won't say.</summary>
+    public ProcessUsage? GetUsage()
+    {
+        var process = _process;
+        if (process is null || Exited.IsCompleted)
+        {
+            return null;
+        }
+
+        try
+        {
+            process.Refresh();
+            return new ProcessUsage(process.WorkingSet64, process.TotalProcessorTime);
+        }
+        catch (Exception e) when (e is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+        {
+            // Exited between the check and the read.
+            return null;
+        }
+    }
+
     /// <summary>Ends the process without saving. Only for when the user agreed after a stop timed out.</summary>
     public void Kill()
     {
@@ -184,6 +208,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IDisposable
         // Also waits until the redirected output has been read to the end.
         await process.WaitForExitAsync().ConfigureAwait(false);
         var exitCode = process.ExitCode;
+        HasExited = true;
 
         bool hadPlayers;
         lock (_gate)

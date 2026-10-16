@@ -1273,4 +1273,274 @@
     <value>「{0}」已刪除。世界保留在：
 {1}</value>
   </data>
+  <data name="Server_Usage" xml:space="preserve">
+    <value>記憶體 {0:0.0} GB（RAM 設定 {1:0.#} GB）· CPU {2:0}%</value>
+  </data>
+  <data name="Duplicate_Section" xml:space="preserve">
+    <value>複製這個伺服器</value>
+  </data>
+  <data name="Duplicate_Open" xml:space="preserve">
+    <value>複製伺服器…</value>
+  </data>
+  <data name="Duplicate_SectionHint" xml:space="preserve">
+    <value>做出第二個一樣的伺服器：世界、設定、模組和插件都相同，可以放心實驗，不會動到這一台。備份和記錄檔不會複製。請先停止伺服器。</value>
+  </data>
+  <data name="Duplicate_Title" xml:space="preserve">
+    <value>複製伺服器</value>
+  </data>
+  <data name="Duplicate_Hint" xml:space="preserve">
+    <value>複本會有備份和記錄檔以外的所有東西。兩台伺服器不能同時執行。</value>
+  </data>
+  <data name="Duplicate_NameLabel" xml:space="preserve">
+    <value>複本的名稱</value>
+  </data>
+  <data name="Duplicate_DefaultName" xml:space="preserve">
+    <value>{0}（複本）</value>
+  </data>
+  <data name="Duplicate_Confirm" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="Duplicate_Working" xml:space="preserve">
+    <value>正在複製伺服器…</value>
+  </data>
+  <data name="Duplicate_Failed" xml:space="preserve">
+    <value>無法複製伺服器：{0} 沒有任何變更。</value>
+  </data>
+  <data name="Icon_Label" xml:space="preserve">
+    <value>伺服器圖示</value>
+  </data>
+  <data name="Icon_Choose" xml:space="preserve">
+    <value>選擇圖片…</value>
+  </data>
+  <data name="Icon_Remove" xml:space="preserve">
+    <value>移除圖示</value>
+  </data>
+  <data name="Icon_Hint" xml:space="preserve">
+    <value>朋友在 Minecraft 的伺服器列表會看到它。任何圖片都可以：WaNut 會裁成正方形並縮成 64×64。換了新圖示，下次啟動後才會顯示。</value>
+  </data>
+  <data name="Icon_PickTitle" xml:space="preserve">
+    <value>選擇伺服器圖示的圖片</value>
+  </data>
+  <data name="Icon_Filter" xml:space="preserve">
+    <value>圖片|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Icon_Failed" xml:space="preserve">
+    <value>無法使用這張圖片：{0}</value>
+  </data>
+  <data name="Backups_Reason_Reset" xml:space="preserve">
+    <value>開新世界前</value>
+  </data>
+  <data name="Reset_Open" xml:space="preserve">
+    <value>開新世界…</value>
+  </data>
+  <data name="Reset_Title" xml:space="preserve">
+    <value>開新世界</value>
+  </data>
+  <data name="Reset_Question" xml:space="preserve">
+    <value>要刪除「{0}」的世界，讓下次啟動時產生新世界嗎？設定、白名單、管理員、模組和插件都會保留。資料包在世界裡面，會一起刪除。</value>
+  </data>
+  <data name="Reset_SeedLabel" xml:space="preserve">
+    <value>新世界的種子</value>
+  </data>
+  <data name="Reset_SeedHint" xml:space="preserve">
+    <value>留空就是隨機世界。</value>
+  </data>
+  <data name="Reset_BackupNote" xml:space="preserve">
+    <value>WaNut 會先備份目前的世界，之後可以在這個分頁還原。這份備份不算在保留份數裡。</value>
+  </data>
+  <data name="Reset_Confirm" xml:space="preserve">
+    <value>刪除世界</value>
+  </data>
+  <data name="Reset_Working" xml:space="preserve">
+    <value>正在備份並清除世界…</value>
+  </data>
+  <data name="Reset_Done" xml:space="preserve">
+    <value>好了！下次啟動時會產生全新的世界。</value>
+  </data>
+  <data name="Server_AutoRestart" xml:space="preserve">
+    <value>伺服器當機時自動重開</value>
+  </data>
+  <data name="Server_AutoRestartHint" xml:space="preserve">
+    <value>只在伺服器曾經上線後才會重開。10 分鐘內最多 3 次，一直當機的伺服器就不會一直重試。</value>
+  </data>
+  <data name="Server_AutoStop" xml:space="preserve">
+    <value>沒人在線時，經過</value>
+  </data>
+  <data name="Server_AutoStopMinutes" xml:space="preserve">
+    <value>分鐘自動關閉伺服器</value>
+  </data>
+  <data name="Server_AutoStopHint" xml:space="preserve">
+    <value>大家都離開後，可以省下電腦的記憶體和電。世界會像按「停止」一樣正常存檔。</value>
+  </data>
+  <data name="Server_AutoStopping" xml:space="preserve">
+    <value>已經 {0} 分鐘沒有人在線，WaNut 正在關閉伺服器。</value>
+  </data>
+  <data name="Server_Restarting" xml:space="preserve">
+    <value>伺服器當機了。{0:0} 秒後重新啟動（第 {1} 次，最多 {2} 次）…</value>
+  </data>
+  <data name="Server_CrashedTooOften" xml:space="preserve">
+    <value>伺服器意外停止（結束代碼 {0}），而且 {2:0} 分鐘內已經當機 {1} 次，所以 WaNut 不再自動重開。請先在主控台查看原因再啟動。</value>
+  </data>
+  <data name="Invite_Section" xml:space="preserve">
+    <value>邀請卡</value>
+  </data>
+  <data name="Invite_Copy" xml:space="preserve">
+    <value>複製邀請</value>
+  </data>
+  <data name="Invite_Hint" xml:space="preserve">
+    <value>複製一段訊息，裡面有伺服器名稱、版本和位址，可以直接貼到 Discord 或 LINE。Fabric 伺服器還會列出模組。</value>
+  </data>
+  <data name="Invite_NoteLabel" xml:space="preserve">
+    <value>給朋友的備註（可不填，所有伺服器共用）</value>
+  </data>
+  <data name="Invite_NotePlaceholder" xml:space="preserve">
+    <value>例如：Radmin VPN 網路 peanut-club，密碼 1234</value>
+  </data>
+  <data name="Invite_Copied" xml:space="preserve">
+    <value>邀請複製好了！貼給朋友吧。</value>
+  </data>
+  <data name="Invite_Title" xml:space="preserve">
+    <value>🥜 來我的 Minecraft 伺服器玩：{0}</value>
+  </data>
+  <data name="Invite_Version" xml:space="preserve">
+    <value>Minecraft: Java Edition，{0}</value>
+  </data>
+  <data name="Invite_Addresses" xml:space="preserve">
+    <value>位址（選你們用的網路，到「多人遊戲 → 新增伺服器」貼上）：</value>
+  </data>
+  <data name="Invite_NoAddress" xml:space="preserve">
+    <value>跟我要位址</value>
+  </data>
+  <data name="Invite_Note" xml:space="preserve">
+    <value>備註：{0}</value>
+  </data>
+  <data name="Invite_Mods" xml:space="preserve">
+    <value>請安裝同版本的 Fabric 和這些模組（其中有些可能只需要裝在伺服器）：</value>
+  </data>
+  <data name="Discord_Section" xml:space="preserve">
+    <value>Discord 通知</value>
+  </data>
+  <data name="Discord_Intro" xml:space="preserve">
+    <value>伺服器上線、關閉、當機，或朋友加入時，自動在 Discord 頻道發訊息。在 Discord：頻道設定 → 整合 → Webhook → 新 Webhook → 複製 Webhook 網址。</value>
+  </data>
+  <data name="Discord_UrlLabel" xml:space="preserve">
+    <value>Webhook 網址</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>傳送測試</value>
+  </data>
+  <data name="Discord_UrlInvalid" xml:space="preserve">
+    <value>這不是 Discord 的 webhook 網址。網址開頭是 https://discord.com/api/webhooks/。</value>
+  </data>
+  <data name="Discord_Secret" xml:space="preserve">
+    <value>請把這個網址當成密碼：拿到它的人都能在你的頻道發訊息。WaNut 只把它存在這台電腦。</value>
+  </data>
+  <data name="Discord_EventsLabel" xml:space="preserve">
+    <value>在這些時候發訊息：</value>
+  </data>
+  <data name="Discord_EventOnline" xml:space="preserve">
+    <value>伺服器上線</value>
+  </data>
+  <data name="Discord_EventStopped" xml:space="preserve">
+    <value>伺服器關閉</value>
+  </data>
+  <data name="Discord_EventCrashed" xml:space="preserve">
+    <value>伺服器當機</value>
+  </data>
+  <data name="Discord_EventJoined" xml:space="preserve">
+    <value>有人加入</value>
+  </data>
+  <data name="Discord_EventLeft" xml:space="preserve">
+    <value>有人離開</value>
+  </data>
+  <data name="Discord_Sending" xml:space="preserve">
+    <value>傳送中…</value>
+  </data>
+  <data name="Discord_TestMessage" xml:space="preserve">
+    <value>🥜 WaNut 連上了！伺服器的消息會出現在這裡。</value>
+  </data>
+  <data name="Discord_TestSent" xml:space="preserve">
+    <value>傳送了！看看你的 Discord 頻道。</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>無法傳送測試訊息：{0}</value>
+  </data>
+  <data name="Discord_Online" xml:space="preserve">
+    <value>🟢 **{0}** 上線了，快來玩！</value>
+  </data>
+  <data name="Discord_Stopped" xml:space="preserve">
+    <value>⚪ **{0}** 已經關閉。</value>
+  </data>
+  <data name="Discord_Crashed" xml:space="preserve">
+    <value>🔴 **{0}** 當機了。</value>
+  </data>
+  <data name="Discord_PlayerJoined" xml:space="preserve">
+    <value>➕ {1} 加入了 **{0}**。</value>
+  </data>
+  <data name="Discord_PlayerLeft" xml:space="preserve">
+    <value>➖ {1} 離開了 **{0}**。</value>
+  </data>
+  <data name="BackupCopy_Label" xml:space="preserve">
+    <value>另外複製一份備份到其他資料夾</value>
+  </data>
+  <data name="BackupCopy_None" xml:space="preserve">
+    <value>目前沒有複製到其他地方</value>
+  </data>
+  <data name="BackupCopy_Choose" xml:space="preserve">
+    <value>選擇資料夾…</value>
+  </data>
+  <data name="BackupCopy_UseOneDrive" xml:space="preserve">
+    <value>使用 OneDrive</value>
+  </data>
+  <data name="BackupCopy_Stop" xml:space="preserve">
+    <value>停止複製</value>
+  </data>
+  <data name="BackupCopy_Hint" xml:space="preserve">
+    <value>選一個 OneDrive、Google 雲端硬碟或隨身碟的資料夾：每份新備份也會複製過去，每台伺服器一個資料夾，套用相同的保留規則。複製失敗時 WaNut 會在這裡提醒你，伺服器照樣可以啟動。所有伺服器共用這個設定。</value>
+  </data>
+  <data name="BackupCopy_PickTitle" xml:space="preserve">
+    <value>選擇備份複本的資料夾</value>
+  </data>
+  <data name="BackupCopy_Failed" xml:space="preserve">
+    <value>備份已經安全存在這台電腦，但複製到 {0} 失敗了：{1}</value>
+  </data>
+  <data name="Close_Question" xml:space="preserve">
+    <value>「{0}」還在執行。要讓它在背景繼續跑嗎？</value>
+  </data>
+  <data name="Close_Hint" xml:space="preserve">
+    <value>在背景時，WaNut 會待在右下角時鐘旁邊的通知區域，朋友可以繼續玩。在那裡的花生上按右鍵，可以打開 WaNut 或關閉伺服器。</value>
+  </data>
+  <data name="Close_Remember" xml:space="preserve">
+    <value>記住我的選擇（可以在 App 設定更改）</value>
+  </data>
+  <data name="Close_Tray" xml:space="preserve">
+    <value>繼續執行</value>
+  </data>
+  <data name="Close_Stop" xml:space="preserve">
+    <value>關閉伺服器並離開</value>
+  </data>
+  <data name="Close_Setting" xml:space="preserve">
+    <value>伺服器執行中關閉 WaNut 時</value>
+  </data>
+  <data name="Close_ActionAsk" xml:space="preserve">
+    <value>每次都問我</value>
+  </data>
+  <data name="Close_ActionTray" xml:space="preserve">
+    <value>讓伺服器在背景繼續執行</value>
+  </data>
+  <data name="Close_ActionStop" xml:space="preserve">
+    <value>關閉伺服器並離開</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>打開 WaNut</value>
+  </data>
+  <data name="Tray_StopServer" xml:space="preserve">
+    <value>關閉伺服器</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>關閉伺服器並結束 WaNut</value>
+  </data>
+  <data name="Tray_Balloon" xml:space="preserve">
+    <value>WaNut 還在這裡，伺服器繼續執行中。按兩下花生就能再打開。</value>
+  </data>
 </root>

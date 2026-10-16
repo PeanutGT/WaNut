@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -10,6 +11,7 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Notifications;
 
 namespace WaNut.App.ViewModels;
 
@@ -23,7 +25,26 @@ public sealed partial class ServerViewModel : ObservableObject
 
     private readonly ServerController _controller;
     private readonly InstanceStore _store;
+    private readonly DiscordNotifier _discord;
     private readonly SynchronizationContext _ui;
+
+    // Console lines from the server's threads and WaNut's own lines share one queue, so they stay in order, and a
+    // burst of output reaches the UI thread as one batch instead of one post per line.
+    private readonly ConcurrentQueue<string> _pendingLines = new();
+    private int _flushPosted;
+
+    /// <summary>How long a crashed server waits before it is started again.</summary>
+    private static readonly TimeSpan RestartDelay = TimeSpan.FromSeconds(5);
+
+    private readonly RestartPolicy _restarts = new();
+    private readonly EmptyServerTimer _empty = new();
+
+    // Crash restarts only follow a server that got online: one that fails while starting (a bad mod, a port in use)
+    // would fail the same way again.
+    private bool _wasOnline;
+
+    // Set for an automatic restart, so the crash's last lines stay readable above the new start.
+    private bool _keepConsole;
 
     public ServerViewModel(
         InstanceMetadata metadata,
@@ -34,8 +55,10 @@ public sealed partial class ServerViewModel : ObservableObject
         IDialogService dialogs,
         FirewallService firewall,
         IClipboardService clipboard,
-        ModLibrary mods)
+        ModLibrary mods,
+        DiscordNotifier discord)
     {
+        _discord = discord;
         Metadata = metadata;
         _controller = controller;
         _store = store;
@@ -44,15 +67,19 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
-        Connect = new ConnectViewModel(this, firewall, clipboard);
+        Connect = new ConnectViewModel(this, firewall, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
         controller.PreparingChanged += OnPreparingChanged;
+        ReloadIcon();
     }
 
     /// <summary>Raised after the server's folder was deleted, so the list can drop it.</summary>
     public event EventHandler? Deleted;
+
+    /// <summary>Raised after the server was copied, so the list can show and select the copy.</summary>
+    public event EventHandler<InstanceMetadata>? Duplicated;
 
     public InstanceMetadata Metadata { get; private set; }
 
@@ -88,6 +115,16 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public ServerProcess? Process { get; private set; }
 
+    /// <summary>The server's server-icon.png, shown in the list and the header; null when it has none.</summary>
+    [ObservableProperty]
+    private System.Windows.Media.ImageSource? _icon;
+
+    public bool HasIcon => Icon is not null;
+
+    partial void OnIconChanged(System.Windows.Media.ImageSource? value) => OnPropertyChanged(nameof(HasIcon));
+
+    internal void ReloadIcon() => Icon = ServerIconMaker.Load(InstanceDir);
+
     public ObservableCollection<string> ConsoleLines { get; } = [];
 
     public ObservableCollection<string> Players { get; } = [];
@@ -117,6 +154,10 @@ public sealed partial class ServerViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _errorText;
+
+    /// <summary>The latest memory and CPU reading of the running java.exe, shown under the server's name.</summary>
+    [ObservableProperty]
+    private string? _usageText;
 
     public bool IsRunning => Status != ServerStatus.Stopped;
 
@@ -160,6 +201,8 @@ public sealed partial class ServerViewModel : ObservableObject
         _controller.Forget(this);
         Deleted?.Invoke(this, EventArgs.Empty);
     }
+
+    internal void OnDuplicated(InstanceMetadata copy) => Duplicated?.Invoke(this, copy);
 
     private void OnAdvancedModeChanged(object? sender, PropertyChangedEventArgs e) => ServerSettings.OnAdvancedModeChanged();
 
@@ -218,21 +261,21 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(StatusScene));
         StartCommand.NotifyCanExecuteChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     /// <summary>A mod or plugin install or removal started or finished: the server can't start meanwhile.</summary>
     internal void OnModWorkChanged()
     {
         StartCommand.NotifyCanExecuteChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     partial void OnIsPreparingChanged(bool value)
     {
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
@@ -288,6 +331,8 @@ public sealed partial class ServerViewModel : ObservableObject
         Mods.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
+            _wasOnline = true;
+            Notify(DiscordEvent.Online, "Discord_Online");
             _ = ApplyOnOnlineAsync();
         }
     }
@@ -323,13 +368,20 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void Attach(ServerProcess process)
     {
         Process = process;
-        ConsoleLines.Clear();
+        if (!_keepConsole)
+        {
+            ConsoleLines.Clear();
+        }
+
+        _keepConsole = false;
         Players.Clear();
         OnPropertyChanged(nameof(PlayersHeader));
 
-        process.OutputReceived += line => _ui.Post(_ => AddConsoleLine(line), null);
+        process.OutputReceived += AddConsoleLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
+        _wasOnline = false;
+        _ = WatchRunningAsync(process);
         process.Exited.ContinueWith(
             t => _ui.Post(_ => OnExited(process, t.Result), null),
             CancellationToken.None,
@@ -338,28 +390,138 @@ public sealed partial class ServerViewModel : ObservableObject
 
     }
 
+    /// <summary>
+    /// Every two seconds until the process exits: reads its memory and CPU, and stops it once it has been empty
+    /// for the "stop when nobody is online" time. Runs on the UI thread.
+    /// </summary>
+    private async Task WatchRunningAsync(ServerProcess process)
+    {
+        var meter = new CpuMeter(Environment.ProcessorCount);
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        var stopping = false;
+        try
+        {
+            while (await timer.WaitForNextTickAsync() && Process == process && process.GetUsage() is { } usage)
+            {
+                var now = DateTimeOffset.UtcNow;
+                if (meter.Sample(usage.CpuTime, now) is { } cpu)
+                {
+                    UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
+                }
+
+                _empty.Update(Status == ServerStatus.Online, Players.Count, now);
+                if (!stopping && Metadata.AutoStopMinutes > 0 && _empty.IsDue(now, TimeSpan.FromMinutes(Metadata.AutoStopMinutes)))
+                {
+                    stopping = true;
+                    AddConsoleLine(string.Format(Text.Get("Server_AutoStopping"), Metadata.AutoStopMinutes));
+                    _ = _controller.StopAsync(this);
+                }
+            }
+        }
+        finally
+        {
+            if (Process == process)
+            {
+                UsageText = null;
+            }
+        }
+    }
+
     private void OnExited(ServerProcess process, int exitCode)
     {
         AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
 
         // "stop" ends with exit code 0; anything else the user did not ask for is a crash.
-        if (exitCode != 0 && !process.WasKilled)
+        if (exitCode == 0 || process.WasKilled)
         {
-            ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+            Notify(DiscordEvent.Stopped, "Discord_Stopped");
+            return;
+        }
+
+        ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+        Notify(DiscordEvent.Crashed, "Discord_Crashed");
+        if (!Metadata.AutoRestart || !_wasOnline)
+        {
+            return;
+        }
+
+        if (_restarts.TryRestart(DateTimeOffset.UtcNow))
+        {
+            AddConsoleLine(string.Format(Text.Get("Server_Restarting"), RestartDelay.TotalSeconds, _restarts.Count, RestartPolicy.MaxRestarts));
+            _ = RestartAfterCrashAsync(process);
+        }
+        else
+        {
+            ErrorText = string.Format(Text.Get("Server_CrashedTooOften"), exitCode, RestartPolicy.MaxRestarts, RestartPolicy.Window.TotalMinutes);
         }
     }
 
+    private async Task RestartAfterCrashAsync(ServerProcess crashed)
+    {
+        await Task.Delay(RestartDelay);
+
+        // Only if nothing happened meanwhile: the user may have started this or another server, or deleted this one.
+        if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && _controller.Preparing is null
+            && (_controller.Running is null || _controller.Running == this) && Directory.Exists(InstanceDir))
+        {
+            _keepConsole = true;
+            try
+            {
+                await _controller.StartAsync(this);
+            }
+            finally
+            {
+                _keepConsole = false;
+            }
+        }
+    }
+
+    /// <summary>Queues a console line from any thread; the UI thread adds every waiting line in one go.</summary>
     private void AddConsoleLine(string line)
     {
-        ConsoleLines.Add(line);
+        _pendingLines.Enqueue(line);
+        if (Interlocked.Exchange(ref _flushPosted, 1) == 0)
+        {
+            _ui.Post(_ => FlushConsoleLines(), null);
+        }
+    }
+
+    private void FlushConsoleLines()
+    {
+        Volatile.Write(ref _flushPosted, 0);
+        while (_pendingLines.TryDequeue(out var line))
+        {
+            ConsoleLines.Add(line);
+        }
+
         while (ConsoleLines.Count > MaxConsoleLines)
         {
             ConsoleLines.RemoveAt(0);
         }
     }
 
+    private void Notify(DiscordEvent kind, string key, string? player = null) =>
+        _discord.Notify(kind, string.Format(Text.Get(key), DiscordWebhook.Escape(Name), player is null ? null : DiscordWebhook.Escape(player)));
+
     private void SyncPlayers(ServerProcess process)
     {
+        var before = Players.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var after = process.Players;
+
+        // When the server stops, everyone "leaves" at once; that is not news worth a message each.
+        if (!process.HasExited)
+        {
+            foreach (var joined in after.Where(p => !before.Contains(p)))
+            {
+                Notify(DiscordEvent.PlayerJoined, "Discord_PlayerJoined", joined);
+            }
+
+            foreach (var left in before.Where(p => !after.Contains(p, StringComparer.OrdinalIgnoreCase)))
+            {
+                Notify(DiscordEvent.PlayerLeft, "Discord_PlayerLeft", left);
+            }
+        }
+
         Players.Clear();
         foreach (var player in process.Players)
         {

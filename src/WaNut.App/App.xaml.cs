@@ -13,6 +13,7 @@ using WaNut.Core.Instances;
 using WaNut.Core.Java;
 using WaNut.Core.Mods;
 using WaNut.Core.Network;
+using WaNut.Core.Notifications;
 using WaNut.Core.Players;
 using WaNut.Core.Settings;
 using WaNut.Core.Updates;
@@ -91,12 +92,17 @@ public partial class App : Application
         services.AddSingleton<WorldImporter>();
         services.AddSingleton<WorldExporter>();
         services.AddSingleton<InstanceDeleter>();
+        services.AddSingleton<InstanceCopier>();
         services.AddSingleton<IFirewall, WindowsFirewall>();
         services.AddSingleton<FirewallService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<AppUpdater>();
         services.AddSingleton<ModrinthClient>();
         services.AddSingleton<ModLibrary>();
+        services.AddSingleton<DiscordWebhook>();
+        services.AddSingleton<DiscordNotifier>();
+        services.AddSingleton<BackupCopyService>();
+        services.AddSingleton<TrayIcon>();
 
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
@@ -116,6 +122,8 @@ public partial class App : Application
         services.AddTransient<ExportWorldWindow>();
         services.AddTransient<DeleteServerViewModel>();
         services.AddTransient<DeleteServerWindow>();
+        services.AddTransient<DuplicateServerViewModel>();
+        services.AddTransient<DuplicateServerWindow>();
 
         return services.BuildServiceProvider();
     }

@@ -1295,4 +1295,274 @@ Stop the server and update?</value>
     <value>“{0}” was deleted. Its world was kept here:
 {1}</value>
   </data>
+  <data name="Server_Usage" xml:space="preserve">
+    <value>Memory {0:0.0} GB (RAM setting {1:0.#} GB) · CPU {2:0}%</value>
+  </data>
+  <data name="Duplicate_Section" xml:space="preserve">
+    <value>Duplicate this server</value>
+  </data>
+  <data name="Duplicate_Open" xml:space="preserve">
+    <value>Duplicate server…</value>
+  </data>
+  <data name="Duplicate_SectionHint" xml:space="preserve">
+    <value>Makes a second server with the same world, settings, mods and plugins, so you can try things without touching this one. Backups and logs aren't copied. Stop the server first.</value>
+  </data>
+  <data name="Duplicate_Title" xml:space="preserve">
+    <value>Duplicate server</value>
+  </data>
+  <data name="Duplicate_Hint" xml:space="preserve">
+    <value>The copy gets everything except backups and logs. Both servers can't run at the same time.</value>
+  </data>
+  <data name="Duplicate_NameLabel" xml:space="preserve">
+    <value>Name of the copy</value>
+  </data>
+  <data name="Duplicate_DefaultName" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="Duplicate_Confirm" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="Duplicate_Working" xml:space="preserve">
+    <value>Copying the server…</value>
+  </data>
+  <data name="Duplicate_Failed" xml:space="preserve">
+    <value>Couldn't copy the server: {0} Nothing was changed.</value>
+  </data>
+  <data name="Icon_Label" xml:space="preserve">
+    <value>Server icon</value>
+  </data>
+  <data name="Icon_Choose" xml:space="preserve">
+    <value>Choose picture…</value>
+  </data>
+  <data name="Icon_Remove" xml:space="preserve">
+    <value>Remove icon</value>
+  </data>
+  <data name="Icon_Hint" xml:space="preserve">
+    <value>Your friends see it next to the server in Minecraft's server list. Any picture works: WaNut crops it to a square and shrinks it to 64×64. A new icon shows after the next start.</value>
+  </data>
+  <data name="Icon_PickTitle" xml:space="preserve">
+    <value>Choose a picture for the server icon</value>
+  </data>
+  <data name="Icon_Filter" xml:space="preserve">
+    <value>Pictures|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Icon_Failed" xml:space="preserve">
+    <value>Couldn't use that picture: {0}</value>
+  </data>
+  <data name="Backups_Reason_Reset" xml:space="preserve">
+    <value>Before a new world</value>
+  </data>
+  <data name="Reset_Open" xml:space="preserve">
+    <value>Start a new world…</value>
+  </data>
+  <data name="Reset_Title" xml:space="preserve">
+    <value>Start a new world</value>
+  </data>
+  <data name="Reset_Question" xml:space="preserve">
+    <value>Delete the world of “{0}” so the next start makes a new one? Settings, the whitelist, OPs, mods and plugins stay. Datapacks live inside the world, so they go with it.</value>
+  </data>
+  <data name="Reset_SeedLabel" xml:space="preserve">
+    <value>Seed for the new world</value>
+  </data>
+  <data name="Reset_SeedHint" xml:space="preserve">
+    <value>Leave empty for a random world.</value>
+  </data>
+  <data name="Reset_BackupNote" xml:space="preserve">
+    <value>WaNut backs the current world up first, so you can restore it from this tab. That backup doesn't count toward the keep count.</value>
+  </data>
+  <data name="Reset_Confirm" xml:space="preserve">
+    <value>Delete world</value>
+  </data>
+  <data name="Reset_Working" xml:space="preserve">
+    <value>Backing up and clearing the world…</value>
+  </data>
+  <data name="Reset_Done" xml:space="preserve">
+    <value>Done! A brand-new world will be made at the next start.</value>
+  </data>
+  <data name="Server_AutoRestart" xml:space="preserve">
+    <value>Restart the server if it crashes</value>
+  </data>
+  <data name="Server_AutoRestartHint" xml:space="preserve">
+    <value>Only after the server was online. At most 3 times in 10 minutes, so a server that keeps crashing stops trying.</value>
+  </data>
+  <data name="Server_AutoStop" xml:space="preserve">
+    <value>Stop the server after</value>
+  </data>
+  <data name="Server_AutoStopMinutes" xml:space="preserve">
+    <value>minutes with nobody online</value>
+  </data>
+  <data name="Server_AutoStopHint" xml:space="preserve">
+    <value>Saves your PC's memory and power when everyone has left. The world is saved like a normal Stop.</value>
+  </data>
+  <data name="Server_AutoStopping" xml:space="preserve">
+    <value>Nobody has been online for {0} minutes, so WaNut is stopping the server.</value>
+  </data>
+  <data name="Server_Restarting" xml:space="preserve">
+    <value>The server crashed. Starting it again in {0:0} seconds (restart {1} of {2})…</value>
+  </data>
+  <data name="Server_CrashedTooOften" xml:space="preserve">
+    <value>The server stopped unexpectedly (exit code {0}) and has crashed {1} times in {2:0} minutes, so WaNut stopped restarting it. Check the console for the cause before starting it again.</value>
+  </data>
+  <data name="Invite_Section" xml:space="preserve">
+    <value>Invite card</value>
+  </data>
+  <data name="Invite_Copy" xml:space="preserve">
+    <value>Copy invite</value>
+  </data>
+  <data name="Invite_Hint" xml:space="preserve">
+    <value>Copies a short message with the server's name, version and addresses, ready to paste into Discord or LINE. Fabric servers also list their mods.</value>
+  </data>
+  <data name="Invite_NoteLabel" xml:space="preserve">
+    <value>Note for friends (optional, remembered for every server)</value>
+  </data>
+  <data name="Invite_NotePlaceholder" xml:space="preserve">
+    <value>e.g. Radmin VPN network: peanut-club, password: 1234</value>
+  </data>
+  <data name="Invite_Copied" xml:space="preserve">
+    <value>Invite copied! Paste it to your friends.</value>
+  </data>
+  <data name="Invite_Title" xml:space="preserve">
+    <value>🥜 Come play on my Minecraft server: {0}</value>
+  </data>
+  <data name="Invite_Version" xml:space="preserve">
+    <value>Minecraft: Java Edition, {0}</value>
+  </data>
+  <data name="Invite_Addresses" xml:space="preserve">
+    <value>Address (pick the one for your network, then add it under Multiplayer → Add Server):</value>
+  </data>
+  <data name="Invite_NoAddress" xml:space="preserve">
+    <value>Ask me for the address</value>
+  </data>
+  <data name="Invite_Note" xml:space="preserve">
+    <value>Note: {0}</value>
+  </data>
+  <data name="Invite_Mods" xml:space="preserve">
+    <value>Install Fabric for the same version and these mods (a few may only be needed on the server):</value>
+  </data>
+  <data name="Discord_Section" xml:space="preserve">
+    <value>Discord notifications</value>
+  </data>
+  <data name="Discord_Intro" xml:space="preserve">
+    <value>Post a message to a Discord channel when a server comes online, stops or crashes, or when friends join. In Discord: channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.</value>
+  </data>
+  <data name="Discord_UrlLabel" xml:space="preserve">
+    <value>Webhook URL</value>
+  </data>
+  <data name="Discord_Test" xml:space="preserve">
+    <value>Send test</value>
+  </data>
+  <data name="Discord_UrlInvalid" xml:space="preserve">
+    <value>That isn't a Discord webhook URL. It starts with https://discord.com/api/webhooks/.</value>
+  </data>
+  <data name="Discord_Secret" xml:space="preserve">
+    <value>Treat this URL like a password: anyone who has it can post in your channel. WaNut keeps it only on this PC.</value>
+  </data>
+  <data name="Discord_EventsLabel" xml:space="preserve">
+    <value>Send a message when:</value>
+  </data>
+  <data name="Discord_EventOnline" xml:space="preserve">
+    <value>A server comes online</value>
+  </data>
+  <data name="Discord_EventStopped" xml:space="preserve">
+    <value>A server stops</value>
+  </data>
+  <data name="Discord_EventCrashed" xml:space="preserve">
+    <value>A server crashes</value>
+  </data>
+  <data name="Discord_EventJoined" xml:space="preserve">
+    <value>Someone joins</value>
+  </data>
+  <data name="Discord_EventLeft" xml:space="preserve">
+    <value>Someone leaves</value>
+  </data>
+  <data name="Discord_Sending" xml:space="preserve">
+    <value>Sending…</value>
+  </data>
+  <data name="Discord_TestMessage" xml:space="preserve">
+    <value>🥜 WaNut is connected! Server news will show up here.</value>
+  </data>
+  <data name="Discord_TestSent" xml:space="preserve">
+    <value>Sent! Check your Discord channel.</value>
+  </data>
+  <data name="Discord_TestFailed" xml:space="preserve">
+    <value>Couldn't send the test message: {0}</value>
+  </data>
+  <data name="Discord_Online" xml:space="preserve">
+    <value>🟢 **{0}** is online. Come play!</value>
+  </data>
+  <data name="Discord_Stopped" xml:space="preserve">
+    <value>⚪ **{0}** has stopped.</value>
+  </data>
+  <data name="Discord_Crashed" xml:space="preserve">
+    <value>🔴 **{0}** crashed.</value>
+  </data>
+  <data name="Discord_PlayerJoined" xml:space="preserve">
+    <value>➕ {1} joined **{0}**.</value>
+  </data>
+  <data name="Discord_PlayerLeft" xml:space="preserve">
+    <value>➖ {1} left **{0}**.</value>
+  </data>
+  <data name="BackupCopy_Label" xml:space="preserve">
+    <value>Also copy backups to another folder</value>
+  </data>
+  <data name="BackupCopy_None" xml:space="preserve">
+    <value>Not copying anywhere</value>
+  </data>
+  <data name="BackupCopy_Choose" xml:space="preserve">
+    <value>Choose folder…</value>
+  </data>
+  <data name="BackupCopy_UseOneDrive" xml:space="preserve">
+    <value>Use OneDrive</value>
+  </data>
+  <data name="BackupCopy_Stop" xml:space="preserve">
+    <value>Stop copying</value>
+  </data>
+  <data name="BackupCopy_Hint" xml:space="preserve">
+    <value>Pick a OneDrive, Google Drive or USB drive folder: every new backup is copied there too, one folder per server, with the same keep rules. If a copy fails, WaNut tells you here and the server still starts. Applies to every server.</value>
+  </data>
+  <data name="BackupCopy_PickTitle" xml:space="preserve">
+    <value>Choose a folder for backup copies</value>
+  </data>
+  <data name="BackupCopy_Failed" xml:space="preserve">
+    <value>The backup is safe on this PC, but copying it to {0} failed: {1}</value>
+  </data>
+  <data name="Close_Question" xml:space="preserve">
+    <value>“{0}” is still running. Keep it running in the background?</value>
+  </data>
+  <data name="Close_Hint" xml:space="preserve">
+    <value>In the background, WaNut waits in the notification area (bottom right, next to the clock) and your friends can keep playing. Right-click the peanut there to open WaNut or stop the server.</value>
+  </data>
+  <data name="Close_Remember" xml:space="preserve">
+    <value>Remember my choice (change it in App settings)</value>
+  </data>
+  <data name="Close_Tray" xml:space="preserve">
+    <value>Keep running</value>
+  </data>
+  <data name="Close_Stop" xml:space="preserve">
+    <value>Stop server and close</value>
+  </data>
+  <data name="Close_Setting" xml:space="preserve">
+    <value>When you close WaNut while a server runs</value>
+  </data>
+  <data name="Close_ActionAsk" xml:space="preserve">
+    <value>Ask me each time</value>
+  </data>
+  <data name="Close_ActionTray" xml:space="preserve">
+    <value>Keep it running in the background</value>
+  </data>
+  <data name="Close_ActionStop" xml:space="preserve">
+    <value>Stop the server and close</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Open WaNut</value>
+  </data>
+  <data name="Tray_StopServer" xml:space="preserve">
+    <value>Stop server</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Stop server and exit WaNut</value>
+  </data>
+  <data name="Tray_Balloon" xml:space="preserve">
+    <value>WaNut is still here, keeping your server running. Double-click the peanut to open it again.</value>
+  </data>
 </root>

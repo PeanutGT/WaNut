@@ -17,6 +17,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly FirewallService _firewall;
     private readonly IClipboardService _clipboard;
     private readonly ModLibrary _mods;
+    private readonly DiscordNotifier _discord;
 
     public MainViewModel(
         InstanceStore store,
@@ -27,8 +28,12 @@ public sealed partial class MainViewModel : ObservableObject
         FirewallService firewall,
         IClipboardService clipboard,
         UpdateViewModel updates,
-        ModLibrary mods)
+        ModLibrary mods,
+        DiscordNotifier discord,
+        BackupCopyService backupCopies)
     {
+        backupCopies.CopyFailed += OnBackupCopyFailed;
+        _discord = discord;
         _mods = mods;
         _firewall = firewall;
         _clipboard = clipboard;
@@ -54,6 +59,8 @@ public sealed partial class MainViewModel : ObservableObject
     private bool _isShuttingDown;
 
     public bool HasRunningServer => _controller.HasRunningServer;
+
+    public string? RunningServerName => _controller.Running?.Name;
 
     /// <summary>Stops the running server so its world is saved before WaNut closes.</summary>
     public async Task ShutdownAsync()
@@ -98,9 +105,24 @@ public sealed partial class MainViewModel : ObservableObject
 
     private ServerViewModel NewServer(InstanceMetadata metadata)
     {
-        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods);
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods, _discord);
         server.Deleted += OnServerDeleted;
+        server.Duplicated += OnServerDuplicated;
         return server;
+    }
+
+    private void OnBackupCopyFailed(string instanceDir, string message)
+    {
+        if (Servers.FirstOrDefault(s => string.Equals(s.InstanceDir, instanceDir, StringComparison.OrdinalIgnoreCase)) is { } server)
+        {
+            server.Backups.ErrorText = message;
+        }
+    }
+
+    private void OnServerDuplicated(object? sender, InstanceMetadata copy)
+    {
+        Reload();
+        SelectedServer = Servers.FirstOrDefault(s => s.Id == copy.Id);
     }
 
     /// <summary>Drops a deleted server from the list and selects its neighbour, or nothing when the list is empty.</summary>
@@ -112,6 +134,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         server.Deleted -= OnServerDeleted;
+        server.Duplicated -= OnServerDuplicated;
         var index = Servers.IndexOf(server);
         Servers.Remove(server);
         if (SelectedServer == server || SelectedServer is null)

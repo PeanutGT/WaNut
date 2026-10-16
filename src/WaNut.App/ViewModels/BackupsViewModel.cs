@@ -37,7 +37,7 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange), nameof(WorkText))]
-    [NotifyCanExecuteChangedFor(nameof(BackUpNowCommand), nameof(RestoreCommand), nameof(ReplaceWorldCommand), nameof(ExportWorldCommand), nameof(ExportBackupCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackUpNowCommand), nameof(RestoreCommand), nameof(ReplaceWorldCommand), nameof(ResetWorldCommand), nameof(ExportWorldCommand), nameof(ExportBackupCommand))]
     private BackupReason? _working;
 
     [ObservableProperty]
@@ -56,7 +56,12 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     public bool ShowStopToChange => _server.IsRunning;
 
-    public string WorkText => Working == BackupReason.Restore ? Text.Get("Backups_Restoring") : Text.Get("Backups_Working");
+    public string WorkText => Working switch
+    {
+        BackupReason.Restore => Text.Get("Backups_Restoring"),
+        BackupReason.Reset => Text.Get("Reset_Working"),
+        _ => Text.Get("Backups_Working"),
+    };
 
     public string TotalSizeText => string.Format(Text.Get("Backups_Total"), Items.Count, BackupItemViewModel.FormatSize(Items.Sum(i => i.Info.SizeBytes)));
 
@@ -98,6 +103,7 @@ public sealed partial class BackupsViewModel : ObservableObject
         BackUpNowCommand.NotifyCanExecuteChanged();
         RestoreCommand.NotifyCanExecuteChanged();
         ReplaceWorldCommand.NotifyCanExecuteChanged();
+        ResetWorldCommand.NotifyCanExecuteChanged();
         ExportWorldCommand.NotifyCanExecuteChanged();
         ExportBackupCommand.NotifyCanExecuteChanged();
     }
@@ -117,6 +123,25 @@ public sealed partial class BackupsViewModel : ObservableObject
         Reload();
         var notes = WorldMessages.ImportNotes(result);
         DoneText = Text.Get("World_Replaced") + (notes.Length > 0 ? Environment.NewLine + notes : string.Empty);
+    }
+
+    /// <summary>"Start a new world": backs the world up, deletes it and optionally sets a new seed. Settings stay.</summary>
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private async Task ResetWorldAsync()
+    {
+        ErrorText = null;
+        DoneText = null;
+        if (_dialogs.AskResetWorld(_server.Name) is not { } seed)
+        {
+            return;
+        }
+
+        await RunAsync(BackupReason.Reset, async progress =>
+        {
+            await _store.ResetWorldAsync(_server.InstanceDir, progress);
+            Core.Settings.GameSettingsStore.SetSeed(_server.InstanceDir, seed);
+            return Text.Get("Reset_Done");
+        });
     }
 
     [RelayCommand(CanExecute = nameof(CanChange))]
@@ -173,6 +198,37 @@ public sealed partial class BackupsViewModel : ObservableObject
     }
 
     private bool CanRestore(BackupItemViewModel? item) => item is not null && CanChange;
+
+    /// <summary>Picks the folder every backup is also copied to, starting from OneDrive when there is one.</summary>
+    [RelayCommand]
+    private void ChooseCopyFolder()
+    {
+        if (_dialogs.PickFolder(Text.Get("BackupCopy_PickTitle")) is { } dir)
+        {
+            App.BackupCopyDir = dir;
+            OnPropertyChanged(nameof(CanUseOneDrive));
+        }
+    }
+
+    [RelayCommand]
+    private void UseOneDrive()
+    {
+        if (BackupCopyService.SuggestedFolder() is { } dir)
+        {
+            App.BackupCopyDir = dir;
+            OnPropertyChanged(nameof(CanUseOneDrive));
+        }
+    }
+
+    [RelayCommand]
+    private void StopCopying()
+    {
+        App.BackupCopyDir = string.Empty;
+        OnPropertyChanged(nameof(CanUseOneDrive));
+    }
+
+    /// <summary>The "Use OneDrive" button only shows when OneDrive is set up and not already chosen.</summary>
+    public bool CanUseOneDrive => BackupCopyService.SuggestedFolder() is { } dir && !string.Equals(dir, App.BackupCopyDir, StringComparison.OrdinalIgnoreCase);
 
     [RelayCommand]
     private void OpenFolder()

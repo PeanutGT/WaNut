@@ -335,4 +335,71 @@ public sealed class BackupStoreTests : IDisposable
 
         Assert.Equal(BackupProblem.BackupMissing, error.Problem);
     }
+
+    [Fact]
+    public async Task ResetWorldAsync_World_BacksUpThenDeletesIt()
+    {
+        WriteWorld();
+        WriteFile("world_nether/DIM-1/level.dat", "nether");
+        WriteFile("server.properties", "level-name=world");
+
+        var safety = await _store.ResetWorldAsync(Dir);
+
+        Assert.Equal(BackupReason.Reset, safety!.Reason);
+        Assert.False(Directory.Exists(Path.Combine(Dir, "world")));
+        Assert.False(Directory.Exists(Path.Combine(Dir, "world_nether")));
+        Assert.Equal("level-name=world", ReadFile("server.properties"));
+        using var archive = ZipFile.OpenRead(safety.FilePath);
+        Assert.Contains(archive.Entries, e => e.FullName == "world/level.dat");
+        Assert.Empty(Directory.EnumerateDirectories(Dir, ".wanut-*"));
+    }
+
+    [Fact]
+    public async Task ResetWorldAsync_NoWorld_ReturnsNull()
+    {
+        Assert.Null(await _store.ResetWorldAsync(Dir));
+    }
+
+    [Fact]
+    public async Task Cleanup_ResetCopy_DoesNotCountTowardKeepCount()
+    {
+        WriteWorld();
+        await BackUpAsync(BackupReason.Reset);
+        for (var i = 0; i < 3; i++)
+        {
+            _clock.Advance(TimeSpan.FromMinutes(1));
+            await BackUpAsync();
+        }
+
+        _store.Cleanup(Dir, new BackupRules { KeepCount = 2, MaxAgeDays = 30 });
+
+        Assert.Contains(_store.List(Dir), b => b.Reason == BackupReason.Reset);
+    }
+
+    [Fact]
+    public async Task CreateAsync_World_RaisesCreated()
+    {
+        WriteWorld();
+        (string Dir, BackupInfo Backup)? raised = null;
+        _store.Created += (dir, backup) => raised = (dir, backup);
+
+        var backup = await BackUpAsync();
+
+        Assert.Equal((Dir, backup), raised);
+    }
+
+    [Fact]
+    public async Task CopyToFolderAsync_Backup_CopiesAndAppliesRules()
+    {
+        using var copies = new TempDir();
+        WriteWorld();
+        for (var i = 0; i < 3; i++)
+        {
+            _clock.Advance(TimeSpan.FromMinutes(1));
+            await _store.CopyToFolderAsync(await BackUpAsync(), copies.Path, new BackupRules { KeepCount = 2, MaxAgeDays = 30 });
+        }
+
+        var copied = Directory.GetFiles(copies.Path).Select(Path.GetFileName).Order().ToList();
+        Assert.Equal(["2026-10-15_12-02-00_start.zip", "2026-10-15_12-03-00_start.zip"], copied);
+    }
 }

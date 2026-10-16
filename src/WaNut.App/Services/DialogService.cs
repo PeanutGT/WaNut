@@ -60,14 +60,34 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return deleted;
     }
 
+    public InstanceMetadata? ShowDuplicateServer(ServerViewModel server)
+    {
+        var window = services.GetRequiredService<DuplicateServerWindow>();
+        window.ViewModel.Initialize(server);
+        window.Owner = Application.Current.MainWindow;
+        return window.ShowDialog() == true ? window.ViewModel.Copy : null;
+    }
+
+    public string? AskResetWorld(string serverName)
+    {
+        var window = new ResetWorldWindow(string.Format(Text.Get("Reset_Question"), serverName)) { Owner = Application.Current.MainWindow };
+        return window.ShowDialog() == true ? window.Seed : null;
+    }
+
     public bool Confirm(string message) => Show(new ConfirmWindow(message));
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));
 
-    public string? PickFolder()
+    public string? PickFolder(string? title = null)
     {
-        var dialog = new OpenFolderDialog { Title = Text.Get("World_PickFolderTitle") };
+        var dialog = new OpenFolderDialog { Title = title ?? Text.Get("World_PickFolderTitle") };
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FolderName : null;
+    }
+
+    public string? PickImage()
+    {
+        var dialog = new OpenFileDialog { Title = Text.Get("Icon_PickTitle"), Filter = Text.Get("Icon_Filter") };
+        return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
     }
 
     public string? PickZipToOpen()

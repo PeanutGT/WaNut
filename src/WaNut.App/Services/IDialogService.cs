@@ -25,6 +25,12 @@ public interface IDialogService
     /// <summary>Shows the "Delete server" window. Returns true when the server was deleted; <paramref name="keptZip"/> is the world zip kept, if any.</summary>
     bool ShowDeleteServer(ServerViewModel server, out string? keptZip);
 
+    /// <summary>Shows the "Duplicate server" window. Returns the new server, or null if nothing was copied.</summary>
+    InstanceMetadata? ShowDuplicateServer(ServerViewModel server);
+
+    /// <summary>Asks before resetting the world. Returns the seed for the new world (empty for random), or null to cancel.</summary>
+    string? AskResetWorld(string serverName);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 
@@ -32,7 +38,10 @@ public interface IDialogService
     void Inform(string message);
 
     /// <summary>Asks for a world folder. Returns null if the user cancelled.</summary>
-    string? PickFolder();
+    string? PickFolder(string? title = null);
+
+    /// <summary>Asks for a picture (PNG, JPEG, BMP or GIF). Returns null if the user cancelled.</summary>
+    string? PickImage();
 
     /// <summary>Asks for a .zip file to read. Returns null if the user cancelled.</summary>
     string? PickZipToOpen();

@@ -37,6 +37,49 @@
                    Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}" />
       </StackPanel>
 
+      <!-- Server icon: friends see it in Minecraft's server list. -->
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Icon_Label}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal">
+          <Border Width="64" Height="64" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
+                  Background="{DynamicResource CardBrush}" Margin="0,0,12,0">
+            <Grid>
+              <Image Source="{Binding Server.Icon}" Width="64" Height="64" RenderOptions.BitmapScalingMode="NearestNeighbor"
+                     AutomationProperties.Name="{res:Text Icon_Label}" />
+              <!-- No icon yet: a faded peanut keeps the spot. -->
+              <Image Width="32" Height="32" Opacity="0.4">
+                <Image.Style>
+                  <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Server.HasIcon}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Image.Style>
+              </Image>
+            </Grid>
+          </Border>
+          <StackPanel VerticalAlignment="Center">
+            <Button Content="{res:Text Icon_Choose}" Command="{Binding ChooseIconCommand}" HorizontalAlignment="Left" />
+            <Button Content="{res:Text Icon_Remove}" Command="{Binding RemoveIconCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Text="{res:Text Icon_Hint}" Style="{StaticResource Hint}" />
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IconError}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding IconError}" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+
       <!-- More settings -->
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,18">
         <StackPanel Margin="4,8,0,0">
@@ -65,6 +108,21 @@
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
+            <CheckBox Content="{res:Text Server_AutoRestart}" IsChecked="{Binding AutoRestart}" />
+            <TextBlock Text="{res:Text Server_AutoRestartHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox Content="{res:Text Server_AutoStop}" IsChecked="{Binding AutoStop}" VerticalAlignment="Center" />
+              <TextBox Text="{Binding AutoStopMinutes}" IsEnabled="{Binding AutoStopMinutesEnabled}" Width="56" MaxLength="4" Margin="8,0,6,0"
+                       AutomationProperties.Name="{res:Text Server_AutoStopMinutes}" />
+              <TextBlock Text="{res:Text Server_AutoStopMinutes}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="{res:Text Server_AutoStopHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
             <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
                      AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />
@@ -78,6 +136,12 @@
                     Visibility="{Binding ShowOnlineModeWarning, Converter={StaticResource Visible}}">
               <TextBlock Text="{res:Text Server_OnlineModeWarning}" TextWrapping="Wrap" />
             </Border>
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Duplicate_Section}" Style="{StaticResource Label}" />
+            <Button Content="{res:Text Duplicate_Open}" Command="{Binding DuplicateServerCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="{res:Text Duplicate_SectionHint}" Style="{StaticResource Hint}" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">

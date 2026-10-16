@@ -9,6 +9,10 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </Window.Resources>
+
   <!-- DataContext: AppSettingsViewModel -->
   <StackPanel Margin="24">
     <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
@@ -29,6 +33,12 @@
     <ComboBox ItemsSource="{Binding Themes}" DisplayMemberPath="Value" SelectedValuePath="Key"
               SelectedValue="{Binding Theme}" HorizontalAlignment="Left" MinWidth="160" Margin="0,0,0,18"
               AutomationProperties.Name="{res:Text AppSettings_Theme}" />
+
+    <!-- Closing while a server runs -->
+    <TextBlock Text="{res:Text Close_Setting}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+    <ComboBox ItemsSource="{Binding CloseActions}" DisplayMemberPath="Value" SelectedValuePath="Key"
+              SelectedValue="{Binding CloseAction}" HorizontalAlignment="Left" MinWidth="220" Margin="0,0,0,18"
+              AutomationProperties.Name="{res:Text Close_Setting}" />
 
     <!-- Updates -->
     <TextBlock Text="{res:Text Update_Section}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
@@ -90,6 +100,29 @@
           </Border.Style>
           <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
         </Border>
+      </StackPanel>
+    </Expander>
+
+    <Expander Header="{res:Text Discord_Section}" Margin="-4,0,0,18">
+      <StackPanel Margin="4,8,0,0">
+        <TextBlock Text="{res:Text Discord_Intro}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
+        <TextBlock Text="{res:Text Discord_UrlLabel}" Margin="0,0,0,4" />
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="{res:Text Discord_Test}" Command="{Binding SendDiscordTestCommand}" Margin="8,0,0,0" />
+          <TextBox Text="{Binding DiscordWebhookUrl, UpdateSourceTrigger=PropertyChanged, Delay=500}"
+                   Tag="https://discord.com/api/webhooks/…" InputMethod.IsInputMethodEnabled="False"
+                   AutomationProperties.Name="{res:Text Discord_UrlLabel}" />
+        </DockPanel>
+        <TextBlock Text="{res:Text Discord_UrlInvalid}" Foreground="{DynamicResource ErrorTextBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                   Visibility="{Binding DiscordUrlInvalid, Converter={StaticResource BoolToVisibility}}" />
+        <TextBlock Text="{res:Text Discord_Secret}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock Text="{Binding DiscordTestText}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" AutomationProperties.LiveSetting="Polite" />
+        <TextBlock Text="{res:Text Discord_EventsLabel}" Margin="0,10,0,4" />
+        <CheckBox Content="{res:Text Discord_EventOnline}" IsChecked="{Binding DiscordOnline}" />
+        <CheckBox Content="{res:Text Discord_EventStopped}" IsChecked="{Binding DiscordStopped}" Margin="0,4,0,0" />
+        <CheckBox Content="{res:Text Discord_EventCrashed}" IsChecked="{Binding DiscordCrashed}" Margin="0,4,0,0" />
+        <CheckBox Content="{res:Text Discord_EventJoined}" IsChecked="{Binding DiscordPlayerJoined}" Margin="0,4,0,0" />
+        <CheckBox Content="{res:Text Discord_EventLeft}" IsChecked="{Binding DiscordPlayerLeft}" Margin="0,4,0,0" />
       </StackPanel>
     </Expander>
 

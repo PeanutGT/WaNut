@@ -184,4 +184,16 @@ public sealed class GameSettingsStoreTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_dir.Path, "survival"));
         Assert.True(GameSettingsStore.WorldExists(_dir.Path));
     }
+
+    [Fact]
+    public void SetSeed_KeepsOtherKeys()
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "server.properties"), "motd=hi\nlevel-seed=123\n");
+
+        GameSettingsStore.SetSeed(_dir.Path, " 42 ");
+
+        var text = File.ReadAllText(Path.Combine(_dir.Path, "server.properties"));
+        Assert.Contains("level-seed=42", text);
+        Assert.Contains("motd=hi", text);
+    }
 }

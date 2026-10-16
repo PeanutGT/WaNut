@@ -47,9 +47,10 @@ public sealed partial class BackupStore(TimeProvider clock)
     }
 
     /// <summary>The server's backups, newest first. Zips WaNut did not name are left out, so they are never deleted.</summary>
-    public IReadOnlyList<BackupInfo> List(string instanceDir)
+    public IReadOnlyList<BackupInfo> List(string instanceDir) => ListFolder(BackupsDir(instanceDir));
+
+    private List<BackupInfo> ListFolder(string dir)
     {
-        var dir = BackupsDir(instanceDir);
         if (!Directory.Exists(dir))
         {
             return [];
@@ -93,26 +94,65 @@ public sealed partial class BackupStore(TimeProvider clock)
         }
 
         TryParseName(Path.GetFileName(path), out var createdAt, out _);
-        return new BackupInfo(path, createdAt, reason, new FileInfo(path).Length);
+        var backup = new BackupInfo(path, createdAt, reason, new FileInfo(path).Length);
+        Created?.Invoke(instanceDir, backup);
+        return backup;
+    }
+
+    /// <summary>Raised after a backup zip was written, with the server folder it belongs to.</summary>
+    public event Action<string, BackupInfo>? Created;
+
+    /// <summary>
+    /// Copies a backup into <paramref name="copyDir"/> (for example a OneDrive folder), then applies the cleanup
+    /// rules there too. The zip is written under a temporary name first, so a half-copied file never looks complete.
+    /// </summary>
+    public async Task CopyToFolderAsync(BackupInfo backup, string copyDir, BackupRules rules, CancellationToken cancellationToken = default)
+    {
+        Directory.CreateDirectory(copyDir);
+        var target = Path.Combine(copyDir, backup.FileName);
+        if (!File.Exists(target))
+        {
+            var temp = target + ".tmp";
+            try
+            {
+                await using (var input = new FileStream(backup.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true))
+                await using (var output = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                {
+                    await input.CopyToAsync(output, cancellationToken);
+                }
+
+                File.Move(temp, target);
+            }
+            catch
+            {
+                File.Delete(temp);
+                throw;
+            }
+        }
+
+        CleanupFolder(copyDir, rules);
     }
 
     /// <summary>
     /// Deletes backups beyond the newest <see cref="BackupRules.KeepCount"/> and those older than
     /// <see cref="BackupRules.MaxAgeDays"/>. The newest backup is always kept, however old, so a server left alone
     /// for months still has one. The copies made before a restore, a world import or a type/version change do not count toward the
-    /// keep count, so a few starts afterwards cannot delete the only way back; they still expire by age.
+    /// keep count, so a few starts afterwards cannot delete the only way back; they still expire by age. The same
+    /// goes for the copy made before a world reset.
     /// </summary>
-    public IReadOnlyList<BackupInfo> Cleanup(string instanceDir, BackupRules rules)
+    public IReadOnlyList<BackupInfo> Cleanup(string instanceDir, BackupRules rules) => CleanupFolder(BackupsDir(instanceDir), rules);
+
+    private List<BackupInfo> CleanupFolder(string dir, BackupRules rules)
     {
         rules = rules.Normalized();
         var oldest = clock.GetUtcNow() - TimeSpan.FromDays(rules.MaxAgeDays);
         var deleted = new List<BackupInfo>();
-        var backups = List(instanceDir);
+        var backups = ListFolder(dir);
         var counted = 0;
         for (var i = 0; i < backups.Count; i++)
         {
             var backup = backups[i];
-            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import;
+            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import or BackupReason.Reset;
             var tooMany = !isSafetyCopy && counted >= rules.KeepCount;
             if (i > 0 && (tooMany || backup.CreatedAt < oldest))
             {
@@ -155,6 +195,27 @@ public sealed partial class BackupStore(TimeProvider clock)
         }
 
         return await ReplaceWorldAsync(instanceDir, incoming, restoredFolders, BackupReason.Restore, cancellationToken);
+    }
+
+    /// <summary>
+    /// Deletes the world so the next start generates a new one. The world is backed up first (as a "reset" backup);
+    /// if that fails, nothing is deleted. Settings, players, mods and plugins stay. Returns the safety backup, or
+    /// null when there was no world.
+    /// </summary>
+    public async Task<BackupInfo?> ResetWorldAsync(string instanceDir, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
+    {
+        var safety = await CreateAsync(instanceDir, BackupReason.Reset, progress, cancellationToken);
+        var folders = WorldFolders(instanceDir);
+        if (folders.Count == 0)
+        {
+            return safety;
+        }
+
+        // Moved aside first, so a folder in use puts everything back instead of leaving half a world.
+        var outgoing = NewStagingDir(instanceDir, "old");
+        Swap(instanceDir, outgoing, outgoing, folders, []);
+        DeleteQuietly(outgoing);
+        return safety;
     }
 
     /// <summary>

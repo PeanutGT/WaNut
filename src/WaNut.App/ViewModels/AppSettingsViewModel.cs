@@ -1,7 +1,9 @@
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Notifications;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;
@@ -11,11 +13,13 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 {
     private readonly AppSettingsStore _store;
     private readonly ThemeService _themeService;
+    private readonly DiscordWebhook _webhook;
     private AppSettings _saved;
     private bool _loading;
 
-    public AppSettingsViewModel(AppSettingsStore store, ThemeService theme)
+    public AppSettingsViewModel(AppSettingsStore store, ThemeService theme, DiscordWebhook webhook)
     {
+        _webhook = webhook;
         _store = store;
         _themeService = theme;
         var settings = store.Load();
@@ -27,6 +31,15 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         CheckForUpdates = settings.CheckForUpdates;
         Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
+        InviteNote = settings.InviteNote ?? string.Empty;
+        CloseAction = settings.CloseAction;
+        BackupCopyDir = settings.BackupCopyDir ?? string.Empty;
+        DiscordWebhookUrl = settings.Discord.WebhookUrl ?? string.Empty;
+        DiscordOnline = settings.Discord.Online;
+        DiscordStopped = settings.Discord.Stopped;
+        DiscordCrashed = settings.Discord.Crashed;
+        DiscordPlayerJoined = settings.Discord.PlayerJoined;
+        DiscordPlayerLeft = settings.Discord.PlayerLeft;
         _loading = false;
     }
 
@@ -58,6 +71,97 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private ThemeChoice _theme;
+
+    /// <summary>Remembered for every server's invite card: hosts usually use one VPN network.</summary>
+    [ObservableProperty]
+    private string _inviteNote = string.Empty;
+
+    partial void OnInviteNoteChanged(string value) => Save();
+
+    [ObservableProperty]
+    private CloseAction _closeAction;
+
+    public IReadOnlyList<KeyValuePair<CloseAction, string>> CloseActions { get; } =
+    [
+        new(Core.Settings.CloseAction.Ask, Resources.Text.Get("Close_ActionAsk")),
+        new(Core.Settings.CloseAction.Tray, Resources.Text.Get("Close_ActionTray")),
+        new(Core.Settings.CloseAction.Stop, Resources.Text.Get("Close_ActionStop")),
+    ];
+
+    partial void OnCloseActionChanged(CloseAction value) => Save();
+
+    /// <summary>Where every backup is also copied; empty for nowhere.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBackupCopyDir))]
+    private string _backupCopyDir = string.Empty;
+
+    public bool HasBackupCopyDir => BackupCopyDir.Trim().Length > 0;
+
+    partial void OnBackupCopyDirChanged(string value) => Save();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DiscordUrlInvalid))]
+    [NotifyCanExecuteChangedFor(nameof(SendDiscordTestCommand))]
+    private string _discordWebhookUrl = string.Empty;
+
+    [ObservableProperty]
+    private bool _discordOnline;
+
+    [ObservableProperty]
+    private bool _discordStopped;
+
+    [ObservableProperty]
+    private bool _discordCrashed;
+
+    [ObservableProperty]
+    private bool _discordPlayerJoined;
+
+    [ObservableProperty]
+    private bool _discordPlayerLeft;
+
+    [ObservableProperty]
+    private string? _discordTestText;
+
+    public bool DiscordUrlInvalid => DiscordWebhookUrl.Trim().Length > 0 && !DiscordWebhook.IsValidUrl(DiscordWebhookUrl);
+
+    public DiscordSettings Discord => new()
+    {
+        WebhookUrl = DiscordWebhookUrl.Trim().Length == 0 ? null : DiscordWebhookUrl.Trim(),
+        Online = DiscordOnline,
+        Stopped = DiscordStopped,
+        Crashed = DiscordCrashed,
+        PlayerJoined = DiscordPlayerJoined,
+        PlayerLeft = DiscordPlayerLeft,
+    };
+
+    partial void OnDiscordWebhookUrlChanged(string value) => Save();
+
+    partial void OnDiscordOnlineChanged(bool value) => Save();
+
+    partial void OnDiscordStoppedChanged(bool value) => Save();
+
+    partial void OnDiscordCrashedChanged(bool value) => Save();
+
+    partial void OnDiscordPlayerJoinedChanged(bool value) => Save();
+
+    partial void OnDiscordPlayerLeftChanged(bool value) => Save();
+
+    [RelayCommand(CanExecute = nameof(CanSendDiscordTest))]
+    private async Task SendDiscordTestAsync()
+    {
+        DiscordTestText = Resources.Text.Get("Discord_Sending");
+        try
+        {
+            await _webhook.SendAsync(DiscordWebhookUrl, Resources.Text.Get("Discord_TestMessage"));
+            DiscordTestText = Resources.Text.Get("Discord_TestSent");
+        }
+        catch (Exception e) when (e is System.Net.Http.HttpRequestException or TaskCanceledException or ArgumentException)
+        {
+            DiscordTestText = string.Format(Resources.Text.Get("Discord_TestFailed"), e.Message);
+        }
+    }
+
+    private bool CanSendDiscordTest() => DiscordWebhook.IsValidUrl(DiscordWebhookUrl);
 
     public IReadOnlyList<KeyValuePair<ThemeChoice, string>> Themes { get; } =
     [
@@ -131,7 +235,18 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme };
+            _saved = _saved with
+            {
+                AdvancedMode = AdvancedMode,
+                Backups = BackupRules,
+                CheckForUpdates = CheckForUpdates,
+                Language = Language,
+                Theme = Theme,
+                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim(),
+                Discord = Discord,
+                CloseAction = CloseAction,
+                BackupCopyDir = HasBackupCopyDir ? BackupCopyDir.Trim() : null,
+            };
             _store.Save(_saved);
             ErrorText = null;
         }

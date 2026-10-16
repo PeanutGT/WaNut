@@ -160,6 +160,15 @@ public static class GameSettingsStore
         properties.Save(Path.Combine(instanceDir, PropertiesFileName));
     }
 
+    /// <summary>Sets the seed the next new world is generated from. Empty means a random seed.</summary>
+    public static void SetSeed(string instanceDir, string seed)
+    {
+        var path = Path.Combine(instanceDir, PropertiesFileName);
+        var properties = PropertiesFile.Load(path);
+        properties.Set("level-seed", seed.Trim());
+        properties.Save(path);
+    }
+
     private static IEnumerable<(RuleSetting Setting, bool Before, bool After)> RuleValues(GameSettings before, GameSettings after)
     {
         yield return (RuleSetting.KeepInventory, before.KeepInventory, after.KeepInventory);
