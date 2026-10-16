@@ -1295,4 +1295,7 @@ Stop the server and update?</value>
     <value>“{0}” was deleted. Its world was kept here:
 {1}</value>
   </data>
+  <data name="Server_Usage" xml:space="preserve">
+    <value>Memory {0:0.0} GB (RAM setting {1:0.#} GB) · CPU {2:0}%</value>
+  </data>
 </root>

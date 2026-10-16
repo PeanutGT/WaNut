@@ -1273,4 +1273,7 @@
     <value>「{0}」已刪除。世界保留在：
 {1}</value>
   </data>
+  <data name="Server_Usage" xml:space="preserve">
+    <value>記憶體 {0:0.0} GB（RAM 設定 {1:0.#} GB）· CPU {2:0}%</value>
+  </data>
 </root>

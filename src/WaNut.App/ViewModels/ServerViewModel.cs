@@ -124,6 +124,10 @@ public sealed partial class ServerViewModel : ObservableObject
     [ObservableProperty]
     private string? _errorText;
 
+    /// <summary>The latest memory and CPU reading of the running java.exe, shown under the server's name.</summary>
+    [ObservableProperty]
+    private string? _usageText;
+
     public bool IsRunning => Status != ServerStatus.Stopped;
 
     public bool IsOnline => Status == ServerStatus.Online;
@@ -336,12 +340,37 @@ public sealed partial class ServerViewModel : ObservableObject
         process.OutputReceived += AddConsoleLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
+        _ = TrackUsageAsync(process);
         process.Exited.ContinueWith(
             t => _ui.Post(_ => OnExited(process, t.Result), null),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnRanToCompletion,
             TaskScheduler.Default);
 
+    }
+
+    /// <summary>Reads the process's memory and CPU every two seconds until it exits. Runs on the UI thread.</summary>
+    private async Task TrackUsageAsync(ServerProcess process)
+    {
+        var meter = new CpuMeter(Environment.ProcessorCount);
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        try
+        {
+            while (await timer.WaitForNextTickAsync() && Process == process && process.GetUsage() is { } usage)
+            {
+                if (meter.Sample(usage.CpuTime, DateTimeOffset.UtcNow) is { } cpu)
+                {
+                    UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
+                }
+            }
+        }
+        finally
+        {
+            if (Process == process)
+            {
+                UsageText = null;
+            }
+        }
     }
 
     private void OnExited(ServerProcess process, int exitCode)

@@ -215,6 +215,18 @@
               <Run Text="{Binding Metadata.MemoryMb, Mode=OneWay}" />
               <Run Text="MB" />
             </TextBlock>
+            <!-- Live memory and CPU of java.exe while the server runs. -->
+            <TextBlock Text="{Binding UsageText}" Margin="0,2,0,0" FontSize="12" AutomationProperties.Name="{Binding UsageText}">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding UsageText}" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <!-- The peanut acts out the status: asleep, starting, cheering, saving. -->
