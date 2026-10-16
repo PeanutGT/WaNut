@@ -60,6 +60,8 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool HasRunningServer => _controller.HasRunningServer;
 
+    public string? RunningServerName => _controller.Running?.Name;
+
     /// <summary>Stops the running server so its world is saved before WaNut closes.</summary>
     public async Task ShutdownAsync()
     {

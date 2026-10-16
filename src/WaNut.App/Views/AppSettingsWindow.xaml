@@ -34,6 +34,12 @@
               SelectedValue="{Binding Theme}" HorizontalAlignment="Left" MinWidth="160" Margin="0,0,0,18"
               AutomationProperties.Name="{res:Text AppSettings_Theme}" />
 
+    <!-- Closing while a server runs -->
+    <TextBlock Text="{res:Text Close_Setting}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+    <ComboBox ItemsSource="{Binding CloseActions}" DisplayMemberPath="Value" SelectedValuePath="Key"
+              SelectedValue="{Binding CloseAction}" HorizontalAlignment="Left" MinWidth="220" Margin="0,0,0,18"
+              AutomationProperties.Name="{res:Text Close_Setting}" />
+
     <!-- Updates -->
     <TextBlock Text="{res:Text Update_Section}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
     <StackPanel x:Name="UpdatePanel">

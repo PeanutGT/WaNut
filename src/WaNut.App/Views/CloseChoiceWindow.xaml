@@ -1,0 +1,27 @@
+<Window x:Class="WaNut.App.Views.CloseChoiceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WaNut.App.Resources"
+        Title="{res:Text App_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
+        Width="460" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+  <!-- Closing WaNut while a server runs: keep it running in the notification area, or stop it. -->
+  <StackPanel Margin="24">
+    <StackPanel Orientation="Horizontal">
+      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
+      <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="14" VerticalAlignment="Center" MaxWidth="360" />
+    </StackPanel>
+    <TextBlock Text="{res:Text Close_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />
+    <CheckBox x:Name="RememberBox" Content="{res:Text Close_Remember}" Margin="0,14,0,0" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button x:Name="TrayButton" Content="{res:Text Close_Tray}" Style="{StaticResource PrimaryButton}" MinWidth="80" Margin="0,0,8,0"
+              IsDefault="True" Click="OnTray" />
+      <Button Content="{res:Text Close_Stop}" MinWidth="80" Margin="0,0,8,0" Click="OnStop" />
+      <Button Content="{res:Text Common_Cancel}" MinWidth="80" IsCancel="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

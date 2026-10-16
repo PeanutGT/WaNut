@@ -1504,4 +1504,43 @@
   <data name="BackupCopy_Failed" xml:space="preserve">
     <value>備份已經安全存在這台電腦，但複製到 {0} 失敗了：{1}</value>
   </data>
+  <data name="Close_Question" xml:space="preserve">
+    <value>「{0}」還在執行。要讓它在背景繼續跑嗎？</value>
+  </data>
+  <data name="Close_Hint" xml:space="preserve">
+    <value>在背景時，WaNut 會待在右下角時鐘旁邊的通知區域，朋友可以繼續玩。在那裡的花生上按右鍵，可以打開 WaNut 或關閉伺服器。</value>
+  </data>
+  <data name="Close_Remember" xml:space="preserve">
+    <value>記住我的選擇（可以在 App 設定更改）</value>
+  </data>
+  <data name="Close_Tray" xml:space="preserve">
+    <value>繼續執行</value>
+  </data>
+  <data name="Close_Stop" xml:space="preserve">
+    <value>關閉伺服器並離開</value>
+  </data>
+  <data name="Close_Setting" xml:space="preserve">
+    <value>伺服器執行中關閉 WaNut 時</value>
+  </data>
+  <data name="Close_ActionAsk" xml:space="preserve">
+    <value>每次都問我</value>
+  </data>
+  <data name="Close_ActionTray" xml:space="preserve">
+    <value>讓伺服器在背景繼續執行</value>
+  </data>
+  <data name="Close_ActionStop" xml:space="preserve">
+    <value>關閉伺服器並離開</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>打開 WaNut</value>
+  </data>
+  <data name="Tray_StopServer" xml:space="preserve">
+    <value>關閉伺服器</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>關閉伺服器並結束 WaNut</value>
+  </data>
+  <data name="Tray_Balloon" xml:space="preserve">
+    <value>WaNut 還在這裡，伺服器繼續執行中。按兩下花生就能再打開。</value>
+  </data>
 </root>

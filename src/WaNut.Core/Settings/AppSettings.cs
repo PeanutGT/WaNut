@@ -38,6 +38,9 @@ public sealed record AppSettings
     /// <summary>A folder (such as OneDrive) that gets a copy of every backup, or null for none.</summary>
     public string? BackupCopyDir { get; init; }
 
+    /// <summary>What closing the window does while a server runs.</summary>
+    public CloseAction CloseAction { get; init; }
+
     /// <summary>Discord notifications for server events.</summary>
     public DiscordSettings Discord { get; init; } = new();
 

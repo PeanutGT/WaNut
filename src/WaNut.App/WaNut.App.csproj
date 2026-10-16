@@ -4,12 +4,20 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- Only for the notification area icon (NotifyIcon); WPF has none of its own. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>WaNut</AssemblyName>
     <RootNamespace>WaNut.App</RootNamespace>
     <ApplicationIcon>Assets\wanut.ico</ApplicationIcon>
     <!-- Program.Main runs Velopack's install and update hooks before the WPF app starts. -->
     <StartupObject>WaNut.App.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Windows Forms' global usings would clash with WPF's Application, MessageBox, Color and more. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />

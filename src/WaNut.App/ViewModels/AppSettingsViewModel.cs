@@ -32,6 +32,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
         InviteNote = settings.InviteNote ?? string.Empty;
+        CloseAction = settings.CloseAction;
         BackupCopyDir = settings.BackupCopyDir ?? string.Empty;
         DiscordWebhookUrl = settings.Discord.WebhookUrl ?? string.Empty;
         DiscordOnline = settings.Discord.Online;
@@ -76,6 +77,18 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private string _inviteNote = string.Empty;
 
     partial void OnInviteNoteChanged(string value) => Save();
+
+    [ObservableProperty]
+    private CloseAction _closeAction;
+
+    public IReadOnlyList<KeyValuePair<CloseAction, string>> CloseActions { get; } =
+    [
+        new(Core.Settings.CloseAction.Ask, Resources.Text.Get("Close_ActionAsk")),
+        new(Core.Settings.CloseAction.Tray, Resources.Text.Get("Close_ActionTray")),
+        new(Core.Settings.CloseAction.Stop, Resources.Text.Get("Close_ActionStop")),
+    ];
+
+    partial void OnCloseActionChanged(CloseAction value) => Save();
 
     /// <summary>Where every backup is also copied; empty for nowhere.</summary>
     [ObservableProperty]
@@ -222,9 +235,18 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme,
-                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim(), Discord = Discord,
-                BackupCopyDir = HasBackupCopyDir ? BackupCopyDir.Trim() : null };
+            _saved = _saved with
+            {
+                AdvancedMode = AdvancedMode,
+                Backups = BackupRules,
+                CheckForUpdates = CheckForUpdates,
+                Language = Language,
+                Theme = Theme,
+                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim(),
+                Discord = Discord,
+                CloseAction = CloseAction,
+                BackupCopyDir = HasBackupCopyDir ? BackupCopyDir.Trim() : null,
+            };
             _store.Save(_saved);
             ErrorText = null;
         }

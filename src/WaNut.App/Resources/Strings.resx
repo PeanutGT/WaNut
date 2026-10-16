@@ -1526,4 +1526,43 @@ Stop the server and update?</value>
   <data name="BackupCopy_Failed" xml:space="preserve">
     <value>The backup is safe on this PC, but copying it to {0} failed: {1}</value>
   </data>
+  <data name="Close_Question" xml:space="preserve">
+    <value>“{0}” is still running. Keep it running in the background?</value>
+  </data>
+  <data name="Close_Hint" xml:space="preserve">
+    <value>In the background, WaNut waits in the notification area (bottom right, next to the clock) and your friends can keep playing. Right-click the peanut there to open WaNut or stop the server.</value>
+  </data>
+  <data name="Close_Remember" xml:space="preserve">
+    <value>Remember my choice (change it in App settings)</value>
+  </data>
+  <data name="Close_Tray" xml:space="preserve">
+    <value>Keep running</value>
+  </data>
+  <data name="Close_Stop" xml:space="preserve">
+    <value>Stop server and close</value>
+  </data>
+  <data name="Close_Setting" xml:space="preserve">
+    <value>When you close WaNut while a server runs</value>
+  </data>
+  <data name="Close_ActionAsk" xml:space="preserve">
+    <value>Ask me each time</value>
+  </data>
+  <data name="Close_ActionTray" xml:space="preserve">
+    <value>Keep it running in the background</value>
+  </data>
+  <data name="Close_ActionStop" xml:space="preserve">
+    <value>Stop the server and close</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Open WaNut</value>
+  </data>
+  <data name="Tray_StopServer" xml:space="preserve">
+    <value>Stop server</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Stop server and exit WaNut</value>
+  </data>
+  <data name="Tray_Balloon" xml:space="preserve">
+    <value>WaNut is still here, keeping your server running. Double-click the peanut to open it again.</value>
+  </data>
 </root>

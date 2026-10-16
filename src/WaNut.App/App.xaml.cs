@@ -102,6 +102,7 @@ public partial class App : Application
         services.AddSingleton<DiscordWebhook>();
         services.AddSingleton<DiscordNotifier>();
         services.AddSingleton<BackupCopyService>();
+        services.AddSingleton<TrayIcon>();
 
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
