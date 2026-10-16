@@ -46,6 +46,9 @@ public interface IDialogService
     /// <summary>Asks for a .zip file to read. Returns null if the user cancelled.</summary>
     string? PickZipToOpen();
 
+    /// <summary>Asks for a Modrinth .mrpack file. Returns null if the user cancelled.</summary>
+    string? PickModpack();
+
     /// <summary>Asks where to save a .zip file. Returns null if the user cancelled.</summary>
     string? PickZipToSave(string fileName);
 }

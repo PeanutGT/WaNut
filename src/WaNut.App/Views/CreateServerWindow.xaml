@@ -70,6 +70,33 @@
           <views:WorldPicker DataContext="{Binding Picker}" IsEnabled="{Binding DataContext.IsIdle, RelativeSource={RelativeSource AncestorType=Window}}" />
         </StackPanel>
 
+        <!-- A modpack decides the type and version, so those lists are locked while it is chosen. -->
+        <StackPanel Visibility="{Binding IsModpack, Converter={StaticResource BoolToVisibility}}">
+          <TextBlock Text="{res:Text Modpack_PickLabel}" Style="{StaticResource FieldLabel}" />
+          <Button Content="{res:Text Modpack_Pick}"
+                  Command="{Binding PickModpackCommand}"
+                  IsEnabled="{Binding IsIdle}"
+                  HorizontalAlignment="Left" Padding="12,4" />
+          <TextBlock Text="{Binding ModpackSummary}" TextWrapping="Wrap" Margin="0,8,0,0" />
+          <TextBlock Text="{res:Text Modpack_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <Border Margin="0,8,0,0">
+            <Border.Style>
+              <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding ModpackError}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding ModpackError}" TextWrapping="Wrap" />
+          </Border>
+          <Border Style="{StaticResource WarningBanner}" Margin="0,8,0,0"
+                  Visibility="{Binding ModpackVersionMissing, Converter={StaticResource BoolToVisibility}}">
+            <TextBlock Text="{Binding ModpackVersionMissingText}" TextWrapping="Wrap" />
+          </Border>
+        </StackPanel>
+
         <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource FieldLabel}" />
         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
                  AutomationProperties.Name="{res:Text CreateServer_NameLabel}"
@@ -78,7 +105,7 @@
         <TextBlock Text="{res:Text CreateServer_TypeLabel}" Style="{StaticResource FieldLabel}" />
         <ListBox ItemsSource="{Binding ServerTypes}"
                  SelectedItem="{Binding SelectedType}"
-                 IsEnabled="{Binding IsIdle}"
+                 IsEnabled="{Binding CanPickTypeAndVersion}"
                  AutomationProperties.Name="{res:Text CreateServer_TypeLabel}"
                  Background="{DynamicResource CardBrush}"
                  BorderThickness="1"
@@ -107,7 +134,7 @@
         <ComboBox ItemsSource="{Binding Versions}"
                   SelectedItem="{Binding SelectedVersion}"
                   DisplayMemberPath="Id"
-                  IsEnabled="{Binding IsIdle}" />
+                  IsEnabled="{Binding CanPickTypeAndVersion}" />
 
         <!-- Going back to an older version than the world's: a plain warning and a second, deliberate tick. -->
         <Border Style="{StaticResource WarningBanner}" Margin="0,10,0,0"

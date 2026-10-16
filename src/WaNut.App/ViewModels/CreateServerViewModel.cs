@@ -8,6 +8,7 @@ using WaNut.App.Services;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
+using WaNut.Core.Modpacks;
 using WaNut.Core.Mods;
 using WaNut.Core.Players;
 using WaNut.Core.Settings;
@@ -22,18 +23,27 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private readonly ServerCreator _creator;
     private readonly WorldImporter _importer;
     private readonly ModLibrary _mods;
+    private readonly ModpackInstaller _modpacks;
     private readonly InstanceStore _store;
     private readonly IDialogService _dialogs;
     private CancellationTokenSource? _cancellation;
 
     public CreateServerViewModel(
-        ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, ModLibrary mods, InstanceStore store, IDialogService dialogs, AppSettingsViewModel app)
+        ServerVersionCatalog catalog,
+        ServerCreator creator,
+        WorldImporter importer,
+        ModLibrary mods,
+        ModpackInstaller modpacks,
+        InstanceStore store,
+        IDialogService dialogs,
+        AppSettingsViewModel app)
     {
         App = app;
         _catalog = catalog;
         _creator = creator;
         _importer = importer;
         _mods = mods;
+        _modpacks = modpacks;
         _store = store;
         _dialogs = dialogs;
         Picker = new WorldPickerViewModel(dialogs);
@@ -67,6 +77,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
     [
         new("new", Text.Get("CreateServer_WorldNew"), Text.Get("CreateServer_WorldNewHint")),
         new("import", Text.Get("CreateServer_WorldImport"), Text.Get("CreateServer_WorldImportHint")),
+        new("modpack", Text.Get("CreateServer_WorldModpack"), Text.Get("CreateServer_WorldModpackHint")),
     ];
 
     public WorldPickerViewModel Picker { get; }
@@ -104,6 +115,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsImport), nameof(CanBringInventory), nameof(ShowNewerWorldWarning))]
+    [NotifyPropertyChangedFor(nameof(IsModpack), nameof(CanPickTypeAndVersion), nameof(ModpackVersionMissing))]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
     private WorldChoice _selectedWorldChoice;
 
@@ -116,6 +128,39 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private bool _newerWorldAccepted;
 
     public bool IsImport => SelectedWorldChoice.Id == "import";
+
+    public bool IsModpack => SelectedWorldChoice.Id == "modpack";
+
+    /// <summary>The .mrpack the user picked, once it has been read.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ModpackSummary), nameof(ModpackVersionMissing))]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    private Modpack? _modpack;
+
+    private string? _modpackPath;
+
+    [ObservableProperty]
+    private string? _modpackError;
+
+    public string? ModpackSummary => Modpack is null
+        ? null
+        : string.Format(
+            Text.Get("Modpack_Summary"),
+            Modpack.Name,
+            Modpack.Version,
+            Modpack.MinecraftVersion,
+            Text.Get($"CreateServer_Type{Modpack.Type}"),
+            Modpack.Files.Count,
+            Modpack.SkippedFiles);
+
+    /// <summary>A modpack sets the type and version itself; other choices let the user pick them.</summary>
+    public bool CanPickTypeAndVersion => IsIdle && !IsModpack;
+
+    /// <summary>The pack needs a Minecraft version WaNut cannot make a server of.</summary>
+    public bool ModpackVersionMissing =>
+        IsModpack && Modpack is not null && Versions.Count > 0 && Versions.All(v => v.Id != Modpack.MinecraftVersion);
+
+    public string ModpackVersionMissingText => string.Format(Text.Get("Modpack_VersionMissing"), Modpack?.MinecraftVersion);
 
     /// <summary>
     /// The seed and terrain only matter for a world the server generates. The custom JSON counts only while
@@ -176,7 +221,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
-    [NotifyPropertyChangedFor(nameof(IsIdle))]
+    [NotifyPropertyChangedFor(nameof(IsIdle), nameof(CanPickTypeAndVersion))]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -207,6 +252,63 @@ public sealed partial class CreateServerViewModel : ObservableObject
         {
             _ = Picker.ScanOnceAsync();
         }
+
+        ApplyModpack();
+    }
+
+    [RelayCommand]
+    private async Task PickModpackAsync()
+    {
+        if (_dialogs.PickModpack() is not { } path)
+        {
+            return;
+        }
+
+        ModpackError = null;
+        try
+        {
+            Modpack = await Task.Run(() => ModpackReader.Read(path));
+            _modpackPath = path;
+            Name = Modpack.Name;
+            ApplyModpack();
+        }
+        catch (ModpackException e)
+        {
+            Modpack = null;
+            _modpackPath = null;
+            ModpackError = ModpackProblemText(e);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Modpack = null;
+            _modpackPath = null;
+            ModpackError = string.Format(Text.Get("Modpack_ReadFailed"), e.Message);
+        }
+    }
+
+    private static string ModpackProblemText(ModpackException e) => e.Problem == ModpackProblem.UnsupportedLoader
+        ? string.Format(Text.Get("Modpack_Problem_UnsupportedLoader"), e.Detail)
+        : Text.Get($"Modpack_Problem_{e.Problem}");
+
+    /// <summary>Switches the type and version to the ones the pack was made for.</summary>
+    private void ApplyModpack()
+    {
+        if (!IsModpack || Modpack is null)
+        {
+            return;
+        }
+
+        var type = ServerTypes.First(t => t.Type == Modpack.Type);
+        if (SelectedType != type)
+        {
+            // The version follows once the new type's list has loaded.
+            SelectedType = type;
+            return;
+        }
+
+        SelectedVersion = Versions.FirstOrDefault(v => v.Id == Modpack.MinecraftVersion) ?? SelectedVersion;
+        OnPropertyChanged(nameof(ModpackVersionMissing));
+        OnPropertyChanged(nameof(ModpackVersionMissingText));
     }
 
     partial void OnSelectedVersionChanged(GameVersion? value) => NewerWorldAccepted = false;
@@ -286,6 +388,8 @@ public sealed partial class CreateServerViewModel : ObservableObject
                 PreselectWorldVersion();
             }
 
+            ApplyModpack();
+
             StatusText = null;
         }
         catch (Exception)
@@ -303,6 +407,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private bool CanCreate() =>
         IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name) && !OwnerNameInvalid
         && (!IsImport || (Picker.IsAccepted && (!ShowNewerWorldWarning || NewerWorldAccepted)))
+        && (!IsModpack || (Modpack is not null && SelectedType.Type == Modpack.Type && SelectedVersion.Id == Modpack.MinecraftVersion))
         && (IsImport || !IsSuperflat || !App.AdvancedMode || !CustomGeneratorInvalid);
 
     [RelayCommand(CanExecute = nameof(CanCreate))]
@@ -316,13 +421,21 @@ public sealed partial class CreateServerViewModel : ObservableObject
         try
         {
             Created = await _creator.CreateAsync(
-                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName, NewWorld()),
+                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName, NewWorld(), IsModpack ? Modpack!.LoaderVersion : null),
                 progress,
                 _cancellation.Token);
             if (IsImport)
             {
                 notes = await ImportWorldAsync(Created, _cancellation.Token);
             }
+            else if (IsModpack)
+            {
+                await InstallModpackAsync(Created, _cancellation.Token);
+            }
+        }
+        catch (ModpackException e)
+        {
+            ErrorText = ModpackProblemText(e);
         }
         catch (OperationCanceledException)
         {
@@ -401,6 +514,35 @@ public sealed partial class CreateServerViewModel : ObservableObject
         }
 
         return WorldMessages.Join(WorldMessages.ImportNotes(result), mods);
+    }
+
+    /// <summary>
+    /// Puts the pack's files into the server that was just created. If that fails or is stopped, the new server is
+    /// removed again: without its mods it would not be the server the user asked for.
+    /// </summary>
+    private async Task InstallModpackAsync(InstanceMetadata created, CancellationToken cancellationToken)
+    {
+        StatusText = Text.Get("Modpack_Installing");
+        ProgressFraction = 0;
+        var instanceDir = _store.InstanceDir(created.Id);
+        try
+        {
+            await _modpacks.InstallAsync(instanceDir, _modpackPath!, Modpack!, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+        }
+        catch
+        {
+            Created = null;
+            try
+            {
+                Directory.Delete(instanceDir, recursive: true);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                // The half-installed server stays in the list; the user can delete it.
+            }
+
+            throw;
+        }
     }
 
     /// <summary>Stops a running creation, or closes the wizard when nothing is being created.</summary>
