@@ -36,6 +36,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 24 | Modded worlds | Importing a world played with mods shows a red warning that mod blocks will disappear and needs an extra tick. "Install the mods too" comes with step 15. |
 | 25 | Inventory on import | "Bring my single-player inventory and position along" is on by default and greyed out without the host's name. The UUID comes from Mojang (offline UUID when `online-mode` is off); if the lookup fails, the world is still imported and WaNut says why the inventory wasn't. |
 | 26 | Map resource packs | For now WaNut only tells the host to send the world's `resources.zip` to friends. |
+| 27 | Misc big update | Small low-effort features ship together as one "misc big update", before step 16, and may jump ahead of Phase 2/3: duplicate server, server icon, notification-area icon, crash auto-restart, new world keeping settings, invite card, stop when empty, Discord notifications, backup copy folder, code-review fixes, memory and CPU display. TPS with a pre-start health check, and a "friends can't join" diagnosis wizard, come later as their own versions. |
 
 ---
 
@@ -127,15 +128,15 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 | Tab | Always visible | More settings | Advanced mode |
 | :-- | :-- | :-- | :-- |
-| Top bar | Start/Stop, status, Open folder | | Force close |
+| Top bar | Start/Stop, status, memory and CPU while running, Open folder | | Force close |
 | Console | Console, command box | | Log detail level |
 | Players | Online players, whitelist switch and list, OP list | Kick/ban (commands in Phase 1, buttons in Phase 3) | |
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
-| Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off), Delete server | Custom JVM arguments, choose Java manually, use your own server.jar |
-| Backups | Backup list, restore, back up now, replace with another world, export (current world or any backup) | Keep count, delete after days | |
+| Server | RAM slider, server icon | Change type or version (automatic backup first, warning on downgrade), restart after a crash, stop when nobody is online, port, `online-mode` (warning when turned off), Duplicate server, Delete server | Custom JVM arguments, choose Java manually, use your own server.jar |
+| Backups | Backup list, restore, back up now, replace with another world, start a new world, export (current world or any backup) | Keep count, delete after days, copy backups to another folder (OneDrive) | |
 | Mods (Fabric: mods, Paper: plugins) | Installed list with Remove, Modrinth search (filtered to the server's loader and version; Fabric hides client-only mods), Install with required dependencies, Open folder | | |
-| Connect | IPv4 per adapter with Copy | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
-| App settings | | Instances folder, update check | Advanced mode switch; clear download cache |
+| Connect | IPv4 per adapter with Copy, invite card | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
+| App settings | Close behaviour while a server runs (ask, keep running in the notification area, stop) | Instances folder, update check, Discord notifications | Advanced mode switch; clear download cache |
 
   Phase 1 Advanced mode contains only custom JVM arguments; the other advanced items come later.
 
@@ -198,6 +199,18 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * If the zip fails, nothing is deleted. The folder is then renamed to `.wanut-deleting-<id>` (a file in use stops it here, and the zip is removed again) and deleted; a part that can't be deleted yet is retried at the next delete and never shows in the list.
 * Only a folder directly inside the servers folder with an `instance.json` is deleted. Links inside it are removed without touching what they point to.
 * Afterwards the list selects the next server.
+
+### Misc big update (decision 27)
+* **Duplicate server** (Server tab, More settings): copies a stopped server under a new name, without `backups/`, `logs/`, `crash-reports/` or `session.lock`. `instance.json` is written last, so a failed copy never shows in the list.
+* **Server icon** (Server tab): any picture is cropped to a centered square and saved as a 64x64 `server-icon.png`; small pixel art keeps sharp pixels. Shown in WaNut's list and header too.
+* **Notification area**: closing the window while a server runs asks "Keep running" or "Stop server and close" (remembered on request; also in App settings). The tray icon's dot follows the status; its menu has Open, Stop server and Exit.
+* **Restart after a crash** (on by default, per server): a non-zero exit the user didn't ask for, after the server was online, restarts it 5 s later, at most 3 times in 10 minutes. The crash's console lines stay.
+* **Start a new world** (Backups tab): backs the world up as a protected "reset" backup, deletes the world folders and optionally sets a new `level-seed`. Settings, player lists, mods and plugins stay.
+* **Invite card** (Connect tab): copies the server name, type and version, every `IP:port`, the host's note (VPN network name, kept in `config.json` for every server) and, for Fabric, the installed mods.
+* **Stop when nobody is online** (off by default, per server): after N minutes online and empty, a normal `stop`.
+* **Discord notifications** (App settings, More settings): a webhook URL (only `https://discord.com/api/webhooks/...` and its sibling hosts), events online / stopped / crashed (on) and join / leave (off). Mentions are off and names are markdown-escaped. The URL counts as a secret and only lives in `config.json`.
+* **Backup copy folder** (Backups tab, More settings): every new backup is also copied to a chosen folder (OneDrive suggested), one subfolder per server, with the same keep rules. A failed copy is shown on the Backups tab and never blocks a start.
+* **Memory and CPU**: java.exe's working set and CPU share of the whole PC, every 2 s, under the server name while it runs.
 
 ### Change type or version (Server tab, More settings)
 * Opens a window with the type list and version list from the Create Server wizard. Only while the server is stopped.
@@ -306,6 +319,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 14.2. ✓ Seed and world type in the Create Server wizard's More settings (new worlds only): a seed box (empty means random); Normal, Superflat, Large Biomes and Amplified, plus Superflat presets (Classic, Desert, The Void). Custom generator JSON in Advanced mode. `level-type` is a plain name up to 1.18.2 (`flat`) and a world preset id from 1.19 (`minecraft:flat`); Superflat structures are a placement map before 1.18.2 and structure sets (`structure_overrides`) from 1.18.2.
 15. ✓ Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
 15.1. ✓ Delete a server from the Server tab (More settings), keeping a world zip by default (section 5, "Delete server").
+15.2. ✓ Misc big update (decision 27, section 5 "Misc big update").
 16. Modrinth `.mrpack` modpack server install (decision 19), reusing step 15's downloader.
 17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
 18. CurseForge server-pack import from a zip the user already downloaded.
