@@ -16,7 +16,7 @@ public sealed class ServerLaunchPlanner(InstanceStore store, JavaRuntimeManager 
         CancellationToken cancellationToken = default)
     {
         var dir = store.InstanceDir(server.Id);
-        if (!File.Exists(Path.Combine(dir, server.ServerJar)))
+        if (!File.Exists(Path.Combine(dir, server.ServerJar.TrimStart('@'))))
         {
             throw new ServerStartException(ServerStartProblem.ServerJarMissing);
         }

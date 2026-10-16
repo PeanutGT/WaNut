@@ -99,6 +99,21 @@ public sealed class ServerLaunchPlannerTests : IDisposable
     }
 
     [Fact]
+    public async Task PrepareAsync_ArgumentFile_ChecksTheFileAndPassesIt()
+    {
+        InstallFakeJava();
+        const string argsFile = "libraries/net/neoforged/neoforge/21.1.209/win_args.txt";
+        var server = CreateServer(withJar: false) with { Type = ServerType.NeoForge, ServerJar = "@" + argsFile };
+        var path = Path.Combine(_store.InstanceDir(server.Id), argsFile);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, "-cp x.jar");
+
+        var launch = await new ServerLaunchPlanner(_store, _java).PrepareAsync(server);
+
+        Assert.Equal(["@" + argsFile, "nogui"], launch.Arguments.TakeLast(2));
+    }
+
+    [Fact]
     public async Task PrepareAsync_JarMissing_ThrowsServerJarMissing()
     {
         InstallFakeJava();

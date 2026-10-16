@@ -47,6 +47,25 @@ public sealed class LiveApiTests : IDisposable
     }
 
     [Theory]
+    [InlineData("1.16.5")]
+    [InlineData("1.20.1")]
+    [InlineData("1.21.1")]
+    public async Task Forge_Installer_MatchesMavenSha1(string gameVersion)
+    {
+        var installer = await new ForgeClient(_http).GetInstallerAsync(gameVersion);
+
+        Assert.Equal(Hashes.Sha1(await _http.GetByteArrayAsync(installer.JarUrl)), installer.Sha1);
+    }
+
+    [Fact]
+    public async Task NeoForge_Installer_MatchesMavenSha1()
+    {
+        var installer = await new NeoForgeClient(_http).GetInstallerAsync("1.21.1");
+
+        Assert.Equal(Hashes.Sha1(await _http.GetByteArrayAsync(installer.JarUrl)), installer.Sha1);
+    }
+
+    [Theory]
     [InlineData(8)]
     [InlineData(17)]
     [InlineData(21)]
@@ -69,7 +88,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), new ForgeClient(_http), new NeoForgeClient(_http), new ForgeInstallerRunner(), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
 
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Test", version, 2048, EulaAccepted: true));
@@ -108,7 +127,7 @@ public sealed class LiveApiTests : IDisposable
         var versions = new MojangVersionService(_http, downloader);
         var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
         var store = new InstanceStore(paths);
-        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), new ForgeClient(_http), new NeoForgeClient(_http), new ForgeInstallerRunner(), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
         var version = (await versions.GetReleasesAsync()).Single(r => r.Id == "1.21.1");
         var metadata = await creator.CreateAsync(new CreateServerRequest("Live Run", version, 2048, EulaAccepted: true, type));
         var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);

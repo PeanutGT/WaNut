@@ -20,15 +20,19 @@ public sealed class ServerVersionCatalogTests
         var http = new StubHttpHandler()
             .Add(MojangVersionService.ManifestUrl, manifest)
             .Add(PaperClient.ProjectUrl, SampleData.PaperProject)
-            .Add(FabricClient.GameVersionsUrl, SampleData.FabricGameVersions);
+            .Add(FabricClient.GameVersionsUrl, SampleData.FabricGameVersions)
+            .Add(ForgeClient.PromotionsUrl, """{"promos":{"1.21.4-latest":"54.1.0","1.16.5-recommended":"36.2.34","1.16.4-latest":"35.1.37"}}""")
+            .Add(NeoForgeClient.VersionsUrl, """{"versions":["21.4.150","21.11.3-beta","26.3.0.1-beta"]}""");
         var client = http.CreateClient();
-        return new ServerVersionCatalog(new MojangVersionService(client, new FileDownloader(client)), new PaperClient(client), new FabricClient(client));
+        return new ServerVersionCatalog(new MojangVersionService(client, new FileDownloader(client)), new PaperClient(client), new FabricClient(client), new ForgeClient(client), new NeoForgeClient(client));
     }
 
     [Theory]
     [InlineData(ServerType.Vanilla, new[] { "26.3", "1.21.11", "1.21.4", "1.21.2", "1.16.5" })]
     [InlineData(ServerType.Paper, new[] { "26.3", "1.21.11", "1.21.4", "1.16.5" })]
     [InlineData(ServerType.Fabric, new[] { "26.3", "1.21.4", "1.16.5" })]
+    [InlineData(ServerType.Forge, new[] { "1.21.4", "1.16.5" })]
+    [InlineData(ServerType.NeoForge, new[] { "26.3", "1.21.11", "1.21.4" })]
     public async Task GetVersionsAsync_Type_OffersSupportedReleasesNewestFirst(ServerType type, string[] expected)
     {
         var versions = await Create().GetVersionsAsync(type);

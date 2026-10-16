@@ -27,6 +27,9 @@ public sealed class ServerCreatorTests : IDisposable
     private static readonly Uri NewDetailsUrl = new("https://piston-meta.mojang.com/v1/packages/1.21.10.json");
     private static readonly Uri NewJarUrl = new("https://piston-data.mojang.com/v1/objects/z/server.jar");
     private static readonly byte[] NewJar = Encoding.UTF8.GetBytes("1.21.10 server jar bytes");
+    private static readonly byte[] ForgeInstallerJar = Encoding.UTF8.GetBytes("forge installer bytes");
+    private static readonly byte[] NeoForgeInstallerJar = Encoding.UTF8.GetBytes("neoforge installer bytes");
+    private const string ForgeArgs = "@libraries/net/minecraftforge/forge/1.21.1-52.0.38/win_args.txt";
 
     private readonly TempDir _temp = new();
     private readonly LauncherPaths _paths;
@@ -35,6 +38,7 @@ public sealed class ServerCreatorTests : IDisposable
     private readonly GameVersion _version;
     private readonly GameVersion _oldVersion;
     private readonly GameVersion _newVersion;
+    private readonly FakeForgeRunner _forgeRunner = new();
 
     public ServerCreatorTests()
     {
@@ -56,7 +60,15 @@ public sealed class ServerCreatorTests : IDisposable
             .Add(FabricClient.LoaderVersionsUrl, SampleData.FabricLoaderVersions)
             .Add(FabricClient.InstallerVersionsUrl, SampleData.FabricInstallerVersions)
             .Add(FabricClient.ServerLauncherUrl("1.1.2"), FabricJar)
-            .Add(new Uri(FabricClient.ServerLauncherUrl("1.1.2").AbsoluteUri + ".sha256"), Hashes.Sha256(FabricJar));
+            .Add(new Uri(FabricClient.ServerLauncherUrl("1.1.2").AbsoluteUri + ".sha256"), Hashes.Sha256(FabricJar))
+            .Add(ForgeClient.PromotionsUrl, """{"promos":{"1.21.1-latest":"52.0.40","1.21.1-recommended":"52.0.38"}}""")
+            .Add(ForgeClient.InstallerUrl("1.21.1-52.0.38"), ForgeInstallerJar)
+            .Add(new Uri(ForgeClient.InstallerUrl("1.21.1-52.0.38").AbsoluteUri + ".sha1"), Hashes.Sha1(ForgeInstallerJar))
+            .Add(NeoForgeClient.VersionsUrl, """{"isSnapshot":false,"versions":["21.1.200","21.1.209","21.1.210-beta"]}""")
+            .Add(NeoForgeClient.InstallerUrl("21.1.209"), NeoForgeInstallerJar)
+            .Add(new Uri(NeoForgeClient.InstallerUrl("21.1.209").AbsoluteUri + ".sha1"), Hashes.Sha1(NeoForgeInstallerJar))
+            .Add(NeoForgeClient.InstallerUrl("21.1.77"), NeoForgeInstallerJar)
+            .Add(new Uri(NeoForgeClient.InstallerUrl("21.1.77").AbsoluteUri + ".sha1"), Hashes.Sha1(NeoForgeInstallerJar));
         _version = new GameVersion("1.21.1", DateTimeOffset.UnixEpoch, DetailsUrl, Hashes.Sha1(details));
 
         var oldDetails = Encoding.UTF8.GetBytes(SampleData.VersionDetails(OldJarUrl.AbsoluteUri, Hashes.Sha1(OldJar), OldJar.Length, javaMajor: 17));
@@ -82,7 +94,18 @@ public sealed class ServerCreatorTests : IDisposable
         var java = new JavaRuntimeManager(_paths, new AdoptiumClient(client), downloader);
         var clock = new FakeTimeProvider(new DateTimeOffset(2026, 10, 14, 12, 0, 0, TimeSpan.Zero));
         return new ServerCreator(
-            _paths, new MojangVersionService(client, downloader), new PaperClient(client), new FabricClient(client), java, downloader, _store, new BackupStore(clock), clock);
+            _paths,
+            new MojangVersionService(client, downloader),
+            new PaperClient(client),
+            new FabricClient(client),
+            new ForgeClient(client),
+            new NeoForgeClient(client),
+            _forgeRunner,
+            java,
+            downloader,
+            _store,
+            new BackupStore(clock),
+            clock);
     }
 
     [Fact]
@@ -487,6 +510,204 @@ public sealed class ServerCreatorTests : IDisposable
         };
 
         Assert.Equal(expected, ServerCreator.IsDowngrade(server, target));
+    }
+
+    [Fact]
+    public async Task CreateAsync_Forge_RunsInstallerAndStartsFromArgumentFile()
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Forge", _version, 4096, EulaAccepted: true, ServerType.Forge));
+
+        var dir = _store.InstanceDir(metadata.Id);
+        Assert.Equal(ServerType.Forge, metadata.Type);
+        Assert.Equal("52.0.38", metadata.LoaderVersion);
+        Assert.Equal(ForgeArgs, metadata.ServerJar);
+        Assert.True(File.Exists(Path.Combine(dir, ForgeArgs[1..])));
+        Assert.True(File.Exists(Path.Combine(dir, "run.bat")));
+        Assert.True(Directory.Exists(Path.Combine(dir, "mods")));
+        Assert.False(File.Exists(Path.Combine(dir, ".wanut-installed")));
+        Assert.Empty(Directory.GetFiles(dir, "*.log"));
+        Assert.True(EulaFile.IsAccepted(dir));
+        var run = Assert.Single(_forgeRunner.Runs);
+        Assert.EndsWith("forge-1.21.1-52.0.38-installer.jar", run.InstallerJar, StringComparison.Ordinal);
+        Assert.EndsWith("java.exe", run.JavaExe, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ForgeTwice_RunsInstallerOnce()
+    {
+        await CreateCreator().CreateAsync(new CreateServerRequest("One", _version, 4096, EulaAccepted: true, ServerType.Forge));
+        var second = await CreateCreator().CreateAsync(new CreateServerRequest("Two", _version, 4096, EulaAccepted: true, ServerType.Forge));
+
+        Assert.Single(_forgeRunner.Runs);
+        Assert.True(File.Exists(Path.Combine(_store.InstanceDir(second.Id), ForgeArgs[1..])));
+    }
+
+    [Fact]
+    public async Task CreateAsync_ForgeWithoutArgumentFile_RunsTheForgeJar()
+    {
+        _forgeRunner.LegacyJar = true;
+
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Old", _version, 4096, EulaAccepted: true, ServerType.Forge));
+
+        Assert.Equal("forge-1.21.1-52.0.38.jar", metadata.ServerJar);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ForgeInstallerFails_ThrowsAndCreatesNoServer()
+    {
+        _forgeRunner.Fail = true;
+
+        await Assert.ThrowsAsync<ForgeInstallException>(() =>
+            CreateCreator().CreateAsync(new CreateServerRequest("Forge", _version, 4096, EulaAccepted: true, ServerType.Forge)));
+
+        Assert.Empty(Directory.GetDirectories(_paths.InstancesDir));
+
+        // A failed install is never reused: the next try runs the installer again.
+        _forgeRunner.Fail = false;
+        await CreateCreator().CreateAsync(new CreateServerRequest("Forge", _version, 4096, EulaAccepted: true, ServerType.Forge));
+        Assert.Equal(2, _forgeRunner.Runs.Count);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ForgeInstallerChecksumWrong_ThrowsBeforeRunningIt()
+    {
+        _http.Add(new Uri(ForgeClient.InstallerUrl("1.21.1-52.0.38").AbsoluteUri + ".sha1"), new string('0', 40));
+
+        await Assert.ThrowsAsync<DownloadVerificationException>(() =>
+            CreateCreator().CreateAsync(new CreateServerRequest("Forge", _version, 4096, EulaAccepted: true, ServerType.Forge)));
+
+        Assert.Empty(_forgeRunner.Runs);
+    }
+
+    [Fact]
+    public async Task CreateAsync_NeoForge_UsesNewestStableVersion()
+    {
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Neo", _version, 4096, EulaAccepted: true, ServerType.NeoForge));
+
+        Assert.Equal("21.1.209", metadata.LoaderVersion);
+        Assert.Equal("@libraries/net/neoforged/neoforge/21.1.209/win_args.txt", metadata.ServerJar);
+    }
+
+    [Fact]
+    public async Task CreateAsync_NeoForgeWithLoaderVersion_InstallsThatVersion()
+    {
+        var metadata = await CreateCreator().CreateAsync(
+            new CreateServerRequest("Pack", _version, 4096, EulaAccepted: true, ServerType.NeoForge, LoaderVersion: "21.1.77"));
+
+        Assert.Equal("21.1.77", metadata.LoaderVersion);
+        Assert.EndsWith("neoforge-21.1.77-installer.jar", Assert.Single(_forgeRunner.Runs).InstallerJar, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Forge_ReportsInstallingStage()
+    {
+        var stages = new List<CreateServerStage>();
+        var progress = new InlineProgress(p =>
+        {
+            if (stages.Count == 0 || stages[^1] != p.Stage)
+            {
+                stages.Add(p.Stage);
+            }
+        });
+
+        await CreateCreator().CreateAsync(new CreateServerRequest("Forge", _version, 4096, EulaAccepted: true, ServerType.Forge), progress);
+
+        Assert.Equal(
+            [CreateServerStage.ReadingVersion, CreateServerStage.DownloadingJava, CreateServerStage.DownloadingServer, CreateServerStage.InstallingLoader, CreateServerStage.WritingFiles],
+            stages);
+    }
+
+    [Fact]
+    public async Task ChangeAsync_FabricToForge_MovesModsAsideAndInstallsForge()
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Fabric);
+        File.WriteAllText(Path.Combine(dir, "mods", "sodium.jar"), "fabric mod");
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Forge, _version);
+
+        Assert.Equal(ForgeArgs, changed.ServerJar);
+        Assert.True(File.Exists(Path.Combine(dir, ForgeArgs[1..])));
+        Assert.False(File.Exists(Path.Combine(dir, FabricClient.LauncherFileName)));
+        Assert.False(Directory.Exists(Path.Combine(dir, "libraries", "old")));
+        Assert.False(Directory.Exists(Path.Combine(dir, ".wanut-new")));
+        Assert.True(File.Exists(Path.Combine(dir, "mods-fabric", "sodium.jar")));
+        Assert.Empty(Directory.GetFiles(Path.Combine(dir, "mods")));
+        Assert.Equal("my world", File.ReadAllText(Path.Combine(dir, "world", "level.dat")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_ModsFolderNameTaken_PicksTheNextName()
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Fabric);
+        File.WriteAllText(Path.Combine(dir, "mods", "sodium.jar"), "fabric mod");
+        Directory.CreateDirectory(Path.Combine(dir, "mods-fabric"));
+
+        await CreateCreator().ChangeAsync(server, ServerType.NeoForge, _version);
+
+        Assert.True(File.Exists(Path.Combine(dir, "mods-fabric-2", "sodium.jar")));
+    }
+
+    [Fact]
+    public async Task ChangeAsync_ForgeToVanilla_RemovesForgeFilesKeepsMods()
+    {
+        var (server, dir) = await CreateWithWorldAsync(ServerType.Forge);
+        File.WriteAllText(Path.Combine(dir, "mods", "create.jar"), "forge mod");
+
+        var changed = await CreateCreator().ChangeAsync(server, ServerType.Vanilla, _version);
+
+        Assert.Equal("server.jar", changed.ServerJar);
+        Assert.Null(changed.LoaderVersion);
+        Assert.Equal(Jar, await File.ReadAllBytesAsync(Path.Combine(dir, "server.jar")));
+        Assert.False(Directory.Exists(Path.Combine(dir, "libraries")));
+        Assert.False(File.Exists(Path.Combine(dir, "run.bat")));
+        Assert.False(File.Exists(Path.Combine(dir, "user_jvm_args.txt")));
+        Assert.True(File.Exists(Path.Combine(dir, "mods", "create.jar")));
+    }
+
+    [Theory]
+    [InlineData(ServerType.Fabric, ServerType.Forge, true)]
+    [InlineData(ServerType.Forge, ServerType.NeoForge, true)]
+    [InlineData(ServerType.Forge, ServerType.Forge, false)]
+    [InlineData(ServerType.Fabric, ServerType.Vanilla, false)]
+    [InlineData(ServerType.Paper, ServerType.Forge, false)]
+    public void MovesMods_OnlyBetweenModLoaders(ServerType from, ServerType to, bool expected) =>
+        Assert.Equal(expected, ServerCreator.MovesMods(from, to));
+
+    /// <summary>Writes what the Forge and NeoForge installers leave behind, without running Java.</summary>
+    private sealed class FakeForgeRunner : ForgeInstallerRunner
+    {
+        public List<(string JavaExe, string InstallerJar, string TargetDir)> Runs { get; } = [];
+
+        public bool Fail { get; set; }
+
+        /// <summary>Like Forge for 1.16.5: a jar to run instead of an argument file.</summary>
+        public bool LegacyJar { get; set; }
+
+        public override Task RunAsync(string javaExe, string installerJar, string targetDir, CancellationToken cancellationToken = default)
+        {
+            Runs.Add((javaExe, installerJar, targetDir));
+            var name = Path.GetFileName(installerJar);
+            File.WriteAllText(Path.Combine(targetDir, name + ".log"), "log");
+            if (Fail)
+            {
+                throw new ForgeInstallException(1, "Could not download a library.");
+            }
+
+            var neo = name.StartsWith("neoforge-", StringComparison.Ordinal);
+            var version = name[(neo ? "neoforge-".Length : "forge-".Length)..^"-installer.jar".Length];
+            File.WriteAllText(Path.Combine(targetDir, "run.bat"), "java @user_jvm_args.txt");
+            File.WriteAllText(Path.Combine(targetDir, "user_jvm_args.txt"), "# -Xmx4G");
+            if (LegacyJar)
+            {
+                File.WriteAllText(Path.Combine(targetDir, $"forge-{version}.jar"), "forge");
+                return Task.CompletedTask;
+            }
+
+            var args = Path.Combine(targetDir, "libraries", neo ? "net/neoforged/neoforge" : "net/minecraftforge/forge", version, "win_args.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(args)!);
+            File.WriteAllText(args, "-cp libraries/x.jar");
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class InlineProgress(Action<CreateServerProgress> handler) : IProgress<CreateServerProgress>

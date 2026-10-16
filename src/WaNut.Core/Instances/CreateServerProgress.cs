@@ -6,6 +6,9 @@ public enum CreateServerStage
     DownloadingJava,
     DownloadingServer,
 
+    /// <summary>Forge and NeoForge only: their installer sets up the server and downloads its libraries.</summary>
+    InstallingLoader,
+
     /// <summary>Changing type or version only: the world is backed up before any server file is replaced.</summary>
     BackingUp,
     WritingFiles,

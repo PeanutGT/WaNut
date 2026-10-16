@@ -13,6 +13,8 @@ public sealed record ModPlatform(ModKind Kind, IReadOnlyList<string> Loaders, st
     public static ModPlatform? For(ServerType type) => type switch
     {
         ServerType.Fabric => new ModPlatform(ModKind.Mod, ["fabric"], "mods"),
+        ServerType.Forge => new ModPlatform(ModKind.Mod, ["forge"], "mods"),
+        ServerType.NeoForge => new ModPlatform(ModKind.Mod, ["neoforge"], "mods"),
         ServerType.Paper => new ModPlatform(ModKind.Plugin, ["paper", "spigot", "bukkit"], "plugins"),
         _ => null,
     };

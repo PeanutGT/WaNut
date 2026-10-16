@@ -17,7 +17,15 @@ public static partial class ModpackReader
     /// <summary>The hosts Modrinth allows in a published pack's download links.</summary>
     private static readonly string[] AllowedHosts = ["cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com"];
 
-    private static readonly string[] OtherLoaders = ["forge", "neoforge", "quilt-loader"];
+    private static readonly string[] OtherLoaders = ["quilt-loader"];
+
+    // The "dependencies" keys of the loaders WaNut can set up.
+    private static readonly (string Key, ServerType Type)[] Loaders =
+    [
+        ("fabric-loader", ServerType.Fabric),
+        ("forge", ServerType.Forge),
+        ("neoforge", ServerType.NeoForge),
+    ];
 
     /// <exception cref="ModpackException">The file is not a usable .mrpack.</exception>
     public static Modpack Read(string mrpackPath)
@@ -70,11 +78,18 @@ public static partial class ModpackReader
                 throw new ModpackException(ModpackProblem.UnsupportedLoader, other);
             }
 
-            // The version goes into the Fabric launcher's install.properties, so it must be one plain token.
-            var loader = GetString(dependencies, "fabric-loader");
-            if (loader is not null && !IsPlainVersion(loader))
+            var found = Loaders.Where(l => dependencies.TryGetProperty(l.Key, out _)).ToList();
+            if (found.Count > 1)
             {
-                throw new ModpackException(ModpackProblem.NotAModpack, "Unreadable Fabric Loader version.");
+                throw new ModpackException(ModpackProblem.NotAModpack, "More than one mod loader.");
+            }
+
+            // The version goes into Fabric's install.properties or a Maven download link, so it must be one plain token.
+            var type = found.Count == 0 ? ServerType.Vanilla : found[0].Type;
+            var loader = found.Count == 0 ? null : GetString(dependencies, found[0].Key);
+            if (found.Count > 0 && (loader is null || !IsPlainVersion(loader)))
+            {
+                throw new ModpackException(ModpackProblem.NotAModpack, "Unreadable mod loader version.");
             }
 
             var files = new List<ModpackFile>();
@@ -103,7 +118,7 @@ public static partial class ModpackReader
                 string.IsNullOrWhiteSpace(name) ? "Modpack" : name.Trim(),
                 GetString(root, "versionId")?.Trim() ?? string.Empty,
                 minecraft,
-                loader is null ? ServerType.Vanilla : ServerType.Fabric,
+                type,
                 loader,
                 files,
                 skipped);

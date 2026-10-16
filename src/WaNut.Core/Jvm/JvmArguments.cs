@@ -18,6 +18,7 @@ public static class JvmArguments
         "-Dsun.stderr.encoding=UTF-8",
     ];
 
+    /// <param name="jarFile">The jar to run, or "@" and an argument file (Forge and NeoForge from 1.17), which names the classpath and main class itself.</param>
     /// <param name="customArguments">Advanced mode's extra JVM options, added after WaNut's own so they can override them.</param>
     public static IReadOnlyList<string> Build(int javaMajor, int memoryMb, string jarFile, IReadOnlyList<string>? customArguments = null)
     {
@@ -29,7 +30,7 @@ public static class JvmArguments
         args.AddRange(GarbageCollectorFlags(javaMajor, memoryMb));
         args.AddRange(EncodingFlags);
         args.AddRange(customArguments ?? []);
-        args.AddRange(["-jar", jarFile, "nogui"]);
+        args.AddRange(jarFile.StartsWith('@') ? [jarFile, "nogui"] : ["-jar", jarFile, "nogui"]);
         return args;
     }
 
