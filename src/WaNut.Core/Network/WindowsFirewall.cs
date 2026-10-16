@@ -22,6 +22,9 @@ public sealed class WindowsFirewall(LauncherPaths paths) : IFirewall
 
     private static readonly TimeSpan ReadTimeout = TimeSpan.FromSeconds(30);
 
+    // Counted from after the UAC prompt was answered: adding the rules takes seconds.
+    private static readonly TimeSpan ElevatedTimeout = TimeSpan.FromMinutes(2);
+
     public async Task<FirewallState> GetStateAsync(string program, CancellationToken cancellationToken = default)
     {
         if (!OperatingSystem.IsWindows())
@@ -78,7 +81,17 @@ public sealed class WindowsFirewall(LauncherPaths paths) : IFirewall
                 return FirewallChange.Failed;
             }
 
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            // A hung PowerShell must not leave WaNut waiting forever. The elevated process can't be killed from here,
+            // so it is left to finish on its own; the Connect tab shows the real state later.
+            try
+            {
+                await process.WaitForExitAsync(cancellationToken).WaitAsync(ElevatedTimeout, cancellationToken).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                return FirewallChange.Failed;
+            }
+
             if (process.ExitCode != 0)
             {
                 return FirewallChange.Failed;

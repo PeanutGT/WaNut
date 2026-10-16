@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -24,6 +25,11 @@ public sealed partial class ServerViewModel : ObservableObject
     private readonly ServerController _controller;
     private readonly InstanceStore _store;
     private readonly SynchronizationContext _ui;
+
+    // Console lines from the server's threads and WaNut's own lines share one queue, so they stay in order, and a
+    // burst of output reaches the UI thread as one batch instead of one post per line.
+    private readonly ConcurrentQueue<string> _pendingLines = new();
+    private int _flushPosted;
 
     public ServerViewModel(
         InstanceMetadata metadata,
@@ -327,7 +333,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Players.Clear();
         OnPropertyChanged(nameof(PlayersHeader));
 
-        process.OutputReceived += line => _ui.Post(_ => AddConsoleLine(line), null);
+        process.OutputReceived += AddConsoleLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
         process.Exited.ContinueWith(
@@ -349,9 +355,24 @@ public sealed partial class ServerViewModel : ObservableObject
         }
     }
 
+    /// <summary>Queues a console line from any thread; the UI thread adds every waiting line in one go.</summary>
     private void AddConsoleLine(string line)
     {
-        ConsoleLines.Add(line);
+        _pendingLines.Enqueue(line);
+        if (Interlocked.Exchange(ref _flushPosted, 1) == 0)
+        {
+            _ui.Post(_ => FlushConsoleLines(), null);
+        }
+    }
+
+    private void FlushConsoleLines()
+    {
+        Volatile.Write(ref _flushPosted, 0);
+        while (_pendingLines.TryDequeue(out var line))
+        {
+            ConsoleLines.Add(line);
+        }
+
         while (ConsoleLines.Count > MaxConsoleLines)
         {
             ConsoleLines.RemoveAt(0);
