@@ -1349,4 +1349,34 @@ Stop the server and update?</value>
   <data name="Icon_Failed" xml:space="preserve">
     <value>Couldn't use that picture: {0}</value>
   </data>
+  <data name="Backups_Reason_Reset" xml:space="preserve">
+    <value>Before a new world</value>
+  </data>
+  <data name="Reset_Open" xml:space="preserve">
+    <value>Start a new world…</value>
+  </data>
+  <data name="Reset_Title" xml:space="preserve">
+    <value>Start a new world</value>
+  </data>
+  <data name="Reset_Question" xml:space="preserve">
+    <value>Delete the world of “{0}” so the next start makes a new one? Settings, the whitelist, OPs, mods and plugins stay. Datapacks live inside the world, so they go with it.</value>
+  </data>
+  <data name="Reset_SeedLabel" xml:space="preserve">
+    <value>Seed for the new world</value>
+  </data>
+  <data name="Reset_SeedHint" xml:space="preserve">
+    <value>Leave empty for a random world.</value>
+  </data>
+  <data name="Reset_BackupNote" xml:space="preserve">
+    <value>WaNut backs the current world up first, so you can restore it from this tab. That backup doesn't count toward the keep count.</value>
+  </data>
+  <data name="Reset_Confirm" xml:space="preserve">
+    <value>Delete world</value>
+  </data>
+  <data name="Reset_Working" xml:space="preserve">
+    <value>Backing up and clearing the world…</value>
+  </data>
+  <data name="Reset_Done" xml:space="preserve">
+    <value>Done! A brand-new world will be made at the next start.</value>
+  </data>
 </root>

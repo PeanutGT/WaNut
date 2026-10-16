@@ -58,6 +58,7 @@
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
         <Button Content="{res:Text Backups_ReplaceWorld}" Command="{Binding ReplaceWorldCommand}" />
         <Button Content="{res:Text Backups_ExportWorld}" Command="{Binding ExportWorldCommand}" Margin="8,0,0,0" />
+        <Button Content="{res:Text Reset_Open}" Command="{Binding ResetWorldCommand}" Margin="8,0,0,0" />
       </StackPanel>
       <TextBlock Text="{res:Text Backups_Hint}" Style="{StaticResource Hint}" Margin="0,0,0,14" />
 

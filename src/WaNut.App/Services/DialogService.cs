@@ -68,6 +68,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.ViewModel.Copy : null;
     }
 
+    public string? AskResetWorld(string serverName)
+    {
+        var window = new ResetWorldWindow(string.Format(Text.Get("Reset_Question"), serverName)) { Owner = Application.Current.MainWindow };
+        return window.ShowDialog() == true ? window.Seed : null;
+    }
+
     public bool Confirm(string message) => Show(new ConfirmWindow(message));
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));

@@ -28,6 +28,9 @@ public interface IDialogService
     /// <summary>Shows the "Duplicate server" window. Returns the new server, or null if nothing was copied.</summary>
     InstanceMetadata? ShowDuplicateServer(ServerViewModel server);
 
+    /// <summary>Asks before resetting the world. Returns the seed for the new world (empty for random), or null to cancel.</summary>
+    string? AskResetWorld(string serverName);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 

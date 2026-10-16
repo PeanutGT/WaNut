@@ -1327,4 +1327,34 @@
   <data name="Icon_Failed" xml:space="preserve">
     <value>無法使用這張圖片：{0}</value>
   </data>
+  <data name="Backups_Reason_Reset" xml:space="preserve">
+    <value>開新世界前</value>
+  </data>
+  <data name="Reset_Open" xml:space="preserve">
+    <value>開新世界…</value>
+  </data>
+  <data name="Reset_Title" xml:space="preserve">
+    <value>開新世界</value>
+  </data>
+  <data name="Reset_Question" xml:space="preserve">
+    <value>要刪除「{0}」的世界，讓下次啟動時產生新世界嗎？設定、白名單、管理員、模組和插件都會保留。資料包在世界裡面，會一起刪除。</value>
+  </data>
+  <data name="Reset_SeedLabel" xml:space="preserve">
+    <value>新世界的種子</value>
+  </data>
+  <data name="Reset_SeedHint" xml:space="preserve">
+    <value>留空就是隨機世界。</value>
+  </data>
+  <data name="Reset_BackupNote" xml:space="preserve">
+    <value>WaNut 會先備份目前的世界，之後可以在這個分頁還原。這份備份不算在保留份數裡。</value>
+  </data>
+  <data name="Reset_Confirm" xml:space="preserve">
+    <value>刪除世界</value>
+  </data>
+  <data name="Reset_Working" xml:space="preserve">
+    <value>正在備份並清除世界…</value>
+  </data>
+  <data name="Reset_Done" xml:space="preserve">
+    <value>好了！下次啟動時會產生全新的世界。</value>
+  </data>
 </root>
