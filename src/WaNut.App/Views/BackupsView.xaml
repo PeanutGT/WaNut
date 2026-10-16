@@ -55,6 +55,10 @@
         <Button Content="{res:Text Backups_BackUpNow}" Command="{Binding BackUpNowCommand}" MinWidth="110" />
         <Button Content="{res:Text Backups_OpenFolder}" Command="{Binding OpenFolderCommand}" Margin="8,0,0,0" />
       </StackPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="{res:Text Backups_ReplaceWorld}" Command="{Binding ReplaceWorldCommand}" />
+        <Button Content="{res:Text Backups_ExportWorld}" Command="{Binding ExportWorldCommand}" Margin="8,0,0,0" />
+      </StackPanel>
       <TextBlock Text="{res:Text Backups_Hint}" Style="{StaticResource Hint}" Margin="0,0,0,14" />
 
       <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,14"
@@ -108,6 +112,10 @@
           <DataTemplate>
             <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
               <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{res:Text Backups_Export}" Padding="10,3" VerticalAlignment="Center" Margin="6,0,0,0"
+                        AutomationProperties.Name="{Binding ExportLabel}"
+                        Command="{Binding DataContext.ExportBackupCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                        CommandParameter="{Binding}" />
                 <Button DockPanel.Dock="Right" Content="{res:Text Backups_Restore}" Padding="10,3" VerticalAlignment="Center"
                         AutomationProperties.Name="{Binding RestoreLabel}"
                         Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"

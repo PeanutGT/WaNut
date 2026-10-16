@@ -99,7 +99,7 @@ public sealed partial class BackupStore(TimeProvider clock)
     /// <summary>
     /// Deletes backups beyond the newest <see cref="BackupRules.KeepCount"/> and those older than
     /// <see cref="BackupRules.MaxAgeDays"/>. The newest backup is always kept, however old, so a server left alone
-    /// for months still has one. The copies made before a restore or a type/version change do not count toward the
+    /// for months still has one. The copies made before a restore, a world import or a type/version change do not count toward the
     /// keep count, so a few starts afterwards cannot delete the only way back; they still expire by age.
     /// </summary>
     public IReadOnlyList<BackupInfo> Cleanup(string instanceDir, BackupRules rules)
@@ -112,7 +112,7 @@ public sealed partial class BackupStore(TimeProvider clock)
         for (var i = 0; i < backups.Count; i++)
         {
             var backup = backups[i];
-            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change;
+            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import;
             var tooMany = !isSafetyCopy && counted >= rules.KeepCount;
             if (i > 0 && (tooMany || backup.CreatedAt < oldest))
             {
@@ -140,9 +140,7 @@ public sealed partial class BackupStore(TimeProvider clock)
             throw new BackupException(BackupProblem.BackupMissing, backup.FileName);
         }
 
-        var stamp = clock.GetUtcNow().ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
-        var incoming = Path.Combine(instanceDir, StagingPrefix + "new-" + stamp);
-        var outgoing = Path.Combine(instanceDir, StagingPrefix + "old-" + stamp);
+        var incoming = NewStagingDir(instanceDir, "new");
 
         // Read the whole zip into a staging folder before touching the world, so a damaged zip changes nothing.
         IReadOnlyList<string> restoredFolders;
@@ -156,10 +154,37 @@ public sealed partial class BackupStore(TimeProvider clock)
             throw;
         }
 
+        return await ReplaceWorldAsync(instanceDir, incoming, restoredFolders, BackupReason.Restore, cancellationToken);
+    }
+
+    /// <summary>
+    /// Extracts a backup's world folders into <paramref name="target"/>, which must not exist yet, and returns their
+    /// names (e.g. "world", "world_nether"). Nothing outside <paramref name="target"/> is touched.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> ExtractAsync(
+        BackupInfo backup, string target, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(backup.FilePath))
+        {
+            throw new BackupException(BackupProblem.BackupMissing, backup.FileName);
+        }
+
+        return await Task.Run(() => Extract(backup.FilePath, target, progress, cancellationToken), cancellationToken);
+    }
+
+    /// <summary>
+    /// Swaps in the world folders staged in <paramref name="incoming"/> (named as in the server folder, e.g. "world").
+    /// The current world is backed up first with <paramref name="reason"/>, which should be a safety-copy reason
+    /// such as Restore or Import, then moved aside and deleted once the new one is in place. If a move fails, the
+    /// old world is put back. Returns the safety backup, or null when there was no world to save.
+    /// </summary>
+    public async Task<BackupInfo?> ReplaceWorldAsync(
+        string instanceDir, string incoming, IReadOnlyList<string> incomingFolders, BackupReason reason, CancellationToken cancellationToken = default)
+    {
         BackupInfo? safety;
         try
         {
-            safety = await CreateAsync(instanceDir, BackupReason.Restore, cancellationToken: cancellationToken);
+            safety = await CreateAsync(instanceDir, reason, cancellationToken: cancellationToken);
         }
         catch
         {
@@ -167,14 +192,28 @@ public sealed partial class BackupStore(TimeProvider clock)
             throw;
         }
 
-        var replaced = WorldFolders(instanceDir).Union(restoredFolders, StringComparer.OrdinalIgnoreCase)
+        var outgoing = NewStagingDir(instanceDir, "old");
+        var replaced = WorldFolders(instanceDir).Union(incomingFolders, StringComparer.OrdinalIgnoreCase)
             .Where(name => Directory.Exists(Path.Combine(instanceDir, name)))
             .ToList();
-        Swap(instanceDir, incoming, outgoing, replaced, restoredFolders);
+        Swap(instanceDir, incoming, outgoing, replaced, incomingFolders);
 
         DeleteQuietly(outgoing);
         DeleteQuietly(incoming);
         return safety;
+    }
+
+    private string NewStagingDir(string instanceDir, string kind)
+    {
+        var stamp = clock.GetUtcNow().ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+        for (var n = 1; ; n++)
+        {
+            var dir = Path.Combine(instanceDir, $"{StagingPrefix}{kind}-{stamp}" + (n == 1 ? string.Empty : $"-{n}"));
+            if (!Directory.Exists(dir))
+            {
+                return dir;
+            }
+        }
     }
 
     private static void WriteZip(
@@ -336,7 +375,7 @@ public sealed partial class BackupStore(TimeProvider clock)
     // Minecraft holds session.lock open while running and writes a new one on every start, so it is never worth saving.
     private static bool IsSessionLock(string fileName) => fileName.Equals("session.lock", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsPlainName(string name) =>
+    internal static bool IsPlainName(string name) =>
         name.Length > 0 && name != "." && name != ".." && name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
         && name.IndexOfAny(['/', '\\', ':']) < 0;
 

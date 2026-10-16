@@ -192,6 +192,7 @@ public sealed class BackupStoreTests : IDisposable
     [Theory]
     [InlineData(BackupReason.Restore)]
     [InlineData(BackupReason.Change)]
+    [InlineData(BackupReason.Import)]
     public async Task Cleanup_SafetyCopies_DoNotCountTowardKeepCount(BackupReason reason)
     {
         WriteWorld();

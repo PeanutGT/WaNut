@@ -25,6 +25,8 @@ public sealed class BackupItemViewModel(BackupInfo info)
 
     public string RestoreLabel => string.Format(Text.Get("Backups_RestoreLabel"), DateText, ReasonText);
 
+    public string ExportLabel => string.Format(Text.Get("Backups_ExportLabel"), DateText, ReasonText);
+
     public override string ToString() => AccessibleName;
 
     internal static string FormatSize(long bytes) => bytes >= 1024L * 1024 * 1024

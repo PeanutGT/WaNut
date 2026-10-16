@@ -855,4 +855,214 @@
   <data name="AppSettings_ThemeDark" xml:space="preserve">
     <value>深色</value>
   </data>
+  <data name="Backups_ReplaceWorld" xml:space="preserve">
+    <value>用別的世界取代…</value>
+  </data>
+  <data name="Backups_ExportWorld" xml:space="preserve">
+    <value>匯出世界…</value>
+  </data>
+  <data name="Backups_Export" xml:space="preserve">
+    <value>匯出</value>
+  </data>
+  <data name="Backups_ExportLabel" xml:space="preserve">
+    <value>匯出 {0} 的備份（{1}）</value>
+  </data>
+  <data name="Backups_Reason_Import" xml:space="preserve">
+    <value>匯入世界前</value>
+  </data>
+  <data name="CreateServer_WorldLabel" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="CreateServer_WorldNew" xml:space="preserve">
+    <value>新世界</value>
+  </data>
+  <data name="CreateServer_WorldNewHint" xml:space="preserve">
+    <value>第一次啟動時，Minecraft 會產生一個全新的世界。</value>
+  </data>
+  <data name="CreateServer_WorldImport" xml:space="preserve">
+    <value>匯入我的世界</value>
+  </data>
+  <data name="CreateServer_WorldImportHint" xml:space="preserve">
+    <value>把單人世界、資料夾或 .zip 帶過來，和朋友一起玩。原本的檔案不會被改動。</value>
+  </data>
+  <data name="World_PickLabel" xml:space="preserve">
+    <value>要用哪個世界？</value>
+  </data>
+  <data name="World_ListLabel" xml:space="preserve">
+    <value>你的單人世界</value>
+  </data>
+  <data name="World_Scanning" xml:space="preserve">
+    <value>正在找你的世界…</value>
+  </data>
+  <data name="World_NoneFound" xml:space="preserve">
+    <value>在常見的位置沒有找到單人世界。請按「選擇資料夾」或「選擇 .zip」。</value>
+  </data>
+  <data name="World_ChooseFolder" xml:space="preserve">
+    <value>選擇資料夾…</value>
+  </data>
+  <data name="World_ChooseZip" xml:space="preserve">
+    <value>選擇 .zip…</value>
+  </data>
+  <data name="World_PickFolderTitle" xml:space="preserve">
+    <value>選擇世界資料夾（裡面有 level.dat 的那個）</value>
+  </data>
+  <data name="World_PickZipTitle" xml:space="preserve">
+    <value>選擇世界 .zip</value>
+  </data>
+  <data name="World_ZipFilter" xml:space="preserve">
+    <value>Zip 檔案 (*.zip)|*.zip</value>
+  </data>
+  <data name="World_UnknownVersion" xml:space="preserve">
+    <value>未知版本</value>
+  </data>
+  <data name="World_UnknownLoader" xml:space="preserve">
+    <value>模組</value>
+  </data>
+  <data name="World_Launcher_Official" xml:space="preserve">
+    <value>Minecraft 啟動器</value>
+  </data>
+  <data name="World_Launcher_ModrinthApp" xml:space="preserve">
+    <value>Modrinth App</value>
+  </data>
+  <data name="World_Launcher_Prism" xml:space="preserve">
+    <value>Prism Launcher</value>
+  </data>
+  <data name="World_Launcher_CurseForge" xml:space="preserve">
+    <value>CurseForge</value>
+  </data>
+  <data name="World_ModCount" xml:space="preserve">
+    <value> 和 {0} 個模組</value>
+  </data>
+  <data name="World_ModdedWarning" xml:space="preserve">
+    <value>這個世界是用 {0}{1} 玩的。WaNut 目前還不能在伺服器上安裝模組，所以伺服器這份世界裡的模組方塊、物品和生物會消失。你原本的世界不會被改動。</value>
+  </data>
+  <data name="World_ModdedAccept" xml:space="preserve">
+    <value>我了解，模組方塊會消失</value>
+  </data>
+  <data name="World_OldWorldHint" xml:space="preserve">
+    <value>這個世界比 Minecraft 1.16.5 還舊，只能升級到較新的版本來開啟。</value>
+  </data>
+  <data name="World_NewerWarning" xml:space="preserve">
+    <value>這個世界上次是用 Minecraft {0} 儲存的，比你選的版本新。舊版本不一定讀得了新世界：區塊可能遺失，或世界無法載入。選 {0} 或更新的版本比較安全。</value>
+  </data>
+  <data name="World_NewerServerWarning" xml:space="preserve">
+    <value>這個世界上次是用 Minecraft {0} 儲存的，比這台伺服器的 {1} 新。舊版本不一定讀得了新世界：區塊可能遺失，或世界無法載入。你可以先到「伺服器」分頁更改伺服器版本。</value>
+  </data>
+  <data name="World_NewerAccept" xml:space="preserve">
+    <value>我了解，仍然使用這個世界</value>
+  </data>
+  <data name="World_BringInventory" xml:space="preserve">
+    <value>把我在單人遊戲的背包和位置帶過去</value>
+  </data>
+  <data name="World_BringInventoryNeedsName" xml:space="preserve">
+    <value>在上面填你的 Minecraft 名稱，才能帶過去。</value>
+  </data>
+  <data name="World_Copying" xml:space="preserve">
+    <value>正在複製世界…</value>
+  </data>
+  <data name="World_ImportFailed" xml:space="preserve">
+    <value>無法複製世界，所以沒有任何改動。{0}</value>
+  </data>
+  <data name="World_ReadFailed" xml:space="preserve">
+    <value>無法讀取這個世界。{0}</value>
+  </data>
+  <data name="World_ScanFailed" xml:space="preserve">
+    <value>無法列出你的世界。{0}</value>
+  </data>
+  <data name="World_Replaced" xml:space="preserve">
+    <value>新世界已經放好了！舊世界已備份在下面的清單裡，隨時可以還原。</value>
+  </data>
+  <data name="World_ResourcePackHint" xml:space="preserve">
+    <value>這個世界附有資源包（世界資料夾裡的 resources.zip）。WaNut 目前還不會自動傳給朋友，請把這個檔案傳給他們，請他們在「選項 &gt; 資源包」加入。</value>
+  </data>
+  <data name="World_Problem_NotAWorld" xml:space="preserve">
+    <value>這不是 Minecraft 世界：裡面沒有 level.dat。</value>
+  </data>
+  <data name="World_Problem_DamagedZip" xml:space="preserve">
+    <value>無法讀取這個 .zip，或裡面有檔案會被放到世界資料夾以外。沒有任何改動。</value>
+  </data>
+  <data name="World_Problem_NotEnoughSpace" xml:space="preserve">
+    <value>磁碟空間不足。請清出一些空間後再試一次，沒有任何改動。</value>
+  </data>
+  <data name="World_Problem_UnsafeWorldName" xml:space="preserve">
+    <value>server.properties 裡的 level-name 不是單純的資料夾名稱，所以 WaNut 不會動這個世界。請直接修改 server.properties。</value>
+  </data>
+  <data name="World_Problem_NoWorld" xml:space="preserve">
+    <value>還沒有世界可以匯出。先啟動伺服器一次來產生世界。</value>
+  </data>
+  <data name="World_Inventory_NameNotFound" xml:space="preserve">
+    <value>背包沒有帶過去：Mojang 找不到這個名稱的 Minecraft 帳號。請檢查名稱的拼寫；世界本身已經匯入了。</value>
+  </data>
+  <data name="World_Inventory_LookupFailed" xml:space="preserve">
+    <value>背包沒有帶過去：無法連上 Mojang 查詢你的名稱。世界本身已經匯入了。</value>
+  </data>
+  <data name="World_Inventory_NoPlayerInWorld" xml:space="preserve">
+    <value>背包沒有帶過去：這個世界裡沒有單人遊戲的背包，例如它原本是伺服器的世界。世界本身已經匯入了。</value>
+  </data>
+  <data name="World_Inventory_NoPlayerData" xml:space="preserve">
+    <value>背包沒有帶過去：這位玩家沒有在這個世界玩過。</value>
+  </data>
+  <data name="World_Inventory_DamagedPlayerData" xml:space="preserve">
+    <value>背包沒有帶過去：無法讀取玩家資料。</value>
+  </data>
+  <data name="Import_Title" xml:space="preserve">
+    <value>用別的世界取代</value>
+  </data>
+  <data name="Import_Hint" xml:space="preserve">
+    <value>會先備份伺服器目前的世界，之後可以從「備份」分頁還原。</value>
+  </data>
+  <data name="Import_Confirm" xml:space="preserve">
+    <value>取代世界</value>
+  </data>
+  <data name="Export_Title" xml:space="preserve">
+    <value>匯出世界</value>
+  </data>
+  <data name="Export_CurrentWorld" xml:space="preserve">
+    <value>伺服器目前的世界</value>
+  </data>
+  <data name="Export_Backup" xml:space="preserve">
+    <value>{0} 的備份</value>
+  </data>
+  <data name="Export_TargetLabel" xml:space="preserve">
+    <value>要放到哪裡？</value>
+  </data>
+  <data name="Export_ToZip" xml:space="preserve">
+    <value>存成 .zip</value>
+  </data>
+  <data name="Export_ToZipHint" xml:space="preserve">
+    <value>一個檔案，方便保存或分享，之後也能再匯入。</value>
+  </data>
+  <data name="Export_ToSaves" xml:space="preserve">
+    <value>放進單人遊戲</value>
+  </data>
+  <data name="Export_ToSavesHint" xml:space="preserve">
+    <value>會出現在 Minecraft 的世界清單裡，可以自己玩。</value>
+  </data>
+  <data name="Export_LocationLabel" xml:space="preserve">
+    <value>啟動器</value>
+  </data>
+  <data name="Export_NoLocations" xml:space="preserve">
+    <value>沒有找到 Minecraft 啟動器，請改存成 .zip。</value>
+  </data>
+  <data name="Export_BringInventory" xml:space="preserve">
+    <value>單人遊戲使用這位玩家的背包和位置</value>
+  </data>
+  <data name="Export_NoPlayers" xml:space="preserve">
+    <value>還沒有人加入過這台伺服器，所以沒有背包可以帶。</value>
+  </data>
+  <data name="Export_SaveZipTitle" xml:space="preserve">
+    <value>把世界存成 .zip</value>
+  </data>
+  <data name="Export_Confirm" xml:space="preserve">
+    <value>匯出</value>
+  </data>
+  <data name="Export_Working" xml:space="preserve">
+    <value>正在匯出世界…</value>
+  </data>
+  <data name="Export_Done" xml:space="preserve">
+    <value>匯出完成！世界在 {0}</value>
+  </data>
+  <data name="Export_Failed" xml:space="preserve">
+    <value>無法匯出世界。{0}</value>
+  </data>
 </root>

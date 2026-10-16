@@ -877,4 +877,214 @@ Stop the server and update?</value>
   <data name="AppSettings_ThemeDark" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Backups_ReplaceWorld" xml:space="preserve">
+    <value>Replace with another world…</value>
+  </data>
+  <data name="Backups_ExportWorld" xml:space="preserve">
+    <value>Export world…</value>
+  </data>
+  <data name="Backups_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Backups_ExportLabel" xml:space="preserve">
+    <value>Export the backup from {0} ({1})</value>
+  </data>
+  <data name="Backups_Reason_Import" xml:space="preserve">
+    <value>Before importing a world</value>
+  </data>
+  <data name="CreateServer_WorldLabel" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="CreateServer_WorldNew" xml:space="preserve">
+    <value>New world</value>
+  </data>
+  <data name="CreateServer_WorldNewHint" xml:space="preserve">
+    <value>Minecraft makes a fresh world on the first start.</value>
+  </data>
+  <data name="CreateServer_WorldImport" xml:space="preserve">
+    <value>Import my world</value>
+  </data>
+  <data name="CreateServer_WorldImportHint" xml:space="preserve">
+    <value>Bring a single-player world, a folder or a .zip, and play it with friends. Your original stays as it is.</value>
+  </data>
+  <data name="World_PickLabel" xml:space="preserve">
+    <value>Which world?</value>
+  </data>
+  <data name="World_ListLabel" xml:space="preserve">
+    <value>Your single-player worlds</value>
+  </data>
+  <data name="World_Scanning" xml:space="preserve">
+    <value>Looking for your worlds…</value>
+  </data>
+  <data name="World_NoneFound" xml:space="preserve">
+    <value>No single-player worlds found in the usual places. Use Choose folder or Choose .zip.</value>
+  </data>
+  <data name="World_ChooseFolder" xml:space="preserve">
+    <value>Choose folder…</value>
+  </data>
+  <data name="World_ChooseZip" xml:space="preserve">
+    <value>Choose .zip…</value>
+  </data>
+  <data name="World_PickFolderTitle" xml:space="preserve">
+    <value>Choose a world folder (the one with level.dat)</value>
+  </data>
+  <data name="World_PickZipTitle" xml:space="preserve">
+    <value>Choose a world .zip</value>
+  </data>
+  <data name="World_ZipFilter" xml:space="preserve">
+    <value>Zip files (*.zip)|*.zip</value>
+  </data>
+  <data name="World_UnknownVersion" xml:space="preserve">
+    <value>Unknown version</value>
+  </data>
+  <data name="World_UnknownLoader" xml:space="preserve">
+    <value>mods</value>
+  </data>
+  <data name="World_Launcher_Official" xml:space="preserve">
+    <value>Minecraft Launcher</value>
+  </data>
+  <data name="World_Launcher_ModrinthApp" xml:space="preserve">
+    <value>Modrinth App</value>
+  </data>
+  <data name="World_Launcher_Prism" xml:space="preserve">
+    <value>Prism Launcher</value>
+  </data>
+  <data name="World_Launcher_CurseForge" xml:space="preserve">
+    <value>CurseForge</value>
+  </data>
+  <data name="World_ModCount" xml:space="preserve">
+    <value> and {0} mods</value>
+  </data>
+  <data name="World_ModdedWarning" xml:space="preserve">
+    <value>This world was played with {0}{1}. WaNut can't install mods on the server yet, so blocks, items and creatures from mods will disappear from the server's copy. Your original world is not changed.</value>
+  </data>
+  <data name="World_ModdedAccept" xml:space="preserve">
+    <value>I understand, the mod blocks will disappear</value>
+  </data>
+  <data name="World_OldWorldHint" xml:space="preserve">
+    <value>This world is older than Minecraft 1.16.5. It can only be opened by upgrading it to a newer version.</value>
+  </data>
+  <data name="World_NewerWarning" xml:space="preserve">
+    <value>This world was last saved in Minecraft {0}, which is newer than the version you picked. Older versions can't always read newer worlds: chunks can be lost or the world can fail to load. Pick {0} or newer to be safe.</value>
+  </data>
+  <data name="World_NewerServerWarning" xml:space="preserve">
+    <value>This world was last saved in Minecraft {0}, which is newer than this server's {1}. Older versions can't always read newer worlds: chunks can be lost or the world can fail to load. You can change the server's version on the Server tab first.</value>
+  </data>
+  <data name="World_NewerAccept" xml:space="preserve">
+    <value>I understand, use this world anyway</value>
+  </data>
+  <data name="World_BringInventory" xml:space="preserve">
+    <value>Bring my single-player inventory and position along</value>
+  </data>
+  <data name="World_BringInventoryNeedsName" xml:space="preserve">
+    <value>Type your Minecraft name above to bring them along.</value>
+  </data>
+  <data name="World_Copying" xml:space="preserve">
+    <value>Copying the world…</value>
+  </data>
+  <data name="World_ImportFailed" xml:space="preserve">
+    <value>The world could not be copied, so nothing was changed. {0}</value>
+  </data>
+  <data name="World_ReadFailed" xml:space="preserve">
+    <value>The world could not be read. {0}</value>
+  </data>
+  <data name="World_ScanFailed" xml:space="preserve">
+    <value>Your worlds could not be listed. {0}</value>
+  </data>
+  <data name="World_Replaced" xml:space="preserve">
+    <value>The new world is in place. The old one is in the list below as a backup, so you can restore it.</value>
+  </data>
+  <data name="World_ResourcePackHint" xml:space="preserve">
+    <value>This world comes with a resource pack (resources.zip in the world folder). WaNut doesn't send it to friends yet, so send them the file and ask them to add it in Options &gt; Resource Packs.</value>
+  </data>
+  <data name="World_Problem_NotAWorld" xml:space="preserve">
+    <value>This isn't a Minecraft world: there is no level.dat in it.</value>
+  </data>
+  <data name="World_Problem_DamagedZip" xml:space="preserve">
+    <value>This .zip can't be read, or it has files that would land outside the world folder. Nothing was changed.</value>
+  </data>
+  <data name="World_Problem_NotEnoughSpace" xml:space="preserve">
+    <value>There isn't enough free space on the drive. Free some space and try again; nothing was changed.</value>
+  </data>
+  <data name="World_Problem_UnsafeWorldName" xml:space="preserve">
+    <value>level-name in server.properties isn't a plain folder name, so WaNut won't touch the world. Fix it in the raw server.properties.</value>
+  </data>
+  <data name="World_Problem_NoWorld" xml:space="preserve">
+    <value>There is no world to export yet. Start the server once to create it.</value>
+  </data>
+  <data name="World_Inventory_NameNotFound" xml:space="preserve">
+    <value>Your inventory didn't come along: Mojang has no Minecraft account with that name. Check the spelling of your name; the world itself was imported.</value>
+  </data>
+  <data name="World_Inventory_LookupFailed" xml:space="preserve">
+    <value>Your inventory didn't come along: Mojang couldn't be reached to look up your name. The world itself was imported.</value>
+  </data>
+  <data name="World_Inventory_NoPlayerInWorld" xml:space="preserve">
+    <value>Your inventory didn't come along: this world has no single-player inventory in it, for example because it came from a server. The world itself was imported.</value>
+  </data>
+  <data name="World_Inventory_NoPlayerData" xml:space="preserve">
+    <value>The inventory didn't come along: that player has never played in this world.</value>
+  </data>
+  <data name="World_Inventory_DamagedPlayerData" xml:space="preserve">
+    <value>The inventory didn't come along: the player data could not be read.</value>
+  </data>
+  <data name="Import_Title" xml:space="preserve">
+    <value>Replace with another world</value>
+  </data>
+  <data name="Import_Hint" xml:space="preserve">
+    <value>The server's current world is backed up first, so you can restore it from the Backups tab.</value>
+  </data>
+  <data name="Import_Confirm" xml:space="preserve">
+    <value>Replace world</value>
+  </data>
+  <data name="Export_Title" xml:space="preserve">
+    <value>Export world</value>
+  </data>
+  <data name="Export_CurrentWorld" xml:space="preserve">
+    <value>The server's current world</value>
+  </data>
+  <data name="Export_Backup" xml:space="preserve">
+    <value>The backup from {0}</value>
+  </data>
+  <data name="Export_TargetLabel" xml:space="preserve">
+    <value>Where to?</value>
+  </data>
+  <data name="Export_ToZip" xml:space="preserve">
+    <value>Save as .zip</value>
+  </data>
+  <data name="Export_ToZipHint" xml:space="preserve">
+    <value>One file to keep or share. You can import it again later.</value>
+  </data>
+  <data name="Export_ToSaves" xml:space="preserve">
+    <value>Add to single player</value>
+  </data>
+  <data name="Export_ToSavesHint" xml:space="preserve">
+    <value>Shows up in Minecraft's world list, ready to play on your own.</value>
+  </data>
+  <data name="Export_LocationLabel" xml:space="preserve">
+    <value>Launcher</value>
+  </data>
+  <data name="Export_NoLocations" xml:space="preserve">
+    <value>No Minecraft launcher found. Save as .zip instead.</value>
+  </data>
+  <data name="Export_BringInventory" xml:space="preserve">
+    <value>Use this player's inventory and position for single player</value>
+  </data>
+  <data name="Export_NoPlayers" xml:space="preserve">
+    <value>No one has joined this server yet, so there is no inventory to bring.</value>
+  </data>
+  <data name="Export_SaveZipTitle" xml:space="preserve">
+    <value>Save the world as .zip</value>
+  </data>
+  <data name="Export_Confirm" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Export_Working" xml:space="preserve">
+    <value>Exporting the world…</value>
+  </data>
+  <data name="Export_Done" xml:space="preserve">
+    <value>Exported! The world is at {0}</value>
+  </data>
+  <data name="Export_Failed" xml:space="preserve">
+    <value>The world could not be exported. {0}</value>
+  </data>
 </root>

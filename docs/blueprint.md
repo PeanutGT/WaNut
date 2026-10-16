@@ -32,6 +32,10 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 20 | Settings layout | Tabs first, then tiers (always visible / More settings / Advanced mode), per section 4b. Whitelist, OP list and the RAM slider are always visible; changing type or version backs up first and warns on downgrade. |
 | 21 | New server whitelist | **On** by default for every new server, on every Minecraft version. The Players tab warns while the list is empty. |
 | 22 | Code signing | Setup.exe is **not signed** for now. Windows shows a SmartScreen warning on first install. |
+| 23 | World import and export | Built before step 15 (Mods tab), as two PRs: world import and export first, then seed and world type. Details in section 5, "World import and export". |
+| 24 | Modded worlds | Importing a world played with mods shows a red warning that mod blocks will disappear and needs an extra tick. "Install the mods too" comes with step 15. |
+| 25 | Inventory on import | "Bring my single-player inventory and position along" is on by default and greyed out without the host's name. The UUID comes from Mojang (offline UUID when `online-mode` is off); if the lookup fails, the world is still imported and WaNut says why the inventory wasn't. |
+| 26 | Map resource packs | For now WaNut only tells the host to send the world's `resources.zip` to friends. |
 
 ---
 
@@ -128,7 +132,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 | Players | Online players, whitelist switch and list, OP list | Kick/ban (commands in Phase 1, buttons in Phase 3) | |
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
 | Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off) | Custom JVM arguments, choose Java manually, use your own server.jar |
-| Backups | Backup list, restore, back up now | Keep count, delete after days | |
+| Backups | Backup list, restore, back up now, replace with another world, export (current world or any backup) | Keep count, delete after days | |
 | Connect | IPv4 per adapter with Copy | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
 | App settings | | Instances folder, update check | Advanced mode switch; clear download cache |
 
@@ -174,6 +178,16 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * The cleanup rules live in `config.json` and apply to every server. They are edited under "More settings" on the Backups tab.
 * Backups hold the world only, not plugins, mods or config. From 26.x every dimension sits inside the level-name folder (`world/dimensions/minecraft/...`) for Vanilla, Paper and Fabric. Paper up to 1.21.x still splits off `world_nether` and `world_the_end`, so those are included when present.
 * If the backup before a start fails (e.g. a full disk), WaNut asks whether to start anyway.
+
+### World import and export (decisions 23–26)
+* **Import sources:** a list of single-player worlds from the official launcher (`%APPDATA%\.minecraft\saves`) and the default places of the Modrinth App, Prism Launcher and CurseForge, each labelled with its launcher and instance; or a folder or `.zip` the user picks. In a zip, `level.dat` may be at the top or one or two folders down.
+* **Entry points:** the Create Server wizard starts with "New world / Import my world". An existing server has "Replace with another world" on the Backups tab, which backs up the current world first (an "import" backup, protected from the keep count like a restore copy).
+* **Version:** the wizard preselects the version from `level.dat` (changeable). Picking an older version than the world's shows a warning and needs an extra tick. Worlds older than 1.16.5 can only be upgraded.
+* **Layout:** for Paper up to 1.21.x the Nether and End are split out into `world_nether/DIM-1` and `world_the_end/DIM1`; 26.x worlds are left as they are. Datapacks travel inside the world.
+* **Safety:** the import is a copy; the source is never changed. Free space is checked first, progress is shown, and the copy is staged next to the server's world, so a failure changes nothing. Zips get the same path-escape checks as backups, and `session.lock` is never copied.
+* **Modded worlds:** detected from `ServerBrands`/`WasModded` in `level.dat`; the launcher instance's `mods/` folder gives the mod count. Red warning plus extra tick (decision 24).
+* **Host inventory:** `level.dat`'s `Player` is written to the server's player file for the host's UUID (`playerdata/`, or `players/data/` from 26.x; a folder the world already has wins).
+* **Export:** the current world (server stopped) or any backup, to a `.zip` or straight into a single-player saves folder (official or a launcher instance from the list). Paper's split Nether and End are joined back into `world/`. A player picker (names from `usercache.json`, the host by default) chooses whose inventory goes into `level.dat`. An export never overwrites an existing save.
 
 ### Change type or version (Server tab, More settings)
 * Opens a window with the type list and version list from the Create Server wizard. Only while the server is stopped.
@@ -249,7 +263,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 
 ### Screens (WaNut.App)
 1. **Main window:** server list on the left; on the right the selected server's status badge, Start/Stop, Open folder, and tabs: Console, Players, Game settings, Server, Backups, Connect (section 4b).
-2. **Create Server wizard:** name → type (Vanilla/Paper/Fabric) → version → RAM slider → EULA checkbox → Create (progress bar while Java and the server jar download).
+2. **Create Server wizard:** new world or import my world → name → type (Vanilla/Paper/Fabric) → version → RAM slider → EULA checkbox → Create (progress bar while Java and the server jar download).
 3. **App settings:** language (later), instances folder, backup rules, update check, Advanced mode switch.
 
 ### Start a server: what happens in order
@@ -277,6 +291,8 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ### Phase 2 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
 13. ✓ Traditional Chinese: `Strings.zh-TW.resx` for every key, a language choice in App settings (English by default, applied after restart), and a test that every English key has a zh-TW entry. Claude translates, Peanut reviews.
 14. Illustrations (`design/illustrations/` in the project files, confirmed by Peanut 2026-10-15): 32x32 peanut scenes, 4 frames of 0.25 s, nearest-neighbor scaling. No servers (main window); stopped, starting, online, saving (server status); no players and empty whitelist/OP list (Players tab); no backups and backup done (Backups tab); downloading and the Vanilla/Paper/Fabric icons (Create Server); friends (Connect tab); updating (update card). New art for later steps (mods, modpacks, Forge) is agreed with Peanut in those steps.
+14.1. ✓ World import and export (decisions 23–26): import from the launchers' single-player worlds, a folder or a zip, in the Create Server wizard and as "Replace with another world" on the Backups tab; export the current world or a backup to a zip or single-player saves.
+14.2. Seed and world type in the Create Server wizard's More settings: a seed box (empty means random); Normal, Superflat, Large Biomes and Amplified, plus Superflat presets (Classic, Desert, The Void). Custom generator JSON in Advanced mode; the generator-settings format changes between versions.
 15. Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
 16. Modrinth `.mrpack` modpack server install (decision 19), reusing step 15's downloader.
 17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.

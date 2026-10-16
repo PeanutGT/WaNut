@@ -12,9 +12,11 @@ using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
 using WaNut.Core.Network;
+using WaNut.Core.Players;
 using WaNut.Core.Settings;
 using WaNut.Core.Updates;
 using WaNut.Core.Versions;
+using WaNut.Core.Worlds;
 
 namespace WaNut.App;
 
@@ -84,6 +86,9 @@ public partial class App : Application
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
+        services.AddSingleton<MojangProfiles>();
+        services.AddSingleton<WorldImporter>();
+        services.AddSingleton<WorldExporter>();
         services.AddSingleton<IFirewall, WindowsFirewall>();
         services.AddSingleton<FirewallService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
@@ -101,6 +106,10 @@ public partial class App : Application
         services.AddTransient<ServersFolderViewModel>();
         services.AddTransient<ChangeServerViewModel>();
         services.AddTransient<ChangeServerWindow>();
+        services.AddTransient<ImportWorldViewModel>();
+        services.AddTransient<ImportWorldWindow>();
+        services.AddTransient<ExportWorldViewModel>();
+        services.AddTransient<ExportWorldWindow>();
 
         return services.BuildServiceProvider();
     }
