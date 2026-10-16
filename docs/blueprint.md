@@ -321,7 +321,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 15. ✓ Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
 15.1. ✓ Delete a server from the Server tab (More settings), keeping a world zip by default (section 5, "Delete server").
 15.2. ✓ Misc big update (decision 27, section 5 "Misc big update").
-16. Modrinth `.mrpack` modpack server install (decision 19), reusing step 15's downloader.
+16. ✓ Modrinth `.mrpack` modpack server install (decision 19): "From a modpack" in the Create Server wizard (Fabric and Vanilla packs; Forge, NeoForge and Quilt packs are refused until step 17).
 17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
 18. CurseForge server-pack import from a zip the user already downloaded.
 19. UPnP port forwarding (`Open.Nat`) on the Connect tab, with a clear message when the router refuses or CGNAT is detected.
