@@ -38,7 +38,7 @@ public interface IDialogService
     void Inform(string message);
 
     /// <summary>Asks for a world folder. Returns null if the user cancelled.</summary>
-    string? PickFolder();
+    string? PickFolder(string? title = null);
 
     /// <summary>Asks for a picture (PNG, JPEG, BMP or GIF). Returns null if the user cancelled.</summary>
     string? PickImage();

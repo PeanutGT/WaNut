@@ -29,8 +29,10 @@ public sealed partial class MainViewModel : ObservableObject
         IClipboardService clipboard,
         UpdateViewModel updates,
         ModLibrary mods,
-        DiscordNotifier discord)
+        DiscordNotifier discord,
+        BackupCopyService backupCopies)
     {
+        backupCopies.CopyFailed += OnBackupCopyFailed;
         _discord = discord;
         _mods = mods;
         _firewall = firewall;
@@ -105,6 +107,14 @@ public sealed partial class MainViewModel : ObservableObject
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
         return server;
+    }
+
+    private void OnBackupCopyFailed(string instanceDir, string message)
+    {
+        if (Servers.FirstOrDefault(s => string.Equals(s.InstanceDir, instanceDir, StringComparison.OrdinalIgnoreCase)) is { } server)
+        {
+            server.Backups.ErrorText = message;
+        }
     }
 
     private void OnServerDuplicated(object? sender, InstanceMetadata copy)

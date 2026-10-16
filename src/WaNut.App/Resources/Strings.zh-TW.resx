@@ -1480,4 +1480,28 @@
   <data name="Discord_PlayerLeft" xml:space="preserve">
     <value>➖ {1} 離開了 **{0}**。</value>
   </data>
+  <data name="BackupCopy_Label" xml:space="preserve">
+    <value>另外複製一份備份到其他資料夾</value>
+  </data>
+  <data name="BackupCopy_None" xml:space="preserve">
+    <value>目前沒有複製到其他地方</value>
+  </data>
+  <data name="BackupCopy_Choose" xml:space="preserve">
+    <value>選擇資料夾…</value>
+  </data>
+  <data name="BackupCopy_UseOneDrive" xml:space="preserve">
+    <value>使用 OneDrive</value>
+  </data>
+  <data name="BackupCopy_Stop" xml:space="preserve">
+    <value>停止複製</value>
+  </data>
+  <data name="BackupCopy_Hint" xml:space="preserve">
+    <value>選一個 OneDrive、Google 雲端硬碟或隨身碟的資料夾：每份新備份也會複製過去，每台伺服器一個資料夾，套用相同的保留規則。複製失敗時 WaNut 會在這裡提醒你，伺服器照樣可以啟動。所有伺服器共用這個設定。</value>
+  </data>
+  <data name="BackupCopy_PickTitle" xml:space="preserve">
+    <value>選擇備份複本的資料夾</value>
+  </data>
+  <data name="BackupCopy_Failed" xml:space="preserve">
+    <value>備份已經安全存在這台電腦，但複製到 {0} 失敗了：{1}</value>
+  </data>
 </root>

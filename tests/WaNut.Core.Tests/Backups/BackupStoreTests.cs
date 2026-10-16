@@ -375,4 +375,31 @@ public sealed class BackupStoreTests : IDisposable
 
         Assert.Contains(_store.List(Dir), b => b.Reason == BackupReason.Reset);
     }
+
+    [Fact]
+    public async Task CreateAsync_World_RaisesCreated()
+    {
+        WriteWorld();
+        (string Dir, BackupInfo Backup)? raised = null;
+        _store.Created += (dir, backup) => raised = (dir, backup);
+
+        var backup = await BackUpAsync();
+
+        Assert.Equal((Dir, backup), raised);
+    }
+
+    [Fact]
+    public async Task CopyToFolderAsync_Backup_CopiesAndAppliesRules()
+    {
+        using var copies = new TempDir();
+        WriteWorld();
+        for (var i = 0; i < 3; i++)
+        {
+            _clock.Advance(TimeSpan.FromMinutes(1));
+            await _store.CopyToFolderAsync(await BackUpAsync(), copies.Path, new BackupRules { KeepCount = 2, MaxAgeDays = 30 });
+        }
+
+        var copied = Directory.GetFiles(copies.Path).Select(Path.GetFileName).Order().ToList();
+        Assert.Equal(["2026-10-15_12-02-00_start.zip", "2026-10-15_12-03-00_start.zip"], copied);
+    }
 }

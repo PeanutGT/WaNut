@@ -199,6 +199,37 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     private bool CanRestore(BackupItemViewModel? item) => item is not null && CanChange;
 
+    /// <summary>Picks the folder every backup is also copied to, starting from OneDrive when there is one.</summary>
+    [RelayCommand]
+    private void ChooseCopyFolder()
+    {
+        if (_dialogs.PickFolder(Text.Get("BackupCopy_PickTitle")) is { } dir)
+        {
+            App.BackupCopyDir = dir;
+            OnPropertyChanged(nameof(CanUseOneDrive));
+        }
+    }
+
+    [RelayCommand]
+    private void UseOneDrive()
+    {
+        if (BackupCopyService.SuggestedFolder() is { } dir)
+        {
+            App.BackupCopyDir = dir;
+            OnPropertyChanged(nameof(CanUseOneDrive));
+        }
+    }
+
+    [RelayCommand]
+    private void StopCopying()
+    {
+        App.BackupCopyDir = string.Empty;
+        OnPropertyChanged(nameof(CanUseOneDrive));
+    }
+
+    /// <summary>The "Use OneDrive" button only shows when OneDrive is set up and not already chosen.</summary>
+    public bool CanUseOneDrive => BackupCopyService.SuggestedFolder() is { } dir && !string.Equals(dir, App.BackupCopyDir, StringComparison.OrdinalIgnoreCase);
+
     [RelayCommand]
     private void OpenFolder()
     {

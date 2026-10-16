@@ -35,6 +35,9 @@ public sealed record AppSettings
     /// <summary>The host's note on invite cards, such as the Radmin VPN network name and password. Null for none.</summary>
     public string? InviteNote { get; init; }
 
+    /// <summary>A folder (such as OneDrive) that gets a copy of every backup, or null for none.</summary>
+    public string? BackupCopyDir { get; init; }
+
     /// <summary>Discord notifications for server events.</summary>
     public DiscordSettings Discord { get; init; } = new();
 

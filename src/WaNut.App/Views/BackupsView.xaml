@@ -169,7 +169,22 @@
                      AutomationProperties.Name="{res:Text Backups_MaxAgeDays}" InputMethod.IsInputMethodEnabled="False" />
             <TextBlock Text="{res:Text Backups_MaxAgeDaysHint}" Style="{StaticResource Hint}" />
           </StackPanel>
-          <TextBlock Text="{res:Text Backups_RulesShared}" Style="{StaticResource Hint}" Margin="0,-6,0,0" />
+          <TextBlock Text="{res:Text Backups_RulesShared}" Style="{StaticResource Hint}" Margin="0,-6,0,18" />
+
+          <!-- A second copy somewhere else, such as OneDrive, so a dead disk doesn't take the worlds with it. -->
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text BackupCopy_Label}" Style="{StaticResource Label}" />
+            <TextBox Text="{Binding App.BackupCopyDir, Mode=OneWay}" IsReadOnly="True" Tag="{res:Text BackupCopy_None}"
+                     AutomationProperties.Name="{res:Text BackupCopy_Label}" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+              <Button Content="{res:Text BackupCopy_Choose}" Command="{Binding ChooseCopyFolderCommand}" />
+              <Button Content="{res:Text BackupCopy_UseOneDrive}" Command="{Binding UseOneDriveCommand}" Margin="8,0,0,0"
+                      Visibility="{Binding CanUseOneDrive, Converter={StaticResource Visible}}" />
+              <Button Content="{res:Text BackupCopy_Stop}" Command="{Binding StopCopyingCommand}" Margin="8,0,0,0"
+                      Visibility="{Binding App.HasBackupCopyDir, Converter={StaticResource Visible}}" />
+            </StackPanel>
+            <TextBlock Text="{res:Text BackupCopy_Hint}" Style="{StaticResource Hint}" />
+          </StackPanel>
         </StackPanel>
       </Expander>
     </StackPanel>

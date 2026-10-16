@@ -1502,4 +1502,28 @@ Stop the server and update?</value>
   <data name="Discord_PlayerLeft" xml:space="preserve">
     <value>➖ {1} left **{0}**.</value>
   </data>
+  <data name="BackupCopy_Label" xml:space="preserve">
+    <value>Also copy backups to another folder</value>
+  </data>
+  <data name="BackupCopy_None" xml:space="preserve">
+    <value>Not copying anywhere</value>
+  </data>
+  <data name="BackupCopy_Choose" xml:space="preserve">
+    <value>Choose folder…</value>
+  </data>
+  <data name="BackupCopy_UseOneDrive" xml:space="preserve">
+    <value>Use OneDrive</value>
+  </data>
+  <data name="BackupCopy_Stop" xml:space="preserve">
+    <value>Stop copying</value>
+  </data>
+  <data name="BackupCopy_Hint" xml:space="preserve">
+    <value>Pick a OneDrive, Google Drive or USB drive folder: every new backup is copied there too, one folder per server, with the same keep rules. If a copy fails, WaNut tells you here and the server still starts. Applies to every server.</value>
+  </data>
+  <data name="BackupCopy_PickTitle" xml:space="preserve">
+    <value>Choose a folder for backup copies</value>
+  </data>
+  <data name="BackupCopy_Failed" xml:space="preserve">
+    <value>The backup is safe on this PC, but copying it to {0} failed: {1}</value>
+  </data>
 </root>

@@ -32,6 +32,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
         InviteNote = settings.InviteNote ?? string.Empty;
+        BackupCopyDir = settings.BackupCopyDir ?? string.Empty;
         DiscordWebhookUrl = settings.Discord.WebhookUrl ?? string.Empty;
         DiscordOnline = settings.Discord.Online;
         DiscordStopped = settings.Discord.Stopped;
@@ -75,6 +76,15 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private string _inviteNote = string.Empty;
 
     partial void OnInviteNoteChanged(string value) => Save();
+
+    /// <summary>Where every backup is also copied; empty for nowhere.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasBackupCopyDir))]
+    private string _backupCopyDir = string.Empty;
+
+    public bool HasBackupCopyDir => BackupCopyDir.Trim().Length > 0;
+
+    partial void OnBackupCopyDirChanged(string value) => Save();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DiscordUrlInvalid))]
@@ -213,7 +223,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         try
         {
             _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme,
-                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim(), Discord = Discord };
+                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim(), Discord = Discord,
+                BackupCopyDir = HasBackupCopyDir ? BackupCopyDir.Trim() : null };
             _store.Save(_saved);
             ErrorText = null;
         }

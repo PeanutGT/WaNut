@@ -78,9 +78,9 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));
 
-    public string? PickFolder()
+    public string? PickFolder(string? title = null)
     {
-        var dialog = new OpenFolderDialog { Title = Text.Get("World_PickFolderTitle") };
+        var dialog = new OpenFolderDialog { Title = title ?? Text.Get("World_PickFolderTitle") };
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FolderName : null;
     }
 
