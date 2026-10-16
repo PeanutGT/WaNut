@@ -50,6 +50,16 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.ViewModel.Result : null;
     }
 
+    public bool ShowDeleteServer(ServerViewModel server, out string? keptZip)
+    {
+        var window = services.GetRequiredService<DeleteServerWindow>();
+        window.ViewModel.Initialize(server);
+        window.Owner = Application.Current.MainWindow;
+        var deleted = window.ShowDialog() == true;
+        keptZip = deleted ? window.ViewModel.KeptZip : null;
+        return deleted;
+    }
+
     public bool Confirm(string message) => Show(new ConfirmWindow(message));
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));

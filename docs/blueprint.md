@@ -131,7 +131,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 | Console | Console, command box | | Log detail level |
 | Players | Online players, whitelist switch and list, OP list | Kick/ban (commands in Phase 1, buttons in Phase 3) | |
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
-| Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off) | Custom JVM arguments, choose Java manually, use your own server.jar |
+| Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off), Delete server | Custom JVM arguments, choose Java manually, use your own server.jar |
 | Backups | Backup list, restore, back up now, replace with another world, export (current world or any backup) | Keep count, delete after days | |
 | Mods (Fabric: mods, Paper: plugins) | Installed list with Remove, Modrinth search (filtered to the server's loader and version; Fabric hides client-only mods), Install with required dependencies, Open folder | | |
 | Connect | IPv4 per adapter with Copy | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
@@ -151,6 +151,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 │   ├── java-17/
 │   └── java-21/
 ├── cache/                       # Cached server jars
+├── deleted-servers/             # World zips kept when a server is deleted
 └── instances/                   # Movable via settings (decision 4)
     └── survival-1.21.1/
         ├── instance.json        # MC version, loader, RAM, play time
@@ -189,6 +190,14 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * **Modded worlds:** detected from `ServerBrands`/`WasModded` in `level.dat`; the launcher instance's `mods/` folder gives the mod count. Red warning plus extra tick (decision 24).
 * **Host inventory:** `level.dat`'s `Player` is written to the server's player file for the host's UUID (`playerdata/`, or `players/data/` from 26.x; a folder the world already has wins).
 * **Export:** the current world (server stopped) or any backup, to a `.zip` or straight into a single-player saves folder (official or a launcher instance from the list). Paper's split Nether and End are joined back into `world/`. A player picker (names from `usercache.json`, the host by default) chooses whose inventory goes into `level.dat`. An export never overwrites an existing save.
+
+### Delete server (Server tab, More settings)
+* Only while the server is stopped and no backup, restore or mod install is running.
+* A window names the server, says it can't be undone, and has Cancel as the default button.
+* "Keep a copy of the world as a .zip" is ticked by default: the world is exported like "Export world" (Paper's Nether and End joined back in) to `deleted-servers/<name> <date>.zip` in the data folder, so it can be imported again or opened in single player. Unticking deletes everything. A server that never started has no world, so the option is hidden.
+* If the zip fails, nothing is deleted. The folder is then renamed to `.wanut-deleting-<id>` (a file in use stops it here, and the zip is removed again) and deleted; a part that can't be deleted yet is retried at the next delete and never shows in the list.
+* Only a folder directly inside the servers folder with an `instance.json` is deleted. Links inside it are removed without touching what they point to.
+* Afterwards the list selects the next server.
 
 ### Change type or version (Server tab, More settings)
 * Opens a window with the type list and version list from the Create Server wizard. Only while the server is stopped.
@@ -296,6 +305,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 14.1. ✓ World import and export (decisions 23–26): import from the launchers' single-player worlds, a folder or a zip, in the Create Server wizard and as "Replace with another world" on the Backups tab; export the current world or a backup to a zip or single-player saves.
 14.2. ✓ Seed and world type in the Create Server wizard's More settings (new worlds only): a seed box (empty means random); Normal, Superflat, Large Biomes and Amplified, plus Superflat presets (Classic, Desert, The Void). Custom generator JSON in Advanced mode. `level-type` is a plain name up to 1.18.2 (`flat`) and a world preset id from 1.19 (`minecraft:flat`); Superflat structures are a placement map before 1.18.2 and structure sets (`structure_overrides`) from 1.18.2.
 15. ✓ Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
+15.1. ✓ Delete a server from the Server tab (More settings), keeping a world zip by default (section 5, "Delete server").
 16. Modrinth `.mrpack` modpack server install (decision 19), reusing step 15's downloader.
 17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
 18. CurseForge server-pack import from a zip the user already downloaded.

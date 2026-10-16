@@ -22,6 +22,9 @@ public interface IDialogService
     /// <summary>Shows the "Export world" window for the current world or a backup. Returns null if nothing was exported.</summary>
     WorldExportResult? ShowExportWorld(ServerViewModel server, BackupInfo? backup);
 
+    /// <summary>Shows the "Delete server" window. Returns true when the server was deleted; <paramref name="keptZip"/> is the world zip kept, if any.</summary>
+    bool ShowDeleteServer(ServerViewModel server, out string? keptZip);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 

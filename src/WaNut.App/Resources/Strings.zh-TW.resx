@@ -1233,4 +1233,44 @@
   <data name="Mods_OpenFailed" xml:space="preserve">
     <value>無法開啟：{0}</value>
   </data>
+  <data name="Delete_Section" xml:space="preserve">
+    <value>刪除這個伺服器</value>
+  </data>
+  <data name="Delete_Open" xml:space="preserve">
+    <value>刪除伺服器…</value>
+  </data>
+  <data name="Delete_SectionHint" xml:space="preserve">
+    <value>從這台電腦移除這個伺服器和它的所有檔案。請先停止伺服器。</value>
+  </data>
+  <data name="Delete_Title" xml:space="preserve">
+    <value>刪除伺服器</value>
+  </data>
+  <data name="Delete_Question" xml:space="preserve">
+    <value>要刪除「{0}」嗎？它的世界、備份、設定、模組和插件都會從這台電腦移除。</value>
+  </data>
+  <data name="Delete_KeepWorld" xml:space="preserve">
+    <value>把世界另存一份 .zip</value>
+  </data>
+  <data name="Delete_KeepWorldHint" xml:space="preserve">
+    <value>存在 WaNut 的 deleted-servers 資料夾。之後可以用「匯入我的世界」再匯入，或在單人遊戲開啟。取消勾選就會全部刪除。</value>
+  </data>
+  <data name="Delete_NoWorld" xml:space="preserve">
+    <value>這個伺服器還沒有世界，沒有需要保留的東西。</value>
+  </data>
+  <data name="Delete_Warning" xml:space="preserve">
+    <value>這個動作無法復原。</value>
+  </data>
+  <data name="Delete_Confirm" xml:space="preserve">
+    <value>刪除</value>
+  </data>
+  <data name="Delete_Working" xml:space="preserve">
+    <value>正在刪除伺服器…</value>
+  </data>
+  <data name="Delete_Failed" xml:space="preserve">
+    <value>無法刪除伺服器：{0} 請關閉正在使用它檔案的程式，再試一次。</value>
+  </data>
+  <data name="Delete_DoneKept" xml:space="preserve">
+    <value>「{0}」已刪除。世界保留在：
+{1}</value>
+  </data>
 </root>

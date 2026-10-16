@@ -1255,4 +1255,44 @@ Stop the server and update?</value>
   <data name="Mods_OpenFailed" xml:space="preserve">
     <value>Couldn't open it: {0}</value>
   </data>
+  <data name="Delete_Section" xml:space="preserve">
+    <value>Delete this server</value>
+  </data>
+  <data name="Delete_Open" xml:space="preserve">
+    <value>Delete server…</value>
+  </data>
+  <data name="Delete_SectionHint" xml:space="preserve">
+    <value>Removes the server and all its files from this PC. Stop the server first.</value>
+  </data>
+  <data name="Delete_Title" xml:space="preserve">
+    <value>Delete server</value>
+  </data>
+  <data name="Delete_Question" xml:space="preserve">
+    <value>Delete “{0}”? Its world, backups, settings, mods and plugins are removed from this PC.</value>
+  </data>
+  <data name="Delete_KeepWorld" xml:space="preserve">
+    <value>Keep a copy of the world as a .zip</value>
+  </data>
+  <data name="Delete_KeepWorldHint" xml:space="preserve">
+    <value>Saved in WaNut's deleted-servers folder. You can import it again with “Import my world”, or open it in single player. Untick to delete everything.</value>
+  </data>
+  <data name="Delete_NoWorld" xml:space="preserve">
+    <value>This server has no world yet, so there is nothing to keep.</value>
+  </data>
+  <data name="Delete_Warning" xml:space="preserve">
+    <value>This can't be undone.</value>
+  </data>
+  <data name="Delete_Confirm" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Delete_Working" xml:space="preserve">
+    <value>Deleting the server…</value>
+  </data>
+  <data name="Delete_Failed" xml:space="preserve">
+    <value>Couldn't delete the server: {0} Close any program using its files and try again.</value>
+  </data>
+  <data name="Delete_DoneKept" xml:space="preserve">
+    <value>“{0}” was deleted. Its world was kept here:
+{1}</value>
+  </data>
 </root>

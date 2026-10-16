@@ -79,6 +79,12 @@
               <TextBlock Text="{res:Text Server_OnlineModeWarning}" TextWrapping="Wrap" />
             </Border>
           </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Delete_Section}" Style="{StaticResource Label}" />
+            <Button Content="{res:Text Delete_Open}" Command="{Binding DeleteServerCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="{res:Text Delete_SectionHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
         </StackPanel>
       </Expander>
 

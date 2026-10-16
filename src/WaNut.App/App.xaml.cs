@@ -90,6 +90,7 @@ public partial class App : Application
         services.AddSingleton<MojangProfiles>();
         services.AddSingleton<WorldImporter>();
         services.AddSingleton<WorldExporter>();
+        services.AddSingleton<InstanceDeleter>();
         services.AddSingleton<IFirewall, WindowsFirewall>();
         services.AddSingleton<FirewallService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
@@ -113,6 +114,8 @@ public partial class App : Application
         services.AddTransient<ImportWorldWindow>();
         services.AddTransient<ExportWorldViewModel>();
         services.AddTransient<ExportWorldWindow>();
+        services.AddTransient<DeleteServerViewModel>();
+        services.AddTransient<DeleteServerWindow>();
 
         return services.BuildServiceProvider();
     }

@@ -92,7 +92,31 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? NewServer(server));
+        }
+    }
+
+    private ServerViewModel NewServer(InstanceMetadata metadata)
+    {
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods);
+        server.Deleted += OnServerDeleted;
+        return server;
+    }
+
+    /// <summary>Drops a deleted server from the list and selects its neighbour, or nothing when the list is empty.</summary>
+    private void OnServerDeleted(object? sender, EventArgs e)
+    {
+        if (sender is not ServerViewModel server)
+        {
+            return;
+        }
+
+        server.Deleted -= OnServerDeleted;
+        var index = Servers.IndexOf(server);
+        Servers.Remove(server);
+        if (SelectedServer == server || SelectedServer is null)
+        {
+            SelectedServer = Servers.Count == 0 ? null : Servers[Math.Clamp(index, 0, Servers.Count - 1)];
         }
     }
 }
