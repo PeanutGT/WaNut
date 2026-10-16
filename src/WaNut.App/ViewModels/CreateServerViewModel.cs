@@ -8,6 +8,7 @@ using WaNut.App.Services;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
+using WaNut.Core.Mods;
 using WaNut.Core.Players;
 using WaNut.Core.Settings;
 using WaNut.Core.Versions;
@@ -20,22 +21,25 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private readonly ServerVersionCatalog _catalog;
     private readonly ServerCreator _creator;
     private readonly WorldImporter _importer;
+    private readonly ModLibrary _mods;
     private readonly InstanceStore _store;
     private readonly IDialogService _dialogs;
     private CancellationTokenSource? _cancellation;
 
     public CreateServerViewModel(
-        ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, InstanceStore store, IDialogService dialogs, AppSettingsViewModel app)
+        ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, ModLibrary mods, InstanceStore store, IDialogService dialogs, AppSettingsViewModel app)
     {
         App = app;
         _catalog = catalog;
         _creator = creator;
         _importer = importer;
+        _mods = mods;
         _store = store;
         _dialogs = dialogs;
         Picker = new WorldPickerViewModel(dialogs);
         Picker.SelectionChanged += () =>
         {
+            PreselectFabricForMods();
             PreselectWorldVersion();
             OnWorldChanged();
         };
@@ -231,8 +235,18 @@ public sealed partial class CreateServerViewModel : ObservableObject
             ?? SelectedVersion;
     }
 
+    /// <summary>A world played with Fabric mods gets a Fabric server, so its mods can be installed too.</summary>
+    private void PreselectFabricForMods()
+    {
+        if (Picker.Source?.HasFabricMods == true)
+        {
+            SelectedType = ServerTypes.First(t => t.Type == ServerType.Fabric);
+        }
+    }
+
     partial void OnSelectedTypeChanged(ServerTypeOption? value)
     {
+        Picker.ServerType = value?.Type;
         // A load already running picks up the new type when it finishes.
         if (!LoadVersionsCommand.IsRunning)
         {
@@ -348,24 +362,26 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     /// <summary>
     /// Copies the picked world into the server that was just created. If that fails, the new server is removed
-    /// again: it was made for this world and holds nothing else yet.
+    /// again: it was made for this world and holds nothing else yet. The mods come after, and their failure keeps
+    /// the server.
     /// </summary>
     private async Task<string> ImportWorldAsync(InstanceMetadata created, CancellationToken cancellationToken)
     {
         StatusText = Text.Get("World_Copying");
         ProgressFraction = 0;
+        var instanceDir = _store.InstanceDir(created.Id);
+        WorldImportResult result;
         try
         {
             var request = new WorldImportRequest(Picker.Source!, created.Type, created.MinecraftVersion, OwnerName.Trim(), BringInventory && CanBringInventory);
-            var result = await _importer.ImportAsync(_store.InstanceDir(created.Id), request, new Progress<double>(f => ProgressFraction = f), cancellationToken);
-            return WorldMessages.ImportNotes(result);
+            result = await _importer.ImportAsync(instanceDir, request, new Progress<double>(f => ProgressFraction = f), cancellationToken);
         }
         catch
         {
             Created = null;
             try
             {
-                Directory.Delete(_store.InstanceDir(created.Id), recursive: true);
+                Directory.Delete(instanceDir, recursive: true);
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
@@ -374,6 +390,17 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
             throw;
         }
+
+        var mods = string.Empty;
+        if (Picker.WillInstallMods)
+        {
+            StatusText = Text.Get("World_InstallingMods");
+            ProgressFraction = 0;
+            mods = await WorldMessages.InstallModsAsync(
+                _mods, instanceDir, created.MinecraftVersion, Picker.Source!, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+        }
+
+        return WorldMessages.Join(WorldMessages.ImportNotes(result), mods);
     }
 
     /// <summary>Stops a running creation, or closes the wizard when nothing is being created.</summary>

@@ -65,8 +65,14 @@
             Visibility="{Binding ShowModdedWarning, Converter={StaticResource Visible}}">
       <StackPanel>
         <TextBlock Text="{Binding ModdedWarningText}" TextWrapping="Wrap" />
+        <TextBlock Text="{res:Text World_ModsPickFabric}" TextWrapping="Wrap" Margin="0,8,0,0"
+                   Visibility="{Binding ShowPickFabricHint, Converter={StaticResource Visible}}" />
+        <CheckBox IsChecked="{Binding InstallMods}" Margin="0,10,0,0"
+                  Visibility="{Binding CanInstallMods, Converter={StaticResource Visible}}">
+          <TextBlock Text="{res:Text World_InstallMods}" TextWrapping="Wrap" />
+        </CheckBox>
         <CheckBox IsChecked="{Binding ModdedAccepted}" Margin="0,10,0,0">
-          <TextBlock Text="{res:Text World_ModdedAccept}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding ModdedAcceptText}" TextWrapping="Wrap" />
         </CheckBox>
       </StackPanel>
     </Border>

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Mods;
 using WaNut.Core.Players;
 using WaNut.Core.Worlds;
 
@@ -11,18 +12,21 @@ namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// "Replace with another world" on the Backups tab. The server's current world is backed up first, like a
-/// restore, so the replacement can be undone from the backup list.
+/// restore, so the replacement can be undone from the backup list. A world played with Fabric mods can bring its
+/// mods to a Fabric server too.
 /// </summary>
 public sealed partial class ImportWorldViewModel : ObservableObject
 {
     private readonly WorldImporter _importer;
+    private readonly ModLibrary _mods;
     private ServerViewModel _server = null!;
     private CancellationTokenSource? _cancellation;
     private bool _closeWhenCancelled;
 
-    public ImportWorldViewModel(WorldImporter importer, IDialogService dialogs)
+    public ImportWorldViewModel(WorldImporter importer, ModLibrary mods, IDialogService dialogs)
     {
         _importer = importer;
+        _mods = mods;
         Picker = new WorldPickerViewModel(dialogs);
         Picker.SelectionChanged += () =>
         {
@@ -47,6 +51,9 @@ public sealed partial class ImportWorldViewModel : ObservableObject
 
     public WorldImportResult? Result { get; private set; }
 
+    /// <summary>The notes to show once the world is replaced: inventory, resource pack and mods.</summary>
+    public string Notes { get; private set; } = string.Empty;
+
     public string ServerText { get; private set; } = string.Empty;
 
     [ObservableProperty]
@@ -70,6 +77,9 @@ public sealed partial class ImportWorldViewModel : ObservableObject
     private double _progressFraction;
 
     [ObservableProperty]
+    private string _statusText = Text.Get("World_Copying");
+
+    [ObservableProperty]
     private string? _errorText;
 
     public bool IsIdle => !IsBusy;
@@ -88,6 +98,7 @@ public sealed partial class ImportWorldViewModel : ObservableObject
     {
         _server = server;
         ServerText = $"{server.Name} ({server.TypeAndVersionText})";
+        Picker.ServerType = server.Metadata.Type;
 
         // The first operator is usually the host: the wizard adds the owner's name there.
         OwnerName = PlayerLists.ReadNames(server.InstanceDir, PlayerList.Operators).FirstOrDefault() ?? string.Empty;
@@ -102,12 +113,23 @@ public sealed partial class ImportWorldViewModel : ObservableObject
         IsBusy = true;
         ErrorText = null;
         ProgressFraction = 0;
+        StatusText = Text.Get("World_Copying");
         _cancellation = new CancellationTokenSource();
         try
         {
             var metadata = _server.Metadata;
             var request = new WorldImportRequest(Picker.Source!, metadata.Type, metadata.MinecraftVersion, OwnerName.Trim(), BringInventory && CanBringInventory);
             Result = await _importer.ImportAsync(_server.InstanceDir, request, new Progress<double>(f => ProgressFraction = f), _cancellation.Token);
+            var mods = string.Empty;
+            if (Picker.WillInstallMods)
+            {
+                StatusText = Text.Get("World_InstallingMods");
+                ProgressFraction = 0;
+                mods = await WorldMessages.InstallModsAsync(
+                    _mods, _server.InstanceDir, metadata.MinecraftVersion, Picker.Source!, new Progress<double>(f => ProgressFraction = f), _cancellation.Token);
+            }
+
+            Notes = WorldMessages.Join(WorldMessages.ImportNotes(Result), mods);
         }
         catch (OperationCanceledException)
         {

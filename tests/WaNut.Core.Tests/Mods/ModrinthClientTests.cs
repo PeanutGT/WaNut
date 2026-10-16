@@ -132,4 +132,32 @@ public sealed class ModrinthClientTests
 
         Assert.Equal(["AANobbMI", "P7dR8mSH"], ids.Order(StringComparer.Ordinal));
     }
+
+    [Fact]
+    public void ParseIdentifiedFiles_Map_ReturnsProjectPerHash()
+    {
+        var files = ModrinthClient.ParseIdentifiedFiles(Json("""{"h1":{"id":"v1","project_id":"P7dR8mSH"}}"""));
+
+        Assert.Equal("P7dR8mSH", files["H1"]);
+    }
+
+    [Fact]
+    public void ParseProjects_ServerSideUnsupported_IsClientOnly()
+    {
+        var projects = ModrinthClient.ParseProjects(Json("""
+            [{"id":"AANobbMI","title":"Sodium","server_side":"unsupported"},
+             {"id":"P7dR8mSH","title":"Fabric API","server_side":"required"},
+             {"id":"gL7mEBC0","title":"","server_side":"unknown"}]
+            """));
+
+        Assert.Equal(
+            [new ModProject("AANobbMI", "Sodium", true), new ModProject("P7dR8mSH", "Fabric API", false), new ModProject("gL7mEBC0", "gL7mEBC0", false)],
+            projects);
+    }
+
+    [Fact]
+    public void ProjectsUrl_SortsIds()
+    {
+        Assert.Equal(ModrinthClient.ProjectsUrl(["a", "b"]), ModrinthClient.ProjectsUrl(["b", "a"]));
+    }
 }

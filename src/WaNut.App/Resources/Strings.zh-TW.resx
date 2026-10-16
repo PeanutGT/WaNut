@@ -934,7 +934,7 @@
     <value> 和 {0} 個模組</value>
   </data>
   <data name="World_ModdedWarning" xml:space="preserve">
-    <value>這個世界是用 {0}{1} 玩的。WaNut 目前還不能在伺服器上安裝模組，所以伺服器這份世界裡的模組方塊、物品和生物會消失。你原本的世界不會被改動。</value>
+    <value>這個世界是用 {0}{1} 玩的。這個伺服器不會載入那些模組，所以伺服器這份世界裡的模組方塊、物品和生物會消失。你原本的世界不會被改動。</value>
   </data>
   <data name="World_ModdedAccept" xml:space="preserve">
     <value>我了解，模組方塊會消失</value>
@@ -1542,5 +1542,38 @@
   </data>
   <data name="Tray_Balloon" xml:space="preserve">
     <value>WaNut 還在這裡，伺服器繼續執行中。按兩下花生就能再打開。</value>
+  </data>
+  <data name="World_ModdedInstallWarning" xml:space="preserve">
+    <value>這個世界是用 {0}{1} 玩的。WaNut 會到 Modrinth 找這些模組，安裝能在伺服器上跑的那些。裝不了的模組，它們的方塊、物品和生物會從伺服器這份世界消失。你原本的世界不會被改動。</value>
+  </data>
+  <data name="World_ModdedAcceptSome" xml:space="preserve">
+    <value>我了解，裝不了的模組方塊會消失</value>
+  </data>
+  <data name="World_InstallMods" xml:space="preserve">
+    <value>一併安裝模組</value>
+  </data>
+  <data name="World_ModsPickFabric" xml:space="preserve">
+    <value>選 Fabric 伺服器，WaNut 就能一併安裝這些模組。</value>
+  </data>
+  <data name="World_InstallingMods" xml:space="preserve">
+    <value>正在安裝模組…</value>
+  </data>
+  <data name="World_ModsInstalled" xml:space="preserve">
+    <value>已在伺服器上安裝 {0} 個模組：{1}。</value>
+  </data>
+  <data name="World_ModsNoVersion" xml:space="preserve">
+    <value>這些模組沒有適合這個 Minecraft 版本的伺服器版本，它們的方塊會不見：{0}。</value>
+  </data>
+  <data name="World_ModsUnknown" xml:space="preserve">
+    <value>WaNut 在 Modrinth 上找不到這些，所以沒有複製。如果它們能在伺服器上跑，請放進伺服器的 mods 資料夾（模組分頁的「開啟資料夾」）：{0}。</value>
+  </data>
+  <data name="World_ModsClientOnly" xml:space="preserve">
+    <value>已略過，它們只能在遊戲裡用，不能在伺服器上跑：{0}。</value>
+  </data>
+  <data name="World_ModsFailed" xml:space="preserve">
+    <value>世界已匯入，但模組沒能安裝：{0} 你可以到模組分頁再加。</value>
+  </data>
+  <data name="World_ModsCancelled" xml:space="preserve">
+    <value>世界已匯入，但模組安裝被停止了。你可以到模組分頁再加。</value>
   </data>
 </root>

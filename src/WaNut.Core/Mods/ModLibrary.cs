@@ -128,6 +128,62 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         return new ModInstallResult(plan.Select(p => p.Title).ToList(), missing);
     }
 
+    /// <summary>
+    /// Gives the server its own copies of a single-player instance's mods (decision 24, "Install the mods too"). Each
+    /// jar is looked up on Modrinth by its SHA-512; mods that only run in the game are skipped, and the rest are
+    /// installed in their version for this server, with required dependencies. Jars Modrinth does not know are not
+    /// copied: WaNut cannot tell whether they run on a server, and a client-only mod stops the server from starting.
+    /// Only call while the server is stopped.
+    /// </summary>
+    public async Task<ModCopyResult> InstallCopiesAsync(
+        string instanceDir,
+        ModPlatform platform,
+        string gameVersion,
+        IReadOnlyList<string> jarPaths,
+        IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        // The same jar twice (two copies in one folder) counts once.
+        var fileNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var path in jarPaths)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            fileNames.TryAdd(HashFile(path), Path.GetFileName(path));
+        }
+
+        var projectByHash = await modrinth.IdentifyFilesAsync(fileNames.Keys, cancellationToken).ConfigureAwait(false);
+        var projects = await modrinth.GetProjectsAsync(projectByHash.Values.ToHashSet(StringComparer.Ordinal), cancellationToken).ConfigureAwait(false);
+        var found = projects.Select(p => p.Id).ToHashSet(StringComparer.Ordinal);
+        var unknown = fileNames
+            .Where(f => !projectByHash.TryGetValue(f.Key, out var id) || !found.Contains(id))
+            .Select(f => f.Value)
+            .Order(StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        var clientOnly = projects.Where(p => p.IsClientOnly).Select(p => p.Title).Order(StringComparer.CurrentCultureIgnoreCase).ToList();
+        var wanted = projects.Where(p => !p.IsClientOnly).OrderBy(p => p.Title, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+        var installed = new List<string>();
+        var noVersion = new List<string>();
+        for (var i = 0; i < wanted.Count; i++)
+        {
+            var step = i;
+            var projectProgress = progress is null ? null : new SyncProgress<double>(f => progress.Report((step + f) / wanted.Count));
+            try
+            {
+                var result = await InstallAsync(instanceDir, platform, gameVersion, wanted[i].Id, wanted[i].Title, projectProgress, cancellationToken).ConfigureAwait(false);
+                installed.AddRange(result.Installed);
+                noVersion.AddRange(result.MissingDependencies);
+            }
+            catch (NoCompatibleVersionException)
+            {
+                noVersion.Add(wanted[i].Title);
+            }
+        }
+
+        progress?.Report(1);
+        return new ModCopyResult(installed, noVersion.Distinct().ToList(), clientOnly, unknown);
+    }
+
     /// <summary>Deletes the jar. Only call while the server is stopped.</summary>
     public void Remove(string instanceDir, ModPlatform platform, InstalledMod mod)
     {
@@ -143,9 +199,11 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         WriteRecords(instanceDir, records);
     }
 
-    private static string HashFile(string folder, string fileName)
+    private static string HashFile(string folder, string fileName) => HashFile(Path.Combine(folder, fileName));
+
+    private static string HashFile(string path)
     {
-        using var stream = File.OpenRead(Path.Combine(folder, fileName));
+        using var stream = File.OpenRead(path);
         return Convert.ToHexStringLower(System.Security.Cryptography.SHA512.HashData(stream));
     }
 

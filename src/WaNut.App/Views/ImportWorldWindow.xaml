@@ -63,9 +63,9 @@
         <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
           <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
             <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
-            <TextBlock Text="{res:Text World_Copying}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
-          <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressFraction, Mode=OneWay}" AutomationProperties.Name="{res:Text World_Copying}" />
+          <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressFraction, Mode=OneWay}" AutomationProperties.Name="{Binding StatusText}" />
         </StackPanel>
 
         <Border Margin="0,14,0,0">

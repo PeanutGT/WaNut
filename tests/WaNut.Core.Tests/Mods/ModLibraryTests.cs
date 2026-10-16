@@ -145,4 +145,60 @@ public sealed class ModLibraryTests : IDisposable
     {
         Assert.Throws<ArgumentException>(() => _library.Remove(_dir.Path, Fabric, new InstalledMod("../server.jar")));
     }
+
+    /// <summary>Writes a jar into a single-player instance's mods folder and returns its path.</summary>
+    private string ClientJar(string fileName, byte[] content)
+    {
+        var dir = Path.Combine(_dir.Path, "client", "mods");
+        Directory.CreateDirectory(dir);
+        var path = Path.Combine(dir, fileName);
+        File.WriteAllBytes(path, content);
+        return path;
+    }
+
+    [Fact]
+    public async Task InstallCopiesAsync_MixedInstance_InstallsServerModsAndReportsTheRest()
+    {
+        var api = AddProject("api", "Fabric API", "api-server");
+        _http.Add(ModrinthClient.VersionsUrl("old", Fabric, Game), "[]");
+        var clientApi = Encoding.UTF8.GetBytes("api-client");
+        var sodium = Encoding.UTF8.GetBytes("sodium");
+        var old = Encoding.UTF8.GetBytes("old");
+        string[] jars =
+        [
+            ClientJar("fabric-api-client.jar", clientApi),
+            ClientJar("sodium.jar", sodium),
+            ClientJar("old.jar", old),
+            ClientJar("homemade.jar", Encoding.UTF8.GetBytes("homemade")),
+        ];
+        _http.Add(ModrinthClient.VersionFilesUrl, $$$"""
+            {"{{{Sha512(clientApi)}}}":{"project_id":"api"},"{{{Sha512(sodium)}}}":{"project_id":"sodium"},"{{{Sha512(old)}}}":{"project_id":"old"}}
+            """)
+            .Add(ModrinthClient.ProjectsUrl(["api", "sodium", "old"]), """
+            [{"id":"api","title":"Fabric API","server_side":"required"},
+             {"id":"sodium","title":"Sodium","server_side":"unsupported"},
+             {"id":"old","title":"Old Mod","server_side":"optional"}]
+            """);
+
+        var result = await _library.InstallCopiesAsync(_dir.Path, Fabric, Game, jars);
+
+        Assert.Equal(["Fabric API"], result.Installed);
+        Assert.Equal(["Old Mod"], result.NoServerVersion);
+        Assert.Equal(["Sodium"], result.ClientOnly);
+        Assert.Equal(["homemade.jar"], result.NotOnModrinth);
+
+        // The server gets Modrinth's file for its own version, never the client's copy.
+        Assert.Equal(api, File.ReadAllBytes(Path.Combine(ModsDir, "api.jar")));
+        Assert.Equal(["api.jar"], Directory.GetFiles(ModsDir).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public async Task InstallCopiesAsync_NoJars_AsksModrinthNothing()
+    {
+        var result = await _library.InstallCopiesAsync(_dir.Path, Fabric, Game, []);
+
+        Assert.Empty(result.Installed);
+        Assert.Empty(result.NotOnModrinth);
+        Assert.Empty(_http.Requests);
+    }
 }
