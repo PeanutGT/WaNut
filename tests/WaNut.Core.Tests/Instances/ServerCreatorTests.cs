@@ -184,6 +184,18 @@ public sealed class ServerCreatorTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateAsync_FabricWithLoaderVersion_UsesThatLoader()
+    {
+        var metadata = await CreateCreator().CreateAsync(
+            new CreateServerRequest("Pack", _version, 4096, EulaAccepted: true, ServerType.Fabric, LoaderVersion: "0.16.10"));
+
+        Assert.Equal("0.16.10", metadata.LoaderVersion);
+        using var launcher = System.IO.Compression.ZipFile.OpenRead(Path.Combine(_store.InstanceDir(metadata.Id), FabricClient.LauncherFileName));
+        using var reader = new StreamReader(launcher.GetEntry("install.properties")!.Open());
+        Assert.Equal("fabric-loader-version=0.16.10\ngame-version=1.21.1\n", reader.ReadToEnd());
+    }
+
+    [Fact]
     public async Task CreateAsync_FabricChecksumWrong_ThrowsAndCreatesNoServer()
     {
         _http.Add(new Uri(FabricClient.ServerLauncherUrl("1.1.2").AbsoluteUri + ".sha256"), new string('0', 64));
