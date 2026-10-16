@@ -123,7 +123,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * **Mascot (decision 16):** the peanut appears often: empty states, Starting/Saving, success messages. Never in error messages or Advanced mode sections. This replaces "mascot sparingly" in the design notes.
 * **"More settings" (decision 15):** each settings page shows the common items first and the rest under an expander, e.g. the `server.properties` editor shows gamemode, difficulty and PvP first.
 * **Advanced mode (decision 15):** a switch in app settings. Items marked advanced-only are hidden until it is on. Phase 1 item: custom JVM arguments per server, added after WaNut's own flags.
-* **Tabs first, then tiers (confirmed by Peanut, `product/feature-tiers.md` v2):** each server has the tabs Console, Players, Game settings, Server, Backups and Connect; App settings is its own window. Inside each tab, items are always visible, under "More settings", or Advanced mode only. "Common" means "you meet it when playing with friends", not "simple".
+* **Tabs first, then tiers (confirmed by Peanut, `product/feature-tiers.md` v2):** each server has the tabs Console, Players, Game settings, Server, Backups, Mods and Connect; App settings is its own window. Inside each tab, items are always visible, under "More settings", or Advanced mode only. "Common" means "you meet it when playing with friends", not "simple".
 
 | Tab | Always visible | More settings | Advanced mode |
 | :-- | :-- | :-- | :-- |
@@ -133,6 +133,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
 | Server | RAM slider | Change type or version (automatic backup first, warning on downgrade), port, `online-mode` (warning when turned off) | Custom JVM arguments, choose Java manually, use your own server.jar |
 | Backups | Backup list, restore, back up now, replace with another world, export (current world or any backup) | Keep count, delete after days | |
+| Mods (Fabric: mods, Paper: plugins) | Installed list with Remove, Modrinth search (filtered to the server's loader and version; Fabric hides client-only mods), Install with required dependencies, Open folder | | |
 | Connect | IPv4 per adapter with Copy | Virtual LAN guide (Radmin VPN, ZeroTier, Tailscale, Hamachi) | |
 | App settings | | Instances folder, update check | Advanced mode switch; clear download cache |
 
@@ -260,6 +261,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 | `Backups` | Zips worlds before start, applies keep-5 / 30-day cleanup, restores. |
 | `Network` | Lists IPv4 addresses per adapter (Wi-Fi, Radmin VPN...), adds the firewall rule (with UAC). |
 | `Updates` | Checks GitHub Releases and applies updates (Velopack). |
+| `Mods` | Searches Modrinth, picks the version for the server's loader and Minecraft version, installs it and its required dependencies (SHA-512 checked), lists and removes jars. |
 
 ### Screens (WaNut.App)
 1. **Main window:** server list on the left; on the right the selected server's status badge, Start/Stop, Open folder, and tabs: Console, Players, Game settings, Server, Backups, Connect (section 4b).
@@ -293,7 +295,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 14. Illustrations (`design/illustrations/` in the project files, confirmed by Peanut 2026-10-15): 32x32 peanut scenes, 4 frames of 0.25 s, nearest-neighbor scaling. No servers (main window); stopped, starting, online, saving (server status); no players and empty whitelist/OP list (Players tab); no backups and backup done (Backups tab); downloading and the Vanilla/Paper/Fabric icons (Create Server); friends (Connect tab); updating (update card). New art for later steps (mods, modpacks, Forge) is agreed with Peanut in those steps.
 14.1. ✓ World import and export (decisions 23–26): import from the launchers' single-player worlds, a folder or a zip, in the Create Server wizard and as "Replace with another world" on the Backups tab; export the current world or a backup to a zip or single-player saves.
 14.2. ✓ Seed and world type in the Create Server wizard's More settings (new worlds only): a seed box (empty means random); Normal, Superflat, Large Biomes and Amplified, plus Superflat presets (Classic, Desert, The Void). Custom generator JSON in Advanced mode. `level-type` is a plain name up to 1.18.2 (`flat`) and a world preset id from 1.19 (`minecraft:flat`); Superflat structures are a placement map before 1.18.2 and structure sets (`structure_overrides`) from 1.18.2.
-15. Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
+15. ✓ Modrinth mod and plugin browser on a new Mods tab: search, filter by loader and version, install with hash check, list and remove installed files.
 16. Modrinth `.mrpack` modpack server install (decision 19), reusing step 15's downloader.
 17. Forge / NeoForge support in the Create Server wizard and "Change type or version"; then Forge / NeoForge modpacks.
 18. CurseForge server-pack import from a zip the user already downloaded.

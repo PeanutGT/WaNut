@@ -8,6 +8,7 @@ using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
+using WaNut.Core.Mods;
 
 namespace WaNut.App.ViewModels;
 
@@ -31,7 +32,8 @@ public sealed partial class ServerViewModel : ObservableObject
         BackupStore backups,
         IDialogService dialogs,
         FirewallService firewall,
-        IClipboardService clipboard)
+        IClipboardService clipboard,
+        ModLibrary mods)
     {
         Metadata = metadata;
         _controller = controller;
@@ -42,6 +44,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, clipboard);
+        Mods = new ModsViewModel(this, mods, dialogs);
         app.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(AppSettingsViewModel.AdvancedMode))
@@ -66,6 +69,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public BackupsViewModel Backups { get; }
 
     public ConnectViewModel Connect { get; }
+
+    public ModsViewModel Mods { get; }
 
     public string Id => Metadata.Id;
 
@@ -144,7 +149,7 @@ public sealed partial class ServerViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanStart))]
     private Task StartAsync() => _controller.StartAsync(this);
 
-    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && _controller.Preparing is null;
+    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && _controller.Preparing is null;
 
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);
@@ -201,7 +206,14 @@ public sealed partial class ServerViewModel : ObservableObject
         StartCommand.NotifyCanExecuteChanged();
     }
 
-    partial void OnIsPreparingChanged(bool value) => Backups.OnServerStatusChanged();
+    /// <summary>A mod or plugin install or removal started or finished: the server can't start meanwhile.</summary>
+    internal void OnModWorkChanged() => StartCommand.NotifyCanExecuteChanged();
+
+    partial void OnIsPreparingChanged(bool value)
+    {
+        Backups.OnServerStatusChanged();
+        Mods.OnServerStatusChanged();
+    }
 
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
 
@@ -225,6 +237,7 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(GameSettings));
         PlayerLists.Reload();
         Backups.Reload();
+        Mods.OnTypeOrVersionChanged();
     }
 
     /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>
@@ -252,6 +265,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists.OnServerStatusChanged();
         ServerSettings.OnServerStatusChanged();
         Backups.OnServerStatusChanged();
+        Mods.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
             _ = ApplyOnOnlineAsync();

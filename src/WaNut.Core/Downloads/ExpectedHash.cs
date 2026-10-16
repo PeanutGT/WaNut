@@ -6,6 +6,7 @@ public enum HashKind
 {
     Sha1,
     Sha256,
+    Sha512,
 }
 
 /// <summary>
@@ -17,10 +18,13 @@ public sealed record ExpectedHash(HashKind Kind, string Hex)
 
     public static ExpectedHash Sha256(string hex) => new(HashKind.Sha256, hex);
 
+    public static ExpectedHash Sha512(string hex) => new(HashKind.Sha512, hex);
+
     internal IncrementalHash CreateHasher() => Kind switch
     {
         HashKind.Sha1 => IncrementalHash.CreateHash(HashAlgorithmName.SHA1),
         HashKind.Sha256 => IncrementalHash.CreateHash(HashAlgorithmName.SHA256),
+        HashKind.Sha512 => IncrementalHash.CreateHash(HashAlgorithmName.SHA512),
         _ => throw new ArgumentOutOfRangeException(nameof(Kind), Kind, null),
     };
 
