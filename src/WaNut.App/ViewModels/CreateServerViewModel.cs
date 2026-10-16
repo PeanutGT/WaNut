@@ -49,7 +49,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         Picker = new WorldPickerViewModel(dialogs);
         Picker.SelectionChanged += () =>
         {
-            PreselectFabricForMods();
+            PreselectLoaderForMods();
             PreselectWorldVersion();
             OnWorldChanged();
         };
@@ -178,12 +178,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public string NewerWorldWarningText => string.Format(Text.Get("World_NewerWarning"), Picker.Source?.Details.VersionName);
 
-    public IReadOnlyList<ServerTypeOption> ServerTypes { get; } =
-    [
-        new(ServerType.Vanilla, Text.Get("CreateServer_TypeVanilla"), Text.Get("CreateServer_TypeVanillaHint")),
-        new(ServerType.Paper, Text.Get("CreateServer_TypePaper"), Text.Get("CreateServer_TypePaperHint")),
-        new(ServerType.Fabric, Text.Get("CreateServer_TypeFabric"), Text.Get("CreateServer_TypeFabricHint")),
-    ];
+    public IReadOnlyList<ServerTypeOption> ServerTypes { get; } = ServerTypeOption.All();
 
     [ObservableProperty]
     private ServerTypeOption? _selectedType;
@@ -337,12 +332,12 @@ public sealed partial class CreateServerViewModel : ObservableObject
             ?? SelectedVersion;
     }
 
-    /// <summary>A world played with Fabric mods gets a Fabric server, so its mods can be installed too.</summary>
-    private void PreselectFabricForMods()
+    /// <summary>A world played with Fabric, Forge or NeoForge mods gets a server of that type, so its mods can be installed too.</summary>
+    private void PreselectLoaderForMods()
     {
-        if (Picker.Source?.HasFabricMods == true)
+        if (Picker.Source?.ModServerType is { } type)
         {
-            SelectedType = ServerTypes.First(t => t.Type == ServerType.Fabric);
+            SelectedType = ServerTypes.First(t => t.Type == type);
         }
     }
 
@@ -578,4 +573,8 @@ public sealed record ServerTypeOption(ServerType Type, string Title, string Desc
 {
     /// <summary>The pixel icon for this type, e.g. "type-paper".</summary>
     public string Scene => $"type-{Type.ToString().ToLowerInvariant()}";
+
+    /// <summary>Every type, in the order the lists show them.</summary>
+    public static IReadOnlyList<ServerTypeOption> All() =>
+        Enum.GetValues<ServerType>().Select(t => new ServerTypeOption(t, Text.Get($"CreateServer_Type{t}"), Text.Get($"CreateServer_Type{t}Hint"))).ToList();
 }

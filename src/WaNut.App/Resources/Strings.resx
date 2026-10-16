@@ -559,7 +559,7 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
     <value>Server type and version</value>
   </data>
   <data name="Change_SectionHint" xml:space="preserve">
-    <value>Switch between Vanilla, Paper and Fabric, or move to another Minecraft version. Stop the server first.</value>
+    <value>Switch between Vanilla, Paper, Fabric, Forge and NeoForge, or move to another Minecraft version. Stop the server first.</value>
   </data>
   <data name="Change_Hint" xml:space="preserve">
     <value>WaNut backs up the world first, then swaps the server files. Your world, settings, mods and plugins stay. Check that your mods or plugins work with the new version.</value>
@@ -1130,7 +1130,7 @@ Stop the server and update?</value>
     <value>Plugins</value>
   </data>
   <data name="Mods_Vanilla" xml:space="preserve">
-    <value>Vanilla servers can't load mods or plugins. To add some, switch this server to Fabric (mods) or Paper (plugins) under Server › More settings › Change type or version.</value>
+    <value>Vanilla servers can't load mods or plugins. To add some, switch this server to Fabric, Forge or NeoForge (mods) or Paper (plugins) under Server › More settings › Change type or version.</value>
   </data>
   <data name="Mods_StopToChange" xml:space="preserve">
     <value>Stop the server to add or remove files. You can still look around.</value>
@@ -1181,7 +1181,7 @@ Stop the server and update?</value>
     <value>Find plugins on Modrinth</value>
   </data>
   <data name="Mods_FilterMods" xml:space="preserve">
-    <value>Showing Fabric mods for Minecraft {0} that work on a server.</value>
+    <value>Showing {1} mods for Minecraft {0} that work on a server.</value>
   </data>
   <data name="Mods_FilterPlugins" xml:space="preserve">
     <value>Showing Paper, Spigot and Bukkit plugins for Minecraft {0}.</value>
@@ -1410,7 +1410,7 @@ Stop the server and update?</value>
     <value>Copy invite</value>
   </data>
   <data name="Invite_Hint" xml:space="preserve">
-    <value>Copies a short message with the server's name, version and addresses, ready to paste into Discord or LINE. Fabric servers also list their mods.</value>
+    <value>Copies a short message with the server's name, version and addresses, ready to paste into Discord or LINE. Modded servers also list their mods.</value>
   </data>
   <data name="Invite_NoteLabel" xml:space="preserve">
     <value>Note for friends (optional, remembered for every server)</value>
@@ -1437,7 +1437,7 @@ Stop the server and update?</value>
     <value>Note: {0}</value>
   </data>
   <data name="Invite_Mods" xml:space="preserve">
-    <value>Install Fabric for the same version and these mods (a few may only be needed on the server):</value>
+    <value>Install {0} for the same version and these mods (a few may only be needed on the server):</value>
   </data>
   <data name="Discord_Section" xml:space="preserve">
     <value>Discord notifications</value>
@@ -1574,8 +1574,8 @@ Stop the server and update?</value>
   <data name="World_InstallMods" xml:space="preserve">
     <value>Install the mods too</value>
   </data>
-  <data name="World_ModsPickFabric" xml:space="preserve">
-    <value>Pick a Fabric server and WaNut can install these mods too.</value>
+  <data name="World_ModsPickLoader" xml:space="preserve">
+    <value>Pick a {0} server and WaNut can install these mods too.</value>
   </data>
   <data name="World_InstallingMods" xml:space="preserve">
     <value>Installing the mods…</value>
@@ -1632,12 +1632,30 @@ Stop the server and update?</value>
     <value>This file isn't a Modrinth modpack. Download the .mrpack file from the modpack's Modrinth page.</value>
   </data>
   <data name="Modpack_Problem_UnsupportedLoader" xml:space="preserve">
-    <value>This modpack needs {0}, which WaNut doesn't support yet. Fabric and Vanilla modpacks work.</value>
+    <value>This modpack needs {0}, which WaNut doesn't support yet. Fabric, Forge, NeoForge and Vanilla modpacks work.</value>
   </data>
   <data name="Modpack_Problem_UnsafeFile" xml:space="preserve">
     <value>This modpack has a file WaNut won't install (it would go outside the server folder or comes from an unknown website).</value>
   </data>
   <data name="Modpack_Installing" xml:space="preserve">
     <value>Installing the modpack…</value>
+  </data>
+  <data name="CreateServer_TypeForge" xml:space="preserve">
+    <value>Forge</value>
+  </data>
+  <data name="CreateServer_TypeForgeHint" xml:space="preserve">
+    <value>The classic mod loader. Many big mods and older modpacks need it. Put mods in the mods folder.</value>
+  </data>
+  <data name="CreateServer_TypeNeoForge" xml:space="preserve">
+    <value>NeoForge</value>
+  </data>
+  <data name="CreateServer_TypeNeoForgeHint" xml:space="preserve">
+    <value>The newer branch of Forge, for 1.20.2 and later. Many new mods use it. Put mods in the mods folder.</value>
+  </data>
+  <data name="CreateServer_Stage_InstallingLoader" xml:space="preserve">
+    <value>Installing the mod loader (this can take a few minutes)…</value>
+  </data>
+  <data name="Change_ModsMoved" xml:space="preserve">
+    <value>Mods for {0} don't work on {1}, so the mods folder will be renamed to "{2}". Nothing is deleted; install mods for {1} on the Mods tab.</value>
   </data>
 </root>

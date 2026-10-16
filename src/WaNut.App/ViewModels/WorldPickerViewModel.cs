@@ -32,12 +32,12 @@ public sealed partial class WorldPickerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Source), nameof(ShowModdedWarning), nameof(ModdedWarningText), nameof(IsAccepted), nameof(ShowOldWorldHint))]
-    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedAcceptText), nameof(ShowPickFabricHint))]
+    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedAcceptText), nameof(ShowPickLoaderHint), nameof(PickLoaderHintText))]
     private WorldOptionViewModel? _selected;
 
     /// <summary>The type of the server the world goes to; set by the window that hosts the picker.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedWarningText), nameof(ModdedAcceptText), nameof(ShowPickFabricHint))]
+    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedWarningText), nameof(ModdedAcceptText), nameof(ShowPickLoaderHint), nameof(PickLoaderHintText))]
     private ServerType? _serverType;
 
     /// <summary>"Install the mods too", on by default where it is offered.</summary>
@@ -66,8 +66,12 @@ public sealed partial class WorldPickerViewModel : ObservableObject
 
     public bool WillInstallMods => CanInstallMods && InstallMods;
 
-    /// <summary>The world has Fabric mods WaNut could install, but the server is not Fabric.</summary>
-    public bool ShowPickFabricHint => Source?.HasFabricMods == true && ServerType != Core.Instances.ServerType.Fabric;
+    /// <summary>The world has mods WaNut could install, but the server is not of their type.</summary>
+    public bool ShowPickLoaderHint => Source?.ModServerType is { } type && ServerType != type;
+
+    public string PickLoaderHintText => Source?.ModServerType is { } type
+        ? string.Format(Text.Get("World_ModsPickLoader"), Text.Get($"CreateServer_Type{type}"))
+        : string.Empty;
 
     public string ModdedAcceptText => Text.Get(WillInstallMods ? "World_ModdedAcceptSome" : "World_ModdedAccept");
 

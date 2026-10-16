@@ -115,19 +115,19 @@ public sealed partial class ConnectViewModel : ObservableObject
         }
     }
 
-    /// <summary>Copies a ready-to-paste invite: name, version, every address, the host's note and, for Fabric, the mods.</summary>
+    /// <summary>Copies a ready-to-paste invite: name, version, every address, the host's note and, for a modded server, the mods.</summary>
     [RelayCommand]
     private void CopyInvite()
     {
         LoadAddresses();
-        var mods = _server.Metadata.Type == Core.Instances.ServerType.Fabric
+        var mods = Core.Instances.ServerCreator.LoadsMods(_server.Metadata.Type)
             ? _server.Mods.Installed.Select(m => m.Name).ToList()
             : [];
         var content = new InviteCardContent(
             _server.Name, _server.TypeAndVersionText, Addresses.Select(a => (a.Title, a.Endpoint)).ToList(), App.InviteNote, mods);
         var labels = new InviteCardLabels(
             Text.Get("Invite_Title"), Text.Get("Invite_Version"), Text.Get("Invite_Addresses"), Text.Get("Invite_NoAddress"),
-            Text.Get("Invite_Note"), Text.Get("Invite_Mods"));
+            Text.Get("Invite_Note"), string.Format(Text.Get("Invite_Mods"), Text.Get($"CreateServer_Type{_server.Metadata.Type}")));
 
         if (_clipboard.TrySetText(InviteCard.Compose(content, labels)))
         {
