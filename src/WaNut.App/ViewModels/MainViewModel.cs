@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
+using WaNut.Core.Mods;
 
 namespace WaNut.App.ViewModels;
 
@@ -15,6 +16,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly BackupStore _backups;
     private readonly FirewallService _firewall;
     private readonly IClipboardService _clipboard;
+    private readonly ModLibrary _mods;
 
     public MainViewModel(
         InstanceStore store,
@@ -24,8 +26,10 @@ public sealed partial class MainViewModel : ObservableObject
         BackupStore backups,
         FirewallService firewall,
         IClipboardService clipboard,
-        UpdateViewModel updates)
+        UpdateViewModel updates,
+        ModLibrary mods)
     {
+        _mods = mods;
         _firewall = firewall;
         _clipboard = clipboard;
         Updates = updates;
@@ -88,7 +92,7 @@ public sealed partial class MainViewModel : ObservableObject
         Servers.Clear();
         foreach (var server in _store.LoadAll())
         {
-            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard));
+            Servers.Add(existing.GetValueOrDefault(server.Id) ?? new ServerViewModel(server, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods));
         }
     }
 }

@@ -1123,4 +1123,136 @@ Stop the server and update?</value>
   <data name="CreateServer_CustomGeneratorInvalid" xml:space="preserve">
     <value>This is not a JSON object. Fix it or clear the box.</value>
   </data>
+  <data name="Server_TabMods" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="Server_TabPlugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Mods_Vanilla" xml:space="preserve">
+    <value>Vanilla servers can't load mods or plugins. To add some, switch this server to Fabric (mods) or Paper (plugins) under Server › More settings › Change type or version.</value>
+  </data>
+  <data name="Mods_StopToChange" xml:space="preserve">
+    <value>Stop the server to add or remove files. You can still look around.</value>
+  </data>
+  <data name="Mods_InstalledMods" xml:space="preserve">
+    <value>Installed mods ({0})</value>
+  </data>
+  <data name="Mods_InstalledPlugins" xml:space="preserve">
+    <value>Installed plugins ({0})</value>
+  </data>
+  <data name="Mods_EmptyMods" xml:space="preserve">
+    <value>No mods yet</value>
+  </data>
+  <data name="Mods_EmptyPlugins" xml:space="preserve">
+    <value>No plugins yet</value>
+  </data>
+  <data name="Mods_EmptyHint" xml:space="preserve">
+    <value>Find one below and press Install. They load the next time the server starts.</value>
+  </data>
+  <data name="Mods_OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Mods_ByHand" xml:space="preserve">
+    <value>Added by hand</value>
+  </data>
+  <data name="Mods_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Mods_RemoveLabel" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="Mods_RemoveConfirm" xml:space="preserve">
+    <value>Remove {0} from {1}? The file is deleted. Your world stays, but blocks and items from it will disappear.</value>
+  </data>
+  <data name="Mods_Removing" xml:space="preserve">
+    <value>Removing…</value>
+  </data>
+  <data name="Mods_Removed" xml:space="preserve">
+    <value>Removed {0}.</value>
+  </data>
+  <data name="Mods_RemoveFailed" xml:space="preserve">
+    <value>Couldn't remove {0}: {1}</value>
+  </data>
+  <data name="Mods_FindMods" xml:space="preserve">
+    <value>Find mods on Modrinth</value>
+  </data>
+  <data name="Mods_FindPlugins" xml:space="preserve">
+    <value>Find plugins on Modrinth</value>
+  </data>
+  <data name="Mods_FilterMods" xml:space="preserve">
+    <value>Showing Fabric mods for Minecraft {0} that work on a server.</value>
+  </data>
+  <data name="Mods_FilterPlugins" xml:space="preserve">
+    <value>Showing Paper, Spigot and Bukkit plugins for Minecraft {0}.</value>
+  </data>
+  <data name="Mods_SearchBox" xml:space="preserve">
+    <value>Search Modrinth</value>
+  </data>
+  <data name="Mods_Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Mods_Searching" xml:space="preserve">
+    <value>Searching…</value>
+  </data>
+  <data name="Mods_NoResults" xml:space="preserve">
+    <value>Nothing found. Try another word.</value>
+  </data>
+  <data name="Mods_LoadMore" xml:space="preserve">
+    <value>Show more</value>
+  </data>
+  <data name="Mods_By" xml:space="preserve">
+    <value>by {0}</value>
+  </data>
+  <data name="Mods_Downloads" xml:space="preserve">
+    <value>{0} downloads</value>
+  </data>
+  <data name="Mods_Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="Mods_PageLabel" xml:space="preserve">
+    <value>Open the Modrinth page of {0}</value>
+  </data>
+  <data name="Mods_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Mods_InstallLabel" xml:space="preserve">
+    <value>Install {0}</value>
+  </data>
+  <data name="Mods_Installed" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Mods_Installing" xml:space="preserve">
+    <value>Installing {0}…</value>
+  </data>
+  <data name="Mods_InstallDone" xml:space="preserve">
+    <value>Installed {0}! It loads the next time the server starts.</value>
+  </data>
+  <data name="Mods_InstallDoneWithDependencies" xml:space="preserve">
+    <value>Installed {0}, plus what it needs: {1}. They load the next time the server starts.</value>
+  </data>
+  <data name="Mods_AlreadyInstalled" xml:space="preserve">
+    <value>{0} is already in the folder.</value>
+  </data>
+  <data name="Mods_MissingDependencies" xml:space="preserve">
+    <value>{0} also needs {1}, which has no version for this server. The server may not start until it's removed.</value>
+  </data>
+  <data name="Mods_NoVersion" xml:space="preserve">
+    <value>{0} has no version for {1} {2}.</value>
+  </data>
+  <data name="Mods_VerifyFailed" xml:space="preserve">
+    <value>The download of {0} didn't match its checksum, so it wasn't installed. Try again later.</value>
+  </data>
+  <data name="Mods_InstallFailed" xml:space="preserve">
+    <value>Couldn't install {0}: {1}</value>
+  </data>
+  <data name="Mods_SearchFailed" xml:space="preserve">
+    <value>Couldn't reach Modrinth: {0}</value>
+  </data>
+  <data name="Mods_ListFailed" xml:space="preserve">
+    <value>Couldn't read the {0} folder: {1}</value>
+  </data>
+  <data name="Mods_OpenFailed" xml:space="preserve">
+    <value>Couldn't open it: {0}</value>
+  </data>
 </root>

@@ -393,6 +393,10 @@
             <views:BackupsView DataContext="{Binding Backups}" />
           </TabItem>
 
+          <TabItem Header="{Binding Mods.Header}">
+            <views:ModsView DataContext="{Binding Mods}" />
+          </TabItem>
+
           <TabItem Header="{res:Text Server_TabConnect}">
             <views:ConnectView DataContext="{Binding Connect}" />
           </TabItem>

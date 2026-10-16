@@ -1101,4 +1101,136 @@
   <data name="CreateServer_CustomGeneratorInvalid" xml:space="preserve">
     <value>這不是 JSON 物件。請修正或清空。</value>
   </data>
+  <data name="Server_TabMods" xml:space="preserve">
+    <value>模組</value>
+  </data>
+  <data name="Server_TabPlugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="Mods_Vanilla" xml:space="preserve">
+    <value>Vanilla 伺服器不能載入模組或插件。想加的話，到「伺服器 › 更多設定 › 更改類型或版本」把這台伺服器換成 Fabric（模組）或 Paper（插件）。</value>
+  </data>
+  <data name="Mods_StopToChange" xml:space="preserve">
+    <value>停止伺服器後才能新增或移除檔案。現在還是可以先逛逛。</value>
+  </data>
+  <data name="Mods_InstalledMods" xml:space="preserve">
+    <value>已安裝的模組（{0}）</value>
+  </data>
+  <data name="Mods_InstalledPlugins" xml:space="preserve">
+    <value>已安裝的插件（{0}）</value>
+  </data>
+  <data name="Mods_EmptyMods" xml:space="preserve">
+    <value>還沒有模組</value>
+  </data>
+  <data name="Mods_EmptyPlugins" xml:space="preserve">
+    <value>還沒有插件</value>
+  </data>
+  <data name="Mods_EmptyHint" xml:space="preserve">
+    <value>在下面找一個，按「安裝」。下次啟動伺服器時就會載入。</value>
+  </data>
+  <data name="Mods_OpenFolder" xml:space="preserve">
+    <value>開啟資料夾</value>
+  </data>
+  <data name="Mods_ByHand" xml:space="preserve">
+    <value>手動加入</value>
+  </data>
+  <data name="Mods_Remove" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Mods_RemoveLabel" xml:space="preserve">
+    <value>移除 {0}</value>
+  </data>
+  <data name="Mods_RemoveConfirm" xml:space="preserve">
+    <value>要從 {1} 移除 {0} 嗎？檔案會被刪除。世界會保留，但它帶來的方塊和物品會消失。</value>
+  </data>
+  <data name="Mods_Removing" xml:space="preserve">
+    <value>正在移除…</value>
+  </data>
+  <data name="Mods_Removed" xml:space="preserve">
+    <value>已移除 {0}。</value>
+  </data>
+  <data name="Mods_RemoveFailed" xml:space="preserve">
+    <value>無法移除 {0}：{1}</value>
+  </data>
+  <data name="Mods_FindMods" xml:space="preserve">
+    <value>在 Modrinth 找模組</value>
+  </data>
+  <data name="Mods_FindPlugins" xml:space="preserve">
+    <value>在 Modrinth 找插件</value>
+  </data>
+  <data name="Mods_FilterMods" xml:space="preserve">
+    <value>只顯示 Minecraft {0} 可在伺服器上使用的 Fabric 模組。</value>
+  </data>
+  <data name="Mods_FilterPlugins" xml:space="preserve">
+    <value>只顯示 Minecraft {0} 的 Paper、Spigot 和 Bukkit 插件。</value>
+  </data>
+  <data name="Mods_SearchBox" xml:space="preserve">
+    <value>搜尋 Modrinth</value>
+  </data>
+  <data name="Mods_Search" xml:space="preserve">
+    <value>搜尋</value>
+  </data>
+  <data name="Mods_Searching" xml:space="preserve">
+    <value>搜尋中…</value>
+  </data>
+  <data name="Mods_NoResults" xml:space="preserve">
+    <value>找不到結果，換個關鍵字試試。</value>
+  </data>
+  <data name="Mods_LoadMore" xml:space="preserve">
+    <value>顯示更多</value>
+  </data>
+  <data name="Mods_By" xml:space="preserve">
+    <value>作者 {0}</value>
+  </data>
+  <data name="Mods_Downloads" xml:space="preserve">
+    <value>{0} 次下載</value>
+  </data>
+  <data name="Mods_Page" xml:space="preserve">
+    <value>頁面</value>
+  </data>
+  <data name="Mods_PageLabel" xml:space="preserve">
+    <value>開啟 {0} 的 Modrinth 頁面</value>
+  </data>
+  <data name="Mods_Install" xml:space="preserve">
+    <value>安裝</value>
+  </data>
+  <data name="Mods_InstallLabel" xml:space="preserve">
+    <value>安裝 {0}</value>
+  </data>
+  <data name="Mods_Installed" xml:space="preserve">
+    <value>已安裝</value>
+  </data>
+  <data name="Mods_Installing" xml:space="preserve">
+    <value>正在安裝 {0}…</value>
+  </data>
+  <data name="Mods_InstallDone" xml:space="preserve">
+    <value>已安裝 {0}！下次啟動伺服器時就會載入。</value>
+  </data>
+  <data name="Mods_InstallDoneWithDependencies" xml:space="preserve">
+    <value>已安裝 {0}，還有它需要的：{1}。下次啟動伺服器時就會載入。</value>
+  </data>
+  <data name="Mods_AlreadyInstalled" xml:space="preserve">
+    <value>{0} 已經在資料夾裡了。</value>
+  </data>
+  <data name="Mods_MissingDependencies" xml:space="preserve">
+    <value>{0} 還需要 {1}，但它沒有適合這台伺服器的版本。在移除 {0} 之前，伺服器可能無法啟動。</value>
+  </data>
+  <data name="Mods_NoVersion" xml:space="preserve">
+    <value>{0} 沒有適合 {1} {2} 的版本。</value>
+  </data>
+  <data name="Mods_VerifyFailed" xml:space="preserve">
+    <value>{0} 的下載檔和校驗碼不符，所以沒有安裝。請稍後再試。</value>
+  </data>
+  <data name="Mods_InstallFailed" xml:space="preserve">
+    <value>無法安裝 {0}：{1}</value>
+  </data>
+  <data name="Mods_SearchFailed" xml:space="preserve">
+    <value>無法連線到 Modrinth：{0}</value>
+  </data>
+  <data name="Mods_ListFailed" xml:space="preserve">
+    <value>無法讀取 {0} 資料夾：{1}</value>
+  </data>
+  <data name="Mods_OpenFailed" xml:space="preserve">
+    <value>無法開啟：{0}</value>
+  </data>
 </root>
