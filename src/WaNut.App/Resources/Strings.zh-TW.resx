@@ -1065,4 +1065,40 @@
   <data name="Export_Failed" xml:space="preserve">
     <value>無法匯出世界。{0}</value>
   </data>
+  <data name="CreateServer_WorldTypeLabel" xml:space="preserve">
+    <value>世界類型</value>
+  </data>
+  <data name="CreateServer_WorldTypeNormal" xml:space="preserve">
+    <value>一般</value>
+  </data>
+  <data name="CreateServer_WorldTypeSuperflat" xml:space="preserve">
+    <value>超平坦</value>
+  </data>
+  <data name="CreateServer_WorldTypeLargeBiomes" xml:space="preserve">
+    <value>巨型生物群系</value>
+  </data>
+  <data name="CreateServer_WorldTypeAmplified" xml:space="preserve">
+    <value>巨大化</value>
+  </data>
+  <data name="CreateServer_FlatPresetLabel" xml:space="preserve">
+    <value>超平坦範本</value>
+  </data>
+  <data name="CreateServer_FlatPresetClassic" xml:space="preserve">
+    <value>經典</value>
+  </data>
+  <data name="CreateServer_FlatPresetDesert" xml:space="preserve">
+    <value>沙漠</value>
+  </data>
+  <data name="CreateServer_FlatPresetVoid" xml:space="preserve">
+    <value>虛空</value>
+  </data>
+  <data name="CreateServer_CustomGenerator" xml:space="preserve">
+    <value>自訂超平坦設定（JSON）</value>
+  </data>
+  <data name="CreateServer_CustomGeneratorHint" xml:space="preserve">
+    <value>原樣寫入 generator-settings，取代上面的範本。格式會隨 Minecraft 版本改變；值無效時伺服器會改用經典範本。</value>
+  </data>
+  <data name="CreateServer_CustomGeneratorInvalid" xml:space="preserve">
+    <value>這不是 JSON 物件。請修正或清空。</value>
+  </data>
 </root>

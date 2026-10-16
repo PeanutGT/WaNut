@@ -4,6 +4,7 @@ using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
+using WaNut.Core.Properties;
 using WaNut.Core.Settings;
 using WaNut.Core.Tests.TestSupport;
 using WaNut.Core.Versions;
@@ -99,6 +100,19 @@ public sealed class ServerCreatorTests : IDisposable
         Assert.True(EulaFile.IsAccepted(dir));
         Assert.Contains("white-list=true", await File.ReadAllTextAsync(Path.Combine(dir, "server.properties")), StringComparison.Ordinal);
         Assert.Equivalent(metadata, Assert.Single(_store.LoadAll()), strict: true);
+    }
+
+    [Fact]
+    public async Task CreateAsync_World_WritesSeedAndTypeForTheVersion()
+    {
+        var world = new WorldGeneration("peanut", WorldType.Superflat, FlatPreset.Void);
+        var metadata = await CreateCreator().CreateAsync(new CreateServerRequest("Flat", _version, 2048, EulaAccepted: true, World: world));
+
+        var properties = PropertiesFile.Load(Path.Combine(_store.InstanceDir(metadata.Id), "server.properties"));
+        Assert.Equal("peanut", properties.Get("level-seed"));
+        Assert.Equal("minecraft:flat", properties.Get("level-type"));
+        Assert.Contains("minecraft:the_void", properties.Get("generator-settings")!, StringComparison.Ordinal);
+        Assert.Equal("true", properties.Get("white-list"));
     }
 
     [Fact]

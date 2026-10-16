@@ -1,4 +1,5 @@
 using WaNut.Core.Instances;
+using WaNut.Core.Properties;
 using WaNut.Core.Settings;
 using WaNut.Core.Tests.TestSupport;
 
@@ -152,12 +153,23 @@ public sealed class GameSettingsStoreTests : IDisposable
     [Fact]
     public void WriteDefaults_SetsMotdAndTurnsWhitelistOn()
     {
-        GameSettingsStore.WriteDefaults(_dir.Path, "Peanut's world 花生");
+        GameSettingsStore.WriteDefaults(_dir.Path, "Peanut's world 花生", "26.3");
 
         var settings = GameSettingsStore.Load(_dir.Path, Metadata("26.3"));
         Assert.Equal("Peanut's world 花生", settings.Motd);
         Assert.Contains("white-list=true", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
         Assert.DoesNotContain("management-server", File.ReadAllText(PropertiesPath), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void WriteDefaults_World_WritesSeedAndType()
+    {
+        GameSettingsStore.WriteDefaults(_dir.Path, "Flat", "1.21.1", new WorldGeneration(" 42 ", WorldType.Amplified));
+
+        var properties = PropertiesFile.Load(PropertiesPath);
+        Assert.Equal("42", properties.Get("level-seed"));
+        Assert.Equal("minecraft:amplified", properties.Get("level-type"));
+        Assert.Equal("42", GameSettingsStore.Load(_dir.Path, Metadata("1.21.1")).Seed);
     }
 
     [Fact]

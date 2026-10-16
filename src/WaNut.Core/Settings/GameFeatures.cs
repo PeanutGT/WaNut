@@ -21,6 +21,8 @@ public sealed class GameFeatures
 {
     // First versions with each change.
     private static readonly Version SimulationDistanceSince = new(1, 18, 0);
+    private static readonly Version StructureSetsSince = new(1, 18, 2);
+    private static readonly Version WorldPresetsSince = new(1, 19, 0);
     private static readonly Version SnakeCaseRulesSince = new(1, 21, 11);
     private static readonly Version PropertiesAsRulesSince = new(1, 21, 9);
 
@@ -29,11 +31,22 @@ public sealed class GameFeatures
     private GameFeatures(Version version)
     {
         HasSimulationDistance = version >= SimulationDistanceSince;
+        HasStructureSets = version >= StructureSetsSince;
+        HasWorldPresets = version >= WorldPresetsSince;
         SettingsAreGameRules = version >= PropertiesAsRulesSince;
         _snakeCase = version >= SnakeCaseRulesSince;
     }
 
     public bool HasSimulationDistance { get; }
+
+    /// <summary>
+    /// True when a Superflat world lists its structures as structure sets ("structure_overrides") in
+    /// generator-settings, rather than as a "structures" placement map.
+    /// </summary>
+    public bool HasStructureSets { get; }
+
+    /// <summary>True when level-type is a world preset id ("minecraft:flat") rather than a plain name ("flat").</summary>
+    public bool HasWorldPresets { get; }
 
     /// <summary>True when PvP, command blocks and monster spawning are game rules instead of server.properties keys.</summary>
     public bool SettingsAreGameRules { get; }

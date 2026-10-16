@@ -1,3 +1,4 @@
+using WaNut.Core.Settings;
 using WaNut.Core.Versions;
 
 namespace WaNut.Core.Instances;
@@ -6,10 +7,12 @@ namespace WaNut.Core.Instances;
 /// The host's own Minecraft name, or null to skip. It goes on the whitelist and the OP list at the first start,
 /// because the whitelist is on for every new server.
 /// </param>
+/// <param name="World">The seed and terrain of the new world; null for a random Normal world.</param>
 public sealed record CreateServerRequest(
     string Name,
     GameVersion Version,
     int MemoryMb,
     bool EulaAccepted,
     ServerType Type = ServerType.Vanilla,
-    string? OwnerName = null);
+    string? OwnerName = null,
+    WorldGeneration? World = null);

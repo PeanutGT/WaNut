@@ -1087,4 +1087,40 @@ Stop the server and update?</value>
   <data name="Export_Failed" xml:space="preserve">
     <value>The world could not be exported. {0}</value>
   </data>
+  <data name="CreateServer_WorldTypeLabel" xml:space="preserve">
+    <value>World type</value>
+  </data>
+  <data name="CreateServer_WorldTypeNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="CreateServer_WorldTypeSuperflat" xml:space="preserve">
+    <value>Superflat</value>
+  </data>
+  <data name="CreateServer_WorldTypeLargeBiomes" xml:space="preserve">
+    <value>Large Biomes</value>
+  </data>
+  <data name="CreateServer_WorldTypeAmplified" xml:space="preserve">
+    <value>Amplified</value>
+  </data>
+  <data name="CreateServer_FlatPresetLabel" xml:space="preserve">
+    <value>Superflat layers</value>
+  </data>
+  <data name="CreateServer_FlatPresetClassic" xml:space="preserve">
+    <value>Classic</value>
+  </data>
+  <data name="CreateServer_FlatPresetDesert" xml:space="preserve">
+    <value>Desert</value>
+  </data>
+  <data name="CreateServer_FlatPresetVoid" xml:space="preserve">
+    <value>The Void</value>
+  </data>
+  <data name="CreateServer_CustomGenerator" xml:space="preserve">
+    <value>Custom Superflat settings (JSON)</value>
+  </data>
+  <data name="CreateServer_CustomGeneratorHint" xml:space="preserve">
+    <value>Written to generator-settings as is, instead of the layers above. The format changes between Minecraft versions; an invalid value makes the server use the Classic layers.</value>
+  </data>
+  <data name="CreateServer_CustomGeneratorInvalid" xml:space="preserve">
+    <value>This is not a JSON object. Fix it or clear the box.</value>
+  </data>
 </root>

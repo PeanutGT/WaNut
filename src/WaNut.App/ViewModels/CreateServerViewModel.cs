@@ -24,8 +24,10 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private readonly IDialogService _dialogs;
     private CancellationTokenSource? _cancellation;
 
-    public CreateServerViewModel(ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, InstanceStore store, IDialogService dialogs)
+    public CreateServerViewModel(
+        ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, InstanceStore store, IDialogService dialogs, AppSettingsViewModel app)
     {
+        App = app;
         _catalog = catalog;
         _creator = creator;
         _importer = importer;
@@ -65,6 +67,37 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public WorldPickerViewModel Picker { get; }
 
+    /// <summary>For the Advanced mode switch.</summary>
+    public AppSettingsViewModel App { get; }
+
+    public IReadOnlyList<Option<WorldType>> WorldTypes { get; } =
+        Enum.GetValues<WorldType>().Select(t => new Option<WorldType>(t, Text.Get($"CreateServer_WorldType{t}"))).ToList();
+
+    public IReadOnlyList<Option<FlatPreset>> FlatPresets { get; } =
+        Enum.GetValues<FlatPreset>().Select(p => new Option<FlatPreset>(p, Text.Get($"CreateServer_FlatPreset{p}"))).ToList();
+
+    /// <summary>Empty means random.</summary>
+    [ObservableProperty]
+    private string _seed = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSuperflat))]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    private WorldType _worldType = WorldType.Normal;
+
+    [ObservableProperty]
+    private FlatPreset _flatPreset = FlatPreset.Classic;
+
+    /// <summary>Advanced mode: raw generator-settings JSON for a Superflat world, used instead of the preset.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CustomGeneratorInvalid))]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    private string _customGenerator = string.Empty;
+
+    public bool IsSuperflat => WorldType == WorldType.Superflat;
+
+    public bool CustomGeneratorInvalid => !WorldGeneration.IsValidCustomSettings(CustomGenerator);
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsImport), nameof(CanBringInventory), nameof(ShowNewerWorldWarning))]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
@@ -79,6 +112,14 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private bool _newerWorldAccepted;
 
     public bool IsImport => SelectedWorldChoice.Id == "import";
+
+    /// <summary>
+    /// The seed and terrain only matter for a world the server generates. The custom JSON counts only while
+    /// Advanced mode shows it, so switching Advanced mode off never leaves a hidden value in use.
+    /// </summary>
+    private WorldGeneration? NewWorld() => IsImport
+        ? null
+        : new WorldGeneration(Seed, WorldType, FlatPreset, IsSuperflat && App.AdvancedMode ? CustomGenerator : string.Empty);
 
     /// <summary>The inventory belongs to the host, so it needs their name.</summary>
     public bool CanBringInventory => IsImport && OwnerName.Trim().Length > 0 && !OwnerNameInvalid;
@@ -247,7 +288,8 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     private bool CanCreate() =>
         IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name) && !OwnerNameInvalid
-        && (!IsImport || (Picker.IsAccepted && (!ShowNewerWorldWarning || NewerWorldAccepted)));
+        && (!IsImport || (Picker.IsAccepted && (!ShowNewerWorldWarning || NewerWorldAccepted)))
+        && (IsImport || !IsSuperflat || !App.AdvancedMode || !CustomGeneratorInvalid);
 
     [RelayCommand(CanExecute = nameof(CanCreate))]
     private async Task CreateAsync()
@@ -260,7 +302,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         try
         {
             Created = await _creator.CreateAsync(
-                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName),
+                new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName, NewWorld()),
                 progress,
                 _cancellation.Token);
             if (IsImport)
