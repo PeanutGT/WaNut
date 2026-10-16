@@ -1403,4 +1403,40 @@ Stop the server and update?</value>
   <data name="Server_CrashedTooOften" xml:space="preserve">
     <value>The server stopped unexpectedly (exit code {0}) and has crashed {1} times in {2:0} minutes, so WaNut stopped restarting it. Check the console for the cause before starting it again.</value>
   </data>
+  <data name="Invite_Section" xml:space="preserve">
+    <value>Invite card</value>
+  </data>
+  <data name="Invite_Copy" xml:space="preserve">
+    <value>Copy invite</value>
+  </data>
+  <data name="Invite_Hint" xml:space="preserve">
+    <value>Copies a short message with the server's name, version and addresses, ready to paste into Discord or LINE. Fabric servers also list their mods.</value>
+  </data>
+  <data name="Invite_NoteLabel" xml:space="preserve">
+    <value>Note for friends (optional, remembered for every server)</value>
+  </data>
+  <data name="Invite_NotePlaceholder" xml:space="preserve">
+    <value>e.g. Radmin VPN network: peanut-club, password: 1234</value>
+  </data>
+  <data name="Invite_Copied" xml:space="preserve">
+    <value>Invite copied! Paste it to your friends.</value>
+  </data>
+  <data name="Invite_Title" xml:space="preserve">
+    <value>🥜 Come play on my Minecraft server: {0}</value>
+  </data>
+  <data name="Invite_Version" xml:space="preserve">
+    <value>Minecraft: Java Edition, {0}</value>
+  </data>
+  <data name="Invite_Addresses" xml:space="preserve">
+    <value>Address (pick the one for your network, then add it under Multiplayer → Add Server):</value>
+  </data>
+  <data name="Invite_NoAddress" xml:space="preserve">
+    <value>Ask me for the address</value>
+  </data>
+  <data name="Invite_Note" xml:space="preserve">
+    <value>Note: {0}</value>
+  </data>
+  <data name="Invite_Mods" xml:space="preserve">
+    <value>Install Fabric for the same version and these mods (a few may only be needed on the server):</value>
+  </data>
 </root>

@@ -31,6 +31,9 @@ public sealed record AppSettings
     /// <summary>Light, dark or following Windows.</summary>
     public ThemeChoice Theme { get; init; }
 
+    /// <summary>The host's note on invite cards, such as the Radmin VPN network name and password. Null for none.</summary>
+    public string? InviteNote { get; init; }
+
     /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
     public string? InstancesDir { get; init; }
 }

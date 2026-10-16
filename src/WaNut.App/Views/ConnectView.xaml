@@ -128,6 +128,14 @@
         </StackPanel>
       </StackPanel>
 
+      <!-- Invite card: one text with everything friends need, ready for Discord or LINE. -->
+      <TextBlock Text="{res:Text Invite_Section}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+      <Button Content="{res:Text Invite_Copy}" Command="{Binding CopyInviteCommand}" HorizontalAlignment="Left" />
+      <TextBlock Text="{res:Text Invite_Hint}" Style="{StaticResource Hint}" />
+      <TextBlock Text="{res:Text Invite_NoteLabel}" Margin="0,10,0,4" />
+      <TextBox Text="{Binding App.InviteNote}" MaxLength="200" Tag="{res:Text Invite_NotePlaceholder}"
+               AutomationProperties.Name="{res:Text Invite_NoteLabel}" />
+
       <!-- Windows Firewall -->
       <TextBlock Text="{res:Text Connect_Firewall}" Style="{StaticResource Label}" Margin="0,22,0,6" />
       <StackPanel Orientation="Horizontal">

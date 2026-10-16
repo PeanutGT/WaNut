@@ -8,6 +8,7 @@ using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Network;
 using WaNut.Core.Settings;
+using WaNut.Core.Sharing;
 
 namespace WaNut.App.ViewModels;
 
@@ -31,14 +32,18 @@ public sealed partial class ConnectViewModel : ObservableObject
     private readonly IClipboardService _clipboard;
     private int _firewallCheck;
 
-    public ConnectViewModel(ServerViewModel server, FirewallService firewall, IClipboardService clipboard)
+    public ConnectViewModel(ServerViewModel server, FirewallService firewall, IClipboardService clipboard, AppSettingsViewModel app)
     {
+        App = app;
         _server = server;
         _firewall = firewall;
         _clipboard = clipboard;
     }
 
     public ObservableCollection<ConnectAddressViewModel> Addresses { get; } = [];
+
+    /// <summary>For the invite note, which every server shares.</summary>
+    public AppSettingsViewModel App { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FirewallText), nameof(ShowFirewallOk), nameof(ShowFirewallProblem), nameof(CanAllowFirewall))]
@@ -102,6 +107,32 @@ public sealed partial class ConnectViewModel : ObservableObject
         {
             ErrorText = null;
             CopiedText = string.Format(Text.Get("Connect_Copied"), address.Endpoint);
+        }
+        else
+        {
+            CopiedText = null;
+            ErrorText = Text.Get("Connect_CopyFailed");
+        }
+    }
+
+    /// <summary>Copies a ready-to-paste invite: name, version, every address, the host's note and, for Fabric, the mods.</summary>
+    [RelayCommand]
+    private void CopyInvite()
+    {
+        LoadAddresses();
+        var mods = _server.Metadata.Type == Core.Instances.ServerType.Fabric
+            ? _server.Mods.Installed.Select(m => m.Name).ToList()
+            : [];
+        var content = new InviteCardContent(
+            _server.Name, _server.TypeAndVersionText, Addresses.Select(a => (a.Title, a.Endpoint)).ToList(), App.InviteNote, mods);
+        var labels = new InviteCardLabels(
+            Text.Get("Invite_Title"), Text.Get("Invite_Version"), Text.Get("Invite_Addresses"), Text.Get("Invite_NoAddress"),
+            Text.Get("Invite_Note"), Text.Get("Invite_Mods"));
+
+        if (_clipboard.TrySetText(InviteCard.Compose(content, labels)))
+        {
+            ErrorText = null;
+            CopiedText = Text.Get("Invite_Copied");
         }
         else
         {

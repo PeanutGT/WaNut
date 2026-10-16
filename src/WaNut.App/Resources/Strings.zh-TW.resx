@@ -1381,4 +1381,40 @@
   <data name="Server_CrashedTooOften" xml:space="preserve">
     <value>伺服器意外停止（結束代碼 {0}），而且 {2:0} 分鐘內已經當機 {1} 次，所以 WaNut 不再自動重開。請先在主控台查看原因再啟動。</value>
   </data>
+  <data name="Invite_Section" xml:space="preserve">
+    <value>邀請卡</value>
+  </data>
+  <data name="Invite_Copy" xml:space="preserve">
+    <value>複製邀請</value>
+  </data>
+  <data name="Invite_Hint" xml:space="preserve">
+    <value>複製一段訊息，裡面有伺服器名稱、版本和位址，可以直接貼到 Discord 或 LINE。Fabric 伺服器還會列出模組。</value>
+  </data>
+  <data name="Invite_NoteLabel" xml:space="preserve">
+    <value>給朋友的備註（可不填，所有伺服器共用）</value>
+  </data>
+  <data name="Invite_NotePlaceholder" xml:space="preserve">
+    <value>例如：Radmin VPN 網路 peanut-club，密碼 1234</value>
+  </data>
+  <data name="Invite_Copied" xml:space="preserve">
+    <value>邀請複製好了！貼給朋友吧。</value>
+  </data>
+  <data name="Invite_Title" xml:space="preserve">
+    <value>🥜 來我的 Minecraft 伺服器玩：{0}</value>
+  </data>
+  <data name="Invite_Version" xml:space="preserve">
+    <value>Minecraft: Java Edition，{0}</value>
+  </data>
+  <data name="Invite_Addresses" xml:space="preserve">
+    <value>位址（選你們用的網路，到「多人遊戲 → 新增伺服器」貼上）：</value>
+  </data>
+  <data name="Invite_NoAddress" xml:space="preserve">
+    <value>跟我要位址</value>
+  </data>
+  <data name="Invite_Note" xml:space="preserve">
+    <value>備註：{0}</value>
+  </data>
+  <data name="Invite_Mods" xml:space="preserve">
+    <value>請安裝同版本的 Fabric 和這些模組（其中有些可能只需要裝在伺服器）：</value>
+  </data>
 </root>

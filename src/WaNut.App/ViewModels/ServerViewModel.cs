@@ -60,7 +60,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
-        Connect = new ConnectViewModel(this, firewall, clipboard);
+        Connect = new ConnectViewModel(this, firewall, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));

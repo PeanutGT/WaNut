@@ -27,6 +27,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         CheckForUpdates = settings.CheckForUpdates;
         Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
+        InviteNote = settings.InviteNote ?? string.Empty;
         _loading = false;
     }
 
@@ -58,6 +59,12 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private ThemeChoice _theme;
+
+    /// <summary>Remembered for every server's invite card: hosts usually use one VPN network.</summary>
+    [ObservableProperty]
+    private string _inviteNote = string.Empty;
+
+    partial void OnInviteNoteChanged(string value) => Save();
 
     public IReadOnlyList<KeyValuePair<ThemeChoice, string>> Themes { get; } =
     [
@@ -131,7 +138,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
         try
         {
-            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme };
+            _saved = _saved with { AdvancedMode = AdvancedMode, Backups = BackupRules, CheckForUpdates = CheckForUpdates, Language = Language, Theme = Theme,
+                InviteNote = InviteNote.Trim().Length == 0 ? null : InviteNote.Trim() };
             _store.Save(_saved);
             ErrorText = null;
         }
