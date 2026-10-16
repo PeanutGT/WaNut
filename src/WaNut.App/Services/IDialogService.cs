@@ -25,6 +25,9 @@ public interface IDialogService
     /// <summary>Shows the "Delete server" window. Returns true when the server was deleted; <paramref name="keptZip"/> is the world zip kept, if any.</summary>
     bool ShowDeleteServer(ServerViewModel server, out string? keptZip);
 
+    /// <summary>Shows the "Duplicate server" window. Returns the new server, or null if nothing was copied.</summary>
+    InstanceMetadata? ShowDuplicateServer(ServerViewModel server);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 

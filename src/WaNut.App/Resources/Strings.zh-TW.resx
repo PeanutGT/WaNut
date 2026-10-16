@@ -1276,4 +1276,34 @@
   <data name="Server_Usage" xml:space="preserve">
     <value>記憶體 {0:0.0} GB（RAM 設定 {1:0.#} GB）· CPU {2:0}%</value>
   </data>
+  <data name="Duplicate_Section" xml:space="preserve">
+    <value>複製這個伺服器</value>
+  </data>
+  <data name="Duplicate_Open" xml:space="preserve">
+    <value>複製伺服器…</value>
+  </data>
+  <data name="Duplicate_SectionHint" xml:space="preserve">
+    <value>做出第二個一樣的伺服器：世界、設定、模組和插件都相同，可以放心實驗，不會動到這一台。備份和記錄檔不會複製。請先停止伺服器。</value>
+  </data>
+  <data name="Duplicate_Title" xml:space="preserve">
+    <value>複製伺服器</value>
+  </data>
+  <data name="Duplicate_Hint" xml:space="preserve">
+    <value>複本會有備份和記錄檔以外的所有東西。兩台伺服器不能同時執行。</value>
+  </data>
+  <data name="Duplicate_NameLabel" xml:space="preserve">
+    <value>複本的名稱</value>
+  </data>
+  <data name="Duplicate_DefaultName" xml:space="preserve">
+    <value>{0}（複本）</value>
+  </data>
+  <data name="Duplicate_Confirm" xml:space="preserve">
+    <value>複製</value>
+  </data>
+  <data name="Duplicate_Working" xml:space="preserve">
+    <value>正在複製伺服器…</value>
+  </data>
+  <data name="Duplicate_Failed" xml:space="preserve">
+    <value>無法複製伺服器：{0} 沒有任何變更。</value>
+  </data>
 </root>

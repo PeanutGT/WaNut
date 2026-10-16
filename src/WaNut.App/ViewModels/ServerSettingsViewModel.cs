@@ -125,16 +125,34 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     private bool CanDelete() => _server.CanDelete;
 
+    /// <summary>Opens the "Duplicate server" window. Same rules as deleting: stopped, and nothing else using its files.</summary>
+    [RelayCommand(CanExecute = nameof(CanDelete))]
+    private void DuplicateServer()
+    {
+        if (_dialogs.ShowDuplicateServer(_server) is { } copy)
+        {
+            _server.OnDuplicated(copy);
+        }
+    }
+
     internal void OnServerStatusChanged()
     {
         ChangeTypeOrVersionCommand.NotifyCanExecuteChanged();
         DeleteServerCommand.NotifyCanExecuteChanged();
+        DuplicateServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(ShowNextStartHint));
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();
         }
+    }
+
+    /// <summary>A backup, start or mod install began or ended: deleting and duplicating wait for it.</summary>
+    internal void OnFilesBusyChanged()
+    {
+        DeleteServerCommand.NotifyCanExecuteChanged();
+        DuplicateServerCommand.NotifyCanExecuteChanged();
     }
 
     internal void OnAdvancedModeChanged() => OnPropertyChanged(nameof(ShowHiddenJvmArgumentsNote));

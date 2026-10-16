@@ -91,6 +91,7 @@ public partial class App : Application
         services.AddSingleton<WorldImporter>();
         services.AddSingleton<WorldExporter>();
         services.AddSingleton<InstanceDeleter>();
+        services.AddSingleton<InstanceCopier>();
         services.AddSingleton<IFirewall, WindowsFirewall>();
         services.AddSingleton<FirewallService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
@@ -116,6 +117,8 @@ public partial class App : Application
         services.AddTransient<ExportWorldWindow>();
         services.AddTransient<DeleteServerViewModel>();
         services.AddTransient<DeleteServerWindow>();
+        services.AddTransient<DuplicateServerViewModel>();
+        services.AddTransient<DuplicateServerWindow>();
 
         return services.BuildServiceProvider();
     }

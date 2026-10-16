@@ -60,6 +60,14 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return deleted;
     }
 
+    public InstanceMetadata? ShowDuplicateServer(ServerViewModel server)
+    {
+        var window = services.GetRequiredService<DuplicateServerWindow>();
+        window.ViewModel.Initialize(server);
+        window.Owner = Application.Current.MainWindow;
+        return window.ShowDialog() == true ? window.ViewModel.Copy : null;
+    }
+
     public bool Confirm(string message) => Show(new ConfirmWindow(message));
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));

@@ -100,7 +100,14 @@ public sealed partial class MainViewModel : ObservableObject
     {
         var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _clipboard, _mods);
         server.Deleted += OnServerDeleted;
+        server.Duplicated += OnServerDuplicated;
         return server;
+    }
+
+    private void OnServerDuplicated(object? sender, InstanceMetadata copy)
+    {
+        Reload();
+        SelectedServer = Servers.FirstOrDefault(s => s.Id == copy.Id);
     }
 
     /// <summary>Drops a deleted server from the list and selects its neighbour, or nothing when the list is empty.</summary>
@@ -112,6 +119,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         server.Deleted -= OnServerDeleted;
+        server.Duplicated -= OnServerDuplicated;
         var index = Servers.IndexOf(server);
         Servers.Remove(server);
         if (SelectedServer == server || SelectedServer is null)

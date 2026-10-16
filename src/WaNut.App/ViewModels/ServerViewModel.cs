@@ -60,6 +60,9 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Raised after the server's folder was deleted, so the list can drop it.</summary>
     public event EventHandler? Deleted;
 
+    /// <summary>Raised after the server was copied, so the list can show and select the copy.</summary>
+    public event EventHandler<InstanceMetadata>? Duplicated;
+
     public InstanceMetadata Metadata { get; private set; }
 
     public string InstanceDir => _store.InstanceDir(Metadata.Id);
@@ -171,6 +174,8 @@ public sealed partial class ServerViewModel : ObservableObject
         Deleted?.Invoke(this, EventArgs.Empty);
     }
 
+    internal void OnDuplicated(InstanceMetadata copy) => Duplicated?.Invoke(this, copy);
+
     private void OnAdvancedModeChanged(object? sender, PropertyChangedEventArgs e) => ServerSettings.OnAdvancedModeChanged();
 
     private void OnPreparingChanged(object? sender, EventArgs e) => StartCommand.NotifyCanExecuteChanged();
@@ -228,21 +233,21 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(StatusScene));
         StartCommand.NotifyCanExecuteChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     /// <summary>A mod or plugin install or removal started or finished: the server can't start meanwhile.</summary>
     internal void OnModWorkChanged()
     {
         StartCommand.NotifyCanExecuteChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     partial void OnIsPreparingChanged(bool value)
     {
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
-        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnFilesBusyChanged();
     }
 
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;

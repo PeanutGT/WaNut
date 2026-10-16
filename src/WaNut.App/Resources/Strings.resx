@@ -1298,4 +1298,34 @@ Stop the server and update?</value>
   <data name="Server_Usage" xml:space="preserve">
     <value>Memory {0:0.0} GB (RAM setting {1:0.#} GB) · CPU {2:0}%</value>
   </data>
+  <data name="Duplicate_Section" xml:space="preserve">
+    <value>Duplicate this server</value>
+  </data>
+  <data name="Duplicate_Open" xml:space="preserve">
+    <value>Duplicate server…</value>
+  </data>
+  <data name="Duplicate_SectionHint" xml:space="preserve">
+    <value>Makes a second server with the same world, settings, mods and plugins, so you can try things without touching this one. Backups and logs aren't copied. Stop the server first.</value>
+  </data>
+  <data name="Duplicate_Title" xml:space="preserve">
+    <value>Duplicate server</value>
+  </data>
+  <data name="Duplicate_Hint" xml:space="preserve">
+    <value>The copy gets everything except backups and logs. Both servers can't run at the same time.</value>
+  </data>
+  <data name="Duplicate_NameLabel" xml:space="preserve">
+    <value>Name of the copy</value>
+  </data>
+  <data name="Duplicate_DefaultName" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="Duplicate_Confirm" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="Duplicate_Working" xml:space="preserve">
+    <value>Copying the server…</value>
+  </data>
+  <data name="Duplicate_Failed" xml:space="preserve">
+    <value>Couldn't copy the server: {0} Nothing was changed.</value>
+  </data>
 </root>

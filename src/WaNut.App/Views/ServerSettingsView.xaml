@@ -81,6 +81,12 @@
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Duplicate_Section}" Style="{StaticResource Label}" />
+            <Button Content="{res:Text Duplicate_Open}" Command="{Binding DuplicateServerCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="{res:Text Duplicate_SectionHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Delete_Section}" Style="{StaticResource Label}" />
             <Button Content="{res:Text Delete_Open}" Command="{Binding DeleteServerCommand}" HorizontalAlignment="Left" />
             <TextBlock Text="{res:Text Delete_SectionHint}" Style="{StaticResource Hint}" />
