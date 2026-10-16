@@ -46,6 +46,9 @@ public sealed class ModrinthClient(HttpClient http)
 
     public static Uri ProjectUrl(string projectId) => new($"{ApiBase}/project/{Uri.EscapeDataString(projectId)}");
 
+    public static Uri ProjectsUrl(IEnumerable<string> projectIds) =>
+        new($"{ApiBase}/projects?ids={Escape(projectIds.Order(StringComparer.Ordinal).ToArray())}");
+
     public async Task<ModSearchPage> SearchAsync(
         ModPlatform platform, string gameVersion, string query, int offset, CancellationToken cancellationToken = default)
     {
@@ -72,11 +75,15 @@ public sealed class ModrinthClient(HttpClient http)
     /// <summary>
     /// The Modrinth projects that published these files (SHA-512 hashes). Files Modrinth does not know are left out.
     /// </summary>
-    public async Task<IReadOnlySet<string>> IdentifyProjectsAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlySet<string>> IdentifyProjectsAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default) =>
+        (await IdentifyFilesAsync(sha512Hashes, cancellationToken).ConfigureAwait(false)).Values.ToHashSet(StringComparer.Ordinal);
+
+    /// <summary>The project that published each file, by SHA-512 hash. Files Modrinth does not know are left out.</summary>
+    public async Task<IReadOnlyDictionary<string, string>> IdentifyFilesAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default)
     {
         if (sha512Hashes.Count == 0)
         {
-            return new HashSet<string>();
+            return new Dictionary<string, string>();
         }
 
         var body = JsonSerializer.Serialize(new { hashes = sha512Hashes, algorithm = "sha512" });
@@ -84,13 +91,37 @@ public sealed class ModrinthClient(HttpClient http)
         using var response = await http.PostAsync(VersionFilesUrl, content, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return ParseIdentifiedProjects(stream);
+        return ParseIdentifiedFiles(stream);
     }
 
-    public static IReadOnlySet<string> ParseIdentifiedProjects(Stream versionFilesJson)
+    public static IReadOnlySet<string> ParseIdentifiedProjects(Stream versionFilesJson) =>
+        ParseIdentifiedFiles(versionFilesJson).Values.ToHashSet(StringComparer.Ordinal);
+
+    public static IReadOnlyDictionary<string, string> ParseIdentifiedFiles(Stream versionFilesJson)
     {
         var versions = JsonSerializer.Deserialize<Dictionary<string, IdentifiedDto>>(versionFilesJson) ?? [];
-        return versions.Values.Select(v => v.ProjectId).ToHashSet(StringComparer.Ordinal);
+        return versions.ToDictionary(v => v.Key, v => v.Value.ProjectId, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The title and server support of each project. Projects Modrinth no longer has are left out.</summary>
+    public async Task<IReadOnlyList<ModProject>> GetProjectsAsync(IReadOnlyCollection<string> projectIds, CancellationToken cancellationToken = default)
+    {
+        if (projectIds.Count == 0)
+        {
+            return [];
+        }
+
+        await using var stream = await http.GetStreamAsync(ProjectsUrl(projectIds), cancellationToken).ConfigureAwait(false);
+        return ParseProjects(stream);
+    }
+
+    public static IReadOnlyList<ModProject> ParseProjects(Stream projectsJson)
+    {
+        var projects = JsonSerializer.Deserialize<List<ProjectDto>>(projectsJson) ?? [];
+        return projects
+            .Where(p => !string.IsNullOrEmpty(p.Id))
+            .Select(p => new ModProject(p.Id!, string.IsNullOrWhiteSpace(p.Title) ? p.Id! : p.Title, p.ServerSide == "unsupported"))
+            .ToList();
     }
 
     public static ModSearchPage ParseSearch(Stream searchJson)
@@ -176,7 +207,9 @@ public sealed class ModrinthClient(HttpClient http)
         [property: JsonPropertyName("project_id")] string ProjectId);
 
     private sealed record ProjectDto(
-        [property: JsonPropertyName("title")] string? Title);
+        [property: JsonPropertyName("id")] string? Id,
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("server_side")] string? ServerSide);
 
     private sealed record VersionDto(
         [property: JsonPropertyName("id")] string Id,

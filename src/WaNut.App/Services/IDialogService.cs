@@ -16,8 +16,8 @@ public interface IDialogService
     /// <summary>Shows the App settings window.</summary>
     void ShowAppSettings();
 
-    /// <summary>Shows the "Replace with another world" window. Returns what was imported, or null if nothing changed.</summary>
-    WorldImportResult? ShowImportWorld(ServerViewModel server);
+    /// <summary>Shows the "Replace with another world" window. Returns the notes to show, or null if nothing changed.</summary>
+    string? ShowImportWorld(ServerViewModel server);
 
     /// <summary>Shows the "Export world" window for the current world or a backup. Returns null if nothing was exported.</summary>
     WorldExportResult? ShowExportWorld(ServerViewModel server, BackupInfo? backup);

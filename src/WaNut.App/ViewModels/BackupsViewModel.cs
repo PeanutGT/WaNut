@@ -114,14 +114,13 @@ public sealed partial class BackupsViewModel : ObservableObject
     {
         ErrorText = null;
         DoneText = null;
-        var result = _dialogs.ShowImportWorld(_server);
-        if (result is null)
+        if (_dialogs.ShowImportWorld(_server) is not { } notes)
         {
             return;
         }
 
         Reload();
-        var notes = WorldMessages.ImportNotes(result);
+        _server.Mods.Reload();
         DoneText = Text.Get("World_Replaced") + (notes.Length > 0 ? Environment.NewLine + notes : string.Empty);
     }
 

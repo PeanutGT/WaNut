@@ -34,12 +34,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         window.ShowDialog();
     }
 
-    public WorldImportResult? ShowImportWorld(ServerViewModel server)
+    public string? ShowImportWorld(ServerViewModel server)
     {
         var window = services.GetRequiredService<ImportWorldWindow>();
         window.ViewModel.Initialize(server);
         window.Owner = Application.Current.MainWindow;
-        return window.ShowDialog() == true ? window.ViewModel.Result : null;
+        return window.ShowDialog() == true ? window.ViewModel.Notes : null;
     }
 
     public WorldExportResult? ShowExportWorld(ServerViewModel server, BackupInfo? backup)

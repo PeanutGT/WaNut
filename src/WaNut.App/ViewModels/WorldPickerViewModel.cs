@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
+using WaNut.Core.Instances;
 using WaNut.Core.Settings;
 using WaNut.Core.Worlds;
 
@@ -11,7 +12,8 @@ namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// Picks the world to import: from the single-player worlds of every launcher WaNut knows, or from a folder or
-/// .zip the user chooses. A world played with mods needs an extra tick, since its mod blocks will disappear.
+/// .zip the user chooses. A world played with mods needs an extra tick, since its mod blocks will disappear; a
+/// world with Fabric mods going to a Fabric server can have them installed too (decision 24).
 /// </summary>
 public sealed partial class WorldPickerViewModel : ObservableObject
 {
@@ -30,7 +32,18 @@ public sealed partial class WorldPickerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Source), nameof(ShowModdedWarning), nameof(ModdedWarningText), nameof(IsAccepted), nameof(ShowOldWorldHint))]
+    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedAcceptText), nameof(ShowPickFabricHint))]
     private WorldOptionViewModel? _selected;
+
+    /// <summary>The type of the server the world goes to; set by the window that hosts the picker.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanInstallMods), nameof(WillInstallMods), nameof(ModdedWarningText), nameof(ModdedAcceptText), nameof(ShowPickFabricHint))]
+    private ServerType? _serverType;
+
+    /// <summary>"Install the mods too", on by default where it is offered.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WillInstallMods), nameof(ModdedWarningText), nameof(ModdedAcceptText))]
+    private bool _installMods = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAccepted))]
@@ -49,6 +62,15 @@ public sealed partial class WorldPickerViewModel : ObservableObject
 
     public bool ShowModdedWarning => Source?.Details.IsModded == true;
 
+    public bool CanInstallMods => Source?.CanInstallModsOn(ServerType) == true;
+
+    public bool WillInstallMods => CanInstallMods && InstallMods;
+
+    /// <summary>The world has Fabric mods WaNut could install, but the server is not Fabric.</summary>
+    public bool ShowPickFabricHint => Source?.HasFabricMods == true && ServerType != Core.Instances.ServerType.Fabric;
+
+    public string ModdedAcceptText => Text.Get(WillInstallMods ? "World_ModdedAcceptSome" : "World_ModdedAccept");
+
     public string ModdedWarningText
     {
         get
@@ -60,7 +82,7 @@ public sealed partial class WorldPickerViewModel : ObservableObject
 
             var loaders = string.Join(", ", Source.Details.ModLoaders.Select(l => l is "modded" ? Text.Get("World_UnknownLoader") : char.ToUpperInvariant(l[0]) + l[1..]));
             var mods = Source.ModFiles.Count > 0 ? string.Format(Text.Get("World_ModCount"), Source.ModFiles.Count) : string.Empty;
-            return string.Format(Text.Get("World_ModdedWarning"), loaders, mods);
+            return string.Format(Text.Get(WillInstallMods ? "World_ModdedInstallWarning" : "World_ModdedWarning"), loaders, mods);
         }
     }
 
@@ -125,6 +147,7 @@ public sealed partial class WorldPickerViewModel : ObservableObject
     partial void OnSelectedChanged(WorldOptionViewModel? value)
     {
         ModdedAccepted = false;
+        InstallMods = true;
         SelectionChanged?.Invoke();
     }
 

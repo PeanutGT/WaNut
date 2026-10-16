@@ -956,7 +956,7 @@ Stop the server and update?</value>
     <value> and {0} mods</value>
   </data>
   <data name="World_ModdedWarning" xml:space="preserve">
-    <value>This world was played with {0}{1}. WaNut can't install mods on the server yet, so blocks, items and creatures from mods will disappear from the server's copy. Your original world is not changed.</value>
+    <value>This world was played with {0}{1}. This server doesn't load those mods, so blocks, items and creatures from mods will disappear from the server's copy. Your original world is not changed.</value>
   </data>
   <data name="World_ModdedAccept" xml:space="preserve">
     <value>I understand, the mod blocks will disappear</value>
@@ -1564,5 +1564,38 @@ Stop the server and update?</value>
   </data>
   <data name="Tray_Balloon" xml:space="preserve">
     <value>WaNut is still here, keeping your server running. Double-click the peanut to open it again.</value>
+  </data>
+  <data name="World_ModdedInstallWarning" xml:space="preserve">
+    <value>This world was played with {0}{1}. WaNut will look for these mods on Modrinth and install the ones that run on a server. Blocks, items and creatures from mods it can't install will disappear from the server's copy. Your original world is not changed.</value>
+  </data>
+  <data name="World_ModdedAcceptSome" xml:space="preserve">
+    <value>I understand, blocks from mods that can't be installed will disappear</value>
+  </data>
+  <data name="World_InstallMods" xml:space="preserve">
+    <value>Install the mods too</value>
+  </data>
+  <data name="World_ModsPickFabric" xml:space="preserve">
+    <value>Pick a Fabric server and WaNut can install these mods too.</value>
+  </data>
+  <data name="World_InstallingMods" xml:space="preserve">
+    <value>Installing the mods…</value>
+  </data>
+  <data name="World_ModsInstalled" xml:space="preserve">
+    <value>Installed {0} mods on the server: {1}.</value>
+  </data>
+  <data name="World_ModsNoVersion" xml:space="preserve">
+    <value>These mods have no version for this server's Minecraft version, so their blocks are missing: {0}.</value>
+  </data>
+  <data name="World_ModsUnknown" xml:space="preserve">
+    <value>WaNut couldn't find these on Modrinth, so it didn't copy them. If they run on a server, put them in the server's mods folder (Mods tab, Open folder): {0}.</value>
+  </data>
+  <data name="World_ModsClientOnly" xml:space="preserve">
+    <value>Skipped because they only run in the game, not on a server: {0}.</value>
+  </data>
+  <data name="World_ModsFailed" xml:space="preserve">
+    <value>The world was imported, but the mods could not be installed: {0} You can add them on the Mods tab.</value>
+  </data>
+  <data name="World_ModsCancelled" xml:space="preserve">
+    <value>The world was imported, but installing the mods was stopped. You can add them on the Mods tab.</value>
   </data>
 </root>
