@@ -465,8 +465,14 @@ public sealed partial class ServerViewModel : ObservableObject
             && (_controller.Running is null || _controller.Running == this) && Directory.Exists(InstanceDir))
         {
             _keepConsole = true;
-            await _controller.StartAsync(this);
-            _keepConsole = false;
+            try
+            {
+                await _controller.StartAsync(this);
+            }
+            finally
+            {
+                _keepConsole = false;
+            }
         }
     }
 

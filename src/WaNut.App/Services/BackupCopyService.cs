@@ -55,8 +55,9 @@ public sealed class BackupCopyService
             {
                 await _store.CopyToFolderAsync(backup, dir, rules);
             }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            catch (Exception e)
             {
+                // Any failure (a full drive, a folder that went away, OneDrive locking the file) is only reported.
                 _ui.Post(_ => CopyFailed?.Invoke(instanceDir, string.Format(Resources.Text.Get("BackupCopy_Failed"), dir, e.Message)), null);
             }
         });
