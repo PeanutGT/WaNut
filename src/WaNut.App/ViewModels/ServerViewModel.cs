@@ -43,6 +43,9 @@ public sealed partial class ServerViewModel : ObservableObject
     // would fail the same way again.
     private bool _wasOnline;
 
+    // Set for an automatic restart, so the crash's last lines stay readable above the new start.
+    private bool _keepConsole;
+
     public ServerViewModel(
         InstanceMetadata metadata,
         ServerController controller,
@@ -365,7 +368,12 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void Attach(ServerProcess process)
     {
         Process = process;
-        ConsoleLines.Clear();
+        if (!_keepConsole)
+        {
+            ConsoleLines.Clear();
+        }
+
+        _keepConsole = false;
         Players.Clear();
         OnPropertyChanged(nameof(PlayersHeader));
 
@@ -456,7 +464,9 @@ public sealed partial class ServerViewModel : ObservableObject
         if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && _controller.Preparing is null
             && (_controller.Running is null || _controller.Running == this) && Directory.Exists(InstanceDir))
         {
+            _keepConsole = true;
             await _controller.StartAsync(this);
+            _keepConsole = false;
         }
     }
 
