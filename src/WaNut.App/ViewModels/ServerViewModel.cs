@@ -55,6 +55,7 @@ public sealed partial class ServerViewModel : ObservableObject
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
         controller.PreparingChanged += OnPreparingChanged;
+        ReloadIcon();
     }
 
     /// <summary>Raised after the server's folder was deleted, so the list can drop it.</summary>
@@ -96,6 +97,16 @@ public sealed partial class ServerViewModel : ObservableObject
     public string TypeAndVersionText => string.Join(' ', new[] { Metadata.Type.ToString(), Metadata.MinecraftVersion, LoaderText }.Where(s => s.Length > 0));
 
     public ServerProcess? Process { get; private set; }
+
+    /// <summary>The server's server-icon.png, shown in the list and the header; null when it has none.</summary>
+    [ObservableProperty]
+    private System.Windows.Media.ImageSource? _icon;
+
+    public bool HasIcon => Icon is not null;
+
+    partial void OnIconChanged(System.Windows.Media.ImageSource? value) => OnPropertyChanged(nameof(HasIcon));
+
+    internal void ReloadIcon() => Icon = ServerIconMaker.Load(InstanceDir);
 
     public ObservableCollection<string> ConsoleLines { get; } = [];
 

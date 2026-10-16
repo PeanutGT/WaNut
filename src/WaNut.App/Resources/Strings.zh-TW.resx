@@ -1306,4 +1306,25 @@
   <data name="Duplicate_Failed" xml:space="preserve">
     <value>無法複製伺服器：{0} 沒有任何變更。</value>
   </data>
+  <data name="Icon_Label" xml:space="preserve">
+    <value>伺服器圖示</value>
+  </data>
+  <data name="Icon_Choose" xml:space="preserve">
+    <value>選擇圖片…</value>
+  </data>
+  <data name="Icon_Remove" xml:space="preserve">
+    <value>移除圖示</value>
+  </data>
+  <data name="Icon_Hint" xml:space="preserve">
+    <value>朋友在 Minecraft 的伺服器列表會看到它。任何圖片都可以：WaNut 會裁成正方形並縮成 64×64。換了新圖示，下次啟動後才會顯示。</value>
+  </data>
+  <data name="Icon_PickTitle" xml:space="preserve">
+    <value>選擇伺服器圖示的圖片</value>
+  </data>
+  <data name="Icon_Filter" xml:space="preserve">
+    <value>圖片|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Icon_Failed" xml:space="preserve">
+    <value>無法使用這張圖片：{0}</value>
+  </data>
 </root>

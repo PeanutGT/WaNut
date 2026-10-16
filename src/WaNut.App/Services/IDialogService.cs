@@ -37,6 +37,9 @@ public interface IDialogService
     /// <summary>Asks for a world folder. Returns null if the user cancelled.</summary>
     string? PickFolder();
 
+    /// <summary>Asks for a picture (PNG, JPEG, BMP or GIF). Returns null if the user cancelled.</summary>
+    string? PickImage();
+
     /// <summary>Asks for a .zip file to read. Returns null if the user cancelled.</summary>
     string? PickZipToOpen();
 

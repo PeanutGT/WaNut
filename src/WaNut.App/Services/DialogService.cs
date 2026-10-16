@@ -78,6 +78,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FolderName : null;
     }
 
+    public string? PickImage()
+    {
+        var dialog = new OpenFileDialog { Title = Text.Get("Icon_PickTitle"), Filter = Text.Get("Icon_Filter") };
+        return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
+    }
+
     public string? PickZipToOpen()
     {
         var dialog = new OpenFileDialog { Title = Text.Get("World_PickZipTitle"), Filter = Text.Get("World_ZipFilter") };

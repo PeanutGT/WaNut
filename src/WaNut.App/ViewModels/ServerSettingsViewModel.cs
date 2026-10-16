@@ -62,6 +62,12 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     [ObservableProperty]
     private string? _changeDoneText;
 
+    [ObservableProperty]
+    private string? _iconError;
+
+    /// <summary>For the icon preview.</summary>
+    public ServerViewModel Server => _server;
+
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
     public string PortHint => string.Format(Text.Get("Server_PortHint"), Port, ServerSettings.DefaultPort);
@@ -96,6 +102,48 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             _loading = false;
         }
     }
+
+    /// <summary>Lets the user pick a picture and turns it into the server's 64x64 icon.</summary>
+    [RelayCommand]
+    private void ChooseIcon()
+    {
+        IconError = null;
+        if (_dialogs.PickImage() is not { } picture)
+        {
+            return;
+        }
+
+        try
+        {
+            ServerIconMaker.Save(picture, _server.InstanceDir);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or NotSupportedException or FileFormatException or ArgumentException)
+        {
+            IconError = string.Format(Text.Get("Icon_Failed"), e.Message);
+        }
+
+        _server.ReloadIcon();
+        RemoveIconCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(HasIcon))]
+    private void RemoveIcon()
+    {
+        IconError = null;
+        try
+        {
+            File.Delete(Core.Instances.ServerIcon.PathIn(_server.InstanceDir));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            IconError = string.Format(Text.Get("Icon_Failed"), e.Message);
+        }
+
+        _server.ReloadIcon();
+        RemoveIconCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool HasIcon() => _server.HasIcon;
 
     /// <summary>Opens the "Change type or version" window. Only while stopped, since server files are replaced.</summary>
     [RelayCommand(CanExecute = nameof(CanEditProperties))]

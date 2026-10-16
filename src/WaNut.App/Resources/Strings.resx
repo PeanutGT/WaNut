@@ -1328,4 +1328,25 @@ Stop the server and update?</value>
   <data name="Duplicate_Failed" xml:space="preserve">
     <value>Couldn't copy the server: {0} Nothing was changed.</value>
   </data>
+  <data name="Icon_Label" xml:space="preserve">
+    <value>Server icon</value>
+  </data>
+  <data name="Icon_Choose" xml:space="preserve">
+    <value>Choose picture…</value>
+  </data>
+  <data name="Icon_Remove" xml:space="preserve">
+    <value>Remove icon</value>
+  </data>
+  <data name="Icon_Hint" xml:space="preserve">
+    <value>Your friends see it next to the server in Minecraft's server list. Any picture works: WaNut crops it to a square and shrinks it to 64×64. A new icon shows after the next start.</value>
+  </data>
+  <data name="Icon_PickTitle" xml:space="preserve">
+    <value>Choose a picture for the server icon</value>
+  </data>
+  <data name="Icon_Filter" xml:space="preserve">
+    <value>Pictures|*.png;*.jpg;*.jpeg;*.bmp;*.gif</value>
+  </data>
+  <data name="Icon_Failed" xml:space="preserve">
+    <value>Couldn't use that picture: {0}</value>
+  </data>
 </root>

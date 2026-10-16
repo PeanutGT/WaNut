@@ -135,13 +135,18 @@
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,10,0" />
-                <StackPanel Grid.Column="1">
-                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                  <TextBlock Style="{StaticResource MutedText}" FontSize="12">
-                    <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
-                    <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
-                  </TextBlock>
-                </StackPanel>
+                <!-- TextTrimming needs a width limit, so the icon docks left instead of using a horizontal StackPanel. -->
+                <DockPanel Grid.Column="1">
+                  <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,8,0" VerticalAlignment="Center"
+                         Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Style="{StaticResource MutedText}" FontSize="12">
+                      <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
+                      <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
+                    </TextBlock>
+                  </StackPanel>
+                </DockPanel>
               </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
@@ -204,30 +209,34 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
-          <StackPanel>
-            <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-            <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0">
-              <Run Text="{Binding TypeAndVersionText, Mode=OneWay}" />
-              <Run Text="·" />
-              <Run Text="{res:Text Main_Java}" />
-              <Run Text="{Binding Metadata.JavaMajor, Mode=OneWay}" />
-              <Run Text="·" />
-              <Run Text="{Binding Metadata.MemoryMb, Mode=OneWay}" />
-              <Run Text="MB" />
-            </TextBlock>
-            <!-- Live memory and CPU of java.exe while the server runs. -->
-            <TextBlock Text="{Binding UsageText}" Margin="0,2,0,0" FontSize="12" AutomationProperties.Name="{Binding UsageText}">
-              <TextBlock.Style>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
-                  <Style.Triggers>
-                    <DataTrigger Binding="{Binding UsageText}" Value="{x:Null}">
-                      <Setter Property="Visibility" Value="Collapsed" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </TextBlock.Style>
-            </TextBlock>
-          </StackPanel>
+          <DockPanel>
+            <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="48" Height="48" Margin="0,0,12,0" VerticalAlignment="Center"
+                   Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+              <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0">
+                <Run Text="{Binding TypeAndVersionText, Mode=OneWay}" />
+                <Run Text="·" />
+                <Run Text="{res:Text Main_Java}" />
+                <Run Text="{Binding Metadata.JavaMajor, Mode=OneWay}" />
+                <Run Text="·" />
+                <Run Text="{Binding Metadata.MemoryMb, Mode=OneWay}" />
+                <Run Text="MB" />
+              </TextBlock>
+              <!-- Live memory and CPU of java.exe while the server runs. -->
+              <TextBlock Text="{Binding UsageText}" Margin="0,2,0,0" FontSize="12" AutomationProperties.Name="{Binding UsageText}">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding UsageText}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
+          </DockPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <!-- The peanut acts out the status: asleep, starting, cheering, saving. -->
             <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,8,0" />

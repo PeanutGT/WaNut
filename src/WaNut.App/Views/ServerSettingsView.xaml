@@ -37,6 +37,49 @@
                    Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}" />
       </StackPanel>
 
+      <!-- Server icon: friends see it in Minecraft's server list. -->
+      <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text Icon_Label}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal">
+          <Border Width="64" Height="64" CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
+                  Background="{DynamicResource CardBrush}" Margin="0,0,12,0">
+            <Grid>
+              <Image Source="{Binding Server.Icon}" Width="64" Height="64" RenderOptions.BitmapScalingMode="NearestNeighbor"
+                     AutomationProperties.Name="{res:Text Icon_Label}" />
+              <!-- No icon yet: a faded peanut keeps the spot. -->
+              <Image Width="32" Height="32" Opacity="0.4">
+                <Image.Style>
+                  <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Server.HasIcon}" Value="True">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Image.Style>
+              </Image>
+            </Grid>
+          </Border>
+          <StackPanel VerticalAlignment="Center">
+            <Button Content="{res:Text Icon_Choose}" Command="{Binding ChooseIconCommand}" HorizontalAlignment="Left" />
+            <Button Content="{res:Text Icon_Remove}" Command="{Binding RemoveIconCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Text="{res:Text Icon_Hint}" Style="{StaticResource Hint}" />
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IconError}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding IconError}" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+
       <!-- More settings -->
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,18">
         <StackPanel Margin="4,8,0,0">
