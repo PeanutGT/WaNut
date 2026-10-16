@@ -31,6 +31,16 @@ public sealed partial class ServerViewModel : ObservableObject
     private readonly ConcurrentQueue<string> _pendingLines = new();
     private int _flushPosted;
 
+    /// <summary>How long a crashed server waits before it is started again.</summary>
+    private static readonly TimeSpan RestartDelay = TimeSpan.FromSeconds(5);
+
+    private readonly RestartPolicy _restarts = new();
+    private readonly EmptyServerTimer _empty = new();
+
+    // Crash restarts only follow a server that got online: one that fails while starting (a bad mod, a port in use)
+    // would fail the same way again.
+    private bool _wasOnline;
+
     public ServerViewModel(
         InstanceMetadata metadata,
         ServerController controller,
@@ -314,6 +324,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Mods.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
+            _wasOnline = true;
             _ = ApplyOnOnlineAsync();
         }
     }
@@ -356,7 +367,8 @@ public sealed partial class ServerViewModel : ObservableObject
         process.OutputReceived += AddConsoleLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
-        _ = TrackUsageAsync(process);
+        _wasOnline = false;
+        _ = WatchRunningAsync(process);
         process.Exited.ContinueWith(
             t => _ui.Post(_ => OnExited(process, t.Result), null),
             CancellationToken.None,
@@ -365,18 +377,31 @@ public sealed partial class ServerViewModel : ObservableObject
 
     }
 
-    /// <summary>Reads the process's memory and CPU every two seconds until it exits. Runs on the UI thread.</summary>
-    private async Task TrackUsageAsync(ServerProcess process)
+    /// <summary>
+    /// Every two seconds until the process exits: reads its memory and CPU, and stops it once it has been empty
+    /// for the "stop when nobody is online" time. Runs on the UI thread.
+    /// </summary>
+    private async Task WatchRunningAsync(ServerProcess process)
     {
         var meter = new CpuMeter(Environment.ProcessorCount);
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        var stopping = false;
         try
         {
             while (await timer.WaitForNextTickAsync() && Process == process && process.GetUsage() is { } usage)
             {
-                if (meter.Sample(usage.CpuTime, DateTimeOffset.UtcNow) is { } cpu)
+                var now = DateTimeOffset.UtcNow;
+                if (meter.Sample(usage.CpuTime, now) is { } cpu)
                 {
                     UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
+                }
+
+                _empty.Update(Status == ServerStatus.Online, Players.Count, now);
+                if (!stopping && Metadata.AutoStopMinutes > 0 && _empty.IsDue(now, TimeSpan.FromMinutes(Metadata.AutoStopMinutes)))
+                {
+                    stopping = true;
+                    AddConsoleLine(string.Format(Text.Get("Server_AutoStopping"), Metadata.AutoStopMinutes));
+                    _ = _controller.StopAsync(this);
                 }
             }
         }
@@ -394,9 +419,37 @@ public sealed partial class ServerViewModel : ObservableObject
         AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
 
         // "stop" ends with exit code 0; anything else the user did not ask for is a crash.
-        if (exitCode != 0 && !process.WasKilled)
+        if (exitCode == 0 || process.WasKilled)
         {
-            ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+            return;
+        }
+
+        ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+        if (!Metadata.AutoRestart || !_wasOnline)
+        {
+            return;
+        }
+
+        if (_restarts.TryRestart(DateTimeOffset.UtcNow))
+        {
+            AddConsoleLine(string.Format(Text.Get("Server_Restarting"), RestartDelay.TotalSeconds, _restarts.Count, RestartPolicy.MaxRestarts));
+            _ = RestartAfterCrashAsync(process);
+        }
+        else
+        {
+            ErrorText = string.Format(Text.Get("Server_CrashedTooOften"), exitCode, RestartPolicy.MaxRestarts, RestartPolicy.Window.TotalMinutes);
+        }
+    }
+
+    private async Task RestartAfterCrashAsync(ServerProcess crashed)
+    {
+        await Task.Delay(RestartDelay);
+
+        // Only if nothing happened meanwhile: the user may have started this or another server, or deleted this one.
+        if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && _controller.Preparing is null
+            && (_controller.Running is null || _controller.Running == this) && Directory.Exists(InstanceDir))
+        {
+            await _controller.StartAsync(this);
         }
     }
 

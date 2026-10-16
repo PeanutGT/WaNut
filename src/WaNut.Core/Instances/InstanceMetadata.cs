@@ -37,6 +37,12 @@ public sealed record InstanceMetadata
     /// <summary>Extra JVM options from Advanced mode, as the user typed them. Empty for none.</summary>
     public string CustomJvmArguments { get; init; } = string.Empty;
 
+    /// <summary>Starts the server again when it crashes (at most 3 times in 10 minutes). On unless the user turned it off.</summary>
+    public bool AutoRestart { get; init; } = true;
+
+    /// <summary>Stops the server after this many minutes online with nobody on it. 0 means never.</summary>
+    public int AutoStopMinutes { get; init; }
+
     /// <summary>Console commands waiting for the next start, such as "whitelist add Steve" added while stopped.</summary>
     public IReadOnlyList<string> PendingCommands { get; init; } = [];
 }

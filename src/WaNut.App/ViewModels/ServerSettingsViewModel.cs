@@ -57,6 +57,21 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     private string _customJvmArguments = string.Empty;
 
     [ObservableProperty]
+    private bool _autoRestart;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AutoStopMinutesEnabled))]
+    private bool _autoStop;
+
+    /// <summary>Minutes with nobody online before the server stops, kept when the switch is off.</summary>
+    [ObservableProperty]
+    private int _autoStopMinutes = DefaultAutoStopMinutes;
+
+    public const int DefaultAutoStopMinutes = 15;
+
+    public bool AutoStopMinutesEnabled => AutoStop;
+
+    [ObservableProperty]
     private string? _jvmArgumentsError;
 
     [ObservableProperty]
@@ -89,6 +104,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         {
             MemoryMb = _server.Metadata.MemoryMb;
             CustomJvmArguments = _server.Metadata.CustomJvmArguments;
+            AutoRestart = _server.Metadata.AutoRestart;
+            AutoStop = _server.Metadata.AutoStopMinutes > 0;
+            AutoStopMinutes = AutoStop ? _server.Metadata.AutoStopMinutes : DefaultAutoStopMinutes;
             _loaded = ServerSettingsStore.Load(_server.InstanceDir);
             Port = _loaded.Port;
             OnlineMode = _loaded.OnlineMode;
@@ -221,6 +239,12 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             case nameof(CustomJvmArguments):
                 SaveJvmArguments();
                 break;
+            case nameof(AutoRestart):
+                SaveMetadata(_server.Metadata with { AutoRestart = AutoRestart });
+                break;
+            case nameof(AutoStop) or nameof(AutoStopMinutes):
+                SaveAutoStop();
+                break;
             case nameof(Port) or nameof(OnlineMode):
                 SaveProperties();
                 break;
@@ -239,6 +263,18 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         JvmArgumentsError = null;
         SaveMetadata(_server.Metadata with { CustomJvmArguments = CustomJvmArguments.Trim() });
         OnPropertyChanged(nameof(ShowHiddenJvmArgumentsNote));
+    }
+
+    private void SaveAutoStop()
+    {
+        if (AutoStopMinutes is < 1 or > 1440)
+        {
+            _loading = true;
+            AutoStopMinutes = Math.Clamp(AutoStopMinutes, 1, 1440);
+            _loading = false;
+        }
+
+        SaveMetadata(_server.Metadata with { AutoStopMinutes = AutoStop ? AutoStopMinutes : 0 });
     }
 
     private void SaveProperties()

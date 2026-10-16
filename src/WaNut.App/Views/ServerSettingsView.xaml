@@ -108,6 +108,21 @@
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
+            <CheckBox Content="{res:Text Server_AutoRestart}" IsChecked="{Binding AutoRestart}" />
+            <TextBlock Text="{res:Text Server_AutoRestartHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
+            <StackPanel Orientation="Horizontal">
+              <CheckBox Content="{res:Text Server_AutoStop}" IsChecked="{Binding AutoStop}" VerticalAlignment="Center" />
+              <TextBox Text="{Binding AutoStopMinutes}" IsEnabled="{Binding AutoStopMinutesEnabled}" Width="56" MaxLength="4" Margin="8,0,6,0"
+                       AutomationProperties.Name="{res:Text Server_AutoStopMinutes}" />
+              <TextBlock Text="{res:Text Server_AutoStopMinutes}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="{res:Text Server_AutoStopHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+          </StackPanel>
+
+          <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
             <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
                      AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />

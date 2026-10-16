@@ -1379,4 +1379,28 @@ Stop the server and update?</value>
   <data name="Reset_Done" xml:space="preserve">
     <value>Done! A brand-new world will be made at the next start.</value>
   </data>
+  <data name="Server_AutoRestart" xml:space="preserve">
+    <value>Restart the server if it crashes</value>
+  </data>
+  <data name="Server_AutoRestartHint" xml:space="preserve">
+    <value>Only after the server was online. At most 3 times in 10 minutes, so a server that keeps crashing stops trying.</value>
+  </data>
+  <data name="Server_AutoStop" xml:space="preserve">
+    <value>Stop the server after</value>
+  </data>
+  <data name="Server_AutoStopMinutes" xml:space="preserve">
+    <value>minutes with nobody online</value>
+  </data>
+  <data name="Server_AutoStopHint" xml:space="preserve">
+    <value>Saves your PC's memory and power when everyone has left. The world is saved like a normal Stop.</value>
+  </data>
+  <data name="Server_AutoStopping" xml:space="preserve">
+    <value>Nobody has been online for {0} minutes, so WaNut is stopping the server.</value>
+  </data>
+  <data name="Server_Restarting" xml:space="preserve">
+    <value>The server crashed. Starting it again in {0:0} seconds (restart {1} of {2})…</value>
+  </data>
+  <data name="Server_CrashedTooOften" xml:space="preserve">
+    <value>The server stopped unexpectedly (exit code {0}) and has crashed {1} times in {2:0} minutes, so WaNut stopped restarting it. Check the console for the cause before starting it again.</value>
+  </data>
 </root>

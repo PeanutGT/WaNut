@@ -1357,4 +1357,28 @@
   <data name="Reset_Done" xml:space="preserve">
     <value>好了！下次啟動時會產生全新的世界。</value>
   </data>
+  <data name="Server_AutoRestart" xml:space="preserve">
+    <value>伺服器當機時自動重開</value>
+  </data>
+  <data name="Server_AutoRestartHint" xml:space="preserve">
+    <value>只在伺服器曾經上線後才會重開。10 分鐘內最多 3 次，一直當機的伺服器就不會一直重試。</value>
+  </data>
+  <data name="Server_AutoStop" xml:space="preserve">
+    <value>沒人在線時，經過</value>
+  </data>
+  <data name="Server_AutoStopMinutes" xml:space="preserve">
+    <value>分鐘自動關閉伺服器</value>
+  </data>
+  <data name="Server_AutoStopHint" xml:space="preserve">
+    <value>大家都離開後，可以省下電腦的記憶體和電。世界會像按「停止」一樣正常存檔。</value>
+  </data>
+  <data name="Server_AutoStopping" xml:space="preserve">
+    <value>已經 {0} 分鐘沒有人在線，WaNut 正在關閉伺服器。</value>
+  </data>
+  <data name="Server_Restarting" xml:space="preserve">
+    <value>伺服器當機了。{0:0} 秒後重新啟動（第 {1} 次，最多 {2} 次）…</value>
+  </data>
+  <data name="Server_CrashedTooOften" xml:space="preserve">
+    <value>伺服器意外停止（結束代碼 {0}），而且 {2:0} 分鐘內已經當機 {1} 次，所以 WaNut 不再自動重開。請先在主控台查看原因再啟動。</value>
+  </data>
 </root>
