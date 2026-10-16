@@ -1576,4 +1576,46 @@
   <data name="World_ModsCancelled" xml:space="preserve">
     <value>世界已匯入，但模組安裝被停止了。你可以到模組分頁再加。</value>
   </data>
+  <data name="CreateServer_WorldModpack" xml:space="preserve">
+    <value>從模組包建立</value>
+  </data>
+  <data name="CreateServer_WorldModpackHint" xml:space="preserve">
+    <value>使用你下載的 Modrinth 模組包（.mrpack）。WaNut 會自動選好類型、版本並安裝模組。</value>
+  </data>
+  <data name="Modpack_PickLabel" xml:space="preserve">
+    <value>哪個模組包？</value>
+  </data>
+  <data name="Modpack_Pick" xml:space="preserve">
+    <value>選擇 .mrpack 檔案…</value>
+  </data>
+  <data name="Modpack_PickTitle" xml:space="preserve">
+    <value>選擇 Modrinth 模組包</value>
+  </data>
+  <data name="Modpack_Filter" xml:space="preserve">
+    <value>Modrinth 模組包 (*.mrpack)|*.mrpack</value>
+  </data>
+  <data name="Modpack_Summary" xml:space="preserve">
+    <value>{0} {1}：Minecraft {2}，{3}。要下載 {4} 個檔案；略過 {5} 個只在遊戲裡用的檔案。</value>
+  </data>
+  <data name="Modpack_Hint" xml:space="preserve">
+    <value>朋友要在自己的啟動器（例如 Modrinth App）裝同一個模組包才能加入。</value>
+  </data>
+  <data name="Modpack_VersionMissing" xml:space="preserve">
+    <value>這個模組包需要 Minecraft {0}，WaNut 還不能建立這個版本的伺服器。</value>
+  </data>
+  <data name="Modpack_ReadFailed" xml:space="preserve">
+    <value>無法開啟模組包：{0}</value>
+  </data>
+  <data name="Modpack_Problem_NotAModpack" xml:space="preserve">
+    <value>這不是 Modrinth 模組包。請從模組包的 Modrinth 頁面下載 .mrpack 檔案。</value>
+  </data>
+  <data name="Modpack_Problem_UnsupportedLoader" xml:space="preserve">
+    <value>這個模組包需要 {0}，WaNut 還不支援。Fabric 和 Vanilla 模組包可以使用。</value>
+  </data>
+  <data name="Modpack_Problem_UnsafeFile" xml:space="preserve">
+    <value>這個模組包裡有 WaNut 不會安裝的檔案（會放到伺服器資料夾外面，或來自不明網站）。</value>
+  </data>
+  <data name="Modpack_Installing" xml:space="preserve">
+    <value>正在安裝模組包…</value>
+  </data>
 </root>

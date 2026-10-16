@@ -96,6 +96,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
     }
 
+    public string? PickModpack()
+    {
+        var dialog = new OpenFileDialog { Title = Text.Get("Modpack_PickTitle"), Filter = Text.Get("Modpack_Filter") };
+        return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
+    }
+
     public string? PickZipToSave(string fileName)
     {
         var dialog = new SaveFileDialog { Title = Text.Get("Export_SaveZipTitle"), Filter = Text.Get("World_ZipFilter"), FileName = fileName, DefaultExt = ".zip" };

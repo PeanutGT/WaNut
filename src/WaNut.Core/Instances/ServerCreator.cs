@@ -114,6 +114,8 @@ public sealed class ServerCreator(
 
         var files = await DownloadServerFilesAsync(request.Type, vanilla, StageProgress(progress, CreateServerStage.DownloadingServer), cancellationToken).ConfigureAwait(false);
 
+        var loaderVersion = request.Type == ServerType.Fabric && request.LoaderVersion is { } pinned ? pinned : files.LoaderVersion;
+
         progress?.Report(new CreateServerProgress(CreateServerStage.WritingFiles));
         var id = store.CreateFolder(request.Name);
         var dir = store.InstanceDir(id);
@@ -128,7 +130,7 @@ public sealed class ServerCreator(
                 MinecraftVersion = vanilla.VersionId,
                 JavaMajor = vanilla.JavaMajor,
                 MemoryMb = request.MemoryMb,
-                LoaderVersion = files.LoaderVersion,
+                LoaderVersion = loaderVersion,
                 ServerJar = files.LaunchJar,
                 CreatedAt = now,
                 PendingCommands = owner is null
@@ -143,7 +145,7 @@ public sealed class ServerCreator(
 
             if (request.Type == ServerType.Fabric)
             {
-                FabricClient.WriteInstallProperties(Path.Combine(dir, FabricClient.LauncherFileName), files.LoaderVersion!, vanilla.VersionId);
+                FabricClient.WriteInstallProperties(Path.Combine(dir, FabricClient.LauncherFileName), loaderVersion!, vanilla.VersionId);
                 Directory.CreateDirectory(Path.Combine(dir, "mods"));
             }
 

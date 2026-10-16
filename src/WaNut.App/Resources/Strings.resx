@@ -1598,4 +1598,46 @@ Stop the server and update?</value>
   <data name="World_ModsCancelled" xml:space="preserve">
     <value>The world was imported, but installing the mods was stopped. You can add them on the Mods tab.</value>
   </data>
+  <data name="CreateServer_WorldModpack" xml:space="preserve">
+    <value>From a modpack</value>
+  </data>
+  <data name="CreateServer_WorldModpackHint" xml:space="preserve">
+    <value>Use a Modrinth modpack (.mrpack) you downloaded. WaNut sets up the right type, version and mods.</value>
+  </data>
+  <data name="Modpack_PickLabel" xml:space="preserve">
+    <value>Which modpack?</value>
+  </data>
+  <data name="Modpack_Pick" xml:space="preserve">
+    <value>Choose a .mrpack file…</value>
+  </data>
+  <data name="Modpack_PickTitle" xml:space="preserve">
+    <value>Choose a Modrinth modpack</value>
+  </data>
+  <data name="Modpack_Filter" xml:space="preserve">
+    <value>Modrinth modpacks (*.mrpack)|*.mrpack</value>
+  </data>
+  <data name="Modpack_Summary" xml:space="preserve">
+    <value>{0} {1}: Minecraft {2}, {3}. {4} files to download; {5} files that only the game uses are skipped.</value>
+  </data>
+  <data name="Modpack_Hint" xml:space="preserve">
+    <value>Friends play with the same modpack installed in their own launcher (for example the Modrinth App).</value>
+  </data>
+  <data name="Modpack_VersionMissing" xml:space="preserve">
+    <value>This modpack needs Minecraft {0}, which WaNut can't make a server for yet.</value>
+  </data>
+  <data name="Modpack_ReadFailed" xml:space="preserve">
+    <value>Could not open the modpack: {0}</value>
+  </data>
+  <data name="Modpack_Problem_NotAModpack" xml:space="preserve">
+    <value>This file isn't a Modrinth modpack. Download the .mrpack file from the modpack's Modrinth page.</value>
+  </data>
+  <data name="Modpack_Problem_UnsupportedLoader" xml:space="preserve">
+    <value>This modpack needs {0}, which WaNut doesn't support yet. Fabric and Vanilla modpacks work.</value>
+  </data>
+  <data name="Modpack_Problem_UnsafeFile" xml:space="preserve">
+    <value>This modpack has a file WaNut won't install (it would go outside the server folder or comes from an unknown website).</value>
+  </data>
+  <data name="Modpack_Installing" xml:space="preserve">
+    <value>Installing the modpack…</value>
+  </data>
 </root>
