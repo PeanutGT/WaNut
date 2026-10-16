@@ -163,4 +163,13 @@ public sealed class ServerController(
     public Task ShutdownAsync() => Running is { IsRunning: true } running ? StopAsync(running) : Task.CompletedTask;
 
     public bool HasRunningServer => Running is { IsRunning: true };
+
+    /// <summary>A deleted server must not be kept as the last one that ran.</summary>
+    public void Forget(ServerViewModel server)
+    {
+        if (Running == server)
+        {
+            Running = null;
+        }
+    }
 }

@@ -109,9 +109,26 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>Opens the "Delete server" window. Only while stopped and while nothing else is working on its files.</summary>
+    [RelayCommand(CanExecute = nameof(CanDelete))]
+    private void DeleteServer()
+    {
+        if (_dialogs.ShowDeleteServer(_server, out var keptZip))
+        {
+            _server.OnDeleted();
+            if (keptZip is not null)
+            {
+                _dialogs.Inform(string.Format(Text.Get("Delete_DoneKept"), _server.Name, keptZip));
+            }
+        }
+    }
+
+    private bool CanDelete() => _server.CanDelete;
+
     internal void OnServerStatusChanged()
     {
         ChangeTypeOrVersionCommand.NotifyCanExecuteChanged();
+        DeleteServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(ShowNextStartHint));
         if (_server.Status == ServerStatus.Stopped)

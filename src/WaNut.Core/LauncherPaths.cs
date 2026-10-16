@@ -20,6 +20,7 @@ public sealed class LauncherPaths
         CacheDir = Path.Combine(root, "cache");
         InstancesDir = string.IsNullOrWhiteSpace(instancesDir) ? Path.Combine(root, "instances") : Path.GetFullPath(instancesDir);
         ConfigFile = Path.Combine(root, "config.json");
+        DeletedServersDir = Path.Combine(root, "deleted-servers");
     }
 
     public string Root { get; }
@@ -31,6 +32,9 @@ public sealed class LauncherPaths
     public string InstancesDir { get; }
 
     public string ConfigFile { get; }
+
+    /// <summary>The world zips kept when a server is deleted.</summary>
+    public string DeletedServersDir { get; }
 
     public static LauncherPaths CreateDefault() => CreateDefault(Environment.GetEnvironmentVariable(DataDirVariable));
 

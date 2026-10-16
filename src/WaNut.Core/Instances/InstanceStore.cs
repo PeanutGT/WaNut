@@ -23,7 +23,8 @@ public sealed class InstanceStore(LauncherPaths paths)
     public string InstanceDir(string id) => Path.Combine(paths.InstancesDir, id);
 
     /// <summary>
-    /// All servers, oldest first. Folders without a readable instance.json are skipped, never deleted.
+    /// All servers, oldest first. Folders without a readable instance.json are skipped, never deleted, and so are
+    /// WaNut's own work folders (starting with "."), such as a server half-way through being deleted.
     /// </summary>
     public IReadOnlyList<InstanceMetadata> LoadAll()
     {
@@ -36,7 +37,7 @@ public sealed class InstanceStore(LauncherPaths paths)
         foreach (var dir in Directory.EnumerateDirectories(paths.InstancesDir))
         {
             var file = Path.Combine(dir, InstanceMetadata.FileName);
-            if (!File.Exists(file))
+            if (Path.GetFileName(dir).StartsWith('.') || !File.Exists(file))
             {
                 continue;
             }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,15 +46,13 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, clipboard);
         Mods = new ModsViewModel(this, mods, dialogs);
-        app.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(AppSettingsViewModel.AdvancedMode))
-            {
-                ServerSettings.OnAdvancedModeChanged();
-            }
-        };
-        controller.PreparingChanged += (_, _) => StartCommand.NotifyCanExecuteChanged();
+        // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
+        PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
+        controller.PreparingChanged += OnPreparingChanged;
     }
+
+    /// <summary>Raised after the server's folder was deleted, so the list can drop it.</summary>
+    public event EventHandler? Deleted;
 
     public InstanceMetadata Metadata { get; private set; }
 
@@ -151,6 +150,21 @@ public sealed partial class ServerViewModel : ObservableObject
 
     private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && _controller.Preparing is null;
 
+    /// <summary>Deleting needs the server stopped and nothing else working on its files.</summary>
+    internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
+
+    /// <summary>The folder is gone: let go of the shared services and tell the list.</summary>
+    internal void OnDeleted()
+    {
+        _controller.PreparingChanged -= OnPreparingChanged;
+        _controller.Forget(this);
+        Deleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnAdvancedModeChanged(object? sender, PropertyChangedEventArgs e) => ServerSettings.OnAdvancedModeChanged();
+
+    private void OnPreparingChanged(object? sender, EventArgs e) => StartCommand.NotifyCanExecuteChanged();
+
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);
 
@@ -204,15 +218,21 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(StatusScene));
         StartCommand.NotifyCanExecuteChanged();
+        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>A mod or plugin install or removal started or finished: the server can't start meanwhile.</summary>
-    internal void OnModWorkChanged() => StartCommand.NotifyCanExecuteChanged();
+    internal void OnModWorkChanged()
+    {
+        StartCommand.NotifyCanExecuteChanged();
+        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnIsPreparingChanged(bool value)
     {
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
+        ServerSettings.DeleteServerCommand.NotifyCanExecuteChanged();
     }
 
     internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
