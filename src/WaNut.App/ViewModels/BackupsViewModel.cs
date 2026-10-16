@@ -7,6 +7,7 @@ using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Hosting;
+using WaNut.Core.Worlds;
 
 namespace WaNut.App.ViewModels;
 
@@ -36,7 +37,7 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange), nameof(WorkText))]
-    [NotifyCanExecuteChangedFor(nameof(BackUpNowCommand), nameof(RestoreCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackUpNowCommand), nameof(RestoreCommand), nameof(ReplaceWorldCommand), nameof(ExportWorldCommand), nameof(ExportBackupCommand))]
     private BackupReason? _working;
 
     [ObservableProperty]
@@ -96,6 +97,48 @@ public sealed partial class BackupsViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowStopToChange));
         BackUpNowCommand.NotifyCanExecuteChanged();
         RestoreCommand.NotifyCanExecuteChanged();
+        ReplaceWorldCommand.NotifyCanExecuteChanged();
+        ExportWorldCommand.NotifyCanExecuteChanged();
+        ExportBackupCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>"Replace with another world": imports a single-player world over this one, backing it up first.</summary>
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private void ReplaceWorld()
+    {
+        ErrorText = null;
+        DoneText = null;
+        var result = _dialogs.ShowImportWorld(_server);
+        if (result is null)
+        {
+            return;
+        }
+
+        Reload();
+        var notes = WorldMessages.ImportNotes(result);
+        DoneText = Text.Get("World_Replaced") + (notes.Length > 0 ? Environment.NewLine + notes : string.Empty);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private void ExportWorld() => Export(null);
+
+    [RelayCommand(CanExecute = nameof(CanExportBackup))]
+    private void ExportBackup(BackupItemViewModel? item) => Export(item?.Info);
+
+    private bool CanExportBackup(BackupItemViewModel? item) => item is not null && CanChange;
+
+    private void Export(BackupInfo? backup)
+    {
+        ErrorText = null;
+        DoneText = null;
+        var result = _dialogs.ShowExportWorld(_server, backup);
+        if (result is null)
+        {
+            return;
+        }
+
+        var done = string.Format(Text.Get("Export_Done"), result.Path);
+        DoneText = result.InventoryProblem is { } problem ? done + Environment.NewLine + Text.Get($"World_Inventory_{problem}") : done;
     }
 
     [RelayCommand(CanExecute = nameof(CanChange))]

@@ -1,13 +1,17 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
+using WaNut.App.Services;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Players;
+using WaNut.Core.Settings;
 using WaNut.Core.Versions;
+using WaNut.Core.Worlds;
 
 namespace WaNut.App.ViewModels;
 
@@ -15,12 +19,32 @@ public sealed partial class CreateServerViewModel : ObservableObject
 {
     private readonly ServerVersionCatalog _catalog;
     private readonly ServerCreator _creator;
+    private readonly WorldImporter _importer;
+    private readonly InstanceStore _store;
+    private readonly IDialogService _dialogs;
     private CancellationTokenSource? _cancellation;
 
-    public CreateServerViewModel(ServerVersionCatalog catalog, ServerCreator creator)
+    public CreateServerViewModel(ServerVersionCatalog catalog, ServerCreator creator, WorldImporter importer, InstanceStore store, IDialogService dialogs)
     {
         _catalog = catalog;
         _creator = creator;
+        _importer = importer;
+        _store = store;
+        _dialogs = dialogs;
+        Picker = new WorldPickerViewModel(dialogs);
+        Picker.SelectionChanged += () =>
+        {
+            PreselectWorldVersion();
+            OnWorldChanged();
+        };
+        Picker.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(WorldPickerViewModel.ModdedAccepted))
+            {
+                CreateCommand.NotifyCanExecuteChanged();
+            }
+        };
+        _selectedWorldChoice = WorldChoices[0];
 
         var totalMb = MemoryLimits.TotalPhysicalMb();
         MaxMemoryMb = MemoryLimits.MaxServerMb(totalMb);
@@ -31,6 +55,38 @@ public sealed partial class CreateServerViewModel : ObservableObject
     public event Action<bool>? CloseRequested;
 
     public ObservableCollection<GameVersion> Versions { get; } = [];
+
+    /// <summary>The wizard's first choice: a fresh world, or one of the user's own.</summary>
+    public IReadOnlyList<WorldChoice> WorldChoices { get; } =
+    [
+        new("new", Text.Get("CreateServer_WorldNew"), Text.Get("CreateServer_WorldNewHint")),
+        new("import", Text.Get("CreateServer_WorldImport"), Text.Get("CreateServer_WorldImportHint")),
+    ];
+
+    public WorldPickerViewModel Picker { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsImport), nameof(CanBringInventory), nameof(ShowNewerWorldWarning))]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    private WorldChoice _selectedWorldChoice;
+
+    /// <summary>Carry the host's single-player inventory and position over to their server player.</summary>
+    [ObservableProperty]
+    private bool _bringInventory = true;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    private bool _newerWorldAccepted;
+
+    public bool IsImport => SelectedWorldChoice.Id == "import";
+
+    /// <summary>The inventory belongs to the host, so it needs their name.</summary>
+    public bool CanBringInventory => IsImport && OwnerName.Trim().Length > 0 && !OwnerNameInvalid;
+
+    /// <summary>The chosen version is older than the one that last saved the world, which can break it.</summary>
+    public bool ShowNewerWorldWarning => IsImport && Picker.IsNewerThan(SelectedVersion?.Id);
+
+    public string NewerWorldWarningText => string.Format(Text.Get("World_NewerWarning"), Picker.Source?.Details.VersionName);
 
     public IReadOnlyList<ServerTypeOption> ServerTypes { get; } =
     [
@@ -56,12 +112,13 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
+    [NotifyPropertyChangedFor(nameof(ShowNewerWorldWarning))]
     private GameVersion? _selectedVersion;
 
     /// <summary>The host's Minecraft name; empty skips it.</summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
-    [NotifyPropertyChangedFor(nameof(OwnerNameInvalid))]
+    [NotifyPropertyChangedFor(nameof(OwnerNameInvalid), nameof(CanBringInventory))]
     private string _ownerName = string.Empty;
 
     [ObservableProperty]
@@ -99,6 +156,40 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
+    partial void OnSelectedWorldChoiceChanged(WorldChoice value)
+    {
+        if (IsImport)
+        {
+            _ = Picker.ScanOnceAsync();
+        }
+    }
+
+    partial void OnSelectedVersionChanged(GameVersion? value) => NewerWorldAccepted = false;
+
+    private void OnWorldChanged()
+    {
+        OnPropertyChanged(nameof(ShowNewerWorldWarning));
+        OnPropertyChanged(nameof(NewerWorldWarningText));
+        CreateCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>
+    /// Picks the version that last saved the world. When the list doesn't have it (a snapshot, or a version older
+    /// than 1.16.5), the oldest offered version that is not older than the world.
+    /// </summary>
+    private void PreselectWorldVersion()
+    {
+        if (Picker.Source?.Details.VersionName is not { } world || Versions.Count == 0)
+        {
+            return;
+        }
+
+        var target = GameFeatures.ParseVersion(world);
+        SelectedVersion = Versions.FirstOrDefault(v => v.Id == world)
+            ?? Versions.Where(v => GameFeatures.ParseVersion(v.Id) >= target).MinBy(v => GameFeatures.ParseVersion(v.Id))
+            ?? SelectedVersion;
+    }
+
     partial void OnSelectedTypeChanged(ServerTypeOption? value)
     {
         // A load already running picks up the new type when it finishes.
@@ -135,6 +226,11 @@ public sealed partial class CreateServerViewModel : ObservableObject
             }
 
             SelectedVersion = Versions.FirstOrDefault(v => v.Id == previous) ?? Versions.FirstOrDefault();
+            if (previous is null && IsImport)
+            {
+                PreselectWorldVersion();
+            }
+
             StatusText = null;
         }
         catch (Exception)
@@ -149,7 +245,9 @@ public sealed partial class CreateServerViewModel : ObservableObject
         }
     }
 
-    private bool CanCreate() => IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name) && !OwnerNameInvalid;
+    private bool CanCreate() =>
+        IsIdle && EulaAccepted && SelectedType is not null && SelectedVersion is not null && !string.IsNullOrWhiteSpace(Name) && !OwnerNameInvalid
+        && (!IsImport || (Picker.IsAccepted && (!ShowNewerWorldWarning || NewerWorldAccepted)));
 
     [RelayCommand(CanExecute = nameof(CanCreate))]
     private async Task CreateAsync()
@@ -158,12 +256,17 @@ public sealed partial class CreateServerViewModel : ObservableObject
         ErrorText = null;
         _cancellation = new CancellationTokenSource();
         var progress = new Progress<CreateServerProgress>(ShowProgress);
+        var notes = string.Empty;
         try
         {
             Created = await _creator.CreateAsync(
                 new CreateServerRequest(Name, SelectedVersion!, MemoryMb, EulaAccepted, SelectedType!.Type, OwnerName),
                 progress,
                 _cancellation.Token);
+            if (IsImport)
+            {
+                notes = await ImportWorldAsync(Created, _cancellation.Token);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -173,6 +276,10 @@ public sealed partial class CreateServerViewModel : ObservableObject
         catch (DownloadVerificationException)
         {
             ErrorText = Text.Get("CreateServer_ChecksumFailed");
+        }
+        catch (WorldException e)
+        {
+            ErrorText = WorldMessages.Problem(e);
         }
         catch (Exception ex)
         {
@@ -188,7 +295,42 @@ public sealed partial class CreateServerViewModel : ObservableObject
         // Only after IsCreating is false, so the window does not treat this close as "stop the download".
         if (Created is not null)
         {
+            if (notes.Length > 0)
+            {
+                _dialogs.Inform(notes);
+            }
+
             CloseRequested?.Invoke(true);
+        }
+    }
+
+    /// <summary>
+    /// Copies the picked world into the server that was just created. If that fails, the new server is removed
+    /// again: it was made for this world and holds nothing else yet.
+    /// </summary>
+    private async Task<string> ImportWorldAsync(InstanceMetadata created, CancellationToken cancellationToken)
+    {
+        StatusText = Text.Get("World_Copying");
+        ProgressFraction = 0;
+        try
+        {
+            var request = new WorldImportRequest(Picker.Source!, created.Type, created.MinecraftVersion, OwnerName.Trim(), BringInventory && CanBringInventory);
+            var result = await _importer.ImportAsync(_store.InstanceDir(created.Id), request, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+            return WorldMessages.ImportNotes(result);
+        }
+        catch
+        {
+            Created = null;
+            try
+            {
+                Directory.Delete(_store.InstanceDir(created.Id), recursive: true);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                // The empty server stays in the list; the user can remove its folder.
+            }
+
+            throw;
         }
     }
 

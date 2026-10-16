@@ -1,0 +1,99 @@
+<Window x:Class="WaNut.App.Views.ExportWorldWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WaNut.App.Resources"
+        Title="{res:Text Export_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
+        Width="480" SizeToContent="Height"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    <Style x:Key="FieldLabel" TargetType="TextBlock">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,14,0,6" />
+    </Style>
+  </Window.Resources>
+
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" Margin="0,0,8,0" />
+      <Button Content="{res:Text Export_Confirm}" Command="{Binding ExportCommand}" Style="{StaticResource PrimaryButton}"
+              MinWidth="80" IsDefault="True" />
+    </StackPanel>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+      <StackPanel>
+        <TextBlock Text="{res:Text Export_Title}" FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding SourceText}" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
+
+        <TextBlock Text="{res:Text Export_TargetLabel}" Style="{StaticResource FieldLabel}" />
+        <ListBox ItemsSource="{Binding Targets}"
+                 SelectedItem="{Binding SelectedTarget}"
+                 IsEnabled="{Binding IsIdle}"
+                 AutomationProperties.Name="{res:Text Export_TargetLabel}"
+                 Background="{DynamicResource CardBrush}"
+                 BorderThickness="1"
+                 Padding="4">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+              <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+              <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+              <Setter Property="Padding" Value="10,7" />
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Visibility="{Binding IsSaves, Converter={StaticResource BoolToVisibility}}">
+          <TextBlock Text="{res:Text Export_LocationLabel}" Style="{StaticResource FieldLabel}" />
+          <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" DisplayMemberPath="Title"
+                    IsEnabled="{Binding IsIdle}" AutomationProperties.Name="{res:Text Export_LocationLabel}" />
+          <TextBlock Text="{res:Text Export_NoLocations}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                     Visibility="{Binding NoLocations, Converter={StaticResource BoolToVisibility}}" />
+        </StackPanel>
+
+        <CheckBox IsChecked="{Binding BringInventory}" IsEnabled="{Binding HasPlayers}" Margin="0,16,0,0">
+          <TextBlock Text="{res:Text Export_BringInventory}" TextWrapping="Wrap" />
+        </CheckBox>
+        <ComboBox ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" DisplayMemberPath="Name"
+                  Margin="26,8,0,0" AutomationProperties.Name="{res:Text Export_BringInventory}"
+                  IsEnabled="{Binding BringInventory}"
+                  Visibility="{Binding HasPlayers, Converter={StaticResource BoolToVisibility}}" />
+        <TextBlock Text="{res:Text Export_NoPlayers}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="26,4,0,0"
+                   Visibility="{Binding NoPlayers, Converter={StaticResource BoolToVisibility}}" />
+
+        <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
+            <TextBlock Text="{res:Text Export_Working}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+          </StackPanel>
+          <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressFraction, Mode=OneWay}" AutomationProperties.Name="{res:Text Export_Working}" />
+        </StackPanel>
+
+        <Border Margin="0,14,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

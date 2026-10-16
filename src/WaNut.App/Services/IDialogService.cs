@@ -1,4 +1,7 @@
+using WaNut.App.ViewModels;
+using WaNut.Core.Backups;
 using WaNut.Core.Instances;
+using WaNut.Core.Worlds;
 
 namespace WaNut.App.Services;
 
@@ -13,6 +16,24 @@ public interface IDialogService
     /// <summary>Shows the App settings window.</summary>
     void ShowAppSettings();
 
+    /// <summary>Shows the "Replace with another world" window. Returns what was imported, or null if nothing changed.</summary>
+    WorldImportResult? ShowImportWorld(ServerViewModel server);
+
+    /// <summary>Shows the "Export world" window for the current world or a backup. Returns null if nothing was exported.</summary>
+    WorldExportResult? ShowExportWorld(ServerViewModel server, BackupInfo? backup);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
+
+    /// <summary>Shows a message with a Close button.</summary>
+    void Inform(string message);
+
+    /// <summary>Asks for a world folder. Returns null if the user cancelled.</summary>
+    string? PickFolder();
+
+    /// <summary>Asks for a .zip file to read. Returns null if the user cancelled.</summary>
+    string? PickZipToOpen();
+
+    /// <summary>Asks where to save a .zip file. Returns null if the user cancelled.</summary>
+    string? PickZipToSave(string fileName);
 }

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:WaNut.App.Resources"
         xmlns:controls="clr-namespace:WaNut.App.Controls"
+        xmlns:views="clr-namespace:WaNut.App.Views"
         Title="{res:Text CreateServer_Title}"
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
@@ -37,6 +38,36 @@
         <StackPanel Orientation="Horizontal">
           <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
           <TextBlock Text="{res:Text CreateServer_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <TextBlock Text="{res:Text CreateServer_WorldLabel}" Style="{StaticResource FieldLabel}" />
+        <ListBox ItemsSource="{Binding WorldChoices}"
+                 SelectedItem="{Binding SelectedWorldChoice}"
+                 IsEnabled="{Binding IsIdle}"
+                 AutomationProperties.Name="{res:Text CreateServer_WorldLabel}"
+                 Background="{DynamicResource CardBrush}"
+                 BorderThickness="1"
+                 Padding="4">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+              <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+              <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
+              <Setter Property="Padding" Value="10,7" />
+            </Style>
+          </ListBox.ItemContainerStyle>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}" Style="{StaticResource MutedText}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Visibility="{Binding IsImport, Converter={StaticResource BoolToVisibility}}">
+          <TextBlock Text="{res:Text World_PickLabel}" Style="{StaticResource FieldLabel}" />
+          <views:WorldPicker DataContext="{Binding Picker}" IsEnabled="{Binding DataContext.IsIdle, RelativeSource={RelativeSource AncestorType=Window}}" />
         </StackPanel>
 
         <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource FieldLabel}" />
@@ -78,6 +109,17 @@
                   DisplayMemberPath="Id"
                   IsEnabled="{Binding IsIdle}" />
 
+        <!-- Going back to an older version than the world's: a plain warning and a second, deliberate tick. -->
+        <Border Style="{StaticResource WarningBanner}" Margin="0,10,0,0"
+                Visibility="{Binding ShowNewerWorldWarning, Converter={StaticResource BoolToVisibility}}">
+          <StackPanel>
+            <TextBlock Text="{Binding NewerWorldWarningText}" TextWrapping="Wrap" />
+            <CheckBox IsChecked="{Binding NewerWorldAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,10,0,0">
+              <TextBlock Text="{res:Text World_NewerAccept}" TextWrapping="Wrap" />
+            </CheckBox>
+          </StackPanel>
+        </Border>
+
         <DockPanel Margin="0,14,0,6">
           <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
           <TextBlock Text="{res:Text CreateServer_MemoryLabel}" FontWeight="SemiBold" />
@@ -108,6 +150,23 @@
                    Foreground="{DynamicResource ErrorTextBrush}"
                    TextWrapping="Wrap" Margin="0,4,0,0"
                    Visibility="{Binding OwnerNameInvalid, Converter={StaticResource BoolToVisibility}}" />
+
+        <StackPanel Margin="0,12,0,0" Visibility="{Binding IsImport, Converter={StaticResource BoolToVisibility}}">
+          <CheckBox IsChecked="{Binding BringInventory}" IsEnabled="{Binding CanBringInventory}">
+            <TextBlock Text="{res:Text World_BringInventory}" TextWrapping="Wrap" />
+          </CheckBox>
+          <TextBlock Text="{res:Text World_BringInventoryNeedsName}" TextWrapping="Wrap" Margin="26,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding CanBringInventory}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
 
         <CheckBox IsChecked="{Binding EulaAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,18,0,0">
           <TextBlock TextWrapping="Wrap">

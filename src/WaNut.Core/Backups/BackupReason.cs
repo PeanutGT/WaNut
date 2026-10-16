@@ -14,4 +14,7 @@ public enum BackupReason
 
     /// <summary>The world as it was just before the server's type or Minecraft version was changed.</summary>
     Change,
+
+    /// <summary>The world as it was just before another world was imported over it.</summary>
+    Import,
 }
