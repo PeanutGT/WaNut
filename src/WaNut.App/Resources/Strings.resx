@@ -663,6 +663,21 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   <data name="Connect_RouterHint" xml:space="preserve">
     <value>While this server runs, WaNut asks your router to let friends in from the internet, and closes it again when the server stops. Your whitelist still decides who can join.</value>
   </data>
+  <data name="Connect_RouterAbout" xml:space="preserve">
+    <value>What is UPnP?</value>
+  </data>
+  <data name="Connect_RouterAboutWhat" xml:space="preserve">
+    <value>Every device in your home shares your router's one internet address. When a friend connects from outside, the router doesn't know which device it's for, so it blocks it. Opening a port tells the router: "connections to this port go to this PC". UPnP lets WaNut ask the router for that itself, so you don't have to change router settings by hand.</value>
+  </data>
+  <data name="Connect_RouterAboutHow" xml:space="preserve">
+    <value>With the switch on, WaNut opens the port when the server starts and closes it when the server stops. Friends anywhere then join with the Internet address in the list above, without Radmin VPN or another tool.</value>
+  </data>
+  <data name="Connect_RouterAboutFails" xml:space="preserve">
+    <value>It doesn't work when UPnP is turned off on the router (turn it on in the router's settings, often under Advanced or NAT), or when your internet provider shares one address between many homes (CGNAT). Then play over Radmin VPN or another tool, see More settings.</value>
+  </data>
+  <data name="Connect_RouterAboutSafe" xml:space="preserve">
+    <value>Only the server's own port opens, and only while the server runs. The whitelist is on by default, so people who aren't on it can't join even if they reach your server.</value>
+  </data>
   <data name="Connect_RouterAsking" xml:space="preserve">
     <value>Asking your router...</value>
   </data>

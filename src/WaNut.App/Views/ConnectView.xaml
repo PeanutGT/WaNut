@@ -190,6 +190,14 @@
       <TextBlock Text="{res:Text Connect_Router}" Style="{StaticResource Label}" Margin="0,22,0,6" />
       <CheckBox Content="{res:Text Connect_RouterToggle}" IsChecked="{Binding OpenRouterPort}" />
       <TextBlock Text="{res:Text Connect_RouterHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+      <Expander Header="{res:Text Connect_RouterAbout}" Margin="22,6,0,0">
+        <StackPanel Margin="4,6,0,0">
+          <TextBlock Text="{res:Text Connect_RouterAboutWhat}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RouterAboutHow}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RouterAboutFails}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_RouterAboutSafe}" Style="{StaticResource Step}" />
+        </StackPanel>
+      </Expander>
       <TextBlock Text="{res:Text Connect_RouterAsking}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
                  Visibility="{Binding IsAskingRouter, Converter={StaticResource Visible}}" />
       <TextBlock Text="{Binding RouterNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
