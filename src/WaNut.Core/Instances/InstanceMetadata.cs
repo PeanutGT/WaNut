@@ -49,6 +49,12 @@ public sealed record InstanceMetadata
     /// <summary>Forwards the server's port on the home router (UPnP) while it runs. Off unless the user turned it on.</summary>
     public bool OpenRouterPort { get; init; }
 
+    /// <summary>Runs a playit.gg tunnel while the server runs, so friends join through it. Off unless the user turned it on.</summary>
+    public bool UsePlayitTunnel { get; init; }
+
+    /// <summary>The server's own tunnel on playit.gg, made the first time the tunnel was used. Null until then.</summary>
+    public Guid? PlayitTunnelId { get; init; }
+
     /// <summary>Console commands waiting for the next start, such as "whitelist add Steve" added while stopped.</summary>
     public IReadOnlyList<string> PendingCommands { get; init; } = [];
 }

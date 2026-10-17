@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ using WaNut.Core.Network;
 using WaNut.Core.Notifications;
 using WaNut.Core.Players;
 using WaNut.Core.Settings;
+using WaNut.Core.Tunnels;
 using WaNut.Core.Updates;
 using WaNut.Core.Versions;
 using WaNut.Core.Worlds;
@@ -101,6 +103,11 @@ public partial class App : Application
         services.AddSingleton<FirewallService>();
         services.AddSingleton<IPortForwarder, RouterPortForwarder>();
         services.AddSingleton<PortForwardService>();
+        services.AddSingleton(s => new PlayitApi(s.GetRequiredService<HttpClient>()));
+        services.AddSingleton<PlayitFiles>();
+        services.AddSingleton<PlayitAgentDownloader>();
+        services.AddSingleton<PlayitTunnels>();
+        services.AddSingleton<TunnelService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<AppUpdater>();
         services.AddSingleton<ModrinthClient>();

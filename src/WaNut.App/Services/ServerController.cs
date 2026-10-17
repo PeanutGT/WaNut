@@ -14,7 +14,8 @@ namespace WaNut.App.Services;
 /// </summary>
 public sealed class ServerController(
     ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall,
-    PortForwardService portForwards)
+    PortForwardService portForwards,
+    TunnelService tunnels)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -160,7 +161,7 @@ public sealed class ServerController(
         }
     }
 
-    /// <summary>Stops the running server, if any, and removes its router rule before WaNut closes.</summary>
+    /// <summary>Stops the running server, if any, and removes its router rule and ends the playit agent before WaNut closes.</summary>
     public async Task ShutdownAsync()
     {
         if (Running is { IsRunning: true } running)
@@ -169,6 +170,7 @@ public sealed class ServerController(
         }
 
         await portForwards.CloseAnyAsync();
+        tunnels.StopAny();
     }
 
     public bool HasRunningServer => Running is { IsRunning: true };

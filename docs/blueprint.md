@@ -85,6 +85,12 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 ### Later phases: over the internet without extra tools
 * **UPnP (step 19):** "Open the port on my router automatically (UPnP)" on the Connect tab, saved per server (`OpenRouterPort` in `instance.json`), **off** by default. While it is on, starting the server forwards its TCP port with UPnP or NAT-PMP (`Mono.Nat`, chosen over the unmaintained `Open.Nat`) for a 1-hour lease renewed every 20 minutes, and stopping removes the rule, so one left by a crash ends by itself. The router's internet address joins the address list as "Internet" (and the invite card).
 * CGNAT and double NAT are told from the address the router reports for itself, without asking an outside website: `100.64.0.0/10` is CGNAT, a private address means a second router in front. No answer, a refusal and a port already taken by another device each get their own plain message with the fix.
+* **Built-in tunnel (step 20):** "Let friends join over the internet with playit.gg" on the Connect tab, saved per server (`UsePlayitTunnel` in `instance.json`), **off** by default. It works when the router lets nothing in (no UPnP, CGNAT).
+  * First use: WaNut opens playit.gg's claim page (`https://playit.gg/claim/<code>`) in the browser and waits; the user logs in or creates a free playit.gg account (the claim page requires one) and approves once. The agent key is kept in `playit\playit.toml` under the data folder and serves every server. "Forget this playit.gg account" (More settings) deletes it; "Manage tunnels on playit.gg" opens the dashboard.
+  * The agent is playit's official code-signed `playitd` (`playit-windows-x86_64-signed.exe` from the latest GitHub release), downloaded on first use and checked against the SHA-256 digest GitHub lists. It runs hidden, in WaNut's Job Object, with its own pipe (`\\.\pipe\wanut-playitd`) so it never touches a playit program the user installed, only while the server runs.
+  * Each server gets its own Minecraft Java tunnel (`PlayitTunnelId` in `instance.json`), created through playit's API once the agent has connected, and pointed at the new port when the port changes. Its name (`abc.tun.ply.gg`, found by Minecraft through an SRV record) joins the address list and the invite card. playit turns away a handshake that names a raw IP, so only the name is shown.
+  * playit's free limit, an unreachable playit.gg and an agent that cannot start each get their own plain message.
+  * Tested on Peanut's PC (2026-10-17, router blocks inbound): a tunnel WaNut created carried a Minecraft handshake to the local port. Right after the agent starts, playit can take up to about a minute before connections get through; the Connect tab says so.
 | Method | How It Works on Windows | Pros | Cons |
 | :--- | :--- | :--- | :--- |
 | **UPnP** | Forward TCP/UDP `25565` on the router automatically. | No accounts; lowest latency. | Fails if router UPnP is off or the ISP uses CGNAT. |
@@ -328,7 +334,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 17. ✓ Forge / NeoForge support in the Create Server wizard and "Change type or version"; Forge / NeoForge modpacks; the Mods tab and "Install the mods too" for Forge / NeoForge (section 1.B, section 5 "Change type or version").
 18. ✓ CurseForge server-pack import from a zip the user already downloaded, through the same "From a modpack" choice (section 6, decision 19).
 19. ✓ UPnP port forwarding on the Connect tab (`Mono.Nat`, UPnP and NAT-PMP), with a clear message when the router refuses or CGNAT is detected (section 2, "Later phases").
-20. Built-in tunnel (playit.gg or similar) with a copyable address.
+20. ✓ Built-in tunnel with playit.gg on the Connect tab (section 2, "Later phases"): approve once in the browser, one fixed address per server.
 21. Peanut-led guided onboarding (decision 17), once the steps above are stable.
 
 ### Development and testing
