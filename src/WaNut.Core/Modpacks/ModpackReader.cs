@@ -27,13 +27,21 @@ public static partial class ModpackReader
         ("neoforge", ServerType.NeoForge),
     ];
 
-    /// <exception cref="ModpackException">The file is not a usable .mrpack.</exception>
+    /// <summary>
+    /// Reads a Modrinth .mrpack, or a CurseForge server pack (any zip without a modrinth.index.json, see
+    /// <see cref="ServerPackReader"/>).
+    /// </summary>
+    /// <exception cref="ModpackException">The file is not a usable modpack.</exception>
     public static Modpack Read(string mrpackPath)
     {
         try
         {
             using var zip = ZipFile.OpenRead(mrpackPath);
-            var entry = zip.GetEntry(IndexFileName) ?? throw new ModpackException(ModpackProblem.NotAModpack);
+            if (zip.GetEntry(IndexFileName) is not { } entry)
+            {
+                return ServerPackReader.Read(zip, Path.GetFileNameWithoutExtension(mrpackPath));
+            }
+
             using var stream = entry.Open();
             return Parse(stream);
         }
@@ -162,7 +170,7 @@ public static partial class ModpackReader
 
     private static bool IsHex(string? value, int length) => value is not null && value.Length == length && value.All(Uri.IsHexDigit);
 
-    private static bool IsPlainVersion(string value) => PlainVersion().IsMatch(value);
+    internal static bool IsPlainVersion(string value) => PlainVersion().IsMatch(value);
 
     private static string? GetString(JsonElement element, string name) =>
         element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
