@@ -2,10 +2,12 @@
 
 A Windows app for starting your own Minecraft: Java Edition server in a few clicks: no command line, no Java setup, no config files.
 
-> Status: early release (v0.1.1). Works, but expect rough edges.
+> Status: early release (v0.2.0). Works, but expect rough edges.
 
 ## Features
-- Create a Vanilla, Paper or Fabric server (Minecraft 1.16.5 and newer) from a simple wizard
+- Create a Vanilla, Paper, Fabric, Forge or NeoForge server (Minecraft 1.16.5 and newer) from a simple wizard
+- Start from a modpack: a Modrinth `.mrpack` or a CurseForge server pack sets up the loader, mods and configs for you
+- Import a world, and a Fabric world's mods are installed with it
 - Java is downloaded automatically for the Minecraft version you pick
 - Live console, player list and safe shutdown that never corrupts your world
 - Game settings, whitelist and OP list without editing files; "More settings" and an Advanced mode for the rest
