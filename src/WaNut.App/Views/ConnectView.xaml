@@ -224,6 +224,47 @@
         <TextBlock Text="{Binding RouterProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
       </Border>
 
+      <!-- playit.gg tunnel: friends over the internet when the router lets nothing in. -->
+      <TextBlock Text="{res:Text Connect_Tunnel}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+      <CheckBox Content="{res:Text Connect_TunnelToggle}" IsChecked="{Binding UsePlayitTunnel}" />
+      <TextBlock Text="{res:Text Connect_TunnelHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+      <Expander Header="{res:Text Connect_TunnelAbout}" Margin="22,6,0,0">
+        <StackPanel Margin="4,6,0,0">
+          <TextBlock Text="{res:Text Connect_TunnelAboutWhat}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_TunnelAboutHow}" Style="{StaticResource Step}" />
+          <TextBlock Text="{res:Text Connect_TunnelAboutTradeoff}" Style="{StaticResource Step}" />
+        </StackPanel>
+      </Expander>
+      <TextBlock Text="{res:Text Connect_TunnelStarting}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
+                 Visibility="{Binding IsTunnelBusy, Converter={StaticResource Visible}}" />
+      <TextBlock Text="{Binding TunnelNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding TunnelNote}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+      <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsWaitingForApproval, Converter={StaticResource Visible}}">
+        <Button Content="{res:Text Connect_TunnelOpenPage}" Command="{Binding OpenClaimPageCommand}" />
+        <Button Content="{res:Text Connect_TunnelCancel}" Command="{Binding CancelTunnelSetupCommand}" Margin="8,0,0,0" />
+      </StackPanel>
+      <Border Margin="0,8,0,0">
+        <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource WarningBanner}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding TunnelProblem}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <TextBlock Text="{Binding TunnelProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </Border>
+
       <!-- More settings: playing over a virtual LAN tool -->
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
         <StackPanel Margin="4,8,0,0">
@@ -255,6 +296,15 @@
           </TextBlock>
           <TextBlock Text="{res:Text Connect_GuideNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
           <TextBlock Text="{res:Text Connect_GuideTrouble}" Style="{StaticResource Hint}" />
+
+          <TextBlock Text="{res:Text Connect_TunnelSettings}" Style="{StaticResource Label}" Margin="0,18,0,6" />
+          <TextBlock Style="{StaticResource Step}">
+            <Hyperlink Command="{Binding OpenPlayitTunnelsCommand}"><Run Text="{res:Text Connect_TunnelManage}" /></Hyperlink>
+          </TextBlock>
+          <StackPanel Visibility="{Binding IsTunnelSetUp, Converter={StaticResource Visible}}">
+            <Button Content="{res:Text Connect_TunnelForget}" Command="{Binding ForgetPlayitCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+            <TextBlock Text="{res:Text Connect_TunnelForgetHint}" Style="{StaticResource Hint}" Margin="0,4,0,0" />
+          </StackPanel>
         </StackPanel>
       </Expander>
     </StackPanel>

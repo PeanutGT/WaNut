@@ -12,4 +12,7 @@ public enum AdapterKind
 
     /// <summary>The router's internet address, once WaNut forwarded the port on it: friends anywhere.</summary>
     Internet,
+
+    /// <summary>The server's playit.gg tunnel: friends anywhere, even when the router lets nothing in.</summary>
+    Playit,
 }

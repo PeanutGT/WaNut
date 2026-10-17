@@ -1702,4 +1702,88 @@
   <data name="Change_ModsMoved" xml:space="preserve">
     <value>{0} 的模組不能在 {1} 上使用，所以 mods 資料夾會改名成「{2}」，不會刪除任何東西。請到 Mods 分頁安裝 {1} 的模組。</value>
   </data>
+  <data name="Connect_Tunnel" xml:space="preserve">
+    <value>透過 playit.gg 讓各地的朋友加入</value>
+  </data>
+  <data name="Connect_TunnelToggle" xml:space="preserve">
+    <value>用 playit.gg 讓朋友從網路加入</value>
+  </data>
+  <data name="Connect_TunnelHint" xml:space="preserve">
+    <value>就算路由器什麼都不讓進來也能用，朋友不用裝任何工具。第一次使用時，要在瀏覽器裡的 playit.gg 核准 WaNut 一次。</value>
+  </data>
+  <data name="Connect_TunnelAbout" xml:space="preserve">
+    <value>關於 playit.gg</value>
+  </data>
+  <data name="Connect_TunnelAboutWhat" xml:space="preserve">
+    <value>playit.gg 是免費服務，會透過它自己的伺服器把朋友的連線轉給你的電腦，所以路由器上什麼都不用開。</value>
+  </data>
+  <data name="Connect_TunnelAboutHow" xml:space="preserve">
+    <value>WaNut 第一次會下載 playit 的官方程式，只在這個伺服器開著時於背景執行。每個伺服器都有自己的地址，而且不會變。</value>
+  </data>
+  <data name="Connect_TunnelAboutTradeoff" xml:space="preserve">
+    <value>延遲可能比直接連線高一點，也需要 playit.gg 正常運作。朋友看不到你家的網路位址。</value>
+  </data>
+  <data name="Connect_TunnelApproveInBrowser" xml:space="preserve">
+    <value>瀏覽器已打開 playit.gg 的頁面。請登入或用訪客身分繼續，然後核准 WaNut。WaNut 會在這裡等。</value>
+  </data>
+  <data name="Connect_TunnelPressApprove" xml:space="preserve">
+    <value>快好了：請在 playit.gg 的頁面上按下核准。</value>
+  </data>
+  <data name="Connect_TunnelOpenPage" xml:space="preserve">
+    <value>再次打開頁面</value>
+  </data>
+  <data name="Connect_TunnelCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Connect_TunnelStarting" xml:space="preserve">
+    <value>正在啟動 playit.gg 通道⋯</value>
+  </data>
+  <data name="Connect_TunnelWhenStarted" xml:space="preserve">
+    <value>通道會跟著伺服器一起啟動，啟動後地址會出現在上面的列表。</value>
+  </data>
+  <data name="Connect_TunnelReady" xml:space="preserve">
+    <value>通道已開啟。請把上面的 playit.gg 地址給不在你家的朋友。</value>
+  </data>
+  <data name="Connect_TunnelNoAddressYet" xml:space="preserve">
+    <value>通道已開啟，但 playit.gg 還沒給它地址。請稍等一下再按「重新整理」。</value>
+  </data>
+  <data name="Connect_Kind_Playit" xml:space="preserve">
+    <value>playit.gg</value>
+  </data>
+  <data name="Connect_Hint_Playit" xml:space="preserve">
+    <value>給網路上任何地方的朋友，經由 playit.gg 連線。</value>
+  </data>
+  <data name="Connect_Tunnel_NotSetUp" xml:space="preserve">
+    <value>playit.gg 已經不認得這台電腦。請把開關關掉再打開，重新核准 WaNut。</value>
+  </data>
+  <data name="Connect_Tunnel_Rejected" xml:space="preserve">
+    <value>WaNut 沒有在 playit.gg 獲得核准。請再打開開關重試。</value>
+  </data>
+  <data name="Connect_Tunnel_Limit" xml:space="preserve">
+    <value>你的 playit.gg 帳號已達免費通道數量上限。請到 playit.gg 刪掉不用的通道（「更多設定」裡的「在 playit.gg 管理通道」），再重新啟動伺服器。</value>
+  </data>
+  <data name="Connect_Tunnel_Busy" xml:space="preserve">
+    <value>playit.gg 要求 WaNut 放慢速度。請等一分鐘再重新啟動伺服器。</value>
+  </data>
+  <data name="Connect_Tunnel_Refused" xml:space="preserve">
+    <value>playit.gg 拒絕了這個通道（{0}）。請稍後再試，或到 playit.gg 檢查你的通道。</value>
+  </data>
+  <data name="Connect_Tunnel_Offline" xml:space="preserve">
+    <value>WaNut 連不上 playit.gg。請檢查網路連線，再重新啟動伺服器。</value>
+  </data>
+  <data name="Connect_Tunnel_AgentFailed" xml:space="preserve">
+    <value>playit.gg 程式無法啟動：{0}</value>
+  </data>
+  <data name="Connect_TunnelSettings" xml:space="preserve">
+    <value>playit.gg</value>
+  </data>
+  <data name="Connect_TunnelManage" xml:space="preserve">
+    <value>在 playit.gg 管理通道</value>
+  </data>
+  <data name="Connect_TunnelForget" xml:space="preserve">
+    <value>忘記這個 playit.gg 帳號</value>
+  </data>
+  <data name="Connect_TunnelForgetHint" xml:space="preserve">
+    <value>WaNut 不再使用這台電腦在 playit.gg 的核准。你的通道和地址會留在 playit.gg；之後再打開通道時會重新請你核准。</value>
+  </data>
 </root>

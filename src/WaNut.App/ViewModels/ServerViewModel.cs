@@ -55,6 +55,7 @@ public sealed partial class ServerViewModel : ObservableObject
         IDialogService dialogs,
         FirewallService firewall,
         PortForwardService portForwards,
+        TunnelService tunnels,
         IClipboardService clipboard,
         ModLibrary mods,
         DiscordNotifier discord)
@@ -68,7 +69,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
-        Connect = new ConnectViewModel(this, firewall, portForwards, clipboard, app);
+        Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));

@@ -1724,4 +1724,88 @@ Stop the server and update?</value>
   <data name="Change_ModsMoved" xml:space="preserve">
     <value>Mods for {0} don't work on {1}, so the mods folder will be renamed to "{2}". Nothing is deleted; install mods for {1} on the Mods tab.</value>
   </data>
+  <data name="Connect_Tunnel" xml:space="preserve">
+    <value>Friends anywhere, through playit.gg</value>
+  </data>
+  <data name="Connect_TunnelToggle" xml:space="preserve">
+    <value>Let friends join over the internet with playit.gg</value>
+  </data>
+  <data name="Connect_TunnelHint" xml:space="preserve">
+    <value>Works even when your router lets nothing in. Friends need no extra tools. The first time, you approve WaNut once on playit.gg in your browser.</value>
+  </data>
+  <data name="Connect_TunnelAbout" xml:space="preserve">
+    <value>About playit.gg</value>
+  </data>
+  <data name="Connect_TunnelAboutWhat" xml:space="preserve">
+    <value>playit.gg is a free service that passes friends' connections to your PC through its own servers, so nothing has to be opened on your router.</value>
+  </data>
+  <data name="Connect_TunnelAboutHow" xml:space="preserve">
+    <value>WaNut downloads playit's official program the first time and runs it in the background only while this server runs. Each server gets its own address, which stays the same.</value>
+  </data>
+  <data name="Connect_TunnelAboutTradeoff" xml:space="preserve">
+    <value>Ping can be a little higher than over a direct connection, and it needs playit.gg to be online. Your home's internet address stays hidden from friends.</value>
+  </data>
+  <data name="Connect_TunnelApproveInBrowser" xml:space="preserve">
+    <value>A playit.gg page opened in your browser. Sign in or continue as a guest, then approve WaNut. WaNut waits here.</value>
+  </data>
+  <data name="Connect_TunnelPressApprove" xml:space="preserve">
+    <value>Almost there: press the approve button on the playit.gg page.</value>
+  </data>
+  <data name="Connect_TunnelOpenPage" xml:space="preserve">
+    <value>Open the page again</value>
+  </data>
+  <data name="Connect_TunnelCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Connect_TunnelStarting" xml:space="preserve">
+    <value>Starting the playit.gg tunnel...</value>
+  </data>
+  <data name="Connect_TunnelWhenStarted" xml:space="preserve">
+    <value>The tunnel starts with the server. Its address then appears in the list above.</value>
+  </data>
+  <data name="Connect_TunnelReady" xml:space="preserve">
+    <value>The tunnel is on. Give friends outside your home the playit.gg address above.</value>
+  </data>
+  <data name="Connect_TunnelNoAddressYet" xml:space="preserve">
+    <value>The tunnel is on, but playit.gg has not given it an address yet. Press Refresh in a moment.</value>
+  </data>
+  <data name="Connect_Kind_Playit" xml:space="preserve">
+    <value>playit.gg</value>
+  </data>
+  <data name="Connect_Hint_Playit" xml:space="preserve">
+    <value>For friends anywhere on the internet, through playit.gg.</value>
+  </data>
+  <data name="Connect_Tunnel_NotSetUp" xml:space="preserve">
+    <value>playit.gg no longer knows this PC. Turn the switch off and on again to approve WaNut again.</value>
+  </data>
+  <data name="Connect_Tunnel_Rejected" xml:space="preserve">
+    <value>WaNut was not approved on playit.gg. Turn the switch on again to try again.</value>
+  </data>
+  <data name="Connect_Tunnel_Limit" xml:space="preserve">
+    <value>Your playit.gg account has reached its free limit of tunnels. Delete a tunnel you no longer use on playit.gg ("Manage tunnels on playit.gg" under More settings), then start the server again.</value>
+  </data>
+  <data name="Connect_Tunnel_Busy" xml:space="preserve">
+    <value>playit.gg asked WaNut to slow down. Wait a minute, then start the server again.</value>
+  </data>
+  <data name="Connect_Tunnel_Refused" xml:space="preserve">
+    <value>playit.gg refused the tunnel ({0}). Try again later, or check your tunnels on playit.gg.</value>
+  </data>
+  <data name="Connect_Tunnel_Offline" xml:space="preserve">
+    <value>WaNut could not reach playit.gg. Check the internet connection, then start the server again.</value>
+  </data>
+  <data name="Connect_Tunnel_AgentFailed" xml:space="preserve">
+    <value>The playit.gg program could not start: {0}</value>
+  </data>
+  <data name="Connect_TunnelSettings" xml:space="preserve">
+    <value>playit.gg</value>
+  </data>
+  <data name="Connect_TunnelManage" xml:space="preserve">
+    <value>Manage tunnels on playit.gg</value>
+  </data>
+  <data name="Connect_TunnelForget" xml:space="preserve">
+    <value>Forget this playit.gg account</value>
+  </data>
+  <data name="Connect_TunnelForgetHint" xml:space="preserve">
+    <value>WaNut stops using this PC's approval on playit.gg. Your tunnels and their addresses stay on playit.gg; turning the tunnel on again asks for approval again.</value>
+  </data>
 </root>

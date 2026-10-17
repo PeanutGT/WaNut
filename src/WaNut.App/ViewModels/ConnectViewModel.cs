@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,12 +12,13 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Network;
 using WaNut.Core.Settings;
 using WaNut.Core.Sharing;
+using WaNut.Core.Tunnels;
 
 namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// The Connect tab: the addresses friends use to join (one per network adapter, with Copy) and whether Windows
-/// Firewall lets them through, and the port on the router (UPnP) for friends over the internet.
+/// Firewall lets them through, the port on the router (UPnP) and the playit.gg tunnel for friends over the internet.
 /// </summary>
 public sealed partial class ConnectViewModel : ObservableObject
 {
@@ -29,9 +31,12 @@ public sealed partial class ConnectViewModel : ObservableObject
         [nameof(AdapterKind.Hamachi)] = new("https://vpn.net/"),
     };
 
+    private static readonly Uri PlayitTunnelsPage = new("https://playit.gg/account/tunnels");
+
     private readonly ServerViewModel _server;
     private readonly FirewallService _firewall;
     private readonly PortForwardService _portForwards;
+    private readonly TunnelService _tunnels;
     private readonly IClipboardService _clipboard;
     private int _firewallCheck;
 
@@ -39,8 +44,13 @@ public sealed partial class ConnectViewModel : ObservableObject
     private IPAddress? _routerAddress;
     private int _routerPort;
 
+    // The playit.gg address while the tunnel runs, and the approval in the browser while it is awaited.
+    private string? _tunnelAddress;
+    private CancellationTokenSource? _tunnelSetup;
+
     public ConnectViewModel(
-        ServerViewModel server, FirewallService firewall, PortForwardService portForwards, IClipboardService clipboard, AppSettingsViewModel app)
+        ServerViewModel server, FirewallService firewall, PortForwardService portForwards, TunnelService tunnels, IClipboardService clipboard,
+        AppSettingsViewModel app)
     {
         App = app;
         _server = server;
@@ -49,6 +59,10 @@ public sealed partial class ConnectViewModel : ObservableObject
         _clipboard = clipboard;
         OpenRouterPort = server.Metadata.OpenRouterPort;
         RouterNote = OpenRouterPort ? Text.Get("Connect_RouterWhenStarted") : null;
+        _tunnels = tunnels;
+        UsePlayitTunnel = server.Metadata.UsePlayitTunnel;
+        IsTunnelSetUp = tunnels.IsSetUp;
+        TunnelNote = IdleTunnelNote();
     }
 
     public ObservableCollection<ConnectAddressViewModel> Addresses { get; } = [];
@@ -87,8 +101,31 @@ public sealed partial class ConnectViewModel : ObservableObject
     [ObservableProperty]
     private string? _routerProblem;
 
+    /// <summary>Run the playit.gg tunnel while this server runs (saved in instance.json).</summary>
+    [ObservableProperty]
+    private bool _usePlayitTunnel;
+
+    [ObservableProperty]
+    private bool _isTunnelBusy;
+
+    /// <summary>The approval page while WaNut waits for the user to approve it on playit.gg.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsWaitingForApproval))]
+    private Uri? _claimUrl;
+
+    [ObservableProperty]
+    private string? _tunnelNote;
+
+    [ObservableProperty]
+    private string? _tunnelProblem;
+
+    [ObservableProperty]
+    private bool _isTunnelSetUp;
+
     [ObservableProperty]
     private string? _errorText;
+
+    public bool IsWaitingForApproval => ClaimUrl is not null;
 
     public bool HasAddresses => Addresses.Count > 0;
 
@@ -108,6 +145,7 @@ public sealed partial class ConnectViewModel : ObservableObject
     /// </summary>
     public void OnShown()
     {
+        IsTunnelSetUp = _tunnels.IsSetUp;
         CopiedText = null;
         ErrorText = null;
         LoadAddresses();
@@ -118,6 +156,13 @@ public sealed partial class ConnectViewModel : ObservableObject
     private void Refresh()
     {
         LoadAddresses();
+
+        // A new tunnel can take a moment to get its address from playit.gg.
+        if (UsePlayitTunnel && _server.IsRunning && _tunnelAddress is null && !IsTunnelBusy && _tunnels.IsSetUp)
+        {
+            _ = StartTunnelAsync();
+        }
+
         _ = CheckFirewallAsync();
     }
 
@@ -228,6 +273,182 @@ public sealed partial class ConnectViewModel : ObservableObject
         {
             _ = CloseRouterPortAsync();
         }
+
+        if (status == ServerStatus.Starting && UsePlayitTunnel && _tunnels.IsSetUp)
+        {
+            _ = StartTunnelAsync();
+        }
+        else if (status == ServerStatus.Stopped)
+        {
+            StopTunnel();
+        }
+    }
+
+    partial void OnUsePlayitTunnelChanged(bool value)
+    {
+        if (value == _server.Metadata.UsePlayitTunnel)
+        {
+            return;
+        }
+
+        _server.UpdateMetadata(_server.Metadata with { UsePlayitTunnel = value });
+        if (!value)
+        {
+            _tunnelSetup?.Cancel();
+            StopTunnel();
+        }
+        else if (!_tunnels.IsSetUp)
+        {
+            _ = SetUpTunnelAsync();
+        }
+        else if (_server.IsRunning)
+        {
+            _ = StartTunnelAsync();
+        }
+    }
+
+    /// <summary>The first use: playit.gg asks the user to approve this PC once, in the browser.</summary>
+    private async Task SetUpTunnelAsync()
+    {
+        _tunnelSetup?.Cancel();
+        using var setup = _tunnelSetup = new CancellationTokenSource(TimeSpan.FromMinutes(30));
+        TunnelProblem = null;
+        TunnelNote = Text.Get("Connect_TunnelApproveInBrowser");
+        try
+        {
+            await _tunnels.SetUpAsync(url => ClaimUrl = url, new Progress<PlayitClaimStatus>(OnClaimStatus), setup.Token);
+            IsTunnelSetUp = true;
+            TunnelNote = IdleTunnelNote();
+            if (UsePlayitTunnel && _server.IsRunning)
+            {
+                await StartTunnelAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Turned off, or nobody approved it in 30 minutes.
+            UsePlayitTunnel = false;
+            TunnelNote = null;
+        }
+        catch (Exception e) when (e is PlayitException or HttpRequestException)
+        {
+            UsePlayitTunnel = false;
+            ShowTunnelProblem(e);
+        }
+        finally
+        {
+            ClaimUrl = null;
+            if (_tunnelSetup == setup)
+            {
+                _tunnelSetup = null;
+            }
+        }
+    }
+
+    private void OnClaimStatus(PlayitClaimStatus status)
+    {
+        if (status == PlayitClaimStatus.WaitingForApproval && ClaimUrl is not null)
+        {
+            TunnelNote = Text.Get("Connect_TunnelPressApprove");
+        }
+    }
+
+    private async Task StartTunnelAsync()
+    {
+        TunnelProblem = null;
+        TunnelNote = null;
+        IsTunnelBusy = true;
+        PlayitTunnel tunnel;
+        try
+        {
+            tunnel = await _tunnels.StartAsync(_server.Id, _server.Name, _server.Metadata.PlayitTunnelId, LoadPort(), null, CancellationToken.None);
+        }
+        catch (Exception e) when (e is PlayitException or HttpRequestException or IOException or InvalidDataException
+            or UnauthorizedAccessException or Core.Downloads.DownloadVerificationException or System.ComponentModel.Win32Exception)
+        {
+            IsTunnelSetUp = _tunnels.IsSetUp;
+            ShowTunnelProblem(e);
+            return;
+        }
+        finally
+        {
+            IsTunnelBusy = false;
+        }
+
+        if (tunnel.Id != _server.Metadata.PlayitTunnelId)
+        {
+            _server.UpdateMetadata(_server.Metadata with { PlayitTunnelId = tunnel.Id });
+        }
+
+        // Turned off, or stopped, while playit was answering.
+        if (!UsePlayitTunnel || !_server.IsRunning)
+        {
+            StopTunnel();
+            return;
+        }
+
+        if (tunnel.OfflineReasons.Contains("AgentOverLimit") || tunnel.OfflineReasons.Contains("TunnelDisabled"))
+        {
+            TunnelProblem = Text.Get("Connect_Tunnel_Limit");
+        }
+
+        _tunnelAddress = tunnel.Address;
+        TunnelNote = Text.Get(tunnel.Address is null ? "Connect_TunnelNoAddressYet" : "Connect_TunnelReady");
+        LoadAddresses();
+    }
+
+    private void StopTunnel()
+    {
+        _tunnels.Stop(_server.Id);
+        TunnelProblem = null;
+        TunnelNote = IdleTunnelNote();
+        if (_tunnelAddress is not null)
+        {
+            _tunnelAddress = null;
+            LoadAddresses();
+        }
+    }
+
+    private string? IdleTunnelNote() => UsePlayitTunnel ? Text.Get("Connect_TunnelWhenStarted") : null;
+
+    private void ShowTunnelProblem(Exception e)
+    {
+        TunnelNote = null;
+        TunnelProblem = e switch
+        {
+            PlayitException { Code: "NotSetUp" } => Text.Get("Connect_Tunnel_NotSetUp"),
+            PlayitException { Code: "UserRejected" } => Text.Get("Connect_Tunnel_Rejected"),
+            PlayitException { Code: "RequiresPlayitPremium" or "RequiresVerifiedAccount" or "AgentOverLimit" } => Text.Get("Connect_Tunnel_Limit"),
+            PlayitException { Code: "TooManyRequests" } => Text.Get("Connect_Tunnel_Busy"),
+            PlayitException p => string.Format(Text.Get("Connect_Tunnel_Refused"), p.Code),
+            HttpRequestException => Text.Get("Connect_Tunnel_Offline"),
+            _ => string.Format(Text.Get("Connect_Tunnel_AgentFailed"), e.Message),
+        };
+    }
+
+    [RelayCommand]
+    private void CancelTunnelSetup() => UsePlayitTunnel = false;
+
+    [RelayCommand]
+    private void OpenClaimPage()
+    {
+        if (ClaimUrl is { } url)
+        {
+            TunnelService.OpenInBrowser(url);
+        }
+    }
+
+    [RelayCommand]
+    private static void OpenPlayitTunnels() => TunnelService.OpenInBrowser(PlayitTunnelsPage);
+
+    /// <summary>Deletes the key; the tunnels and their addresses stay on playit.gg for when WaNut is approved again.</summary>
+    [RelayCommand]
+    private void ForgetPlayit()
+    {
+        _tunnels.Forget();
+        IsTunnelSetUp = false;
+        UsePlayitTunnel = false;
+        StopTunnel();
     }
 
     private async Task OpenRouterPortNowAsync()
@@ -329,6 +550,11 @@ public sealed partial class ConnectViewModel : ObservableObject
         if (_routerAddress is { } internet)
         {
             Addresses.Add(new ConnectAddressViewModel(new LocalAddress(string.Empty, AdapterKind.Internet, internet), _routerPort));
+        }
+
+        if (_tunnelAddress is { } tunnel)
+        {
+            Addresses.Add(new ConnectAddressViewModel(AdapterKind.Playit, tunnel));
         }
 
         OnPropertyChanged(nameof(HasAddresses));
