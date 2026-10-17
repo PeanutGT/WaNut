@@ -1,11 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.NetworkInformation;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
+using WaNut.Core.Hosting;
 using WaNut.Core.Network;
 using WaNut.Core.Settings;
 using WaNut.Core.Sharing;
@@ -14,7 +16,7 @@ namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// The Connect tab: the addresses friends use to join (one per network adapter, with Copy) and whether Windows
-/// Firewall lets them through.
+/// Firewall lets them through, and the port on the router (UPnP) for friends over the internet.
 /// </summary>
 public sealed partial class ConnectViewModel : ObservableObject
 {
@@ -29,15 +31,24 @@ public sealed partial class ConnectViewModel : ObservableObject
 
     private readonly ServerViewModel _server;
     private readonly FirewallService _firewall;
+    private readonly PortForwardService _portForwards;
     private readonly IClipboardService _clipboard;
     private int _firewallCheck;
 
-    public ConnectViewModel(ServerViewModel server, FirewallService firewall, IClipboardService clipboard, AppSettingsViewModel app)
+    // The router's internet address while the port is forwarded, listed with the other addresses.
+    private IPAddress? _routerAddress;
+    private int _routerPort;
+
+    public ConnectViewModel(
+        ServerViewModel server, FirewallService firewall, PortForwardService portForwards, IClipboardService clipboard, AppSettingsViewModel app)
     {
         App = app;
         _server = server;
         _firewall = firewall;
+        _portForwards = portForwards;
         _clipboard = clipboard;
+        OpenRouterPort = server.Metadata.OpenRouterPort;
+        RouterNote = OpenRouterPort ? Text.Get("Connect_RouterWhenStarted") : null;
     }
 
     public ObservableCollection<ConnectAddressViewModel> Addresses { get; } = [];
@@ -60,6 +71,21 @@ public sealed partial class ConnectViewModel : ObservableObject
 
     [ObservableProperty]
     private string? _copiedText;
+
+    /// <summary>Forward the port on the router while this server runs (saved in instance.json).</summary>
+    [ObservableProperty]
+    private bool _openRouterPort;
+
+    [ObservableProperty]
+    private bool _isAskingRouter;
+
+    /// <summary>How the router answered when all is well, or what happens next.</summary>
+    [ObservableProperty]
+    private string? _routerNote;
+
+    /// <summary>Why friends still can't come in over the internet, with what to do.</summary>
+    [ObservableProperty]
+    private string? _routerProblem;
 
     [ObservableProperty]
     private string? _errorText;
@@ -173,6 +199,86 @@ public sealed partial class ConnectViewModel : ObservableObject
         }
     }
 
+    partial void OnOpenRouterPortChanged(bool value)
+    {
+        if (value == _server.Metadata.OpenRouterPort)
+        {
+            return;
+        }
+
+        _server.UpdateMetadata(_server.Metadata with { OpenRouterPort = value });
+        if (value && _server.IsRunning)
+        {
+            _ = OpenRouterPortNowAsync();
+        }
+        else
+        {
+            _ = CloseRouterPortAsync();
+        }
+    }
+
+    /// <summary>The port is forwarded while the server runs, and the rule is removed once it stops.</summary>
+    internal void OnServerStatusChanged(ServerStatus status)
+    {
+        if (status == ServerStatus.Starting && OpenRouterPort)
+        {
+            _ = OpenRouterPortNowAsync();
+        }
+        else if (status == ServerStatus.Stopped)
+        {
+            _ = CloseRouterPortAsync();
+        }
+    }
+
+    private async Task OpenRouterPortNowAsync()
+    {
+        var port = LoadPort();
+        RouterNote = null;
+        RouterProblem = null;
+        IsAskingRouter = true;
+        PortForwardResult result;
+        try
+        {
+            result = await _portForwards.OpenAsync(_server.Id, port);
+        }
+        finally
+        {
+            IsAskingRouter = false;
+        }
+
+        // Turned off, or stopped, while the router was answering.
+        if (!OpenRouterPort || !_server.IsRunning)
+        {
+            await CloseRouterPortAsync();
+            return;
+        }
+
+        if (result.Outcome == PortForwardOutcome.Opened)
+        {
+            _routerAddress = result.PublicAddress;
+            _routerPort = port;
+            RouterNote = string.Format(Text.Get(_routerAddress is null ? "Connect_RouterOpenedNoAddress" : "Connect_RouterOpened"), port);
+            LoadAddresses();
+        }
+        else
+        {
+            RouterProblem = string.Format(Text.Get($"Connect_Router_{result.Outcome}"), port);
+        }
+    }
+
+    private async Task CloseRouterPortAsync()
+    {
+        RouterProblem = null;
+        RouterNote = OpenRouterPort ? Text.Get("Connect_RouterWhenStarted") : null;
+        if (_routerAddress is not null)
+        {
+            _routerAddress = null;
+            LoadAddresses();
+        }
+
+        await _portForwards.CloseAsync(_server.Id);
+    }
+
     /// <summary>The start of a server asked about the firewall; show the outcome here too.</summary>
     internal void OnFirewallAsked(FirewallChange change)
     {
@@ -191,18 +297,22 @@ public sealed partial class ConnectViewModel : ObservableObject
         _ => string.Format(Text.Get("Connect_FirewallFailed"), javaExe),
     };
 
-    private void LoadAddresses()
+    private int LoadPort()
     {
-        var port = ServerSettings.DefaultPort;
         try
         {
-            port = ServerSettingsStore.Load(_server.InstanceDir).Port;
+            return ServerSettingsStore.Load(_server.InstanceDir).Port;
         }
         catch (IOException)
         {
             // Show the default port rather than no addresses at all.
+            return ServerSettings.DefaultPort;
         }
+    }
 
+    private void LoadAddresses()
+    {
+        var port = LoadPort();
         Addresses.Clear();
         try
         {
@@ -214,6 +324,11 @@ public sealed partial class ConnectViewModel : ObservableObject
         catch (NetworkInformationException e)
         {
             ErrorText = string.Format(Text.Get("Connect_ListFailed"), e.Message);
+        }
+
+        if (_routerAddress is { } internet)
+        {
+            Addresses.Add(new ConnectAddressViewModel(new LocalAddress(string.Empty, AdapterKind.Internet, internet), _routerPort));
         }
 
         OnPropertyChanged(nameof(HasAddresses));

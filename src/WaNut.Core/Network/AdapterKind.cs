@@ -9,4 +9,7 @@ public enum AdapterKind
     ZeroTier,
     Tailscale,
     Hamachi,
+
+    /// <summary>The router's internet address, once WaNut forwarded the port on it: friends anywhere.</summary>
+    Internet,
 }

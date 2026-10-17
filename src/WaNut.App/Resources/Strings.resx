@@ -648,6 +648,63 @@ The current world will be replaced. WaNut backs it up first, so you can go back.
   <data name="Connect_Hint_Hamachi" xml:space="preserve">
     <value>For friends in your Hamachi network.</value>
   </data>
+  <data name="Connect_Kind_Internet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="Connect_Hint_Internet" xml:space="preserve">
+    <value>For friends anywhere. Your router forwards this port while the server runs.</value>
+  </data>
+  <data name="Connect_Router" xml:space="preserve">
+    <value>Friends over the internet</value>
+  </data>
+  <data name="Connect_RouterToggle" xml:space="preserve">
+    <value>Open the port on my router automatically (UPnP)</value>
+  </data>
+  <data name="Connect_RouterHint" xml:space="preserve">
+    <value>While this server runs, WaNut asks your router to let friends in from the internet, and closes it again when the server stops. Your whitelist still decides who can join.</value>
+  </data>
+  <data name="Connect_RouterAbout" xml:space="preserve">
+    <value>What is UPnP?</value>
+  </data>
+  <data name="Connect_RouterAboutWhat" xml:space="preserve">
+    <value>Every device in your home shares your router's one internet address. When a friend connects from outside, the router doesn't know which device it's for, so it blocks it. Opening a port tells the router: "connections to this port go to this PC". UPnP lets WaNut ask the router for that itself, so you don't have to change router settings by hand.</value>
+  </data>
+  <data name="Connect_RouterAboutHow" xml:space="preserve">
+    <value>With the switch on, WaNut opens the port when the server starts and closes it when the server stops. Friends anywhere then join with the Internet address in the list above, without Radmin VPN or another tool.</value>
+  </data>
+  <data name="Connect_RouterAboutFails" xml:space="preserve">
+    <value>It doesn't work when UPnP is turned off on the router (turn it on in the router's settings, often under Advanced or NAT), or when your internet provider shares one address between many homes (CGNAT). Then play over Radmin VPN or another tool, see More settings.</value>
+  </data>
+  <data name="Connect_RouterAboutSafe" xml:space="preserve">
+    <value>Only the server's own port opens, and only while the server runs. The whitelist is on by default, so people who aren't on it can't join even if they reach your server.</value>
+  </data>
+  <data name="Connect_RouterAsking" xml:space="preserve">
+    <value>Asking your router...</value>
+  </data>
+  <data name="Connect_RouterWhenStarted" xml:space="preserve">
+    <value>The port opens when the server starts.</value>
+  </data>
+  <data name="Connect_RouterOpened" xml:space="preserve">
+    <value>Your router lets friends in on port {0}. Give friends outside your home the Internet address above.</value>
+  </data>
+  <data name="Connect_RouterOpenedNoAddress" xml:space="preserve">
+    <value>Your router forwards port {0}, but didn't say its internet address. Search "what is my IP" in a browser and give friends that address with :{0}.</value>
+  </data>
+  <data name="Connect_Router_NoRouter" xml:space="preserve">
+    <value>Your router didn't answer. UPnP may be turned off in its settings (often under Advanced or NAT), or it doesn't support it. You can still play over Radmin VPN or another tool, see More settings.</value>
+  </data>
+  <data name="Connect_Router_Refused" xml:space="preserve">
+    <value>Your router refused to open port {0}. Check that UPnP is on in its settings, or forward port {0} (TCP) to this PC by hand.</value>
+  </data>
+  <data name="Connect_Router_Conflict" xml:space="preserve">
+    <value>Another device on your network already uses port {0} on the router. Change this server's port on the Server tab, then start it again.</value>
+  </data>
+  <data name="Connect_Router_Cgnat" xml:space="preserve">
+    <value>Your internet provider shares one internet address between many homes (CGNAT), so friends can't reach you this way. Play over Radmin VPN or another tool (see More settings), or ask your provider for a public IP.</value>
+  </data>
+  <data name="Connect_Router_DoubleNat" xml:space="preserve">
+    <value>There is a second router in front of yours, often your provider's modem, so opening the port here isn't enough. Set the modem to bridge mode, or play over Radmin VPN or another tool (see More settings).</value>
+  </data>
   <data name="Connect_Firewall" xml:space="preserve">
     <value>Windows Firewall</value>
   </data>

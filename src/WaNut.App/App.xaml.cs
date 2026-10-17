@@ -99,6 +99,8 @@ public partial class App : Application
         services.AddSingleton<InstanceCopier>();
         services.AddSingleton<IFirewall, WindowsFirewall>();
         services.AddSingleton<FirewallService>();
+        services.AddSingleton<IPortForwarder, RouterPortForwarder>();
+        services.AddSingleton<PortForwardService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<AppUpdater>();
         services.AddSingleton<ModrinthClient>();

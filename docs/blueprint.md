@@ -1,4 +1,4 @@
-﻿# WaNut — Minecraft: Java Edition Server Launcher Blueprint (Windows)
+# WaNut — Minecraft: Java Edition Server Launcher Blueprint (Windows)
 
 > Revision 3 (2026-10-14). Revised with Peanut from the original blueprint; revision 3 adds the positioning decisions (14–20).
 > Repository: https://github.com/PeanutGT/WaNut
@@ -83,6 +83,8 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * A short in-app guide, "Playing with friends over the internet", under More settings on the Connect tab. It is tool-neutral (the main tool differs by region): general steps for host and friends, then one line per common tool (Radmin VPN, ZeroTier, Tailscale, Hamachi) naming where to click. Any adapter with a usable IPv4 is listed, under its Windows name when WaNut doesn't know the tool.
 
 ### Later phases: over the internet without extra tools
+* **UPnP (step 19):** "Open the port on my router automatically (UPnP)" on the Connect tab, saved per server (`OpenRouterPort` in `instance.json`), **off** by default. While it is on, starting the server forwards its TCP port with UPnP or NAT-PMP (`Mono.Nat`, chosen over the unmaintained `Open.Nat`) for a 1-hour lease renewed every 20 minutes, and stopping removes the rule, so one left by a crash ends by itself. The router's internet address joins the address list as "Internet" (and the invite card).
+* CGNAT and double NAT are told from the address the router reports for itself, without asking an outside website: `100.64.0.0/10` is CGNAT, a private address means a second router in front. No answer, a refusal and a port already taken by another device each get their own plain message with the fix.
 | Method | How It Works on Windows | Pros | Cons |
 | :--- | :--- | :--- | :--- |
 | **UPnP** | Forward TCP/UDP `25565` on the router automatically. | No accounts; lowest latency. | Fails if router UPnP is off or the ISP uses CGNAT. |
@@ -325,7 +327,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 16. ✓ Modrinth `.mrpack` modpack server install (decision 19): "From a modpack" in the Create Server wizard (Fabric and Vanilla packs; Forge, NeoForge and Quilt packs are refused until step 17).
 17. ✓ Forge / NeoForge support in the Create Server wizard and "Change type or version"; Forge / NeoForge modpacks; the Mods tab and "Install the mods too" for Forge / NeoForge (section 1.B, section 5 "Change type or version").
 18. ✓ CurseForge server-pack import from a zip the user already downloaded, through the same "From a modpack" choice (section 6, decision 19).
-19. UPnP port forwarding (`Open.Nat`) on the Connect tab, with a clear message when the router refuses or CGNAT is detected.
+19. ✓ UPnP port forwarding on the Connect tab (`Mono.Nat`, UPnP and NAT-PMP), with a clear message when the router refuses or CGNAT is detected (section 2, "Later phases").
 20. Built-in tunnel (playit.gg or similar) with a copyable address.
 21. Peanut-led guided onboarding (decision 17), once the steps above are stable.
 

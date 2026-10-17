@@ -54,6 +54,7 @@ public sealed partial class ServerViewModel : ObservableObject
         BackupStore backups,
         IDialogService dialogs,
         FirewallService firewall,
+        PortForwardService portForwards,
         IClipboardService clipboard,
         ModLibrary mods,
         DiscordNotifier discord)
@@ -67,7 +68,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists = new PlayerListsViewModel(this);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
-        Connect = new ConnectViewModel(this, firewall, clipboard, app);
+        Connect = new ConnectViewModel(this, firewall, portForwards, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
@@ -329,6 +330,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.OnServerStatusChanged();
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
+        Connect.OnServerStatusChanged(value);
         if (value == ServerStatus.Online)
         {
             _wasOnline = true;
