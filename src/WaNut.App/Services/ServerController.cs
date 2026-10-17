@@ -13,7 +13,8 @@ namespace WaNut.App.Services;
 /// Starts and stops servers for the screens: one server at a time, and never a forced close without asking.
 /// </summary>
 public sealed class ServerController(
-    ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall)
+    ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall,
+    PortForwardService portForwards)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -159,8 +160,16 @@ public sealed class ServerController(
         }
     }
 
-    /// <summary>Stops the running server, if any, before WaNut closes.</summary>
-    public Task ShutdownAsync() => Running is { IsRunning: true } running ? StopAsync(running) : Task.CompletedTask;
+    /// <summary>Stops the running server, if any, and removes its router rule before WaNut closes.</summary>
+    public async Task ShutdownAsync()
+    {
+        if (Running is { IsRunning: true } running)
+        {
+            await StopAsync(running);
+        }
+
+        await portForwards.CloseAnyAsync();
+    }
 
     public bool HasRunningServer => Running is { IsRunning: true };
 

@@ -636,6 +636,48 @@
   <data name="Connect_Hint_Hamachi" xml:space="preserve">
     <value>給在你 Hamachi 網路裡的朋友。</value>
   </data>
+  <data name="Connect_Kind_Internet" xml:space="preserve">
+    <value>網際網路</value>
+  </data>
+  <data name="Connect_Hint_Internet" xml:space="preserve">
+    <value>給任何地方的朋友。伺服器開著時，路由器會轉送這個連接埠。</value>
+  </data>
+  <data name="Connect_Router" xml:space="preserve">
+    <value>跟網路上的朋友玩</value>
+  </data>
+  <data name="Connect_RouterToggle" xml:space="preserve">
+    <value>自動在路由器開啟連接埠（UPnP）</value>
+  </data>
+  <data name="Connect_RouterHint" xml:space="preserve">
+    <value>這個伺服器開著時，WaNut 會請路由器讓網路上的朋友進來，伺服器停止時再關上。誰能加入仍由白名單決定。</value>
+  </data>
+  <data name="Connect_RouterAsking" xml:space="preserve">
+    <value>正在詢問路由器...</value>
+  </data>
+  <data name="Connect_RouterWhenStarted" xml:space="preserve">
+    <value>伺服器啟動時會開啟連接埠。</value>
+  </data>
+  <data name="Connect_RouterOpened" xml:space="preserve">
+    <value>路由器已在連接埠 {0} 讓朋友進來。把上面的「網際網路」位址給不在你家的朋友。</value>
+  </data>
+  <data name="Connect_RouterOpenedNoAddress" xml:space="preserve">
+    <value>路由器已轉送連接埠 {0}，但沒有告訴我們它的網際網路位址。請在瀏覽器搜尋「我的 IP」，把那個位址加上 :{0} 給朋友。</value>
+  </data>
+  <data name="Connect_Router_NoRouter" xml:space="preserve">
+    <value>路由器沒有回應。可能是路由器設定裡的 UPnP 被關掉了（常在「進階」或「NAT」裡），或路由器不支援。你還是可以用 Radmin VPN 或其他工具一起玩，請看「更多設定」。</value>
+  </data>
+  <data name="Connect_Router_Refused" xml:space="preserve">
+    <value>路由器拒絕開啟連接埠 {0}。請確認路由器設定裡的 UPnP 有開，或手動把連接埠 {0}（TCP）轉送到這台電腦。</value>
+  </data>
+  <data name="Connect_Router_Conflict" xml:space="preserve">
+    <value>網路裡已經有另一台裝置在路由器上用了連接埠 {0}。請到「伺服器」分頁換一個連接埠，再重新啟動伺服器。</value>
+  </data>
+  <data name="Connect_Router_Cgnat" xml:space="preserve">
+    <value>你的網路業者讓很多家庭共用同一個網際網路位址（CGNAT），所以朋友沒辦法用這個方式連進來。請改用 Radmin VPN 或其他工具（看「更多設定」），或向業者申請公開 IP。</value>
+  </data>
+  <data name="Connect_Router_DoubleNat" xml:space="preserve">
+    <value>你的路由器前面還有另一台路由器（常是業者的數據機），只在這裡開連接埠還不夠。請把數據機設成橋接模式，或改用 Radmin VPN 或其他工具（看「更多設定」）。</value>
+  </data>
   <data name="Connect_Firewall" xml:space="preserve">
     <value>Windows 防火牆</value>
   </data>
