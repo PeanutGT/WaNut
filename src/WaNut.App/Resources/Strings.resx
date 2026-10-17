@@ -1602,25 +1602,28 @@ Stop the server and update?</value>
     <value>From a modpack</value>
   </data>
   <data name="CreateServer_WorldModpackHint" xml:space="preserve">
-    <value>Use a Modrinth modpack (.mrpack) you downloaded. WaNut sets up the right type, version and mods.</value>
+    <value>Use a Modrinth modpack (.mrpack) or a CurseForge server pack (.zip) you downloaded. WaNut sets up the right type, version and mods.</value>
   </data>
   <data name="Modpack_PickLabel" xml:space="preserve">
     <value>Which modpack?</value>
   </data>
   <data name="Modpack_Pick" xml:space="preserve">
-    <value>Choose a .mrpack file…</value>
+    <value>Choose a modpack file…</value>
   </data>
   <data name="Modpack_PickTitle" xml:space="preserve">
-    <value>Choose a Modrinth modpack</value>
+    <value>Choose a modpack</value>
   </data>
   <data name="Modpack_Filter" xml:space="preserve">
-    <value>Modrinth modpacks (*.mrpack)|*.mrpack</value>
+    <value>Modpacks (*.mrpack; *.zip)|*.mrpack;*.zip</value>
   </data>
   <data name="Modpack_Summary" xml:space="preserve">
     <value>{0} {1}: Minecraft {2}, {3}. {4} files to download; {5} files that only the game uses are skipped.</value>
   </data>
+  <data name="Modpack_ServerPackSummary" xml:space="preserve">
+    <value>{0} {1}: Minecraft {2}, {3}. A CurseForge server pack with {4} mods.</value>
+  </data>
   <data name="Modpack_Hint" xml:space="preserve">
-    <value>Friends play with the same modpack installed in their own launcher (for example the Modrinth App).</value>
+    <value>Friends play with the same modpack installed in their own launcher (for example the Modrinth App or CurseForge).</value>
   </data>
   <data name="Modpack_VersionMissing" xml:space="preserve">
     <value>This modpack needs Minecraft {0}, which WaNut can't make a server for yet.</value>
@@ -1629,13 +1632,19 @@ Stop the server and update?</value>
     <value>Could not open the modpack: {0}</value>
   </data>
   <data name="Modpack_Problem_NotAModpack" xml:space="preserve">
-    <value>This file isn't a Modrinth modpack. Download the .mrpack file from the modpack's Modrinth page.</value>
+    <value>This file isn't a modpack WaNut can read. Use the .mrpack file from Modrinth, or the Server Pack zip from the Files page of the modpack on CurseForge.</value>
   </data>
   <data name="Modpack_Problem_UnsupportedLoader" xml:space="preserve">
     <value>This modpack needs {0}, which WaNut doesn't support yet. Fabric, Forge, NeoForge and Vanilla modpacks work.</value>
   </data>
   <data name="Modpack_Problem_UnsafeFile" xml:space="preserve">
     <value>This modpack has a file WaNut won't install (it would go outside the server folder or comes from an unknown website).</value>
+  </data>
+  <data name="Modpack_Problem_ClientPack" xml:space="preserve">
+    <value>This is the CurseForge pack for the game, not for a server. On the modpack's CurseForge page, open Files, pick the version and download its Server Pack.</value>
+  </data>
+  <data name="Modpack_Problem_UnknownServerPack" xml:space="preserve">
+    <value>WaNut can't tell which Minecraft version and mod loader this server pack needs. It has no manifest.json, variables.txt or loader installer that says so.</value>
   </data>
   <data name="Modpack_Installing" xml:space="preserve">
     <value>Installing the modpack…</value>

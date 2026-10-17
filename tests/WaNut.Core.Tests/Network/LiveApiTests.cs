@@ -1,11 +1,14 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO.Compression;
+using System.Text.Json;
 using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Http;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
+using WaNut.Core.Modpacks;
 using WaNut.Core.Tests.TestSupport;
 using WaNut.Core.Versions;
 
@@ -146,6 +149,82 @@ public sealed class LiveApiTests : IDisposable
         Assert.True(stopped);
         Assert.Equal(0, await server.Exited);
         Assert.True(Directory.Exists(Path.Combine(store.InstanceDir(metadata.Id), "world")));
+    }
+
+    /// <summary>
+    /// A CurseForge-style server pack with one real mod from Modrinth (FerriteCore): the loader is installed, the
+    /// pack's files copied, and the server reaches Online with the mod loaded.
+    /// </summary>
+    [Theory]
+    [InlineData("forge", "1.20.1", "47.3.0")]
+    [InlineData("neoforge", "1.21.1", "latest")]
+    [InlineData("forge", "1.16.5", "36.2.39")]
+    public async Task ServerPack_RealLoader_StartsOnlineWithItsMods(string loader, string gameVersion, string loaderVersion)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        using var temp = new TempDir();
+        var paths = new LauncherPaths(temp.Path);
+        paths.EnsureCreated();
+        var downloader = new FileDownloader(_http);
+        var versions = new MojangVersionService(_http, downloader);
+        var java = new JavaRuntimeManager(paths, new AdoptiumClient(_http), downloader);
+        var store = new InstanceStore(paths);
+        var creator = new ServerCreator(paths, versions, new PaperClient(_http), new FabricClient(_http), new ForgeClient(_http), new NeoForgeClient(_http), new ForgeInstallerRunner(), java, downloader, store, new BackupStore(TimeProvider.System), TimeProvider.System);
+
+        if (loaderVersion == "latest")
+        {
+            loaderVersion = (await new NeoForgeClient(_http).GetInstallerAsync(gameVersion)).LoaderVersion;
+        }
+
+        var query = $"https://api.modrinth.com/v2/project/ferrite-core/version?loaders=[\"{loader}\"]&game_versions=[\"{gameVersion}\"]";
+        using var modVersions = JsonDocument.Parse(await _http.GetStringAsync(new Uri(query)));
+        var modUrl = new Uri(modVersions.RootElement[0].GetProperty("files")[0].GetProperty("url").GetString()!);
+        var mod = await _http.GetByteArrayAsync(modUrl);
+        var zipPath = Path.Combine(temp.Path, "Live Pack Server.zip");
+        using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+        {
+            void Add(string name, byte[] data)
+            {
+                using var stream = zip.CreateEntry(name).Open();
+                stream.Write(data);
+            }
+
+            var loaderName = loader == "forge" ? "Forge" : "NeoForge";
+            Add("Live Pack/variables.txt", System.Text.Encoding.UTF8.GetBytes($"MINECRAFT_VERSION={gameVersion}\nMODLOADER={loaderName}\nMODLOADER_VERSION={loaderVersion}\n"));
+            Add("Live Pack/mods/ferritecore.jar", mod);
+            Add("Live Pack/config/live-pack.txt", "hello"u8.ToArray());
+            Add("Live Pack/start.bat", "java -jar server.jar"u8.ToArray());
+            Add("Live Pack/server.properties", "motd=Live pack\nwhite-list=false\n"u8.ToArray());
+        }
+
+        var pack = ModpackReader.Read(zipPath);
+        Assert.Equal(gameVersion, pack.MinecraftVersion);
+        var version = (await versions.GetReleasesAsync()).Single(r => r.Id == pack.MinecraftVersion);
+        var metadata = await creator.CreateAsync(new CreateServerRequest("Live Pack", version, 3072, EulaAccepted: true, pack.Type, LoaderVersion: pack.LoaderVersion));
+        var instanceDir = store.InstanceDir(metadata.Id);
+        await new ModpackInstaller(downloader).InstallAsync(instanceDir, zipPath, pack);
+        Assert.True(File.Exists(Path.Combine(instanceDir, "mods", "ferritecore.jar")));
+        Assert.False(File.Exists(Path.Combine(instanceDir, "start.bat")));
+
+        var launch = await new ServerLaunchPlanner(store, java).PrepareAsync(metadata);
+        var lines = new ConcurrentQueue<string>();
+        using var server = new ServerHost().Start(metadata.Id, launch);
+        server.OutputReceived += lines.Enqueue;
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online || !server.IsRunning, timeoutMs: 600_000);
+        Assert.True(server.Status == ServerStatus.Online, string.Join(Environment.NewLine, lines.TakeLast(40)));
+
+        var stopped = await server.StopAsync(TimeSpan.FromSeconds(90));
+        Assert.True(stopped);
+        // Forge 1.20.1 lists the loaded mods only in logs/debug.log.
+        var logs = Directory.EnumerateFiles(Path.Combine(instanceDir, "logs"), "*.log").Select(File.ReadAllText);
+        Assert.Contains(lines.Concat(logs), l => l.Contains("ferritecore", StringComparison.OrdinalIgnoreCase));
+        var properties = Core.Properties.PropertiesFile.Load(Path.Combine(instanceDir, "server.properties"));
+        Assert.Equal("Live pack", properties.Get("motd"));
+        Assert.Equal("true", properties.Get("white-list"));
     }
 
     [Fact]

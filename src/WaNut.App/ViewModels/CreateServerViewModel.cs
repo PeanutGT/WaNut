@@ -131,7 +131,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public bool IsModpack => SelectedWorldChoice.Id == "modpack";
 
-    /// <summary>The .mrpack the user picked, once it has been read.</summary>
+    /// <summary>The .mrpack or CurseForge server pack the user picked, once it has been read.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ModpackSummary), nameof(ModpackVersionMissing))]
     [NotifyCanExecuteChangedFor(nameof(CreateCommand))]
@@ -144,6 +144,14 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public string? ModpackSummary => Modpack is null
         ? null
+        : Modpack.IsServerPack
+        ? string.Format(
+            Text.Get("Modpack_ServerPackSummary"),
+            Modpack.Name,
+            Modpack.Version,
+            Modpack.MinecraftVersion,
+            Text.Get($"CreateServer_Type{Modpack.Type}"),
+            Modpack.ModCount)
         : string.Format(
             Text.Get("Modpack_Summary"),
             Modpack.Name,

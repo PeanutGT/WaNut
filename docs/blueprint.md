@@ -245,7 +245,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * [x] Forge / NeoForge support.
 * [ ] Modpack server install (decision 19):
   * **Modrinth `.mrpack`:** read `modrinth.index.json`, keep only files whose `env.server` is not `unsupported`, verify each file's sha1/sha512, apply `overrides/` then `server-overrides/`, and pick the loader and Minecraft version from `dependencies`. Forge and NeoForge packs install the loader version the pack names; Quilt packs are refused.
-  * **CurseForge:** import a server pack zip the user already downloaded. Automatic download is hard because the API needs a key and some authors block third-party downloads.
+  * **CurseForge:** import a server pack zip the user already downloaded. Automatic download is hard because the API needs a key and some authors block third-party downloads. The same "From a modpack" choice takes the zip. Server packs have no standard index, so the Minecraft version and loader come from the first of: `manifest.json`, ServerPackCreator's `variables.txt`, ServerStarter's `server-setup-config.yaml`, the loader's installer jar or `libraries/` folders, version variables in the start scripts. A wrapper folder (one or two levels) is skipped. WaNut installs the loader itself, so the author's jars, start scripts, `libraries/`, `user_jvm_args.txt` and the OP, whitelist and ban lists are not copied; the pack's `server.properties` is merged in except whitelist, `online-mode`, ports, query, RCON and management keys. A CurseForge pack for the game (a manifest listing file ids, mods only in `overrides/`) is refused with a hint to download the Server Pack.
 
 ### Phase 3: Quality of Life & Safety
 * [ ] Scheduled backups and backup restore improvements.
@@ -324,7 +324,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 15.2. ✓ Misc big update (decision 27, section 5 "Misc big update").
 16. ✓ Modrinth `.mrpack` modpack server install (decision 19): "From a modpack" in the Create Server wizard (Fabric and Vanilla packs; Forge, NeoForge and Quilt packs are refused until step 17).
 17. ✓ Forge / NeoForge support in the Create Server wizard and "Change type or version"; Forge / NeoForge modpacks; the Mods tab and "Install the mods too" for Forge / NeoForge (section 1.B, section 5 "Change type or version").
-18. CurseForge server-pack import from a zip the user already downloaded.
+18. ✓ CurseForge server-pack import from a zip the user already downloaded, through the same "From a modpack" choice (section 6, decision 19).
 19. UPnP port forwarding (`Open.Nat`) on the Connect tab, with a clear message when the router refuses or CGNAT is detected.
 20. Built-in tunnel (playit.gg or similar) with a copyable address.
 21. Peanut-led guided onboarding (decision 17), once the steps above are stable.
