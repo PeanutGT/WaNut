@@ -43,20 +43,23 @@ public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downl
         var secret = files.LoadSecret() ?? throw new PlayitException("NotSetUp");
         var agentExe = await downloader.EnsureInstalledAsync(progress, cancellationToken);
 
-        PlayitTunnel tunnel;
+        // Started first: playit only makes a new tunnel for an agent that has connected.
+        _owner = owner;
+        _agent.Start(agentExe);
         try
         {
-            tunnel = await tunnels.EnsureTunnelAsync(secret, tunnelId, serverName, port, cancellationToken: cancellationToken);
+            return await tunnels.EnsureTunnelAsync(secret, tunnelId, serverName, port, cancellationToken: cancellationToken);
         }
         catch (PlayitException e) when (e.Code is "InvalidAgentKey" or "AgentNotFound")
         {
             Forget();
             throw new PlayitException("NotSetUp");
         }
-
-        _owner = owner;
-        _agent.Start(agentExe);
-        return tunnel;
+        catch
+        {
+            Stop(owner);
+            throw;
+        }
     }
 
     /// <summary>Ends the agent if <paramref name="owner"/> started it.</summary>

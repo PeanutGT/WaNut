@@ -1731,7 +1731,7 @@ Stop the server and update?</value>
     <value>Let friends join over the internet with playit.gg</value>
   </data>
   <data name="Connect_TunnelHint" xml:space="preserve">
-    <value>Works even when your router lets nothing in. Friends need no extra tools. The first time, you approve WaNut once on playit.gg in your browser.</value>
+    <value>Works even when your router lets nothing in. Friends need no extra tools. The first time, you sign in to playit.gg (a free account) in your browser and approve WaNut once.</value>
   </data>
   <data name="Connect_TunnelAbout" xml:space="preserve">
     <value>About playit.gg</value>
@@ -1746,7 +1746,7 @@ Stop the server and update?</value>
     <value>Ping can be a little higher than over a direct connection, and it needs playit.gg to be online. Your home's internet address stays hidden from friends.</value>
   </data>
   <data name="Connect_TunnelApproveInBrowser" xml:space="preserve">
-    <value>A playit.gg page opened in your browser. Sign in or continue as a guest, then approve WaNut. WaNut waits here.</value>
+    <value>A playit.gg page opened in your browser. Log in, or create a free playit.gg account, then approve WaNut. WaNut waits here.</value>
   </data>
   <data name="Connect_TunnelPressApprove" xml:space="preserve">
     <value>Almost there: press the approve button on the playit.gg page.</value>
@@ -1764,7 +1764,7 @@ Stop the server and update?</value>
     <value>The tunnel starts with the server. Its address then appears in the list above.</value>
   </data>
   <data name="Connect_TunnelReady" xml:space="preserve">
-    <value>The tunnel is on. Give friends outside your home the playit.gg address above.</value>
+    <value>The tunnel is on. Give friends outside your home the playit.gg address above. Right after a start, playit.gg can take up to a minute before friends get through.</value>
   </data>
   <data name="Connect_TunnelNoAddressYet" xml:space="preserve">
     <value>The tunnel is on, but playit.gg has not given it an address yet. Press Refresh in a moment.</value>

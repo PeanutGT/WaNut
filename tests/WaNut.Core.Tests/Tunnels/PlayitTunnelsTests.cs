@@ -8,6 +8,7 @@ public sealed class PlayitTunnelsTests
 {
     private const string Secret = "abc123";
     private static readonly Guid TunnelId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+    private static readonly Guid AgentId = Guid.Parse("99999999-2222-3333-4444-555555555555");
 
     private static string Tunnels(int port, string? address)
     {
@@ -53,16 +54,19 @@ public sealed class PlayitTunnelsTests
     {
         var stub = new PlayitStubHandler()
             .On("v1/tunnels/list", NoTunnels, Tunnels(25565, null), Tunnels(25565, "abc.gl.joinmc.link"))
-            .On("v1/tunnels/create", "{\"status\":\"success\",\"data\":{\"id\":\"" + TunnelId + "\"}}");
+            .On("v1/agents/rundata", "{\"status\":\"success\",\"data\":{\"agent_id\":\"" + AgentId + "\"}}")
+            .On("tunnels/create", """{"status":"fail","data":"AgentVersionTooOld"}""", "{\"status\":\"success\",\"data\":{\"id\":\"" + TunnelId + "\"}}");
 
         var tunnel = await new PlayitTunnels(new PlayitApi(stub.CreateClient()))
             .EnsureTunnelAsync(Secret, null, "Survival", 25565, TimeSpan.Zero);
 
         Assert.Equal(TunnelId, tunnel.Id);
         Assert.Equal("abc.gl.joinmc.link", tunnel.Address);
-        var create = JsonNode.Parse(stub.Requests.Single(r => r.Path == "v1/tunnels/create").Body)!;
-        Assert.Equal("minecraft-java", create["ports"]!["details"]!.GetValue<string>());
-        Assert.Equal("25565", create["origin"]!["data"]!["config"]!["fields"]![1]!["value"]!.GetValue<string>());
+        Assert.Equal(2, stub.Count("tunnels/create"));
+        var create = JsonNode.Parse(stub.Requests.Last(r => r.Path == "tunnels/create").Body)!;
+        Assert.Equal("minecraft-java", create["tunnel_type"]!.GetValue<string>());
+        Assert.Equal(AgentId.ToString(), create["origin"]!["data"]!["agent_id"]!.GetValue<string>());
+        Assert.Equal(25565, create["origin"]!["data"]!["local_port"]!.GetValue<int>());
         Assert.All(stub.Requests, r => Assert.Equal($"Agent-Key {Secret}", r.Authorization));
     }
 
@@ -77,7 +81,7 @@ public sealed class PlayitTunnelsTests
             .EnsureTunnelAsync(Secret, TunnelId, "Survival", 25570, TimeSpan.Zero);
 
         Assert.Equal(25570, tunnel.LocalPort);
-        Assert.Equal(0, stub.Count("v1/tunnels/create"));
+        Assert.Equal(0, stub.Count("tunnels/create"));
         Assert.Contains("\"25570\"", stub.Requests.Single(r => r.Path == "v1/tunnels/config").Body);
     }
 
@@ -98,7 +102,8 @@ public sealed class PlayitTunnelsTests
     {
         var stub = new PlayitStubHandler()
             .On("v1/tunnels/list", NoTunnels)
-            .On("v1/tunnels/create", """{"status":"fail","data":"RequiresPlayitPremium"}""");
+            .On("v1/agents/rundata", "{\"status\":\"success\",\"data\":{\"agent_id\":\"" + AgentId + "\"}}")
+            .On("tunnels/create", """{"status":"fail","data":"RequiresPlayitPremium"}""");
 
         var e = await Assert.ThrowsAsync<PlayitException>(() =>
             new PlayitTunnels(new PlayitApi(stub.CreateClient())).EnsureTunnelAsync(Secret, null, "Survival", 25565, TimeSpan.Zero));
@@ -114,6 +119,26 @@ public sealed class PlayitTunnelsTests
         var e = await Assert.ThrowsAsync<PlayitException>(() => new PlayitApi(stub.CreateClient()).ListTunnelsAsync(Secret));
 
         Assert.Equal("InvalidAgentKey", e.Code);
+    }
+
+    [Fact]
+    public void ParseTunnels_RealAnswer_PicksTheNameBeforeRawIps()
+    {
+        // Trimmed from a real v1/tunnels/list answer (2026-10).
+        var data = JsonNode.Parse("""
+            {"tunnels":[{"id":"ab410b0d-9551-466e-99fa-46a54ed68468","name":"Spike","offline_reasons":null,
+              "origin":{"type":"agent","details":{"config_data":{"fields":[{"name":"local_ip","value":"127.0.0.1"},{"name":"local_port","value":"25599"}]}}},
+              "connect_addresses":[
+                {"type":"auto","value":{"address":"practically-cooperation.tun.ply.gg","source":{"resource":"port-allocation"}}},
+                {"type":"auto","value":{"address":"215.ip.gl.ply.gg:62291","source":{"resource":"port-allocation"}}},
+                {"type":"addr4","value":{"address":"147.185.221.215:62291","source":{"resource":"port-allocation"}}}]}]}
+            """);
+
+        var tunnel = Assert.Single(PlayitApi.ParseTunnels(data));
+
+        Assert.Equal("practically-cooperation.tun.ply.gg", tunnel.Address);
+        Assert.Equal(25599, tunnel.LocalPort);
+        Assert.Empty(tunnel.OfflineReasons);
     }
 
     [Theory]

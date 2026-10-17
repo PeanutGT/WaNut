@@ -52,7 +52,7 @@ public sealed class PlayitTunnels(PlayitApi api)
         var tunnel = tunnels.FirstOrDefault(t => t.Id == tunnelId);
         if (tunnel is null)
         {
-            var id = await api.CreateTunnelAsync(secret, TunnelName(serverName), port, cancellationToken).ConfigureAwait(false);
+            var id = await CreateAsync(secret, TunnelName(serverName), port, pollEvery ?? DefaultPollEvery, cancellationToken).ConfigureAwait(false);
             return await WaitForAddressAsync(secret, id, pollEvery ?? DefaultPollEvery, cancellationToken).ConfigureAwait(false);
         }
 
@@ -82,6 +82,23 @@ public sealed class PlayitTunnels(PlayitApi api)
         var name = ascii.ToString().Trim();
         var full = name.Length == 0 ? "WaNut server" : $"WaNut: {name}";
         return full.Length <= MaxNameLength ? full : full[..MaxNameLength].TrimEnd();
+    }
+
+    // The agent was just started; playit accepts the tunnel once the agent has connected, usually within seconds.
+    private async Task<Guid> CreateAsync(string secret, string name, int port, TimeSpan pollEvery, CancellationToken cancellationToken)
+    {
+        var agentId = await api.GetAgentIdAsync(secret, cancellationToken).ConfigureAwait(false);
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                return await api.CreateTunnelAsync(secret, agentId, name, port, cancellationToken).ConfigureAwait(false);
+            }
+            catch (PlayitException e) when (e.Code == "AgentVersionTooOld" && attempt < 15)
+            {
+                await Task.Delay(pollEvery, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 
     private async Task<PlayitTunnel> WaitForAddressAsync(string secret, Guid id, TimeSpan pollEvery, CancellationToken cancellationToken)

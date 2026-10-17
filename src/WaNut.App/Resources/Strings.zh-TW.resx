@@ -1709,7 +1709,7 @@
     <value>用 playit.gg 讓朋友從網路加入</value>
   </data>
   <data name="Connect_TunnelHint" xml:space="preserve">
-    <value>就算路由器什麼都不讓進來也能用，朋友不用裝任何工具。第一次使用時，要在瀏覽器裡的 playit.gg 核准 WaNut 一次。</value>
+    <value>就算路由器什麼都不讓進來也能用，朋友不用裝任何工具。第一次使用時，要在瀏覽器登入 playit.gg（免費帳號）並核准 WaNut 一次。</value>
   </data>
   <data name="Connect_TunnelAbout" xml:space="preserve">
     <value>關於 playit.gg</value>
@@ -1724,7 +1724,7 @@
     <value>延遲可能比直接連線高一點，也需要 playit.gg 正常運作。朋友看不到你家的網路位址。</value>
   </data>
   <data name="Connect_TunnelApproveInBrowser" xml:space="preserve">
-    <value>瀏覽器已打開 playit.gg 的頁面。請登入或用訪客身分繼續，然後核准 WaNut。WaNut 會在這裡等。</value>
+    <value>瀏覽器已打開 playit.gg 的頁面。請登入，或免費註冊 playit.gg 帳號，然後核准 WaNut。WaNut 會在這裡等。</value>
   </data>
   <data name="Connect_TunnelPressApprove" xml:space="preserve">
     <value>快好了：請在 playit.gg 的頁面上按下核准。</value>
@@ -1742,7 +1742,7 @@
     <value>通道會跟著伺服器一起啟動，啟動後地址會出現在上面的列表。</value>
   </data>
   <data name="Connect_TunnelReady" xml:space="preserve">
-    <value>通道已開啟。請把上面的 playit.gg 地址給不在你家的朋友。</value>
+    <value>通道已開啟。請把上面的 playit.gg 地址給不在你家的朋友。剛啟動時，playit.gg 可能要等一分鐘左右朋友才連得進來。</value>
   </data>
   <data name="Connect_TunnelNoAddressYet" xml:space="preserve">
     <value>通道已開啟，但 playit.gg 還沒給它地址。請稍等一下再按「重新整理」。</value>

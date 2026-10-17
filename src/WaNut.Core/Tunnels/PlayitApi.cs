@@ -65,21 +65,35 @@ public sealed class PlayitApi(HttpClient http, Uri? apiBase = null)
         return ParseTunnels(data);
     }
 
-    /// <summary>Creates a Minecraft: Java tunnel to <paramref name="localPort"/> on this PC and returns its id.</summary>
-    public async Task<Guid> CreateTunnelAsync(string secret, string name, int localPort, CancellationToken cancellationToken = default)
+    /// <summary>The id playit gave this PC's agent when it was approved.</summary>
+    public async Task<Guid> GetAgentIdAsync(string secret, CancellationToken cancellationToken = default)
     {
-        var data = await CallAsync("v1/tunnels/create", secret, new JsonObject
+        var data = await CallAsync("v1/agents/rundata", secret, new JsonObject(), cancellationToken).ConfigureAwait(false);
+        return Guid.TryParse(AsString(data?["agent_id"]), out var id) ? id : throw new PlayitException("NoAgentId");
+    }
+
+    /// <summary>
+    /// Creates a Minecraft: Java tunnel to <paramref name="localPort"/> on this PC and returns its id. playit refuses
+    /// with "AgentVersionTooOld" until the agent has connected once, since only then it knows the agent's version.
+    /// </summary>
+    /// <remarks>This uses the older create call: playit's server does not accept the v1 one (checked 2026-10).</remarks>
+    public async Task<Guid> CreateTunnelAsync(string secret, Guid agentId, string name, int localPort, CancellationToken cancellationToken = default)
+    {
+        var data = await CallAsync("tunnels/create", secret, new JsonObject
         {
             ["name"] = name,
-            ["ports"] = new JsonObject { ["type"] = "tunnel-type", ["details"] = MinecraftJavaTunnelType },
+            ["tunnel_type"] = MinecraftJavaTunnelType,
+            ["port_type"] = "tcp",
+            ["port_count"] = 1,
             ["origin"] = new JsonObject
             {
                 ["type"] = "agent",
-                ["data"] = new JsonObject { ["agent_id"] = null, ["config"] = Config(localPort) },
+                ["data"] = new JsonObject { ["agent_id"] = agentId.ToString(), ["local_ip"] = "127.0.0.1", ["local_port"] = localPort },
             },
             ["enabled"] = true,
             ["alloc"] = null,
             ["firewall_id"] = null,
+            ["proxy_protocol"] = null,
         }, cancellationToken).ConfigureAwait(false);
 
         return Guid.TryParse(AsString(data?["id"]), out var id) ? id : throw new PlayitException("NoTunnelId");
@@ -125,7 +139,8 @@ public sealed class PlayitApi(HttpClient http, Uri? apiBase = null)
         return tunnels;
     }
 
-    // The name players type: playit's own name ("abc.gl.joinmc.link") first, then a custom domain, then a bare IP.
+    // The name players type: playit's own name first ("abc.tun.ply.gg", found through its SRV record), then a custom
+    // domain, then an IP. A name is required: playit turns away a Minecraft handshake that names a raw IP.
     private static string? ConnectAddress(JsonNode tunnel)
     {
         var addresses = tunnel["connect_addresses"]?.AsArray().OfType<JsonNode>().ToList() ?? [];
