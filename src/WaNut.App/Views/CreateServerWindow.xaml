@@ -43,6 +43,17 @@
       <ProgressBar
                    Value="{Binding ProgressPercent, Mode=OneWay}"
                    IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
+      <TextBlock Text="{Binding Eta.Text}" FontSize="12" Margin="0,6,0,0">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Eta.Text}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
     </StackPanel>
 
     <Border DockPanel.Dock="Bottom" Margin="0,14,0,0">

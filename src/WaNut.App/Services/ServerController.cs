@@ -15,7 +15,8 @@ namespace WaNut.App.Services;
 public sealed class ServerController(
     ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall,
     PortForwardService portForwards,
-    TunnelService tunnels)
+    TunnelService tunnels,
+    DesktopNotifier notifier)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -58,6 +59,10 @@ public sealed class ServerController(
 
             var progress = new Progress<DownloadProgress>(server.ReportJavaDownload);
             var launch = await planner.PrepareAsync(server.Metadata, progress);
+            if (server.DownloadedJava)
+            {
+                notifier.NotifyIfAway(string.Format(Text.Get("Notify_JavaReady"), server.Name));
+            }
 
             // Before java.exe first listens, so Windows never shows its own firewall prompt behind WaNut's window.
             if (await firewall.AskOnceAsync(launch.FileName, server.Metadata.JavaMajor) is { } change)
