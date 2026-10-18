@@ -9,8 +9,8 @@ using WaNut.Core.Updates;
 namespace WaNut.App.ViewModels;
 
 /// <summary>
-/// WaNut's own updates (decision 8): a quiet check when WaNut starts, a card in the sidebar when a new version is
-/// out, and "Check now" in App settings. A running server is stopped (and its world saved) before WaNut restarts.
+/// WaNut's own updates (decision 8): a quiet check when WaNut starts, a card in the sidebar and a Windows notification
+/// when a new version is out, and "Check now" in App settings. Every check's result goes to update.log. A running server is stopped (and its world saved) before WaNut restarts.
 /// </summary>
 public sealed partial class UpdateViewModel : ObservableObject
 {
@@ -20,13 +20,17 @@ public sealed partial class UpdateViewModel : ObservableObject
     private readonly AppUpdater _updater;
     private readonly ServerController _controller;
     private readonly IDialogService _dialogs;
+    private readonly TrayIcon _tray;
+    private readonly UpdateLog _log;
     private UpdateInfo? _update;
 
-    public UpdateViewModel(AppUpdater updater, ServerController controller, IDialogService dialogs)
+    public UpdateViewModel(AppUpdater updater, ServerController controller, IDialogService dialogs, TrayIcon tray, UpdateLog log)
     {
         _updater = updater;
         _controller = controller;
         _dialogs = dialogs;
+        _tray = tray;
+        _log = log;
         VersionText = string.Format(
             Text.Get("Update_CurrentVersion"),
             _updater.CurrentVersion ?? Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
@@ -67,11 +71,16 @@ public sealed partial class UpdateViewModel : ObservableObject
     {
         if (!IsInstalled)
         {
+            _log.Write("Startup check skipped: WaNut is not running from its installer.");
             return;
         }
 
         await Task.Delay(StartupDelay);
         await CheckAsync(quiet: true);
+        if (AvailableVersion is not null)
+        {
+            _tray.Notify(Text.Get("App_Title"), string.Format(Text.Get("Update_Notify"), AvailableVersion));
+        }
     }
 
     private bool CanCheck() => IsIdle;
@@ -165,13 +174,15 @@ public sealed partial class UpdateViewModel : ObservableObject
         {
             _update = await _updater.CheckAsync();
             AvailableVersion = _update?.TargetFullRelease.Version.ToString();
+            _log.Write($"{(quiet ? "Startup" : "Manual")} check: {AvailableVersion ?? "up to date"} (running {_updater.CurrentVersion}).");
             OnPropertyChanged(nameof(CardText));
             Dismissed = false;
             StatusText = quiet ? null : _update is null ? Text.Get("Update_UpToDate") : CardText;
         }
         catch (Exception e)
         {
-            // Offline, GitHub's rate limit or a damaged feed: never worth more than a line in App settings.
+            // Offline, GitHub's rate limit or a damaged feed: never worth more than a line in App settings and the log.
+            _log.Write($"{(quiet ? "Startup" : "Manual")} check failed: {e.GetType().Name}: {e.Message}");
             StatusText = quiet ? null : string.Format(Text.Get("Update_CheckFailed"), e.Message);
         }
         finally

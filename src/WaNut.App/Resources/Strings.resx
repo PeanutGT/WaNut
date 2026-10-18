@@ -814,6 +814,9 @@ Windows asks for administrator approval next. WaNut then removes the blocking ru
   <data name="Update_CheckOnStartHint" xml:space="preserve">
     <value>WaNut looks for a new version on GitHub and asks before installing it.</value>
   </data>
+  <data name="Update_Notify" xml:space="preserve">
+    <value>A fresh WaNut {0} is ready! Click the card at the bottom left to update.</value>
+  </data>
   <data name="Update_Available" xml:space="preserve">
     <value>A fresh WaNut {0} is ready!</value>
   </data>

@@ -798,6 +798,9 @@
   <data name="Update_CheckOnStartHint" xml:space="preserve">
     <value>WaNut 會到 GitHub 找新版本，安裝前會先問你。</value>
   </data>
+  <data name="Update_Notify" xml:space="preserve">
+    <value>新鮮的 WaNut {0} 準備好了！點左下角的卡片就能更新。</value>
+  </data>
   <data name="Update_Available" xml:space="preserve">
     <value>新鮮的 WaNut {0} 準備好了！</value>
   </data>

@@ -121,6 +121,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
         services.AddSingleton<AppSettingsViewModel>();
+        services.AddSingleton<UpdateLog>();
         services.AddSingleton<UpdateViewModel>();
         services.AddSingleton<GuideViewModel>();
         services.AddSingleton<MainViewModel>();
