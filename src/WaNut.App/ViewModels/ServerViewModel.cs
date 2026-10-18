@@ -23,6 +23,7 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Older console lines are dropped so a long-running server does not slow the window down.</summary>
     public const int MaxConsoleLines = 2000;
 
+    private readonly ProgressEta _javaEta = new();
     private readonly ServerController _controller;
     private readonly InstanceStore _store;
     private readonly DiscordNotifier _discord;
@@ -183,7 +184,9 @@ public sealed partial class ServerViewModel : ObservableObject
         ? (BackupFraction, JavaDownloadFraction) switch
         {
             ({ } backup, _) => string.Format(Text.Get("Status_BackingUp"), backup * 100),
-            (_, { } java) => string.Format(Text.Get("Status_DownloadingJava"), java * 100),
+            (_, { } java) => _javaEta.Text is { } eta
+                ? $"{string.Format(Text.Get("Status_DownloadingJava"), java * 100)} · {eta}"
+                : string.Format(Text.Get("Status_DownloadingJava"), java * 100),
             _ => Text.Get("Status_Preparing"),
         }
         : Backups.IsWorking ? Backups.WorkText : Text.Get($"Status_{Status}");
@@ -242,6 +245,8 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         ErrorText = null;
         JavaDownloadFraction = null;
+        DownloadedJava = false;
+        _javaEta.Reset();
         IsPreparing = true;
     }
 
@@ -280,7 +285,15 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.OnFilesBusyChanged();
     }
 
-    internal void ReportJavaDownload(DownloadProgress progress) => JavaDownloadFraction = progress.Fraction;
+    /// <summary>True once Java was downloaded while this server got ready to start.</summary>
+    internal bool DownloadedJava { get; private set; }
+
+    internal void ReportJavaDownload(DownloadProgress progress)
+    {
+        DownloadedJava = true;
+        _javaEta.Report(progress.Fraction, progress.BytesReceived);
+        JavaDownloadFraction = progress.Fraction;
+    }
 
     internal void ShowError(string message) => ErrorText = message;
 

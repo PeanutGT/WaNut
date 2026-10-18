@@ -508,7 +508,7 @@ public sealed class ServerCreator(
 
         progress.Report(new CreateServerProgress(stage));
         // Forward synchronously so download updates never arrive after the next stage has started.
-        return new SyncProgress<DownloadProgress>(p => progress.Report(new CreateServerProgress(stage, p.Fraction)));
+        return new SyncProgress<DownloadProgress>(p => progress.Report(new CreateServerProgress(stage, p.Fraction, p.BytesReceived)));
     }
 
     /// <param name="LaunchJar">The jar java.exe runs, or "@" and an argument file.</param>

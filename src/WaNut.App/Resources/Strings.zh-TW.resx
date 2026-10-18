@@ -1894,4 +1894,28 @@
   <data name="AppSettings_ShowGuide" xml:space="preserve">
     <value>再看一次導覽</value>
   </data>
+  <data name="Eta_Seconds" xml:space="preserve">
+    <value>剩約 {0} 秒</value>
+  </data>
+  <data name="Eta_Minutes" xml:space="preserve">
+    <value>剩約 {0} 分 {1} 秒</value>
+  </data>
+  <data name="Eta_Speed" xml:space="preserve">
+    <value>{0:0.0} MB/s</value>
+  </data>
+  <data name="Notify_ServerCreated" xml:space="preserve">
+    <value>伺服器「{0}」準備好了！</value>
+  </data>
+  <data name="Notify_CreateFailed" xml:space="preserve">
+    <value>建立「{0}」時出了問題，打開 WaNut 看看發生什麼事。</value>
+  </data>
+  <data name="Notify_ServerChanged" xml:space="preserve">
+    <value>「{0}」換好了，可以開始玩。</value>
+  </data>
+  <data name="Notify_ChangeFailed" xml:space="preserve">
+    <value>更改「{0}」時出了問題，打開 WaNut 看看發生什麼事。</value>
+  </data>
+  <data name="Notify_JavaReady" xml:space="preserve">
+    <value>Java 下載好了，「{0}」正在啟動。</value>
+  </data>
 </root>

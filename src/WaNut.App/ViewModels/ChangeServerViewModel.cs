@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
+using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
@@ -18,15 +19,18 @@ public sealed partial class ChangeServerViewModel : ObservableObject
 {
     private readonly ServerVersionCatalog _catalog;
     private readonly ServerCreator _creator;
+    private readonly DesktopNotifier _notifier;
     private CancellationTokenSource? _cancellation;
+    private CreateServerStage? _stage;
     private InstanceMetadata _server = null!;
     private bool _worldExists;
     private bool _closeWhenCancelled;
 
-    public ChangeServerViewModel(ServerVersionCatalog catalog, ServerCreator creator)
+    public ChangeServerViewModel(ServerVersionCatalog catalog, ServerCreator creator, DesktopNotifier notifier)
     {
         _catalog = catalog;
         _creator = creator;
+        _notifier = notifier;
     }
 
     /// <summary>Raised when the window should close; true means the server was changed.</summary>
@@ -85,6 +89,8 @@ public sealed partial class ChangeServerViewModel : ObservableObject
     public double ProgressPercent => (ProgressFraction ?? 0) * 100;
 
     public bool IsProgressIndeterminate => ProgressFraction is null;
+
+    public ProgressEta Eta { get; } = new();
 
     public bool IsUnchanged => SelectedType?.Type == _server?.Type && SelectedVersion?.Id == _server?.MinecraftVersion;
 
@@ -203,7 +209,18 @@ public sealed partial class ChangeServerViewModel : ObservableObject
             _cancellation = null;
             CanCancelChange = false;
             OnPropertyChanged(nameof(CanCancelChange));
+            _stage = null;
+            Eta.Reset();
             IsBusy = false;
+        }
+
+        if (Changed is not null)
+        {
+            _notifier.NotifyIfAway(string.Format(Text.Get("Notify_ServerChanged"), _server.Name));
+        }
+        else if (ErrorText is not null)
+        {
+            _notifier.NotifyIfAway(string.Format(Text.Get("Notify_ChangeFailed"), _server.Name));
         }
 
         if (Changed is not null)
@@ -255,7 +272,14 @@ public sealed partial class ChangeServerViewModel : ObservableObject
             OnPropertyChanged(nameof(CanCancelChange));
         }
 
+        if (progress.Stage != _stage)
+        {
+            _stage = progress.Stage;
+            Eta.Reset();
+        }
+
         StatusText = Text.Get($"CreateServer_Stage_{progress.Stage}");
         ProgressFraction = progress.Fraction;
+        Eta.Report(progress.Fraction, progress.BytesReceived);
     }
 }

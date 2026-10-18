@@ -26,7 +26,9 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private readonly ModpackInstaller _modpacks;
     private readonly InstanceStore _store;
     private readonly IDialogService _dialogs;
+    private readonly DesktopNotifier _notifier;
     private CancellationTokenSource? _cancellation;
+    private CreateServerStage? _stage;
 
     public CreateServerViewModel(
         ServerVersionCatalog catalog,
@@ -36,8 +38,10 @@ public sealed partial class CreateServerViewModel : ObservableObject
         ModpackInstaller modpacks,
         InstanceStore store,
         IDialogService dialogs,
-        AppSettingsViewModel app)
+        AppSettingsViewModel app,
+        DesktopNotifier notifier)
     {
+        _notifier = notifier;
         App = app;
         _catalog = catalog;
         _creator = creator;
@@ -246,6 +250,8 @@ public sealed partial class CreateServerViewModel : ObservableObject
     public double ProgressPercent => (ProgressFraction ?? 0) * 100;
 
     public bool IsProgressIndeterminate => ProgressFraction is null;
+
+    public ProgressEta Eta { get; } = new();
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
@@ -461,7 +467,18 @@ public sealed partial class CreateServerViewModel : ObservableObject
         {
             _cancellation.Dispose();
             _cancellation = null;
+            _stage = null;
+            Eta.Reset();
             IsBusy = false;
+        }
+
+        if (Created is not null)
+        {
+            _notifier.NotifyIfAway(string.Format(Text.Get("Notify_ServerCreated"), Name.Trim()));
+        }
+        else if (ErrorText is not null)
+        {
+            _notifier.NotifyIfAway(string.Format(Text.Get("Notify_CreateFailed"), Name.Trim()));
         }
 
         // Only after IsCreating is false, so the window does not treat this close as "stop the download".
@@ -484,13 +501,13 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private async Task<string> ImportWorldAsync(InstanceMetadata created, CancellationToken cancellationToken)
     {
         StatusText = Text.Get("World_Copying");
-        ProgressFraction = 0;
+        StartPart();
         var instanceDir = _store.InstanceDir(created.Id);
         WorldImportResult result;
         try
         {
             var request = new WorldImportRequest(Picker.Source!, created.Type, created.MinecraftVersion, OwnerName.Trim(), BringInventory && CanBringInventory);
-            result = await _importer.ImportAsync(instanceDir, request, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+            result = await _importer.ImportAsync(instanceDir, request, new Progress<double>(ShowFraction), cancellationToken);
         }
         catch
         {
@@ -511,9 +528,9 @@ public sealed partial class CreateServerViewModel : ObservableObject
         if (Picker.WillInstallMods)
         {
             StatusText = Text.Get("World_InstallingMods");
-            ProgressFraction = 0;
+            StartPart();
             mods = await WorldMessages.InstallModsAsync(
-                _mods, instanceDir, created.MinecraftVersion, Picker.Source!, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+                _mods, instanceDir, created.MinecraftVersion, Picker.Source!, new Progress<double>(ShowFraction), cancellationToken);
         }
 
         return WorldMessages.Join(WorldMessages.ImportNotes(result), mods);
@@ -526,11 +543,11 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private async Task InstallModpackAsync(InstanceMetadata created, CancellationToken cancellationToken)
     {
         StatusText = Text.Get("Modpack_Installing");
-        ProgressFraction = 0;
+        StartPart();
         var instanceDir = _store.InstanceDir(created.Id);
         try
         {
-            await _modpacks.InstallAsync(instanceDir, _modpackPath!, Modpack!, new Progress<double>(f => ProgressFraction = f), cancellationToken);
+            await _modpacks.InstallAsync(instanceDir, _modpackPath!, Modpack!, new Progress<double>(ShowFraction), cancellationToken);
         }
         catch
         {
@@ -571,8 +588,28 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     private void ShowProgress(CreateServerProgress progress)
     {
+        if (progress.Stage != _stage)
+        {
+            _stage = progress.Stage;
+            Eta.Reset();
+        }
+
         StatusText = Text.Get($"CreateServer_Stage_{progress.Stage}");
         ProgressFraction = progress.Fraction;
+        Eta.Report(progress.Fraction, progress.BytesReceived);
+    }
+
+    /// <summary>Copying the world, installing its mods or the pack's files: a new bar and a new time guess.</summary>
+    private void StartPart()
+    {
+        ProgressFraction = 0;
+        Eta.Reset();
+    }
+
+    private void ShowFraction(double fraction)
+    {
+        ProgressFraction = fraction;
+        Eta.Report(fraction);
     }
 }
 
