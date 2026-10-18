@@ -10,7 +10,8 @@ namespace WaNut.App.Services;
 
 /// <summary>
 /// WaNut's icon in the notification area while its window is hidden and a server keeps running. The icon's dot
-/// follows the server: green online, amber starting or saving, gray stopped.
+/// follows the server: green online, amber starting or saving, gray stopped. It also carries WaNut's Windows
+/// notifications, showing just for as long as the notification does when the window is open.
 /// </summary>
 public sealed class TrayIcon : IDisposable
 {
@@ -23,6 +24,9 @@ public sealed class TrayIcon : IDisposable
     private Forms.NotifyIcon? _icon;
     private Forms.ToolStripMenuItem? _stopItem;
     private bool _toldOnce;
+
+    // Shown only to carry a notification while the window is open; hidden again once the notification goes.
+    private bool _noticeOnly;
 
     public TrayIcon(ServerController controller)
     {
@@ -37,6 +41,56 @@ public sealed class TrayIcon : IDisposable
     public event EventHandler? ExitRequested;
 
     public void Show()
+    {
+        var icon = EnsureIcon();
+        _noticeOnly = false;
+        Refresh();
+        icon.Visible = true;
+        _timer.Start();
+        if (!_toldOnce)
+        {
+            // Once per run, so the user knows where WaNut went.
+            _toldOnce = true;
+            icon.ShowBalloonTip(5000, Text.Get("App_Title"), Text.Get("Tray_Balloon"), Forms.ToolTipIcon.None);
+        }
+    }
+
+    /// <summary>A Windows notification from WaNut. Clicking it opens WaNut.</summary>
+    public void Notify(string title, string message)
+    {
+        var icon = EnsureIcon();
+        if (!icon.Visible)
+        {
+            _noticeOnly = true;
+            Refresh();
+            icon.Visible = true;
+        }
+
+        icon.ShowBalloonTip(5000, title, message, Forms.ToolTipIcon.None);
+    }
+
+    public void Hide()
+    {
+        _noticeOnly = false;
+        _timer.Stop();
+        if (_icon is not null)
+        {
+            _icon.Visible = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer.Stop();
+        _icon?.Dispose();
+        foreach (var icon in _icons.Values)
+        {
+            DestroyIcon(icon.Handle);
+            icon.Dispose();
+        }
+    }
+
+    private Forms.NotifyIcon EnsureIcon()
     {
         if (_icon is null)
         {
@@ -54,36 +108,22 @@ public sealed class TrayIcon : IDisposable
             menu.Items.Add(Text.Get("Tray_Exit"), null, (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty));
             _icon = new Forms.NotifyIcon { ContextMenuStrip = menu };
             _icon.DoubleClick += (_, _) => OpenRequested?.Invoke(this, EventArgs.Empty);
+            _icon.BalloonTipClicked += (_, _) =>
+            {
+                OpenRequested?.Invoke(this, EventArgs.Empty);
+                EndNotice();
+            };
+            _icon.BalloonTipClosed += (_, _) => EndNotice();
         }
 
-        Refresh();
-        _icon.Visible = true;
-        _timer.Start();
-        if (!_toldOnce)
-        {
-            // Once per run, so the user knows where WaNut went.
-            _toldOnce = true;
-            _icon.ShowBalloonTip(5000, Text.Get("App_Title"), Text.Get("Tray_Balloon"), Forms.ToolTipIcon.None);
-        }
+        return _icon;
     }
 
-    public void Hide()
+    private void EndNotice()
     {
-        _timer.Stop();
-        if (_icon is not null)
+        if (_noticeOnly)
         {
-            _icon.Visible = false;
-        }
-    }
-
-    public void Dispose()
-    {
-        _timer.Stop();
-        _icon?.Dispose();
-        foreach (var icon in _icons.Values)
-        {
-            DestroyIcon(icon.Handle);
-            icon.Dispose();
+            Hide();
         }
     }
 
