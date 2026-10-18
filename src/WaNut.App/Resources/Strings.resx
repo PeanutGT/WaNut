@@ -1808,4 +1808,109 @@ Stop the server and update?</value>
   <data name="Connect_TunnelForgetHint" xml:space="preserve">
     <value>WaNut stops using this PC's approval on playit.gg. Your tunnels and their addresses stay on playit.gg; turning the tunnel on again asks for approval again.</value>
   </data>
+  <data name="Guide_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Guide_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Guide_Skip" xml:space="preserve">
+    <value>Skip the guide</value>
+  </data>
+  <data name="Guide_Finish" xml:space="preserve">
+    <value>Got it!</value>
+  </data>
+  <data name="Guide_Step" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Guide_WelcomeTitle" xml:space="preserve">
+    <value>Hi, I'm Peanut!</value>
+  </data>
+  <data name="Guide_WelcomeText" xml:space="preserve">
+    <value>Let me show you around WaNut. It only takes a minute, and you can skip it at any time.</value>
+  </data>
+  <data name="Guide_CreateTitle" xml:space="preserve">
+    <value>Make a server</value>
+  </data>
+  <data name="Guide_CreateText" xml:space="preserve">
+    <value>Start here. Pick a name, a Minecraft version and a type, and I'll download everything the server needs.</value>
+  </data>
+  <data name="Guide_ServersTitle" xml:space="preserve">
+    <value>Your servers</value>
+  </data>
+  <data name="Guide_ServersText" xml:space="preserve">
+    <value>Every server you make shows up in this list. Click one to see its tabs. The dot turns green while it's online.</value>
+  </data>
+  <data name="Guide_AppSettingsTitle" xml:space="preserve">
+    <value>App settings</value>
+  </data>
+  <data name="Guide_AppSettingsText" xml:space="preserve">
+    <value>Language, dark mode, updates and Advanced mode live here. You can also watch this guide again from there.</value>
+  </data>
+  <data name="Guide_LaterTitle" xml:space="preserve">
+    <value>Your turn!</value>
+  </data>
+  <data name="Guide_LaterText" xml:space="preserve">
+    <value>Make your first server, and I'll come back to show you its tabs.</value>
+  </data>
+  <data name="Guide_StartStopTitle" xml:space="preserve">
+    <value>Start and stop</value>
+  </data>
+  <data name="Guide_StartStopText" xml:space="preserve">
+    <value>Press Start to open the server. I act out what it's doing: asleep, starting, cheering when it's online, saving when it stops.</value>
+  </data>
+  <data name="Guide_ConsoleTitle" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="Guide_ConsoleText" xml:space="preserve">
+    <value>Everything the server says appears here. Type a command at the bottom, for example "time set day", without the slash.</value>
+  </data>
+  <data name="Guide_PlayersTitle" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="Guide_PlayersText" xml:space="preserve">
+    <value>See who's online, and manage the whitelist (who may join) and the OP list (who may use commands).</value>
+  </data>
+  <data name="Guide_GameTitle" xml:space="preserve">
+    <value>Game settings</value>
+  </data>
+  <data name="Guide_GameText" xml:space="preserve">
+    <value>Difficulty, game mode, PvP and more. Rarely used options are tucked away under More settings.</value>
+  </data>
+  <data name="Guide_ServerTitle" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Guide_ServerText" xml:space="preserve">
+    <value>Memory and the server icon. Under More settings you'll find the port, changing the type or version, and duplicating or deleting the server.</value>
+  </data>
+  <data name="Guide_BackupsTitle" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Guide_BackupsText" xml:space="preserve">
+    <value>I back up the world before every start, so nothing gets lost. Restore a backup, export the world or bring in another one here.</value>
+  </data>
+  <data name="Guide_ModsTitle" xml:space="preserve">
+    <value>Mods and plugins</value>
+  </data>
+  <data name="Guide_ModsText" xml:space="preserve">
+    <value>Find and install mods or plugins from Modrinth that fit this server's type and version. Vanilla servers can't use them.</value>
+  </data>
+  <data name="Guide_ConnectTitle" xml:space="preserve">
+    <value>Play with friends</value>
+  </data>
+  <data name="Guide_ConnectText" xml:space="preserve">
+    <value>Copy the address for your friends. If they can't reach you, try port forwarding or the playit.gg tunnel here.</value>
+  </data>
+  <data name="Guide_DoneTitle" xml:space="preserve">
+    <value>That's it!</value>
+  </data>
+  <data name="Guide_DoneText" xml:space="preserve">
+    <value>Have fun with your friends. If you want to see this again, it's in App settings.</value>
+  </data>
+  <data name="AppSettings_Guide" xml:space="preserve">
+    <value>Guide</value>
+  </data>
+  <data name="AppSettings_ShowGuide" xml:space="preserve">
+    <value>Show the guide again</value>
+  </data>
 </root>

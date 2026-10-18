@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using WaNut.App.Services;
 using WaNut.App.ViewModels;
+using WaNut.Core.Onboarding;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.Views;
@@ -20,6 +22,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = _viewModel = viewModel;
         _tray = tray;
+        GuideLayer.FindTarget = FindGuideTarget;
+        Loaded += (_, _) => viewModel.StartPendingGuide();
         tray.OpenRequested += (_, _) => ShowFromTray();
         tray.ExitRequested += (_, _) =>
         {
@@ -86,6 +90,28 @@ public partial class MainWindow : Window
         }
 
         return choice;
+    }
+
+    private FrameworkElement? FindGuideTarget(GuideStop stop)
+    {
+        switch (stop.Target)
+        {
+            case GuideTarget.CreateServer:
+                return EmptyCreateButton.IsVisible ? EmptyCreateButton : SidebarCreateButton;
+            case GuideTarget.ServerList:
+                return ServerList;
+            case GuideTarget.AppSettings:
+                return AppSettingsButton;
+            case GuideTarget.StartStop:
+                return StartStopPanel;
+            case GuideTarget.Tab when stop.TabIndex < ServerTabs.Items.Count:
+                ServerTabs.SelectedIndex = stop.TabIndex;
+                return ServerTabs.Items[stop.TabIndex] as TabItem;
+            default:
+                // Back on the console once the tour has walked through the tabs.
+                ServerTabs.SelectedIndex = 0;
+                return null;
+        }
     }
 
     private void ShowFromTray()

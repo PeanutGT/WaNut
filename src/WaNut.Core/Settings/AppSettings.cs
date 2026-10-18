@@ -26,6 +26,12 @@ public sealed record AppSettings
     /// <summary>True once the first-run setup window was finished, so it shows only once.</summary>
     public bool SetupDone { get; init; }
 
+    /// <summary>True once the peanut's tour of the main window was finished or skipped.</summary>
+    public bool GuideIntroDone { get; init; }
+
+    /// <summary>True once the tour of a server's tabs was finished or skipped; it waits for the first server.</summary>
+    public bool GuideTabsDone { get; init; }
+
     /// <summary>The UI language as a culture name ("en" or "zh-TW"); null or unknown means English.</summary>
     public string? Language { get; init; }
 

@@ -5,6 +5,7 @@ using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Onboarding;
 
 namespace WaNut.App.ViewModels;
 
@@ -34,8 +35,11 @@ public sealed partial class MainViewModel : ObservableObject
         UpdateViewModel updates,
         ModLibrary mods,
         DiscordNotifier discord,
-        BackupCopyService backupCopies)
+        BackupCopyService backupCopies,
+        GuideViewModel guide)
     {
+        Guide = guide;
+        appSettings.GuideRequested += (_, _) => StartGuide(GuideViewModel.Everything(Servers.Count > 0));
         backupCopies.CopyFailed += OnBackupCopyFailed;
         _discord = discord;
         _mods = mods;
@@ -57,6 +61,8 @@ public sealed partial class MainViewModel : ObservableObject
     public AppSettingsViewModel AppSettings { get; }
 
     public UpdateViewModel Updates { get; }
+
+    public GuideViewModel Guide { get; }
 
     [ObservableProperty]
     private ServerViewModel? _selectedServer;
@@ -82,6 +88,20 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Runs whatever part of the tour is still due, such as the tabs once the first server exists.</summary>
+    public void StartPendingGuide() => StartGuide(Guide.Pending(Servers.Count > 0));
+
+    private void StartGuide(IReadOnlyList<GuideStop> stops)
+    {
+        // The tab stops point at the selected server's header and tabs.
+        if (GuideTour.NeedsServer(stops) && SelectedServer is null)
+        {
+            SelectedServer = Servers.FirstOrDefault();
+        }
+
+        Guide.Start(stops);
+    }
+
     [RelayCommand]
     private void OpenAppSettings() => _dialogs.ShowAppSettings();
 
@@ -96,6 +116,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         Reload();
         SelectedServer = Servers.FirstOrDefault(s => s.Id == created.Id);
+        StartPendingGuide();
     }
 
     private void Reload()
