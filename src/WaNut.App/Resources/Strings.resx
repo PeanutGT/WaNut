@@ -1916,4 +1916,28 @@ Stop the server and update?</value>
   <data name="AppSettings_ShowGuide" xml:space="preserve">
     <value>Show the guide again</value>
   </data>
+  <data name="Eta_Seconds" xml:space="preserve">
+    <value>about {0} s left</value>
+  </data>
+  <data name="Eta_Minutes" xml:space="preserve">
+    <value>about {0} min {1} s left</value>
+  </data>
+  <data name="Eta_Speed" xml:space="preserve">
+    <value>{0:0.0} MB/s</value>
+  </data>
+  <data name="Notify_ServerCreated" xml:space="preserve">
+    <value>Your server "{0}" is ready!</value>
+  </data>
+  <data name="Notify_CreateFailed" xml:space="preserve">
+    <value>Something went wrong while making "{0}". Open WaNut to see what happened.</value>
+  </data>
+  <data name="Notify_ServerChanged" xml:space="preserve">
+    <value>"{0}" is switched over and ready.</value>
+  </data>
+  <data name="Notify_ChangeFailed" xml:space="preserve">
+    <value>Something went wrong while changing "{0}". Open WaNut to see what happened.</value>
+  </data>
+  <data name="Notify_JavaReady" xml:space="preserve">
+    <value>Java is downloaded. "{0}" is starting.</value>
+  </data>
 </root>

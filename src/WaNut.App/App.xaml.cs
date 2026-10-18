@@ -118,6 +118,9 @@ public partial class App : Application
         services.AddSingleton<BackupCopyService>();
         services.AddSingleton<TrayIcon>();
 
+        // TrayIcon needs ServerController, which needs the notifier: the icon is fetched when a notification is shown.
+        services.AddSingleton(sp => new DesktopNotifier(sp.GetRequiredService<TrayIcon>));
+
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ServerController>();
         services.AddSingleton<AppSettingsViewModel>();
