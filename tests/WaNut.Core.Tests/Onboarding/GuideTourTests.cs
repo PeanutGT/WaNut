@@ -53,7 +53,7 @@ public class GuideTourTests
     {
         var tabs = GuideTour.Tabs.Where(s => s.Target == GuideTarget.Tab).Select(s => s.TabIndex);
 
-        Assert.Equal(Enumerable.Range(0, 7), tabs);
+        Assert.Equal(Enumerable.Range(0, 8), tabs);
     }
 
     [Theory]

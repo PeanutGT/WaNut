@@ -1891,4 +1891,52 @@
   <data name="AppSettings_ShowGuide" xml:space="preserve">
     <value>再看一次導覽</value>
   </data>
+  <data name="Server_TabPerformance" xml:space="preserve">
+    <value>效能</value>
+  </data>
+  <data name="Performance_Empty" xml:space="preserve">
+    <value>啟動伺服器後，就能看到它讓電腦多忙。</value>
+  </data>
+  <data name="Performance_Hint" xml:space="preserve">
+    <value>最近 10 分鐘，每 2 秒更新。CPU 是佔整台電腦的比例，和工作管理員一樣。</value>
+  </data>
+  <data name="Performance_Mood_Calm" xml:space="preserve">
+    <value>很輕鬆，電腦還很有餘裕。</value>
+  </data>
+  <data name="Performance_Mood_Busy" xml:space="preserve">
+    <value>有點忙，目前沒問題；關掉其他程式會更順。</value>
+  </data>
+  <data name="Performance_Mood_Hot" xml:space="preserve">
+    <value>快冒煙了！伺服器可能會卡。試試減少模組、調低視野距離或關掉其他程式。</value>
+  </data>
+  <data name="Performance_Cpu" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="Performance_Memory" xml:space="preserve">
+    <value>記憶體</value>
+  </data>
+  <data name="Performance_CpuValue" xml:space="preserve">
+    <value>{0:0}%</value>
+  </data>
+  <data name="Performance_MemoryValue" xml:space="preserve">
+    <value>{0:0.0} GB／設定 {1:0.#} GB</value>
+  </data>
+  <data name="Performance_Gigabytes" xml:space="preserve">
+    <value>{0:0.0} GB</value>
+  </data>
+  <data name="Performance_Peak" xml:space="preserve">
+    <value>最高 {0}</value>
+  </data>
+  <data name="Performance_CpuChart" xml:space="preserve">
+    <value>最近 10 分鐘的 CPU</value>
+  </data>
+  <data name="Performance_MemoryChart" xml:space="preserve">
+    <value>最近 10 分鐘的記憶體</value>
+  </data>
+  <data name="Guide_PerformanceTitle" xml:space="preserve">
+    <value>電腦忙不忙</value>
+  </data>
+  <data name="Guide_PerformanceText" xml:space="preserve">
+    <value>看伺服器最近 10 分鐘用了多少 CPU 和記憶體。電腦很忙時，花生會流汗。</value>
+  </data>
 </root>
