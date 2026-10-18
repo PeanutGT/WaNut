@@ -26,7 +26,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 14 | Audience | Beginners through advanced users. The feature set reaches advanced use, but the default screens stay simple. |
 | 15 | Hiding advanced settings | Two layers: a **"More settings"** expander on each settings page, and a global **Advanced mode** switch in app settings that shows advanced-only items. Phase 1 builds both; Advanced mode holds only **custom JVM arguments** for now. |
 | 16 | Tone | Cute and playful, with the peanut mascot appearing often. Errors (crash, failed backup) and Advanced mode sections use plain, calm wording with the fix. One set of texts. |
-| 17 | Guided onboarding | After Phase 1. Phase 1 has only the Create Server wizard; a peanut-led guide comes once features are stable. |
+| 17 | Guided onboarding | After Phase 1. Built in step 21 (confirmed by Peanut 2026-10-18): a step-by-step tour over the real main window, the peanut's bubble next to the ringed part, Next/Back and Skip. It runs once after first-run setup; the tabs part waits for the first server. Skip ends it for good; App settings has "Show the guide again". Every tab is covered; the existing peanut scenes are reused until new art comes. |
 | 18 | References | Modrinth App (clean, modern UI) and Duolingo (mascot, guidance), as direction only. |
 | 19 | Modpack servers | Phase 2, with the mod browser and Forge. Modrinth `.mrpack` first; CurseForge starts as importing a server pack the user already downloaded. |
 | 20 | Settings layout | Tabs first, then tiers (always visible / More settings / Advanced mode), per section 4b. Whitelist, OP list and the RAM slider are always visible; changing type or version backs up first and warns on downgrade. |
@@ -247,7 +247,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 ### Phase 2: Easy Multiplayer & Customization
 * [ ] Traditional Chinese translation.
-* [ ] Peanut-led guided onboarding (decision 17).
+* [x] Peanut-led guided onboarding (decision 17).
 * [ ] UPnP port forwarding and built-in tunnel (playit.gg or similar).
 * [ ] Modrinth / CurseForge mod and plugin browser with version/loader filtering.
 * [x] Forge / NeoForge support.
@@ -319,7 +319,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 8. ✓ Backups tab with cleanup; then "Change type or version" in the Server tab, which needs a backup first.
 9. ✓ Connect tab (IP list) and firewall rule.
 10. ✓ Installer and self-update; first GitHub Release (v0.1.0).
-11. First-run setup window: desktop shortcut (the installer only adds a Start menu shortcut), servers folder, update check.
+11. ✓ First-run setup window: desktop shortcut (the installer only adds a Start menu shortcut), servers folder, update check.
 12. ✓ Move the servers folder later from App settings (More settings), carrying existing servers across.
 
 ### Phase 2 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
@@ -335,7 +335,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 18. ✓ CurseForge server-pack import from a zip the user already downloaded, through the same "From a modpack" choice (section 6, decision 19).
 19. ✓ UPnP port forwarding on the Connect tab (`Mono.Nat`, UPnP and NAT-PMP), with a clear message when the router refuses or CGNAT is detected (section 2, "Later phases").
 20. ✓ Built-in tunnel with playit.gg on the Connect tab (section 2, "Later phases"): approve once in the browser, one fixed address per server.
-21. Peanut-led guided onboarding (decision 17), once the steps above are stable.
+21. ✓ Peanut-led guided onboarding (decision 17): a tour of the main window and every server tab, with Skip and "Show the guide again" in App settings.
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
@@ -345,4 +345,4 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ---
 
 ## Open Questions
-* Content of the guided onboarding (decision 17, after Phase 1).
+* None right now.

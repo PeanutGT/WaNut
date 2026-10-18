@@ -122,6 +122,7 @@ public partial class App : Application
         services.AddSingleton<ServerController>();
         services.AddSingleton<AppSettingsViewModel>();
         services.AddSingleton<UpdateViewModel>();
+        services.AddSingleton<GuideViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
         services.AddTransient<CreateServerViewModel>();

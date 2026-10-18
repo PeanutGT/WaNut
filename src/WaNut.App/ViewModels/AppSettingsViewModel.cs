@@ -183,6 +183,21 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         }
     }
 
+    public bool GuideIntroDone => _saved.GuideIntroDone;
+
+    public bool GuideTabsDone => _saved.GuideTabsDone;
+
+    /// <summary>Raised by "Show the guide again"; the main window runs the whole tour from the start.</summary>
+    public event EventHandler? GuideRequested;
+
+    public void RequestGuide() => GuideRequested?.Invoke(this, EventArgs.Empty);
+
+    public void SaveGuideProgress(bool introDone, bool tabsDone)
+    {
+        _saved = _saved with { GuideIntroDone = introDone, GuideTabsDone = tabsDone };
+        Save();
+    }
+
     partial void OnAdvancedModeChanged(bool value) => Save();
 
     partial void OnCheckForUpdatesChanged(bool value) => Save();

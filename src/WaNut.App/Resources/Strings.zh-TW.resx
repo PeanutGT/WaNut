@@ -1786,4 +1786,109 @@
   <data name="Connect_TunnelForgetHint" xml:space="preserve">
     <value>WaNut 不再使用這台電腦在 playit.gg 的核准。你的通道和地址會留在 playit.gg；之後再打開通道時會重新請你核准。</value>
   </data>
+  <data name="Guide_Next" xml:space="preserve">
+    <value>下一步</value>
+  </data>
+  <data name="Guide_Back" xml:space="preserve">
+    <value>上一步</value>
+  </data>
+  <data name="Guide_Skip" xml:space="preserve">
+    <value>跳過導覽</value>
+  </data>
+  <data name="Guide_Finish" xml:space="preserve">
+    <value>知道了！</value>
+  </data>
+  <data name="Guide_Step" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Guide_WelcomeTitle" xml:space="preserve">
+    <value>嗨，我是花生！</value>
+  </data>
+  <data name="Guide_WelcomeText" xml:space="preserve">
+    <value>我帶你逛一下 WaNut，只要一分鐘，隨時都可以跳過。</value>
+  </data>
+  <data name="Guide_CreateTitle" xml:space="preserve">
+    <value>建立伺服器</value>
+  </data>
+  <data name="Guide_CreateText" xml:space="preserve">
+    <value>從這裡開始。取個名字、選 Minecraft 版本和類型，伺服器需要的東西我都會幫你下載。</value>
+  </data>
+  <data name="Guide_ServersTitle" xml:space="preserve">
+    <value>你的伺服器</value>
+  </data>
+  <data name="Guide_ServersText" xml:space="preserve">
+    <value>建立的伺服器都會出現在這個清單。點一個就能看到它的分頁，上線時圓點會變綠色。</value>
+  </data>
+  <data name="Guide_AppSettingsTitle" xml:space="preserve">
+    <value>App 設定</value>
+  </data>
+  <data name="Guide_AppSettingsText" xml:space="preserve">
+    <value>語言、深色模式、更新和進階模式都在這裡，也可以從這裡再看一次導覽。</value>
+  </data>
+  <data name="Guide_LaterTitle" xml:space="preserve">
+    <value>換你囉！</value>
+  </data>
+  <data name="Guide_LaterText" xml:space="preserve">
+    <value>建立第一個伺服器後，我會回來帶你看它的分頁。</value>
+  </data>
+  <data name="Guide_StartStopTitle" xml:space="preserve">
+    <value>啟動和停止</value>
+  </data>
+  <data name="Guide_StartStopText" xml:space="preserve">
+    <value>按「啟動」打開伺服器。我會演出它的狀態：睡覺、啟動中、上線時歡呼、停止時存檔。</value>
+  </data>
+  <data name="Guide_ConsoleTitle" xml:space="preserve">
+    <value>主控台</value>
+  </data>
+  <data name="Guide_ConsoleText" xml:space="preserve">
+    <value>伺服器說的話都會顯示在這裡。在下方輸入指令，例如「time set day」，不用加斜線。</value>
+  </data>
+  <data name="Guide_PlayersTitle" xml:space="preserve">
+    <value>玩家</value>
+  </data>
+  <data name="Guide_PlayersText" xml:space="preserve">
+    <value>看誰在線上，管理白名單（誰可以加入）和 OP 名單（誰可以用指令）。</value>
+  </data>
+  <data name="Guide_GameTitle" xml:space="preserve">
+    <value>遊戲設定</value>
+  </data>
+  <data name="Guide_GameText" xml:space="preserve">
+    <value>難度、遊戲模式、PvP 等等。不常用的選項收在「更多設定」裡。</value>
+  </data>
+  <data name="Guide_ServerTitle" xml:space="preserve">
+    <value>伺服器</value>
+  </data>
+  <data name="Guide_ServerText" xml:space="preserve">
+    <value>記憶體和伺服器圖示。「更多設定」裡有連接埠、更換類型或版本，以及複製或刪除伺服器。</value>
+  </data>
+  <data name="Guide_BackupsTitle" xml:space="preserve">
+    <value>備份</value>
+  </data>
+  <data name="Guide_BackupsText" xml:space="preserve">
+    <value>每次啟動前我都會先備份世界，什麼都不會弄丟。在這裡可以還原備份、匯出世界或換成別的世界。</value>
+  </data>
+  <data name="Guide_ModsTitle" xml:space="preserve">
+    <value>模組和插件</value>
+  </data>
+  <data name="Guide_ModsText" xml:space="preserve">
+    <value>從 Modrinth 找符合這個伺服器類型和版本的模組或插件來安裝。原版伺服器不能用。</value>
+  </data>
+  <data name="Guide_ConnectTitle" xml:space="preserve">
+    <value>和朋友一起玩</value>
+  </data>
+  <data name="Guide_ConnectText" xml:space="preserve">
+    <value>把地址複製給朋友。如果他們連不進來，可以在這裡試試連接埠轉發或 playit.gg 通道。</value>
+  </data>
+  <data name="Guide_DoneTitle" xml:space="preserve">
+    <value>就這樣！</value>
+  </data>
+  <data name="Guide_DoneText" xml:space="preserve">
+    <value>和朋友玩得開心！想再看一次的話，在 App 設定裡。</value>
+  </data>
+  <data name="AppSettings_Guide" xml:space="preserve">
+    <value>導覽</value>
+  </data>
+  <data name="AppSettings_ShowGuide" xml:space="preserve">
+    <value>再看一次導覽</value>
+  </data>
 </root>

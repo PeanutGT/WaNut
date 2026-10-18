@@ -192,13 +192,16 @@
                   CornerRadius="{StaticResource ControlRadius}"
                   SnapsToDevicePixels="True">
             <Grid Margin="{TemplateBinding Padding}">
-              <TextBlock x:Name="Placeholder"
-                         Text="{TemplateBinding Tag}"
-                         Foreground="{DynamicResource MutedTextBrush}"
-                         Margin="2,0,0,0"
-                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                         Visibility="Collapsed"
-                         IsHitTestVisible="False" />
+              <!-- WPF also indents the typed text by Padding inside the content host, so the hint gets the same indent
+                   and starts where the caret and the first typed letter do. -->
+              <Border Padding="{TemplateBinding Padding}" IsHitTestVisible="False">
+                <TextBlock x:Name="Placeholder"
+                           Text="{TemplateBinding Tag}"
+                           Foreground="{DynamicResource MutedTextBrush}"
+                           Margin="2,0,0,0"
+                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                           Visibility="Collapsed" />
+              </Border>
               <ScrollViewer x:Name="PART_ContentHost"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Focusable="False"

@@ -32,4 +32,6 @@
   <SolidColorBrush x:Key="ErrorBorderBrush" Color="#5C3329" />
   <SolidColorBrush x:Key="ScrollThumbBrush" Color="#4A4136" />
   <SolidColorBrush x:Key="OverlayBrush" Color="#D91F1B16" />
+  <!-- Dims the window around what the guide points at; the highlighted part stays clear. -->
+  <SolidColorBrush x:Key="GuideDimBrush" Color="#B3000000" />
 </ResourceDictionary>
