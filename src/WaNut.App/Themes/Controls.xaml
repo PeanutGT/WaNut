@@ -406,7 +406,9 @@
         <ControlTemplate TargetType="TabControl">
           <DockPanel KeyboardNavigation.TabNavigation="Local">
             <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-              <TabPanel IsItemsHost="True" Margin="0,0,0,-1" />
+              <!-- A WrapPanel, not TabPanel: TabPanel ignores the tabs' margins and squeezes their text when the window is narrow.
+                   Here a tab that does not fit moves to a second row whole. -->
+              <WrapPanel IsItemsHost="True" Margin="0,0,0,-1" />
             </Border>
             <!-- The name lets screen readers and UI Automation reach the selected tab's content. -->
             <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="0,12,0,0" />
