@@ -421,6 +421,10 @@
           <TabItem Header="{res:Text Server_TabConnect}">
             <views:ConnectView DataContext="{Binding Connect}" />
           </TabItem>
+
+          <TabItem Header="{res:Text Server_TabPerformance}">
+            <views:PerformanceView DataContext="{Binding Performance}" />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Grid>

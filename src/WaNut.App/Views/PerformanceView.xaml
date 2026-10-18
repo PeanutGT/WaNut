@@ -1,0 +1,73 @@
+<UserControl x:Class="WaNut.App.Views.PerformanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources"
+             xmlns:controls="clr-namespace:WaNut.App.Controls">
+  <!-- DataContext: PerformanceViewModel -->
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+    <Style x:Key="ChartCard" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="16,12,16,14" />
+      <Setter Property="Margin" Value="0,0,0,14" />
+    </Style>
+    <Style x:Key="Value" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+    <StackPanel>
+      <DockPanel Margin="0,0,0,16">
+        <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Scene}" Width="64" Height="64" Margin="0,0,14,0" />
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="{Binding MoodText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite"
+                     Visibility="{Binding HasData, Converter={StaticResource Visible}}" />
+          <TextBlock Text="{res:Text Performance_Empty}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+                     Visibility="{Binding HasNoData, Converter={StaticResource Visible}}" />
+          <TextBlock Text="{res:Text Performance_Hint}" Style="{StaticResource MutedText}" FontSize="12"
+                     TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+      </DockPanel>
+
+      <Border Style="{StaticResource ChartCard}">
+        <StackPanel>
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding CpuPeakText}" Style="{StaticResource MutedText}" FontSize="12"
+                       VerticalAlignment="Bottom" />
+            <StackPanel>
+              <TextBlock Text="{res:Text Performance_Cpu}" Style="{StaticResource SectionCaption}" />
+              <TextBlock Text="{Binding CpuText, FallbackValue=–, TargetNullValue=–}" Style="{StaticResource Value}"
+                         Foreground="{DynamicResource AccentBrush}" />
+            </StackPanel>
+          </DockPanel>
+          <controls:UsageChart Values="{Binding CpuValues}" Height="110" Margin="0,10,0,0"
+                               Stroke="{DynamicResource AccentBrush}" GridBrush="{DynamicResource BorderBrush}"
+                               AutomationProperties.Name="{res:Text Performance_CpuChart}" />
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource ChartCard}">
+        <StackPanel>
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryPeakText}" Style="{StaticResource MutedText}" FontSize="12"
+                       VerticalAlignment="Bottom" />
+            <StackPanel>
+              <TextBlock Text="{res:Text Performance_Memory}" Style="{StaticResource SectionCaption}" />
+              <TextBlock Text="{Binding MemoryText, FallbackValue=–, TargetNullValue=–}" Style="{StaticResource Value}"
+                         Foreground="{DynamicResource WarningTextBrush}" />
+            </StackPanel>
+          </DockPanel>
+          <controls:UsageChart Values="{Binding MemoryValues}" Height="110" Margin="0,10,0,0"
+                               Stroke="{DynamicResource WarningTextBrush}" GridBrush="{DynamicResource BorderBrush}"
+                               AutomationProperties.Name="{res:Text Performance_MemoryChart}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -71,6 +71,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
+        Performance = new PerformanceViewModel(this);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
         controller.PreparingChanged += OnPreparingChanged;
@@ -97,6 +98,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public BackupsViewModel Backups { get; }
 
     public ConnectViewModel Connect { get; }
+
+    public PerformanceViewModel Performance { get; }
 
     public ModsViewModel Mods { get; }
 
@@ -371,6 +374,7 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void Attach(ServerProcess process)
     {
         Process = process;
+        Performance.Clear();
         if (!_keepConsole)
         {
             ConsoleLines.Clear();
@@ -410,6 +414,7 @@ public sealed partial class ServerViewModel : ObservableObject
                 if (meter.Sample(usage.CpuTime, now) is { } cpu)
                 {
                     UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
+                    Performance.Add(new UsageSample(now, cpu, usage.MemoryBytes));
                 }
 
                 _empty.Update(Status == ServerStatus.Online, Players.Count, now);

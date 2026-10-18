@@ -25,6 +25,7 @@ public static class GuideTour
         new("Backups", GuideTarget.Tab, "backup-done", 4),
         new("Mods", GuideTarget.Tab, "type-modpack", 5),
         new("Connect", GuideTarget.Tab, "friends", 6),
+        new("Performance", GuideTarget.Tab, "perf-calm", 7),
     ];
 
     /// <summary>Ends the intro when there is no server yet: the tabs part follows the first one.</summary>
