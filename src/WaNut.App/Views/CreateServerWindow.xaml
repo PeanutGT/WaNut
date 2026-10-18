@@ -7,7 +7,7 @@
         Title="{res:Text CreateServer_Title}"
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
-        Width="520" SizeToContent="Height"
+        Width="520" Height="640"
         MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
@@ -20,7 +20,7 @@
     </Style>
   </Window.Resources>
 
-  <!-- On a short screen the form scrolls, and Cancel/Create stay visible below it. -->
+  <!-- A fixed height: the form scrolls, and Cancel/Create stay visible below it. -->
   <DockPanel Margin="24,24,24,24">
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
       <Button Content="{res:Text Common_Cancel}"
@@ -32,6 +32,31 @@
               MinWidth="80"
               IsDefault="True" />
     </StackPanel>
+
+    <!-- Progress and errors sit outside the scrolling form so they show however far down it is scrolled. -->
+    <StackPanel DockPanel.Dock="Bottom" Margin="0,18,0,0"
+                Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <controls:PixelScene Scene="downloading" Width="32" Height="32" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
+      </StackPanel>
+      <ProgressBar
+                   Value="{Binding ProgressPercent, Mode=OneWay}"
+                   IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
+    </StackPanel>
+
+    <Border DockPanel.Dock="Bottom" Margin="0,14,0,0">
+      <Border.Style>
+        <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+    </Border>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
@@ -272,31 +297,6 @@
             <Hyperlink Command="{Binding OpenEulaCommand}"><Run Text="{res:Text CreateServer_EulaLink}" /></Hyperlink>
           </TextBlock>
         </CheckBox>
-
-        <StackPanel Margin="0,18,0,0"
-                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-            <controls:PixelScene Scene="downloading" Width="32" Height="32" Margin="0,0,8,0" />
-            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
-          </StackPanel>
-          <ProgressBar
-                       Value="{Binding ProgressPercent, Mode=OneWay}"
-                       IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />
-        </StackPanel>
-
-        <Border Margin="0,14,0,0">
-          <Border.Style>
-            <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
-                  <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Border.Style>
-          <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
-        </Border>
-
       </StackPanel>
     </ScrollViewer>
   </DockPanel>

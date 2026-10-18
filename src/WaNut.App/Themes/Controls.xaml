@@ -421,10 +421,12 @@
     <Setter Property="FontSize" Value="14" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+    <!-- The gap sits outside the tab so the tab's bounds (the guide's ring, the focus ring) hug its text. -->
+    <Setter Property="Margin" Value="0,0,22,0" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="TabItem">
-          <Border x:Name="Underline" Margin="0,0,22,0" Padding="0,6,0,8"
+          <Border x:Name="Underline" Padding="0,6,0,8"
                   BorderThickness="0,0,0,2" BorderBrush="Transparent" Background="Transparent">
             <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
           </Border>
