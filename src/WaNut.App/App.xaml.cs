@@ -95,6 +95,8 @@ public partial class App : Application
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
         services.AddSingleton<MojangProfiles>();
+        services.AddSingleton<PlayerSkins>();
+        services.AddSingleton<PlayerFaces>();
         services.AddSingleton<WorldImporter>();
         services.AddSingleton<WorldExporter>();
         services.AddSingleton<InstanceDeleter>();

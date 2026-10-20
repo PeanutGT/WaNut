@@ -348,11 +348,59 @@ Choose No to keep waiting.</value>
   <data name="Players_InvalidName" xml:space="preserve">
     <value>Player names are 1 to 16 letters, numbers or underscores.</value>
   </data>
+  <data name="Players_MoreName" xml:space="preserve">
+    <value>More actions for {0}</value>
+  </data>
+  <data name="Players_Kick" xml:space="preserve">
+    <value>Kick</value>
+  </data>
+  <data name="Players_Ban" xml:space="preserve">
+    <value>Ban…</value>
+  </data>
+  <data name="Players_Unban" xml:space="preserve">
+    <value>Unban</value>
+  </data>
+  <data name="Players_UnbanName" xml:space="preserve">
+    <value>Unban {0}</value>
+  </data>
+  <data name="Players_MakeOperator" xml:space="preserve">
+    <value>Make operator</value>
+  </data>
+  <data name="Players_RemoveOperator" xml:space="preserve">
+    <value>Remove operator</value>
+  </data>
+  <data name="Players_RemoveFromWhitelist" xml:space="preserve">
+    <value>Remove from whitelist</value>
+  </data>
+  <data name="Players_Banned" xml:space="preserve">
+    <value>Banned</value>
+  </data>
+  <data name="Players_BannedHint" xml:space="preserve">
+    <value>Banned players can't join, even when they are on the whitelist.</value>
+  </data>
+  <data name="Players_Recent" xml:space="preserve">
+    <value>Players who joined before</value>
+  </data>
+  <data name="Players_RecentHint" xml:space="preserve">
+    <value>Everyone who has joined this server. Use ⋯ to add someone to a list or ban them without typing their name.</value>
+  </data>
+  <data name="Ban_Title" xml:space="preserve">
+    <value>Ban player</value>
+  </data>
+  <data name="Ban_Question" xml:space="preserve">
+    <value>Ban {0}? If they are online they are kicked now, and they can't join again until you unban them.</value>
+  </data>
+  <data name="Ban_ReasonLabel" xml:space="preserve">
+    <value>Reason (optional)</value>
+  </data>
+  <data name="Ban_ReasonHint" xml:space="preserve">
+    <value>They see this when they try to join.</value>
+  </data>
+  <data name="Ban_Confirm" xml:space="preserve">
+    <value>Ban</value>
+  </data>
   <data name="Players_Pending" xml:space="preserve">
     <value>Changes made while the server is stopped are applied the next time it starts.</value>
-  </data>
-  <data name="Players_KickBanHint" xml:space="preserve">
-    <value>To kick or ban a player, type kick &lt;name&gt; or ban &lt;name&gt; in the Console. pardon &lt;name&gt; lets them back in.</value>
   </data>
   <data name="CreateServer_OwnerLabel" xml:space="preserve">
     <value>Your Minecraft name (optional)</value>

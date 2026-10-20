@@ -21,6 +21,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly IClipboardService _clipboard;
     private readonly ModLibrary _mods;
     private readonly DiscordNotifier _discord;
+    private readonly PlayerFaces _faces;
 
     public MainViewModel(
         InstanceStore store,
@@ -36,8 +37,10 @@ public sealed partial class MainViewModel : ObservableObject
         ModLibrary mods,
         DiscordNotifier discord,
         BackupCopyService backupCopies,
-        GuideViewModel guide)
+        GuideViewModel guide,
+        PlayerFaces faces)
     {
+        _faces = faces;
         Guide = guide;
         appSettings.GuideRequested += (_, _) => StartGuide(GuideViewModel.Everything(Servers.Count > 0));
         backupCopies.CopyFailed += OnBackupCopyFailed;
@@ -132,7 +135,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private ServerViewModel NewServer(InstanceMetadata metadata)
     {
-        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _discord);
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _discord, _faces);
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
         return server;
