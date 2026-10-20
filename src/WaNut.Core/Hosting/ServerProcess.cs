@@ -7,7 +7,7 @@ namespace WaNut.Core.Hosting;
 /// One running Minecraft server: a hidden java.exe whose console is streamed to WaNut.
 /// Events are raised on background threads.
 /// </summary>
-public sealed class ServerProcess(ServerLaunch launch) : IDisposable
+public sealed class ServerProcess(ServerLaunch launch) : IServerConsole, IDisposable
 {
     private static readonly Encoding Utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 

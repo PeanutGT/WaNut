@@ -74,6 +74,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.Seed : null;
     }
 
+    public IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts)
+    {
+        var window = new RestoreWindow(string.Format(Text.Get("Restore_Question"), serverName, backupDate), parts) { Owner = Application.Current.MainWindow };
+        return window.ShowDialog() == true ? window.Parts : null;
+    }
+
     public bool Confirm(string message) => Show(new ConfirmWindow(message));
 
     public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));

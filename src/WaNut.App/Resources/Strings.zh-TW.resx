@@ -433,10 +433,10 @@
     <value>開啟備份資料夾</value>
   </data>
   <data name="Backups_Hint" xml:space="preserve">
-    <value>每次啟動伺服器時，WaNut 都會備份世界。備份只包含世界，不含插件、模組或設定。</value>
+    <value>每次啟動伺服器時，WaNut 都會備份世界；在「更多設定」開啟後，伺服器開著時也會定時備份。備份只包含世界，不含插件、模組或設定。</value>
   </data>
   <data name="Backups_StopToChange" xml:space="preserve">
-    <value>停止伺服器後才能備份或還原。</value>
+    <value>停止伺服器後才能還原或更換世界。「立即備份」在伺服器開著時也能用。</value>
   </data>
   <data name="Backups_Working" xml:space="preserve">
     <value>正在備份世界…</value>
@@ -479,9 +479,6 @@
   </data>
   <data name="Backups_Problem_BackupMissing" xml:space="preserve">
     <value>這個備份檔不見了，可能被移動或刪除了。</value>
-  </data>
-  <data name="Backups_RestoreConfirm" xml:space="preserve">
-    <value>要把 {0} 還原到 {1} 的備份嗎？\n\n目前的世界會被取代。WaNut 會先備份它，所以可以再改回來。</value>
   </data>
   <data name="Backups_RestoreLabel" xml:space="preserve">
     <value>還原 {0} 的備份（{1}）</value>
@@ -1965,5 +1962,65 @@
   </data>
   <data name="Notify_JavaReady" xml:space="preserve">
     <value>Java 下載好了，「{0}」正在啟動。</value>
+  </data>
+  <data name="Backups_Reason_Scheduled" xml:space="preserve">
+    <value>定時備份</value>
+  </data>
+  <data name="Backups_Problem_SaveNotConfirmed" xml:space="preserve">
+    <value>伺服器沒有回報已存檔，所以 WaNut 沒有複製世界。存檔已重新開啟，請稍後再試。</value>
+  </data>
+  <data name="Backups_Schedule" xml:space="preserve">
+    <value>伺服器開著時定時備份</value>
+  </data>
+  <data name="Backups_ScheduleOff" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Backups_ScheduleEvery30" xml:space="preserve">
+    <value>每 30 分鐘</value>
+  </data>
+  <data name="Backups_ScheduleEvery60" xml:space="preserve">
+    <value>每 1 小時</value>
+  </data>
+  <data name="Backups_ScheduleEvery180" xml:space="preserve">
+    <value>每 3 小時</value>
+  </data>
+  <data name="Backups_ScheduleEvery360" xml:space="preserve">
+    <value>每 6 小時</value>
+  </data>
+  <data name="Backups_ScheduleHint" xml:space="preserve">
+    <value>WaNut 會暫停存檔一下、複製世界，再重新開啟存檔，朋友可以繼續玩。沒有人玩的時段會跳過。這些備份算在保留數量內。所有伺服器共用這個設定。</value>
+  </data>
+  <data name="Server_ScheduledBackup" xml:space="preserve">
+    <value>WaNut 正在定時備份世界，存檔會暫停一下。</value>
+  </data>
+  <data name="Restore_Title" xml:space="preserve">
+    <value>還原備份</value>
+  </data>
+  <data name="Restore_Question" xml:space="preserve">
+    <value>要把 {0} 還原到 {1} 的備份嗎？</value>
+  </data>
+  <data name="Restore_PartLabel" xml:space="preserve">
+    <value>要還原哪些部分</value>
+  </data>
+  <data name="Restore_PartAll" xml:space="preserve">
+    <value>整個世界</value>
+  </data>
+  <data name="Restore_PartOverworld" xml:space="preserve">
+    <value>只還原主世界</value>
+  </data>
+  <data name="Restore_PartNether" xml:space="preserve">
+    <value>只還原地獄</value>
+  </data>
+  <data name="Restore_PartEnd" xml:space="preserve">
+    <value>只還原終界</value>
+  </data>
+  <data name="Restore_PartHint" xml:space="preserve">
+    <value>沒選的部分會維持現在的樣子。主世界也包含每位玩家的物品欄和位置。</value>
+  </data>
+  <data name="Restore_BackupNote" xml:space="preserve">
+    <value>目前的世界會被取代。WaNut 會先備份它，所以可以再改回來。</value>
+  </data>
+  <data name="Restore_Confirm" xml:space="preserve">
+    <value>還原</value>
   </data>
 </root>

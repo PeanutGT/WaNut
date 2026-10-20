@@ -8,6 +8,7 @@ namespace WaNut.Core.Backups;
 /// <summary>
 /// Zips a server's world into its backups/ folder, cleans old backups up and restores one. Only call these while
 /// the server is stopped: a running server keeps writing region files, so a copy taken then can be half-saved.
+/// <see cref="LiveBackup"/> pauses saving first, so a running server can be backed up too.
 /// </summary>
 public sealed partial class BackupStore(TimeProvider clock)
 {
@@ -168,18 +169,57 @@ public sealed partial class BackupStore(TimeProvider clock)
         return deleted;
     }
 
+    /// <summary>The parts of the world a backup holds, in Overworld, Nether, End order.</summary>
+    public static IReadOnlyList<WorldPart> Parts(string instanceDir, BackupInfo backup)
+    {
+        var level = GameSettingsStore.LevelName(instanceDir);
+        using var archive = OpenZip(backup.FilePath);
+        var parts = archive.Entries.Select(entry => PartOf(level, entry.FullName)).ToHashSet();
+        return Enum.GetValues<WorldPart>().Where(parts.Contains).ToList();
+    }
+
+    /// <summary>Which part of the world a path such as "world/DIM-1/region/r.0.0.mca" belongs to.</summary>
+    public static WorldPart PartOf(string level, string path)
+    {
+        path = path.Replace('\\', '/');
+        foreach (var part in new[] { WorldPart.Nether, WorldPart.End })
+        {
+            if (PartFolders(level, part).Any(folder => path.Equals(folder, StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith(folder + "/", StringComparison.OrdinalIgnoreCase)))
+            {
+                return part;
+            }
+        }
+
+        return WorldPart.Overworld;
+    }
+
     /// <summary>
-    /// Puts the backup's world back. The current world is backed up first (as a "restore" backup), so a restore
-    /// can itself be undone. Returns that safety backup, or null when there was no world to save.
+    /// Where the Nether or End lives in each layout: in its own folder for Paper up to 1.21.x, inside the world up to
+    /// 1.21.x, and under dimensions/ from 26.x. The Overworld is everything else.
+    /// </summary>
+    private static string[] PartFolders(string level, WorldPart part) => part switch
+    {
+        WorldPart.Nether => [level + "_nether", level + "/DIM-1", level + "/dimensions/minecraft/the_nether"],
+        WorldPart.End => [level + "_the_end", level + "/DIM1", level + "/dimensions/minecraft/the_end"],
+        _ => [],
+    };
+
+    /// <summary>
+    /// Puts the backup's world back, or only the chosen <paramref name="parts"/> of it (null for all). The current
+    /// world is backed up first (as a "restore" backup), so a restore can itself be undone. Returns that safety
+    /// backup, or null when there was no world to save.
     /// </summary>
     public async Task<BackupInfo?> RestoreAsync(
-        string instanceDir, BackupInfo backup, IProgress<double>? progress = null, CancellationToken cancellationToken = default)
+        string instanceDir, BackupInfo backup, IReadOnlyCollection<WorldPart>? parts = null, IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         if (!File.Exists(backup.FilePath))
         {
             throw new BackupException(BackupProblem.BackupMissing, backup.FileName);
         }
 
+        var current = WorldFolders(instanceDir);
         var incoming = NewStagingDir(instanceDir, "new");
 
         // Read the whole zip into a staging folder before touching the world, so a damaged zip changes nothing.
@@ -187,6 +227,11 @@ public sealed partial class BackupStore(TimeProvider clock)
         try
         {
             restoredFolders = await Task.Run(() => Extract(backup.FilePath, incoming, progress, cancellationToken), cancellationToken);
+            if (parts is not null && Enum.GetValues<WorldPart>().Any(part => !parts.Contains(part)))
+            {
+                incoming = await Task.Run(() => MixParts(instanceDir, current, incoming, parts, cancellationToken), cancellationToken);
+                restoredFolders = Directory.EnumerateDirectories(incoming).Select(dir => Path.GetFileName(dir)).ToList();
+            }
         }
         catch
         {
@@ -264,6 +309,76 @@ public sealed partial class BackupStore(TimeProvider clock)
         return safety;
     }
 
+    /// <summary>
+    /// Builds the world to swap in from the extracted backup and the current world: the chosen parts come from the
+    /// backup, the rest stays as it is now. Returns the staging folder that holds it.
+    /// </summary>
+    private string MixParts(
+        string instanceDir, IReadOnlyList<string> current, string extracted, IReadOnlyCollection<WorldPart> parts, CancellationToken cancellationToken)
+    {
+        var level = GameSettingsStore.LevelName(instanceDir);
+        if (parts.Contains(WorldPart.Overworld))
+        {
+            // Start from the backup and bring the current Nether or End back in.
+            foreach (var part in new[] { WorldPart.Nether, WorldPart.End }.Where(p => !parts.Contains(p)))
+            {
+                CopyFolders(instanceDir, extracted, PartFolders(level, part), cancellationToken);
+            }
+
+            return extracted;
+        }
+
+        // Start from a copy of the current world and bring the chosen Nether or End in from the backup.
+        var mixed = NewStagingDir(instanceDir, "mix");
+        try
+        {
+            CopyFolders(instanceDir, mixed, current, cancellationToken);
+            foreach (var part in parts)
+            {
+                CopyFolders(extracted, mixed, PartFolders(level, part), cancellationToken);
+            }
+        }
+        catch
+        {
+            DeleteQuietly(mixed);
+            throw;
+        }
+
+        DeleteQuietly(extracted);
+        return mixed;
+    }
+
+    /// <summary>
+    /// Replaces each of <paramref name="folders"/> (relative, e.g. "world/DIM-1") in <paramref name="to"/> with a
+    /// copy of the one in <paramref name="from"/>. A folder <paramref name="from"/> doesn't have is left alone.
+    /// </summary>
+    private static void CopyFolders(string from, string to, IEnumerable<string> folders, CancellationToken cancellationToken)
+    {
+        foreach (var folder in folders)
+        {
+            var source = Path.Combine(from, folder);
+            if (!Directory.Exists(source))
+            {
+                continue;
+            }
+
+            var target = Path.Combine(to, folder);
+            if (Directory.Exists(target))
+            {
+                Directory.Delete(target, recursive: true);
+            }
+
+            Directory.CreateDirectory(target);
+            foreach (var file in new DirectoryInfo(source).EnumerateFiles("*", AllFiles).Where(f => !IsSessionLock(f.Name)))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var copy = Path.Combine(target, Path.GetRelativePath(source, file.FullName));
+                Directory.CreateDirectory(Path.GetDirectoryName(copy)!);
+                file.CopyTo(copy);
+            }
+        }
+    }
+
     private string NewStagingDir(string instanceDir, string kind)
     {
         var stamp = clock.GetUtcNow().ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
@@ -308,17 +423,7 @@ public sealed partial class BackupStore(TimeProvider clock)
     /// <summary>Extracts into <paramref name="target"/> and returns the top-level folder names, e.g. "world".</summary>
     private static IReadOnlyList<string> Extract(string zipPath, string target, IProgress<double>? progress, CancellationToken cancellationToken)
     {
-        ZipArchive archive;
-        try
-        {
-            archive = ZipFile.OpenRead(zipPath);
-        }
-        catch (InvalidDataException e)
-        {
-            throw new BackupException(BackupProblem.DamagedBackup, e.Message);
-        }
-
-        using (archive)
+        using (var archive = OpenZip(zipPath))
         {
             var root = Path.GetFullPath(target) + Path.DirectorySeparatorChar;
             var plan = new List<(ZipArchiveEntry Entry, string Destination)>();
@@ -428,6 +533,18 @@ public sealed partial class BackupStore(TimeProvider clock)
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             // Left where it is; the folder still exists on disk and can be moved back by hand.
+        }
+    }
+
+    private static ZipArchive OpenZip(string zipPath)
+    {
+        try
+        {
+            return ZipFile.OpenRead(zipPath);
+        }
+        catch (InvalidDataException e)
+        {
+            throw new BackupException(BackupProblem.DamagedBackup, e.Message);
         }
     }
 

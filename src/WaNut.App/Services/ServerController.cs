@@ -155,6 +155,8 @@ public sealed class ServerController(
             return;
         }
 
+        // Stopping saves the world, which would change files the backup is still copying.
+        await server.Backups.WaitForLiveBackupAsync();
         while (!await process.StopAsync(StopTimeout))
         {
             if (dialogs.Confirm(string.Format(Text.Get("Server_ForceStopConfirm"), server.Name, (int)StopTimeout.TotalSeconds)))

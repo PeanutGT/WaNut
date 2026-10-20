@@ -8,6 +8,9 @@ public enum LogEventKind
     Stopping,
     PlayerJoined,
     PlayerLeft,
+
+    /// <summary>The world was written to disk, as after "save-all".</summary>
+    Saved,
 }
 
 public sealed record LogEvent(LogEventKind Kind, string? PlayerName = null);
@@ -49,6 +52,11 @@ public static partial class ServerLogParser
         if (message == "Stopping server")
         {
             return new LogEvent(LogEventKind.Stopping);
+        }
+
+        if (message == "Saved the game")
+        {
+            return new LogEvent(LogEventKind.Saved);
         }
 
         var match = PlayerMessage().Match(message);

@@ -31,6 +31,12 @@ public interface IDialogService
     /// <summary>Asks before resetting the world. Returns the seed for the new world (empty for random), or null to cancel.</summary>
     string? AskResetWorld(string serverName);
 
+    /// <summary>
+    /// Asks before restoring a backup and, when it holds more than one, which <paramref name="parts"/> of the world to
+    /// bring back. Returns the parts to restore (every part for the whole world), or null to cancel.
+    /// </summary>
+    IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 
