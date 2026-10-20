@@ -31,6 +31,9 @@ public interface IDialogService
     /// <summary>Asks before resetting the world. Returns the seed for the new world (empty for random), or null to cancel.</summary>
     string? AskResetWorld(string serverName);
 
+    /// <summary>Asks before banning a player. Returns the reason they see (empty for none), or null to cancel.</summary>
+    string? AskBan(string playerName);
+
     /// <summary>
     /// Asks before restoring a backup and, when it holds more than one, which <paramref name="parts"/> of the world to
     /// bring back. Returns the parts to restore (every part for the whole world), or null to cancel.

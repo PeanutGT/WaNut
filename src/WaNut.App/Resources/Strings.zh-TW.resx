@@ -342,11 +342,59 @@
   <data name="Players_InvalidName" xml:space="preserve">
     <value>玩家名稱是 1 到 16 個英文字母、數字或底線。</value>
   </data>
+  <data name="Players_MoreName" xml:space="preserve">
+    <value>{0} 的更多動作</value>
+  </data>
+  <data name="Players_Kick" xml:space="preserve">
+    <value>踢出</value>
+  </data>
+  <data name="Players_Ban" xml:space="preserve">
+    <value>封鎖…</value>
+  </data>
+  <data name="Players_Unban" xml:space="preserve">
+    <value>解除封鎖</value>
+  </data>
+  <data name="Players_UnbanName" xml:space="preserve">
+    <value>解除封鎖 {0}</value>
+  </data>
+  <data name="Players_MakeOperator" xml:space="preserve">
+    <value>設為管理員</value>
+  </data>
+  <data name="Players_RemoveOperator" xml:space="preserve">
+    <value>取消管理員</value>
+  </data>
+  <data name="Players_RemoveFromWhitelist" xml:space="preserve">
+    <value>從白名單移除</value>
+  </data>
+  <data name="Players_Banned" xml:space="preserve">
+    <value>封鎖名單</value>
+  </data>
+  <data name="Players_BannedHint" xml:space="preserve">
+    <value>被封鎖的玩家無法加入，就算在白名單上也一樣。</value>
+  </data>
+  <data name="Players_Recent" xml:space="preserve">
+    <value>來過的玩家</value>
+  </data>
+  <data name="Players_RecentHint" xml:space="preserve">
+    <value>所有加入過這台伺服器的人。按 ⋯ 就能把人加進名單或封鎖，不用打名字。</value>
+  </data>
+  <data name="Ban_Title" xml:space="preserve">
+    <value>封鎖玩家</value>
+  </data>
+  <data name="Ban_Question" xml:space="preserve">
+    <value>要封鎖 {0} 嗎？如果他在線上會立刻被踢出，之後要等你解除封鎖才能再加入。</value>
+  </data>
+  <data name="Ban_ReasonLabel" xml:space="preserve">
+    <value>原因（可不填）</value>
+  </data>
+  <data name="Ban_ReasonHint" xml:space="preserve">
+    <value>玩家嘗試加入時會看到這段文字。</value>
+  </data>
+  <data name="Ban_Confirm" xml:space="preserve">
+    <value>封鎖</value>
+  </data>
   <data name="Players_Pending" xml:space="preserve">
     <value>伺服器停止時做的變更，會在下次啟動時套用。</value>
-  </data>
-  <data name="Players_KickBanHint" xml:space="preserve">
-    <value>要踢出或封鎖玩家，請在主控台輸入 kick &lt;名稱&gt; 或 ban &lt;名稱&gt;。輸入 pardon &lt;名稱&gt; 可以解除封鎖。</value>
   </data>
   <data name="CreateServer_OwnerLabel" xml:space="preserve">
     <value>你的 Minecraft 名稱（可不填）</value>

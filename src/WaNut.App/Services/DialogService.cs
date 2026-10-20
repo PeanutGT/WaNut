@@ -74,6 +74,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.Seed : null;
     }
 
+    public string? AskBan(string playerName)
+    {
+        var window = new BanWindow(string.Format(Text.Get("Ban_Question"), playerName)) { Owner = Application.Current.MainWindow };
+        return window.ShowDialog() == true ? window.Reason : null;
+    }
+
     public IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts)
     {
         var window = new RestoreWindow(string.Format(Text.Get("Restore_Question"), serverName, backupDate), parts) { Owner = Application.Current.MainWindow };

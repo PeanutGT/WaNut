@@ -44,23 +44,55 @@
         </Setter.Value>
       </Setter>
     </Style>
+    <!-- A player's skin face (or their initial while it loads or when they have none) and name. -->
+    <DataTemplate x:Key="PlayerName">
+      <StackPanel Orientation="Horizontal">
+        <Grid Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+          <Border CornerRadius="4" Background="{DynamicResource SelectedItemBrush}">
+            <TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <Image Source="{Binding Face}" RenderOptions.BitmapScalingMode="NearestNeighbor"
+                 Visibility="{Binding HasFace, Converter={StaticResource Visible}}" />
+        </Grid>
+        <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+      </StackPanel>
+    </DataTemplate>
+    <!-- Online and earlier players: name plus a ⋯ button whose menu acts on the player. Tag carries the lists' view model to the menu. -->
+    <DataTemplate x:Key="PersonRow">
+      <DockPanel Margin="0,2">
+        <Button DockPanel.Dock="Right" Content="⋯" Padding="10,1" FontSize="14" Click="OnMoreClick"
+                AutomationProperties.Name="{Binding ActionLabel}"
+                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
+          <Button.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="{res:Text Players_Kick}"
+                        Visibility="{Binding IsOnline, Converter={StaticResource Visible}}"
+                        Command="{Binding PlacementTarget.Tag.KickCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        CommandParameter="{Binding}" />
+              <MenuItem Header="{Binding BanAction}"
+                        Command="{Binding PlacementTarget.Tag.ToggleBanCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        CommandParameter="{Binding}" />
+              <Separator />
+              <MenuItem Header="{Binding OperatorAction}"
+                        Command="{Binding PlacementTarget.Tag.ToggleOperatorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        CommandParameter="{Binding}" />
+              <MenuItem Header="{Binding WhitelistAction}"
+                        Command="{Binding PlacementTarget.Tag.ToggleWhitelistCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        CommandParameter="{Binding}" />
+            </ContextMenu>
+          </Button.ContextMenu>
+        </Button>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PlayerName}" VerticalAlignment="Center" />
+      </DockPanel>
+    </DataTemplate>
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
       <!-- Online now -->
       <TextBlock Text="{res:Text Players_Online}" Style="{StaticResource Heading}" />
-      <ItemsControl ItemsSource="{Binding Players}" Margin="0,0,0,4"
-                    AutomationProperties.Name="{res:Text Players_Online}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal" Margin="0,3">
-              <Ellipse Width="8" Height="8" Fill="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
-              <TextBlock Text="{Binding}" FontSize="14" />
-            </StackPanel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
+      <ListBox Style="{StaticResource PlainList}" DataContext="{Binding PlayerLists}" ItemsSource="{Binding Online}"
+               ItemTemplate="{StaticResource PersonRow}" Margin="0,0,0,4" AutomationProperties.Name="{res:Text Players_Online}" />
       <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
         <StackPanel.Style>
           <Style TargetType="StackPanel">
@@ -111,10 +143,10 @@
                   <DataTemplate>
                     <DockPanel Margin="0,2">
                       <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
-                              AutomationProperties.Name="{Binding RemoveLabel}"
+                              AutomationProperties.Name="{Binding ActionLabel}"
                               Command="{Binding DataContext.RemoveFromWhitelistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
-                      <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+                      <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PlayerName}" VerticalAlignment="Center" />
                     </DockPanel>
                   </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -154,10 +186,10 @@
                   <DataTemplate>
                     <DockPanel Margin="0,2">
                       <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
-                              AutomationProperties.Name="{Binding RemoveLabel}"
+                              AutomationProperties.Name="{Binding ActionLabel}"
                               Command="{Binding DataContext.RemoveOperatorCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
-                      <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+                      <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PlayerName}" VerticalAlignment="Center" />
                     </DockPanel>
                   </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -187,13 +219,60 @@
                   </TextBox.InputBindings>
                 </TextBox>
               </DockPanel>
+
+              <!-- Banned -->
+              <TextBlock Text="{res:Text Players_Banned}" FontSize="15" FontWeight="SemiBold" Margin="0,28,0,4" />
+              <TextBlock Text="{res:Text Players_BannedHint}" Style="{StaticResource MutedText}" FontSize="12"
+                         TextWrapping="Wrap" Margin="0,0,0,8" />
+              <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Banned}" AutomationProperties.Name="{res:Text Players_Banned}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <DockPanel Margin="0,2">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Unban}" Padding="10,3"
+                              AutomationProperties.Name="{Binding ActionLabel}"
+                              Command="{Binding DataContext.UnbanCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                              CommandParameter="{Binding}" />
+                      <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PlayerName}" VerticalAlignment="Center" />
+                    </DockPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Banned.Count}" Value="0">
+                        <Setter Property="Visibility" Value="Visible" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
             </StackPanel>
           </DataTemplate>
         </ContentControl.ContentTemplate>
       </ContentControl>
 
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
-        <TextBlock Text="{res:Text Players_KickBanHint}" Style="{StaticResource Hint}" Margin="4,0,0,0" />
+        <StackPanel Margin="4,0,0,0" DataContext="{Binding PlayerLists}">
+          <TextBlock Text="{res:Text Players_Recent}" Style="{StaticResource Heading}" />
+          <TextBlock Text="{res:Text Players_RecentHint}" Style="{StaticResource Hint}" />
+          <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Recent}" ItemTemplate="{StaticResource PersonRow}"
+                   AutomationProperties.Name="{res:Text Players_Recent}" />
+          <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Recent.Count}" Value="0">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
       </Expander>
     </StackPanel>
   </ScrollViewer>

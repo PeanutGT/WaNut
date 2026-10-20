@@ -59,7 +59,8 @@ public sealed partial class ServerViewModel : ObservableObject
         TunnelService tunnels,
         IClipboardService clipboard,
         ModLibrary mods,
-        DiscordNotifier discord)
+        DiscordNotifier discord,
+        PlayerFaces faces)
     {
         _discord = discord;
         Metadata = metadata;
@@ -67,7 +68,7 @@ public sealed partial class ServerViewModel : ObservableObject
         _store = store;
         _ui = SynchronizationContext.Current ?? new SynchronizationContext();
         GameSettings = new GameSettingsViewModel(this);
-        PlayerLists = new PlayerListsViewModel(this);
+        PlayerLists = new PlayerListsViewModel(this, dialogs, faces);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);

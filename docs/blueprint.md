@@ -138,7 +138,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 | :-- | :-- | :-- | :-- |
 | Top bar | Start/Stop, status, memory and CPU while running, Open folder | | Force close |
 | Console | Console, command box | | Log detail level |
-| Players | Online players, whitelist switch and list, OP list | Kick/ban (commands in Phase 1, buttons in Phase 3) | |
+| Players | Online players with faces and a ⋯ menu (kick, ban, OP, whitelist), whitelist switch and list, OP list, ban list with Unban | Players who joined before (from `usercache.json`), with the same ⋯ menu minus kick | |
 | Game settings | Gamemode, difficulty, PvP, max players, MOTD, keepInventory | View/simulation distance, spawn protection, command blocks, flight, mob spawning, hardcore, seed (before the world exists) | Raw `server.properties` editor |
 | Server | RAM slider, server icon | Change type or version (automatic backup first, warning on downgrade), restart after a crash, stop when nobody is online, port, `online-mode` (warning when turned off), Duplicate server, Delete server | Custom JVM arguments, choose Java manually, use your own server.jar |
 | Backups | Backup list, restore, back up now, replace with another world, start a new world, export (current world or any backup) | Keep count, delete after days, copy backups to another folder (OneDrive) | |
@@ -259,7 +259,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 ### Phase 3: Quality of Life & Safety
 * [x] Scheduled backups and backup restore improvements.
-* [ ] Visual Player Manager (kick, ban, OP, whitelist, avatars).
+* [x] Visual Player Manager (kick, ban, OP, whitelist, avatars).
 * [ ] Smart Crash Analyzer (duplicate mods, missing Fabric API, port in use) with plain-language fixes.
 * [ ] Several servers running at the same time (decision 5, revisit).
 
@@ -341,6 +341,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 
 ### Phase 3 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
 22. ✓ Scheduled backups while the server runs (save-off / save-all flush / save-on), "Back up now" while online, and restoring only the Overworld, Nether or End (section 5, "Backups"). Confirmed with Peanut 2026-10-20.
+23. ✓ Visual player manager: faces from the player's Mojang skin (face plus hat layer, cached a day in `cache/skins`; no account or default skin shows the initial), a ⋯ menu on online players (kick right away; ban asks first with an optional reason; make or remove OP; add to or remove from whitelist), the ban list with Unban, and "Players who joined before" under More settings. Changes made while stopped are queued like whitelist changes. No IP bans for now (a household shares one IP). Confirmed with Peanut 2026-10-20 (1A–5A).
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
