@@ -443,10 +443,10 @@ Start the server anyway, without a fresh backup?</value>
     <value>Open backups folder</value>
   </data>
   <data name="Backups_Hint" xml:space="preserve">
-    <value>WaNut backs up the world every time the server starts. Backups hold the world only, not plugins, mods or settings.</value>
+    <value>WaNut backs up the world every time the server starts, and while it runs if you turn that on under More settings. Backups hold the world only, not plugins, mods or settings.</value>
   </data>
   <data name="Backups_StopToChange" xml:space="preserve">
-    <value>Stop the server to back up or restore.</value>
+    <value>Stop the server to restore or change the world. Back up now works while it runs.</value>
   </data>
   <data name="Backups_Working" xml:space="preserve">
     <value>Backing up world…</value>
@@ -489,11 +489,6 @@ Start the server anyway, without a fresh backup?</value>
   </data>
   <data name="Backups_Problem_BackupMissing" xml:space="preserve">
     <value>This backup file is gone. It may have been moved or deleted.</value>
-  </data>
-  <data name="Backups_RestoreConfirm" xml:space="preserve">
-    <value>Restore {0} to the backup from {1}?
-
-The current world will be replaced. WaNut backs it up first, so you can go back.</value>
   </data>
   <data name="Backups_RestoreLabel" xml:space="preserve">
     <value>Restore the backup from {0} ({1})</value>
@@ -1987,5 +1982,65 @@ Stop the server and update?</value>
   </data>
   <data name="Notify_JavaReady" xml:space="preserve">
     <value>Java is downloaded. "{0}" is starting.</value>
+  </data>
+  <data name="Backups_Reason_Scheduled" xml:space="preserve">
+    <value>On schedule</value>
+  </data>
+  <data name="Backups_Problem_SaveNotConfirmed" xml:space="preserve">
+    <value>The server didn't confirm it had saved the world, so WaNut didn't take a copy. Saving is back on. Try again in a moment.</value>
+  </data>
+  <data name="Backups_Schedule" xml:space="preserve">
+    <value>Back up while the server runs</value>
+  </data>
+  <data name="Backups_ScheduleOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Backups_ScheduleEvery30" xml:space="preserve">
+    <value>Every 30 minutes</value>
+  </data>
+  <data name="Backups_ScheduleEvery60" xml:space="preserve">
+    <value>Every hour</value>
+  </data>
+  <data name="Backups_ScheduleEvery180" xml:space="preserve">
+    <value>Every 3 hours</value>
+  </data>
+  <data name="Backups_ScheduleEvery360" xml:space="preserve">
+    <value>Every 6 hours</value>
+  </data>
+  <data name="Backups_ScheduleHint" xml:space="preserve">
+    <value>WaNut pauses saving for a moment, copies the world, then turns saving back on, so friends can keep playing. A stretch nobody played in is skipped. These backups count toward the number kept. Applies to every server.</value>
+  </data>
+  <data name="Server_ScheduledBackup" xml:space="preserve">
+    <value>WaNut is backing up the world on schedule. Saving pauses for a moment.</value>
+  </data>
+  <data name="Restore_Title" xml:space="preserve">
+    <value>Restore a backup</value>
+  </data>
+  <data name="Restore_Question" xml:space="preserve">
+    <value>Restore {0} to the backup from {1}?</value>
+  </data>
+  <data name="Restore_PartLabel" xml:space="preserve">
+    <value>What to restore</value>
+  </data>
+  <data name="Restore_PartAll" xml:space="preserve">
+    <value>The whole world</value>
+  </data>
+  <data name="Restore_PartOverworld" xml:space="preserve">
+    <value>Only the Overworld</value>
+  </data>
+  <data name="Restore_PartNether" xml:space="preserve">
+    <value>Only the Nether</value>
+  </data>
+  <data name="Restore_PartEnd" xml:space="preserve">
+    <value>Only the End</value>
+  </data>
+  <data name="Restore_PartHint" xml:space="preserve">
+    <value>The parts you don't pick stay as they are now. The Overworld also holds every player's inventory and position.</value>
+  </data>
+  <data name="Restore_BackupNote" xml:space="preserve">
+    <value>The current world will be replaced. WaNut backs it up first, so you can go back.</value>
+  </data>
+  <data name="Restore_Confirm" xml:space="preserve">
+    <value>Restore</value>
   </data>
 </root>

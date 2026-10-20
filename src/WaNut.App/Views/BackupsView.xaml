@@ -158,6 +158,13 @@
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
         <StackPanel Margin="4,8,0,0">
           <StackPanel Style="{StaticResource Item}">
+            <TextBlock Text="{res:Text Backups_Schedule}" Style="{StaticResource Label}" />
+            <ComboBox ItemsSource="{Binding App.BackupSchedules}" DisplayMemberPath="Value" SelectedValuePath="Key"
+                      SelectedValue="{Binding App.BackupScheduleMinutes}" HorizontalAlignment="Left" MinWidth="160"
+                      AutomationProperties.Name="{res:Text Backups_Schedule}" />
+            <TextBlock Text="{res:Text Backups_ScheduleHint}" Style="{StaticResource Hint}" />
+          </StackPanel>
+          <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Backups_KeepCount}" Style="{StaticResource Label}" />
             <TextBox Text="{Binding App.BackupKeepCount}" MaxLength="3" Width="80" HorizontalAlignment="Left"
                      AutomationProperties.Name="{res:Text Backups_KeepCount}" InputMethod.IsInputMethodEnabled="False" />

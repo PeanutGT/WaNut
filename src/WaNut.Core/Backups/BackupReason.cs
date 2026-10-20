@@ -20,4 +20,7 @@ public enum BackupReason
 
     /// <summary>The world as it was just before it was deleted for a fresh one.</summary>
     Reset,
+
+    /// <summary>Made on the backup schedule while the server was running.</summary>
+    Scheduled,
 }

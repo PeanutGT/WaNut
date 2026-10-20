@@ -12,14 +12,16 @@ using WaNut.Core.Worlds;
 namespace WaNut.App.ViewModels;
 
 /// <summary>
-/// The Backups tab: the list of world backups, "Back up now" and restore. Backups and restores only run while
-/// the server is stopped, because a running server keeps writing its world.
+/// The Backups tab: the list of world backups, "Back up now" and restore. Restores and world changes only run while
+/// the server is stopped, because a running server keeps writing its world; a running server is backed up with
+/// saving paused (<see cref="LiveBackup"/>).
 /// </summary>
 public sealed partial class BackupsViewModel : ObservableObject
 {
     private readonly ServerViewModel _server;
     private readonly BackupStore _store;
     private readonly IDialogService _dialogs;
+    private Task? _liveBackup;
 
     public BackupsViewModel(ServerViewModel server, BackupStore store, AppSettingsViewModel app, IDialogService dialogs)
     {
@@ -55,6 +57,10 @@ public sealed partial class BackupsViewModel : ObservableObject
     public bool CanChange => _server.Status == ServerStatus.Stopped && !_server.IsPreparing && !IsWorking;
 
     public bool ShowStopToChange => _server.IsRunning;
+
+    /// <summary>"Back up now" works while stopped, and while online by pausing saving.</summary>
+    public bool CanBackUpNow => !IsWorking && !_server.IsPreparing
+        && (_server.Status == ServerStatus.Stopped || (_server.Status == ServerStatus.Online && _server.Process is not null));
 
     public string WorkText => Working switch
     {
@@ -100,6 +106,7 @@ public sealed partial class BackupsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanChange));
         OnPropertyChanged(nameof(ShowStopToChange));
+        OnPropertyChanged(nameof(CanBackUpNow));
         BackUpNowCommand.NotifyCanExecuteChanged();
         RestoreCommand.NotifyCanExecuteChanged();
         ReplaceWorldCommand.NotifyCanExecuteChanged();
@@ -165,9 +172,15 @@ public sealed partial class BackupsViewModel : ObservableObject
         DoneText = result.InventoryProblem is { } problem ? done + Environment.NewLine + Text.Get($"World_Inventory_{problem}") : done;
     }
 
-    [RelayCommand(CanExecute = nameof(CanChange))]
+    [RelayCommand(CanExecute = nameof(CanBackUpNow))]
     private async Task BackUpNowAsync()
     {
+        if (_server.Status == ServerStatus.Online)
+        {
+            await BackUpWhileRunningAsync(BackupReason.Manual);
+            return;
+        }
+
         await RunAsync(BackupReason.Manual, async progress =>
         {
             var backup = await _store.CreateAsync(_server.InstanceDir, BackupReason.Manual, progress);
@@ -181,17 +194,58 @@ public sealed partial class BackupsViewModel : ObservableObject
         });
     }
 
+    /// <summary>Backs up the running server with saving paused, for "Back up now" and the backup schedule.</summary>
+    internal Task BackUpWhileRunningAsync(BackupReason reason)
+    {
+        if (_server.Process is not { } process || IsWorking)
+        {
+            return Task.CompletedTask;
+        }
+
+        _liveBackup = RunAsync(reason, async progress =>
+        {
+            var backup = await LiveBackup.CreateAsync(_store, _server.InstanceDir, process, reason, progress);
+            if (backup is null)
+            {
+                return Text.Get("Backups_NoWorldYet");
+            }
+
+            _store.Cleanup(_server.InstanceDir, App.BackupRules);
+            return Text.Get("Backups_Done");
+        });
+        return _liveBackup;
+    }
+
+    /// <summary>Completes once a backup of the running server is done, so a stop never saves while files are copied.</summary>
+    internal Task WaitForLiveBackupAsync() => _liveBackup ?? Task.CompletedTask;
+
     [RelayCommand(CanExecute = nameof(CanRestore))]
     private async Task RestoreAsync(BackupItemViewModel? item)
     {
-        if (item is null || !_dialogs.Confirm(string.Format(Text.Get("Backups_RestoreConfirm"), _server.Name, item.DateText)))
+        if (item is null)
+        {
+            return;
+        }
+
+        IReadOnlyList<WorldPart> parts;
+        try
+        {
+            parts = BackupStore.Parts(_server.InstanceDir, item.Info);
+        }
+        catch (Exception e) when (e is BackupException or IOException or UnauthorizedAccessException)
+        {
+            // The restore itself reports the problem; the window just offers the whole world.
+            parts = [];
+        }
+
+        if (_dialogs.AskRestore(_server.Name, item.DateText, parts) is not { } chosen)
         {
             return;
         }
 
         await RunAsync(BackupReason.Restore, async progress =>
         {
-            await _store.RestoreAsync(_server.InstanceDir, item.Info, progress);
+            await _store.RestoreAsync(_server.InstanceDir, item.Info, chosen, progress);
             return string.Format(Text.Get("Backups_Restored"), item.DateText);
         });
     }
@@ -259,7 +313,7 @@ public sealed partial class BackupsViewModel : ObservableObject
         {
             ErrorText = Text.Get($"Backups_Problem_{e.Problem}");
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             ErrorText = string.Format(Text.Get(reason == BackupReason.Restore ? "Backups_RestoreFailed" : "Backups_Failed"), e.Message);
         }

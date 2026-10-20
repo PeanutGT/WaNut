@@ -26,6 +26,14 @@ public sealed class ServerLogParserTests
         Assert.Equal(new LogEvent(expected, "Steve"), ServerLogParser.Parse(line));
     }
 
+    [Theory]
+    [InlineData("[12:50:00] [Server thread/INFO]: Saved the game")]
+    [InlineData("[12:50:00 INFO]: Saved the game")]
+    public void Parse_SavedLine_ReturnsSaved(string line)
+    {
+        Assert.Equal(new LogEvent(LogEventKind.Saved), ServerLogParser.Parse(line));
+    }
+
     [Fact]
     public void Parse_StoppingLine_ReturnsStopping()
     {

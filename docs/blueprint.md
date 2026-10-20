@@ -184,7 +184,9 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * Before each start, zip `world/` (and the Nether/End folders) into `backups/<timestamp>.zip`.
 * Cleanup rules in settings: keep the last N backups (default 5) and delete backups older than X days (default 30).
 * Restore a backup from the UI (server must be stopped). Restoring backs up the current world first, so a restore can be undone. These safety copies don't count toward the keep count (they still expire by age), so a few starts after a restore can't delete the only way back.
-* Backups and restores run only while the server is stopped; a running server keeps writing its region files. "Back up now" is greyed out while it runs.
+* The restore window can bring back the whole world or only the Overworld, the Nether or the End (offered when the backup holds more than one). The parts not picked stay as they are now; the Overworld includes player files and modded dimensions.
+* Restores and world changes run only while the server is stopped; a running server keeps writing its region files. A running server is backed up by sending `save-off` and `save-all flush`, waiting for "Saved the game", zipping, then `save-on` (always, even on failure). "Back up now" works while stopped or online; stopping waits for a running backup to finish.
+* Scheduled backups (Phase 3, step 22): off by default; every 30 minutes, 1, 3 or 6 hours while a server is online, chosen under "More settings" on the Backups tab and shared by every server (`config.json`). The clock starts when the server gets online; a period nobody played in is skipped. Scheduled backups count toward the keep count.
 * The newest backup is always kept, even when it is older than X days, so a server left alone for months still has one.
 * The cleanup rules live in `config.json` and apply to every server. They are edited under "More settings" on the Backups tab.
 * Backups hold the world only, not plugins, mods or config. From 26.x every dimension sits inside the level-name folder (`world/dimensions/minecraft/...`) for Vanilla, Paper and Fabric. Paper up to 1.21.x still splits off `world_nether` and `world_the_end`, so those are included when present.
@@ -256,7 +258,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
   * **CurseForge:** import a server pack zip the user already downloaded. Automatic download is hard because the API needs a key and some authors block third-party downloads. The same "From a modpack" choice takes the zip. Server packs have no standard index, so the Minecraft version and loader come from the first of: `manifest.json`, ServerPackCreator's `variables.txt`, ServerStarter's `server-setup-config.yaml`, the loader's installer jar or `libraries/` folders, version variables in the start scripts. A wrapper folder (one or two levels) is skipped. WaNut installs the loader itself, so the author's jars, start scripts, `libraries/`, `user_jvm_args.txt` and the OP, whitelist and ban lists are not copied; the pack's `server.properties` is merged in except whitelist, `online-mode`, ports, query, RCON and management keys. A CurseForge pack for the game (a manifest listing file ids, mods only in `overrides/`) is refused with a hint to download the Server Pack.
 
 ### Phase 3: Quality of Life & Safety
-* [ ] Scheduled backups and backup restore improvements.
+* [x] Scheduled backups and backup restore improvements.
 * [ ] Visual Player Manager (kick, ban, OP, whitelist, avatars).
 * [ ] Smart Crash Analyzer (duplicate mods, missing Fabric API, port in use) with plain-language fixes.
 * [ ] Several servers running at the same time (decision 5, revisit).
@@ -336,6 +338,9 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 19. ✓ UPnP port forwarding on the Connect tab (`Mono.Nat`, UPnP and NAT-PMP), with a clear message when the router refuses or CGNAT is detected (section 2, "Later phases").
 20. ✓ Built-in tunnel with playit.gg on the Connect tab (section 2, "Later phases"): approve once in the browser, one fixed address per server.
 21. ✓ Peanut-led guided onboarding (decision 17): a tour of the main window and every server tab, with Skip and "Show the guide again" in App settings.
+
+### Phase 3 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
+22. ✓ Scheduled backups while the server runs (save-off / save-all flush / save-on), "Back up now" while online, and restoring only the Overworld, Nether or End (section 5, "Backups"). Confirmed with Peanut 2026-10-20.
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.

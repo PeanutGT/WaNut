@@ -28,6 +28,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         AdvancedMode = settings.AdvancedMode;
         BackupKeepCount = settings.Backups.KeepCount;
         BackupMaxAgeDays = settings.Backups.MaxAgeDays;
+        BackupScheduleMinutes = settings.Backups.ScheduleMinutes;
         CheckForUpdates = settings.CheckForUpdates;
         Language = UiLanguages.Resolve(settings.Language);
         Theme = settings.Theme;
@@ -51,6 +52,14 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private int _backupMaxAgeDays;
+
+    /// <summary>Minutes between backups while a server runs; 0 is off.</summary>
+    [ObservableProperty]
+    private int _backupScheduleMinutes;
+
+    public IReadOnlyList<KeyValuePair<int, string>> BackupSchedules { get; } = BackupRules.ScheduleChoices
+        .Select(minutes => new KeyValuePair<int, string>(minutes, Resources.Text.Get(minutes == 0 ? "Backups_ScheduleOff" : $"Backups_ScheduleEvery{minutes}")))
+        .ToList();
 
     [ObservableProperty]
     private bool _checkForUpdates;
@@ -170,7 +179,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         new(ThemeChoice.Dark, Resources.Text.Get("AppSettings_ThemeDark")),
     ];
 
-    public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays };
+    public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays, ScheduleMinutes = BackupScheduleMinutes };
 
     public bool WasFirewallAsked(string javaExe) => _saved.FirewallAsked.Contains(javaExe, StringComparer.OrdinalIgnoreCase);
 
@@ -201,6 +210,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     partial void OnAdvancedModeChanged(bool value) => Save();
 
     partial void OnCheckForUpdatesChanged(bool value) => Save();
+
+    partial void OnBackupScheduleMinutesChanged(int value) => Save();
 
     partial void OnLanguageChanged(string value) => Save();
 

@@ -411,12 +411,13 @@ public sealed partial class ServerViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Every two seconds until the process exits: reads its memory and CPU, and stops it once it has been empty
-    /// for the "stop when nobody is online" time. Runs on the UI thread.
+    /// Every two seconds until the process exits: reads its memory and CPU, backs the world up on the backup
+    /// schedule, and stops it once it has been empty for the "stop when nobody is online" time. Runs on the UI thread.
     /// </summary>
     private async Task WatchRunningAsync(ServerProcess process)
     {
         var meter = new CpuMeter(Environment.ProcessorCount);
+        var schedule = new BackupSchedule();
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         var stopping = false;
         try
@@ -431,6 +432,15 @@ public sealed partial class ServerViewModel : ObservableObject
                 }
 
                 _empty.Update(Status == ServerStatus.Online, Players.Count, now);
+                schedule.Update(Status == ServerStatus.Online, Players.Count, now);
+                var every = Backups.App.BackupScheduleMinutes;
+                if (!stopping && every > 0 && !Backups.IsWorking && schedule.IsDue(now, TimeSpan.FromMinutes(every)))
+                {
+                    schedule.Done(now);
+                    AddConsoleLine(Text.Get("Server_ScheduledBackup"));
+                    _ = Backups.BackUpWhileRunningAsync(BackupReason.Scheduled);
+                }
+
                 if (!stopping && Metadata.AutoStopMinutes > 0 && _empty.IsDue(now, TimeSpan.FromMinutes(Metadata.AutoStopMinutes)))
                 {
                     stopping = true;

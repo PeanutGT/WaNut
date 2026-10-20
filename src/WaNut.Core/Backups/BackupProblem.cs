@@ -10,4 +10,7 @@ public enum BackupProblem
 
     /// <summary>The backup file is gone.</summary>
     BackupMissing,
+
+    /// <summary>A running server did not confirm it had saved the world, so no copy was taken.</summary>
+    SaveNotConfirmed,
 }

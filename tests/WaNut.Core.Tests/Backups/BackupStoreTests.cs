@@ -402,4 +402,88 @@ public sealed class BackupStoreTests : IDisposable
         var copied = Directory.GetFiles(copies.Path).Select(Path.GetFileName).Order().ToList();
         Assert.Equal(["2026-10-15_12-02-00_start.zip", "2026-10-15_12-03-00_start.zip"], copied);
     }
+
+    [Fact]
+    public async Task Parts_ListsWhatTheBackupHolds()
+    {
+        WriteWorld();
+        WriteFile("world/DIM1/region/r.0.0.mca", "end");
+        var backup = await BackUpAsync();
+
+        Assert.Equal([WorldPart.Overworld, WorldPart.End], BackupStore.Parts(Dir, backup));
+    }
+
+    [Theory]
+    [InlineData("world/DIM-1/region/r.0.0.mca", WorldPart.Nether)]
+    [InlineData("world_nether/DIM-1/region/r.0.0.mca", WorldPart.Nether)]
+    [InlineData("world/dimensions/minecraft/the_nether/region/r.0.0.mca", WorldPart.Nether)]
+    [InlineData("world/DIM1/", WorldPart.End)]
+    [InlineData("world_the_end/level.dat", WorldPart.End)]
+    [InlineData("world/dimensions/minecraft/the_end/region/r.0.0.mca", WorldPart.End)]
+    [InlineData("world/dimensions/minecraft/overworld/region/r.0.0.mca", WorldPart.Overworld)]
+    [InlineData("world/playerdata/steve.dat", WorldPart.Overworld)]
+    [InlineData("world/DIM-1x/region/r.0.0.mca", WorldPart.Overworld)]
+    public void PartOf_KnowsEveryLayout(string path, WorldPart expected)
+    {
+        Assert.Equal(expected, BackupStore.PartOf("world", path));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_OnlyTheNether_KeepsTheRestAsItIsNow()
+    {
+        WriteWorld("v1");
+        WriteFile("world/dimensions/minecraft/the_nether/region/r.0.0.mca", "nether-v1");
+        WriteFile("world/dimensions/minecraft/the_end/region/r.0.0.mca", "end-v1");
+        var v1 = await BackUpAsync();
+        _clock.Advance(TimeSpan.FromMinutes(5));
+        WriteWorld("v2");
+        WriteFile("world/dimensions/minecraft/the_nether/region/r.0.0.mca", "nether-v2");
+        WriteFile("world/dimensions/minecraft/the_nether/region/r.1.0.mca", "griefed");
+        WriteFile("world/dimensions/minecraft/the_end/region/r.0.0.mca", "end-v2");
+
+        var safety = await _store.RestoreAsync(Dir, v1, [WorldPart.Nether]);
+
+        Assert.Equal("nether-v1", ReadFile("world/dimensions/minecraft/the_nether/region/r.0.0.mca"));
+        Assert.False(File.Exists(Path.Combine(Dir, "world", "dimensions", "minecraft", "the_nether", "region", "r.1.0.mca")));
+        Assert.Equal("v2", ReadFile("world/level.dat"));
+        Assert.Equal("region-v2", ReadFile("world/dimensions/minecraft/overworld/region/r.0.0.mca"));
+        Assert.Equal("end-v2", ReadFile("world/dimensions/minecraft/the_end/region/r.0.0.mca"));
+        Assert.Equal(BackupReason.Restore, safety?.Reason);
+        Assert.DoesNotContain(Directory.EnumerateDirectories(Dir), d => Path.GetFileName(d).StartsWith(".wanut-restore-", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_OnlyTheOverworld_KeepsTheCurrentNetherAndEnd()
+    {
+        WriteWorld("v1");
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v1");
+        var v1 = await BackUpAsync();
+        _clock.Advance(TimeSpan.FromMinutes(5));
+        WriteWorld("v2");
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v2");
+        WriteFile("world/DIM1/region/r.0.0.mca", "end-v2");
+
+        await _store.RestoreAsync(Dir, v1, [WorldPart.Overworld]);
+
+        Assert.Equal("v1", ReadFile("world/level.dat"));
+        Assert.Equal("nether-v2", ReadFile("world/DIM-1/region/r.0.0.mca"));
+        Assert.Equal("end-v2", ReadFile("world/DIM1/region/r.0.0.mca"));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_OnlyTheEnd_OldPaperLayout_ReplacesItsFolder()
+    {
+        WriteWorld("v1");
+        WriteFile("world_nether/DIM-1/region/r.0.0.mca", "nether-v1");
+        WriteFile("world_the_end/DIM1/region/r.0.0.mca", "end-v1");
+        var v1 = await BackUpAsync();
+        _clock.Advance(TimeSpan.FromMinutes(5));
+        WriteFile("world_nether/DIM-1/region/r.0.0.mca", "nether-v2");
+        WriteFile("world_the_end/DIM1/region/r.0.0.mca", "end-v2");
+
+        await _store.RestoreAsync(Dir, v1, [WorldPart.End]);
+
+        Assert.Equal("end-v1", ReadFile("world_the_end/DIM1/region/r.0.0.mca"));
+        Assert.Equal("nether-v2", ReadFile("world_nether/DIM-1/region/r.0.0.mca"));
+    }
 }
