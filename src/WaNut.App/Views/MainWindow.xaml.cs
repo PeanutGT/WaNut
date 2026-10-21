@@ -23,6 +23,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel = viewModel;
         _tray = tray;
         GuideLayer.FindTarget = FindGuideTarget;
+        viewModel.TabRequested += (_, tab) => ServerTabs.SelectedIndex = (int)tab;
         Loaded += (_, _) => viewModel.StartPendingGuide();
         tray.OpenRequested += (_, _) => ShowFromTray();
         tray.ExitRequested += (_, _) =>

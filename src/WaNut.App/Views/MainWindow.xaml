@@ -313,6 +313,35 @@
           <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
         </Border>
 
+        <!-- After a crash or failed start: the cause in plain words and, when WaNut can, a button that fixes it. -->
+        <Border DockPanel.Dock="Top" Margin="0,0,0,16" DataContext="{Binding CrashHelp}"
+                Style="{StaticResource ErrorBanner}" Padding="12,10"
+                Visibility="{Binding IsShown, Converter={StaticResource BoolToVisibility}}"
+                AutomationProperties.Name="{Binding Title}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <controls:PixelScene Scene="perf-hot" Width="48" Height="48" Margin="0,0,12,0" VerticalAlignment="Top" />
+            <StackPanel Grid.Column="1">
+              <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
+              <WrapPanel Margin="0,10,0,0">
+                <Button Style="{StaticResource PrimaryButton}" Content="{Binding FixText}" Command="{Binding FixCommand}"
+                        Margin="0,0,8,0" Visibility="{Binding HasFix, Converter={StaticResource BoolToVisibility}}" />
+                <Button Content="{res:Text Crash_OpenReport}" Command="{Binding OpenReportCommand}" Margin="0,0,8,0"
+                        Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibility}}" />
+                <Button Content="{res:Text Crash_CopyLines}" Command="{Binding CopyLinesCommand}"
+                        ToolTip="{res:Text Crash_CopyLinesHelp}" />
+              </WrapPanel>
+            </StackPanel>
+            <Button Grid.Column="2" Content="✕" Command="{Binding HideCommand}" VerticalAlignment="Top" Padding="8,4"
+                    Margin="8,0,0,0" ToolTip="{res:Text Crash_Dismiss}" AutomationProperties.Name="{res:Text Crash_Dismiss}" />
+          </Grid>
+        </Border>
+
         <TabControl x:Name="ServerTabs">
           <TabItem Header="{res:Text Server_TabConsole}">
             <DockPanel>

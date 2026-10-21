@@ -138,7 +138,17 @@ public sealed partial class MainViewModel : ObservableObject
         var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _discord, _faces);
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
+        server.TabRequested += OnTabRequested;
         return server;
+    }
+
+    /// <summary>Raised when a server asks for one of its tabs; the window selects the server and switches tabs.</summary>
+    public event EventHandler<ServerTab>? TabRequested;
+
+    private void OnTabRequested(object? sender, ServerTab tab)
+    {
+        SelectedServer = sender as ServerViewModel ?? SelectedServer;
+        TabRequested?.Invoke(this, tab);
     }
 
     private void OnBackupCopyFailed(string instanceDir, string message)
