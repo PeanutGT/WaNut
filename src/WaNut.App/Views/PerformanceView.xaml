@@ -68,6 +68,14 @@
                                AutomationProperties.Name="{res:Text Performance_MemoryChart}" />
         </StackPanel>
       </Border>
+
+      <!-- Several servers at once: what they take together. -->
+      <Border Style="{StaticResource ChartCard}" Visibility="{Binding HasTotal, Converter={StaticResource Visible}}">
+        <StackPanel>
+          <TextBlock Text="{res:Text Performance_TotalCaption}" Style="{StaticResource SectionCaption}" />
+          <TextBlock Text="{Binding TotalText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+      </Border>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

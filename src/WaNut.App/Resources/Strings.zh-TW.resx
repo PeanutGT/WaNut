@@ -147,9 +147,6 @@
   <data name="Server_Exited" xml:space="preserve">
     <value>伺服器已停止（結束代碼 {0}）。</value>
   </data>
-  <data name="Server_StopOtherConfirm" xml:space="preserve">
-    <value>「{0}」正在執行，一次只能執行一個伺服器。\n\n要停止「{0}」並啟動「{1}」嗎？</value>
-  </data>
   <data name="Server_ForceStopConfirm" xml:space="preserve">
     <value>「{0}」已經儲存了 {1} 秒還沒結束。\n\n要強制關閉嗎？上次儲存之後的進度可能會遺失。\n\n選「否」繼續等待。</value>
   </data>
@@ -158,9 +155,6 @@
   </data>
   <data name="Server_Error_EulaNotAccepted" xml:space="preserve">
     <value>這個伺服器還沒同意 Minecraft EULA，所以無法啟動。</value>
-  </data>
-  <data name="Server_Error_AnotherServerRunning" xml:space="preserve">
-    <value>已經有另一個伺服器在執行，請先停止它。</value>
   </data>
   <data name="Server_StartFailed" xml:space="preserve">
     <value>無法啟動伺服器：{0}</value>
@@ -2226,5 +2220,41 @@
   </data>
   <data name="Crash_InstallFailed" xml:space="preserve">
     <value>WaNut 沒辦法自己在 Modrinth 找到 {0}。請在模組分頁的搜尋結果裡挑選。</value>
+  </data>
+  <data name="Status_Queued" xml:space="preserve">
+    <value>排隊中，等另一台伺服器準備好…</value>
+  </data>
+  <data name="Server_Error_AlreadyRunning" xml:space="preserve">
+    <value>這個伺服器已經在執行了。</value>
+  </data>
+  <data name="Server_MemoryTogetherConfirm" xml:space="preserve">
+    <value>「{0}」和正在執行的伺服器加起來要用 {1:0.#} GB 記憶體，這台電腦只有 {2:0.#} GB，Windows 和遊戲可能會變得很卡。\n\n還是要啟動嗎？</value>
+  </data>
+  <data name="Server_NoFreePort" xml:space="preserve">
+    <value>連接埠 {0} 和後面 100 個連接埠都被占用了。請關掉占用的程式，或到伺服器分頁換一個連接埠。</value>
+  </data>
+  <data name="Server_PortMoved" xml:space="preserve">
+    <value>連接埠 {0} 被另一個伺服器或程式占用，WaNut 已把這個伺服器改到連接埠 {1}。朋友要用連線分頁上的新位址。</value>
+  </data>
+  <data name="Main_ListPlayers" xml:space="preserve">
+    <value>· {0} 人在線上</value>
+  </data>
+  <data name="Main_NameSeparator" xml:space="preserve">
+    <value>、</value>
+  </data>
+  <data name="Tray_RunningCount" xml:space="preserve">
+    <value>{0} 台伺服器執行中</value>
+  </data>
+  <data name="Tray_StopNamed" xml:space="preserve">
+    <value>關閉「{0}」</value>
+  </data>
+  <data name="Tray_StopAll" xml:space="preserve">
+    <value>關閉全部伺服器</value>
+  </data>
+  <data name="Performance_TotalCaption" xml:space="preserve">
+    <value>全部伺服器合計</value>
+  </data>
+  <data name="Performance_Total" xml:space="preserve">
+    <value>{0} 台 · CPU {1:0}% · 記憶體 {2:0.0} GB</value>
   </data>
 </root>

@@ -134,7 +134,7 @@ public sealed partial class UpdateViewModel : ObservableObject
     /// <summary>Asks to stop a running or starting server and waits for it. Returns false when the update should wait.</summary>
     private async Task<bool> StopServerForUpdateAsync()
     {
-        if (_controller.Preparing is not null)
+        if (_controller.IsAnyPreparing)
         {
             // Mid-backup or mid-Java-download: not safe to restart, and nothing to stop yet.
             StatusText = Text.Get("Update_WaitForStart");

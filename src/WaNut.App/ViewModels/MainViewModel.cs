@@ -1,11 +1,15 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Network;
 using WaNut.Core.Onboarding;
+using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;
 
@@ -75,9 +79,10 @@ public sealed partial class MainViewModel : ObservableObject
 
     public bool HasRunningServer => _controller.HasRunningServer;
 
-    public string? RunningServerName => _controller.Running?.Name;
+    /// <summary>"Survival, Creative": every running server, for the close question.</summary>
+    public string RunningServerNames => string.Join(Text.Get("Main_NameSeparator"), _controller.RunningServers.Select(s => s.Name));
 
-    /// <summary>Stops the running server so its world is saved before WaNut closes.</summary>
+    /// <summary>Stops every running server so their worlds are saved before WaNut closes.</summary>
     public async Task ShutdownAsync()
     {
         IsShuttingDown = true;
@@ -119,7 +124,35 @@ public sealed partial class MainViewModel : ObservableObject
 
         Reload();
         SelectedServer = Servers.FirstOrDefault(s => s.Id == created.Id);
+        GiveOwnPort(SelectedServer);
         StartPendingGuide();
+    }
+
+    /// <summary>
+    /// A new server or copy gets a port no other server has, so they can run side by side (decision 5). Starting
+    /// still moves a server whose port is taken, so a failure here only costs a later move.
+    /// </summary>
+    private void GiveOwnPort(ServerViewModel? server)
+    {
+        if (server is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var settings = ServerSettingsStore.Load(server.InstanceDir);
+            var taken = Servers.Where(s => s != server).Select(s => ServerSettingsStore.Load(s.InstanceDir).Port).ToHashSet();
+            if (ServerPorts.Pick(settings.Port, taken, _ => true) is { } port && port != settings.Port)
+            {
+                ServerSettingsStore.Save(server.InstanceDir, settings, settings with { Port = port });
+                server.ServerSettings.Reload();
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // Moved on its first start instead.
+        }
     }
 
     private void Reload()
@@ -163,6 +196,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         Reload();
         SelectedServer = Servers.FirstOrDefault(s => s.Id == copy.Id);
+        GiveOwnPort(SelectedServer);
     }
 
     /// <summary>Drops a deleted server from the list and selects its neighbour, or nothing when the list is empty.</summary>

@@ -147,11 +147,6 @@
   <data name="Server_Exited" xml:space="preserve">
     <value>Server stopped (exit code {0}).</value>
   </data>
-  <data name="Server_StopOtherConfirm" xml:space="preserve">
-    <value>"{0}" is running, and only one server can run at a time.
-
-Stop "{0}" and start "{1}"?</value>
-  </data>
   <data name="Server_ForceStopConfirm" xml:space="preserve">
     <value>"{0}" is still saving after {1} seconds.
 
@@ -164,9 +159,6 @@ Choose No to keep waiting.</value>
   </data>
   <data name="Server_Error_EulaNotAccepted" xml:space="preserve">
     <value>The Minecraft EULA has not been accepted for this server, so it cannot start.</value>
-  </data>
-  <data name="Server_Error_AnotherServerRunning" xml:space="preserve">
-    <value>Another server is already running. Stop it first.</value>
   </data>
   <data name="Server_StartFailed" xml:space="preserve">
     <value>Could not start the server: {0}</value>
@@ -870,9 +862,9 @@ Windows asks for administrator approval next. WaNut then removes the blocking ru
     <value>Later</value>
   </data>
   <data name="Update_StopServerConfirm" xml:space="preserve">
-    <value>Updating restarts WaNut, so the running server will be stopped first (the world is saved).
+    <value>Updating restarts WaNut, so the running servers will be stopped first (their worlds are saved).
 
-Stop the server and update?</value>
+Stop the servers and update?</value>
   </data>
   <data name="Update_Downloading" xml:space="preserve">
     <value>Downloading the update…</value>
@@ -2246,5 +2238,43 @@ Stop the server and update?</value>
   </data>
   <data name="Crash_InstallFailed" xml:space="preserve">
     <value>WaNut couldn't find {0} on Modrinth by itself. Pick it from the search on the Mods tab.</value>
+  </data>
+  <data name="Status_Queued" xml:space="preserve">
+    <value>Waiting for another server to get ready…</value>
+  </data>
+  <data name="Server_Error_AlreadyRunning" xml:space="preserve">
+    <value>This server is already running.</value>
+  </data>
+  <data name="Server_MemoryTogetherConfirm" xml:space="preserve">
+    <value>“{0}” and the servers already running would use {1:0.#} GB of memory together, and this PC has {2:0.#} GB. Windows and Minecraft may get very slow.
+
+Start it anyway?</value>
+  </data>
+  <data name="Server_NoFreePort" xml:space="preserve">
+    <value>Port {0} and the 100 ports after it are all in use. Close the program using them, or pick another port on the Server tab.</value>
+  </data>
+  <data name="Server_PortMoved" xml:space="preserve">
+    <value>Port {0} is used by another server or program, so WaNut moved this server to port {1}. Friends need the new address from the Connect tab.</value>
+  </data>
+  <data name="Main_ListPlayers" xml:space="preserve">
+    <value>· {0} online</value>
+  </data>
+  <data name="Main_NameSeparator" xml:space="preserve">
+    <value>, </value>
+  </data>
+  <data name="Tray_RunningCount" xml:space="preserve">
+    <value>{0} servers running</value>
+  </data>
+  <data name="Tray_StopNamed" xml:space="preserve">
+    <value>Stop “{0}”</value>
+  </data>
+  <data name="Tray_StopAll" xml:space="preserve">
+    <value>Stop all servers</value>
+  </data>
+  <data name="Performance_TotalCaption" xml:space="preserve">
+    <value>All servers together</value>
+  </data>
+  <data name="Performance_Total" xml:space="preserve">
+    <value>{0} servers · CPU {1:0}% · memory {2:0.0} GB</value>
   </data>
 </root>

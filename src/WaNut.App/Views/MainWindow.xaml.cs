@@ -79,7 +79,7 @@ public partial class MainWindow : Window
             return _viewModel.AppSettings.CloseAction;
         }
 
-        var window = new CloseChoiceWindow(_viewModel.RunningServerName ?? string.Empty) { Owner = this };
+        var window = new CloseChoiceWindow(_viewModel.RunningServerNames) { Owner = this };
         if (window.ShowDialog() != true || window.Choice is not { } choice)
         {
             return CloseAction.Ask;

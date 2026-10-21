@@ -7,13 +7,13 @@ namespace WaNut.App.Services;
 
 /// <summary>
 /// The playit.gg tunnel (blueprint 2, step 20): approving this PC once in the browser, then running WaNut's own playit
-/// agent while a server with "Let friends join over the internet" on is running. One server runs at a time, so one
-/// agent serves whichever server owns it; every server keeps its own tunnel and address.
+/// agent while a server with "Let friends join over the internet" on is running. One agent carries every tunnel of
+/// the account, so it serves all such servers and ends with the last one; every server keeps its own tunnel and address.
 /// </summary>
 public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downloader, PlayitTunnels tunnels) : IDisposable
 {
     private readonly PlayitAgentProcess _agent = new(files);
-    private string? _owner;
+    private readonly HashSet<string> _owners = [];
 
     public bool IsSetUp => files.HasSecret;
 
@@ -44,7 +44,7 @@ public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downl
         var agentExe = await downloader.EnsureInstalledAsync(progress, cancellationToken);
 
         // Started first: playit only makes a new tunnel for an agent that has connected.
-        _owner = owner;
+        _owners.Add(owner);
         _agent.Start(agentExe);
         try
         {
@@ -62,10 +62,10 @@ public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downl
         }
     }
 
-    /// <summary>Ends the agent if <paramref name="owner"/> started it.</summary>
+    /// <summary>Ends the agent once no running server other than <paramref name="owner"/> needs it.</summary>
     public void Stop(string owner)
     {
-        if (_owner == owner)
+        if (_owners.Remove(owner) && _owners.Count == 0)
         {
             StopAny();
         }
@@ -74,7 +74,7 @@ public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downl
     /// <summary>Before WaNut closes, or when the key is forgotten.</summary>
     public void StopAny()
     {
-        _owner = null;
+        _owners.Clear();
         _agent.Stop();
     }
 

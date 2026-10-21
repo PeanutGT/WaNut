@@ -82,7 +82,6 @@ public sealed partial class ServerViewModel : ObservableObject
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
-        controller.PreparingChanged += OnPreparingChanged;
         ReloadIcon();
     }
 
@@ -148,7 +147,7 @@ public sealed partial class ServerViewModel : ObservableObject
     public ObservableCollection<string> Players { get; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(IsBusy), nameof(StatusText), nameof(StatusScene))]
+    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsOnline), nameof(IsBusy), nameof(StatusText), nameof(StatusScene), nameof(ListPlayersText), nameof(ShowsStop))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand), nameof(StopCommand), nameof(SendCommand))]
     private ServerStatus _status = ServerStatus.Stopped;
 
@@ -156,6 +155,12 @@ public sealed partial class ServerViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsBusy), nameof(StatusText), nameof(StatusScene))]
     [NotifyCanExecuteChangedFor(nameof(StartCommand))]
     private bool _isPreparing;
+
+    /// <summary>Waiting for another server to get ready first (one prepares at a time). Stop leaves the line.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusText), nameof(ShowsStop))]
+    [NotifyCanExecuteChangedFor(nameof(StopCommand))]
+    private bool _isQueued;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatusText))]
@@ -181,6 +186,9 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public bool IsOnline => Status == ServerStatus.Online;
 
+    /// <summary>The header shows Stop instead of Start: while running, and while waiting in line to start.</summary>
+    public bool ShowsStop => IsRunning || IsQueued;
+
     /// <summary>Getting ready, starting, saving, or backing up: the moments the peanut wobbles.</summary>
     public bool IsBusy => IsPreparing || Backups.IsWorking || Status is ServerStatus.Starting or ServerStatus.Stopping;
 
@@ -195,7 +203,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public string PlayersHeader => string.Format(Text.Get("Server_TabPlayers"), Players.Count);
 
-    public string StatusText => IsPreparing
+    public string StatusText => IsQueued ? Text.Get("Status_Queued") : IsPreparing
         ? (BackupFraction, JavaDownloadFraction) switch
         {
             ({ } backup, _) => string.Format(Text.Get("Status_BackingUp"), backup * 100),
@@ -209,7 +217,7 @@ public sealed partial class ServerViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanStart))]
     private Task StartAsync() => _controller.StartAsync(this);
 
-    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && _controller.Preparing is null;
+    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
 
     /// <summary>Deleting needs the server stopped and nothing else working on its files.</summary>
     internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
@@ -217,7 +225,6 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>The folder is gone: let go of the shared services and tell the list.</summary>
     internal void OnDeleted()
     {
-        _controller.PreparingChanged -= OnPreparingChanged;
         _controller.Forget(this);
         Deleted?.Invoke(this, EventArgs.Empty);
     }
@@ -226,12 +233,10 @@ public sealed partial class ServerViewModel : ObservableObject
 
     private void OnAdvancedModeChanged(object? sender, PropertyChangedEventArgs e) => ServerSettings.OnAdvancedModeChanged();
 
-    private void OnPreparingChanged(object? sender, EventArgs e) => StartCommand.NotifyCanExecuteChanged();
-
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);
 
-    private bool CanStop() => Status is ServerStatus.Starting or ServerStatus.Online;
+    private bool CanStop() => IsQueued || Status is ServerStatus.Starting or ServerStatus.Online;
 
     [RelayCommand(CanExecute = nameof(CanSend))]
     private async Task SendAsync()
@@ -316,6 +321,22 @@ public sealed partial class ServerViewModel : ObservableObject
     }
 
     internal void ShowError(string message) => ErrorText = message;
+
+    /// <summary>The port this run listens on, so the next server to start can pick another.</summary>
+    internal int RunningPort { get; set; }
+
+    /// <summary>Another server or program had the port: this one moved, and friends need the new address.</summary>
+    internal void OnPortMoved(int from, int to)
+    {
+        AddConsoleLine(string.Format(Text.Get("Server_PortMoved"), from, to));
+        ServerSettings.Reload();
+    }
+
+    /// <summary>"3 online" under the name in the server list; empty while the server is not online.</summary>
+    public string ListPlayersText => IsOnline ? string.Format(Text.Get("Main_ListPlayers"), Players.Count) : string.Empty;
+
+    /// <summary>The servers running right now, for the Performance tab's total.</summary>
+    internal IReadOnlyList<ServerViewModel> RunningServers => _controller.RunningServers;
 
     internal void RequestTab(ServerTab tab) => TabRequested?.Invoke(this, tab);
 
@@ -560,14 +581,13 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         await Task.Delay(RestartDelay);
 
-        // Only if nothing happened meanwhile: the user may have started this or another server, or deleted this one.
-        if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && _controller.Preparing is null
-            && (_controller.Running is null || _controller.Running == this) && Directory.Exists(InstanceDir))
+        // Only if nothing happened meanwhile: the user may have started this server again or deleted it.
+        if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && Directory.Exists(InstanceDir))
         {
             _keepConsole = true;
             try
             {
-                await _controller.StartAsync(this);
+                await _controller.StartAsync(this, automatic: true);
             }
             finally
             {
@@ -629,5 +649,6 @@ public sealed partial class ServerViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(PlayersHeader));
+        OnPropertyChanged(nameof(ListPlayersText));
     }
 }

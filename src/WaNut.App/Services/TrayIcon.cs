@@ -9,8 +9,8 @@ using Forms = System.Windows.Forms;
 namespace WaNut.App.Services;
 
 /// <summary>
-/// WaNut's icon in the notification area while its window is hidden and a server keeps running. The icon's dot
-/// follows the server: green online, amber starting or saving, gray stopped. It also carries WaNut's Windows
+/// WaNut's icon in the notification area while its window is hidden and servers keep running. The icon's dot
+/// follows the servers: green when one is online, amber starting or saving, gray stopped. It also carries WaNut's Windows
 /// notifications, showing just for as long as the notification does when the window is open.
 /// </summary>
 public sealed class TrayIcon : IDisposable
@@ -22,7 +22,7 @@ public sealed class TrayIcon : IDisposable
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly Dictionary<Color, Icon> _icons = [];
     private Forms.NotifyIcon? _icon;
-    private Forms.ToolStripMenuItem? _stopItem;
+    private readonly List<Forms.ToolStripItem> _stopItems = [];
     private bool _toldOnce;
 
     // Shown only to carry a notification while the window is open; hidden again once the notification goes.
@@ -96,14 +96,7 @@ public sealed class TrayIcon : IDisposable
         {
             var menu = new Forms.ContextMenuStrip();
             menu.Items.Add(Text.Get("Tray_Open"), null, (_, _) => OpenRequested?.Invoke(this, EventArgs.Empty));
-            _stopItem = new Forms.ToolStripMenuItem(Text.Get("Tray_StopServer"), null, async (_, _) =>
-            {
-                if (_controller.Running is { } running)
-                {
-                    await _controller.StopAsync(running);
-                }
-            });
-            menu.Items.Add(_stopItem);
+            menu.Opening += (_, _) => FillStopItems(menu);
             menu.Items.Add(new Forms.ToolStripSeparator());
             menu.Items.Add(Text.Get("Tray_Exit"), null, (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty));
             _icon = new Forms.NotifyIcon { ContextMenuStrip = menu };
@@ -134,17 +127,49 @@ public sealed class TrayIcon : IDisposable
             return;
         }
 
-        var server = _controller.Running;
-        var status = server?.Status ?? ServerStatus.Stopped;
-        var text = server is null ? Text.Get("App_Title") : $"{Text.Get("App_Title")} · {server.Name}: {server.StatusText}";
-        _icon.Text = text.Length > MaxTooltip ? text[..(MaxTooltip - 1)] + "…" : text;
-        _icon.Icon = IconFor(status switch
+        var running = _controller.RunningServers;
+        var text = running switch
         {
-            ServerStatus.Online => Color.FromArgb(0x3C, 0xA3, 0x4F),
-            ServerStatus.Starting or ServerStatus.Stopping => Color.FromArgb(0xE0, 0x9B, 0x2D),
-            _ => Color.FromArgb(0x9A, 0x94, 0x8C),
-        });
-        _stopItem!.Enabled = status is ServerStatus.Starting or ServerStatus.Online;
+            [] => Text.Get("App_Title"),
+            [var server] => $"{Text.Get("App_Title")} · {server.Name}: {server.StatusText}",
+            _ => $"{Text.Get("App_Title")} · {string.Format(Text.Get("Tray_RunningCount"), running.Count)}",
+        };
+        _icon.Text = text.Length > MaxTooltip ? text[..(MaxTooltip - 1)] + "…" : text;
+
+        // Green while any server is online, amber while one starts or saves, gray when none runs.
+        _icon.Icon = IconFor(running.Any(s => s.Status == ServerStatus.Online) ? Color.FromArgb(0x3C, 0xA3, 0x4F)
+            : running.Any(s => s.Status is ServerStatus.Starting or ServerStatus.Stopping) ? Color.FromArgb(0xE0, 0x9B, 0x2D)
+            : Color.FromArgb(0x9A, 0x94, 0x8C));
+    }
+
+    /// <summary>One "Stop" per running server, and "Stop all" when there are several, filled each time the menu opens.</summary>
+    private void FillStopItems(Forms.ContextMenuStrip menu)
+    {
+        foreach (var item in _stopItems)
+        {
+            menu.Items.Remove(item);
+            item.Dispose();
+        }
+
+        _stopItems.Clear();
+        var running = _controller.RunningServers.Where(s => s.Status is ServerStatus.Starting or ServerStatus.Online).ToList();
+        var index = 1;
+        foreach (var server in running)
+        {
+            var label = running.Count == 1 ? Text.Get("Tray_StopServer") : string.Format(Text.Get("Tray_StopNamed"), server.Name);
+            _stopItems.Add(new Forms.ToolStripMenuItem(label, null, async (_, _) => await _controller.StopAsync(server)));
+        }
+
+        if (running.Count > 1)
+        {
+            _stopItems.Add(new Forms.ToolStripMenuItem(Text.Get("Tray_StopAll"), null, async (_, _) =>
+                await Task.WhenAll(running.Select(_controller.StopAsync))));
+        }
+
+        foreach (var item in _stopItems)
+        {
+            menu.Items.Insert(index++, item);
+        }
     }
 
     /// <summary>The WaNut icon with a status dot in the corner, drawn once per color.</summary>
