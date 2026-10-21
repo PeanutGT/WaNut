@@ -243,10 +243,13 @@ public sealed partial class BackupsViewModel : ObservableObject
             return;
         }
 
+        var split = WorldLayout.SplitsDimensions(_server.Metadata.Type, _server.Metadata.MinecraftVersion);
         await RunAsync(BackupReason.Restore, async progress =>
         {
-            await _store.RestoreAsync(_server.InstanceDir, item.Info, chosen, progress);
-            return string.Format(Text.Get("Backups_Restored"), item.DateText);
+            var moved = BackupStore.MovesDimensions(_server.InstanceDir, item.Info, split, chosen);
+            await _store.RestoreAsync(_server.InstanceDir, item.Info, chosen, progress, split);
+            var done = string.Format(Text.Get("Backups_Restored"), item.DateText);
+            return moved ? done + " " + Text.Get("Backups_RestoredMovedDimensions") : done;
         });
     }
 
