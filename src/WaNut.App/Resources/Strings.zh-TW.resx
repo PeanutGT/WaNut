@@ -498,6 +498,9 @@
   <data name="Backups_Restored" xml:space="preserve">
     <value>已從 {0} 還原世界。原本的世界也另外保留了一份備份。</value>
   </data>
+  <data name="Backups_RestoredMovedDimensions" xml:space="preserve">
+    <value>這份備份來自把地獄和終界放在不同資料夾的伺服器，WaNut 已把它們搬到這台伺服器讀取的位置。</value>
+  </data>
   <data name="Backups_Total" xml:space="preserve">
     <value>備份：{0} 個，共 {1}</value>
   </data>

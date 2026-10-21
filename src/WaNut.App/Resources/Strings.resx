@@ -508,6 +508,9 @@ Start the server anyway, without a fresh backup?</value>
   <data name="Backups_Restored" xml:space="preserve">
     <value>Restored the world from {0}. The world from before is kept as a backup too.</value>
   </data>
+  <data name="Backups_RestoredMovedDimensions" xml:space="preserve">
+    <value>This backup was made on a server that keeps the Nether and End in other folders, so WaNut moved them to where this server looks for them.</value>
+  </data>
   <data name="Backups_Total" xml:space="preserve">
     <value>Backups: {0} · {1} in total</value>
   </data>

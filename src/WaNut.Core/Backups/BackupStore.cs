@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 using WaNut.Core.Settings;
+using WaNut.Core.Worlds;
 
 namespace WaNut.Core.Backups;
 
@@ -206,13 +207,34 @@ public sealed partial class BackupStore(TimeProvider clock)
     };
 
     /// <summary>
+    /// Whether restoring <paramref name="parts"/> (null for all) of the backup moves its Nether or End to another
+    /// folder, because it was made with the other layout (e.g. on Paper before the server became Fabric).
+    /// <paramref name="splitDimensions"/> is the server's layout now, from <see cref="WorldLayout.SplitsDimensions"/>.
+    /// </summary>
+    public static bool MovesDimensions(string instanceDir, BackupInfo backup, bool splitDimensions, IReadOnlyCollection<WorldPart>? parts = null)
+    {
+        var level = GameSettingsStore.LevelName(instanceDir);
+        using var archive = OpenZip(backup.FilePath);
+        return DimensionFolders(level, splitDimensions)
+            .Where(d => parts is null || parts.Contains(d.Part))
+            .Any(d => archive.Entries.Any(entry => entry.FullName.Replace('\\', '/').StartsWith(d.Other + "/", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    /// <summary>For the Nether and End: the folder the other layout keeps it in.</summary>
+    private static IEnumerable<(WorldPart Part, string Other)> DimensionFolders(string level, bool splitDimensions) => splitDimensions
+        ? [(WorldPart.Nether, level + "/DIM-1"), (WorldPart.End, level + "/DIM1")]
+        : [(WorldPart.Nether, level + "_nether/DIM-1"), (WorldPart.End, level + "_the_end/DIM1")];
+
+    /// <summary>
     /// Puts the backup's world back, or only the chosen <paramref name="parts"/> of it (null for all). The current
     /// world is backed up first (as a "restore" backup), so a restore can itself be undone. Returns that safety
-    /// backup, or null when there was no world to save.
+    /// backup, or null when there was no world to save. With <paramref name="splitDimensions"/> (the server's layout
+    /// now), a backup made with the other layout has its Nether and End moved to match, or the server would start
+    /// with a fresh Nether and End.
     /// </summary>
     public async Task<BackupInfo?> RestoreAsync(
         string instanceDir, BackupInfo backup, IReadOnlyCollection<WorldPart>? parts = null, IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        bool? splitDimensions = null, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(backup.FilePath))
         {
@@ -227,6 +249,12 @@ public sealed partial class BackupStore(TimeProvider clock)
         try
         {
             restoredFolders = await Task.Run(() => Extract(backup.FilePath, incoming, progress, cancellationToken), cancellationToken);
+            if (splitDimensions is { } split)
+            {
+                MatchLayout(incoming, GameSettingsStore.LevelName(instanceDir), split);
+                restoredFolders = Directory.EnumerateDirectories(incoming).Select(dir => Path.GetFileName(dir)).ToList();
+            }
+
             if (parts is not null && Enum.GetValues<WorldPart>().Any(part => !parts.Contains(part)))
             {
                 incoming = await Task.Run(() => MixParts(instanceDir, current, incoming, parts, cancellationToken), cancellationToken);
@@ -240,6 +268,18 @@ public sealed partial class BackupStore(TimeProvider clock)
         }
 
         return await ReplaceWorldAsync(instanceDir, incoming, restoredFolders, BackupReason.Restore, cancellationToken);
+    }
+
+    private static void MatchLayout(string staging, string level, bool splitDimensions)
+    {
+        if (splitDimensions)
+        {
+            WorldLayout.Split(staging, level);
+        }
+        else
+        {
+            WorldLayout.Join(staging, level);
+        }
     }
 
     /// <summary>

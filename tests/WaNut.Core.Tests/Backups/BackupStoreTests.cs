@@ -486,4 +486,71 @@ public sealed class BackupStoreTests : IDisposable
         Assert.Equal("end-v1", ReadFile("world_the_end/DIM1/region/r.0.0.mca"));
         Assert.Equal("nether-v2", ReadFile("world_nether/DIM-1/region/r.0.0.mca"));
     }
+
+    [Fact]
+    public async Task RestoreAsync_OldPaperBackupOnVanillaLayout_MovesNetherAndEndInsideTheWorld()
+    {
+        WriteWorld("v1");
+        WriteFile("world_nether/DIM-1/region/r.0.0.mca", "nether-v1");
+        WriteFile("world_the_end/DIM1/region/r.0.0.mca", "end-v1");
+        var v1 = await BackUpAsync();
+        _clock.Advance(TimeSpan.FromMinutes(5));
+        Directory.Delete(Path.Combine(Dir, "world_nether"), recursive: true);
+        Directory.Delete(Path.Combine(Dir, "world_the_end"), recursive: true);
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v2");
+
+        Assert.True(BackupStore.MovesDimensions(Dir, v1, splitDimensions: false));
+        await _store.RestoreAsync(Dir, v1, splitDimensions: false);
+
+        Assert.Equal("nether-v1", ReadFile("world/DIM-1/region/r.0.0.mca"));
+        Assert.Equal("end-v1", ReadFile("world/DIM1/region/r.0.0.mca"));
+        Assert.False(Directory.Exists(Path.Combine(Dir, "world_nether", "DIM-1")));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_VanillaBackupOnOldPaperLayout_MovesNetherAndEndOut()
+    {
+        WriteWorld("v1");
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v1");
+        WriteFile("world/DIM1/region/r.0.0.mca", "end-v1");
+        var v1 = await BackUpAsync();
+
+        Assert.True(BackupStore.MovesDimensions(Dir, v1, splitDimensions: true));
+        await _store.RestoreAsync(Dir, v1, splitDimensions: true);
+
+        Assert.Equal("nether-v1", ReadFile("world_nether/DIM-1/region/r.0.0.mca"));
+        Assert.Equal("end-v1", ReadFile("world_the_end/DIM1/region/r.0.0.mca"));
+        Assert.False(Directory.Exists(Path.Combine(Dir, "world", "DIM-1")));
+    }
+
+    [Fact]
+    public async Task RestoreAsync_OnlyTheNether_OldPaperBackupOnVanillaLayout_ReplacesTheNetherInsideTheWorld()
+    {
+        WriteWorld("v1");
+        WriteFile("world_nether/DIM-1/region/r.0.0.mca", "nether-v1");
+        var v1 = await BackUpAsync();
+        _clock.Advance(TimeSpan.FromMinutes(5));
+        Directory.Delete(Path.Combine(Dir, "world_nether"), recursive: true);
+        WriteWorld("v2");
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v2");
+        WriteFile("world/DIM1/region/r.0.0.mca", "end-v2");
+
+        Assert.True(BackupStore.MovesDimensions(Dir, v1, splitDimensions: false, [WorldPart.Nether]));
+        Assert.False(BackupStore.MovesDimensions(Dir, v1, splitDimensions: false, [WorldPart.End]));
+        await _store.RestoreAsync(Dir, v1, [WorldPart.Nether], splitDimensions: false);
+
+        Assert.Equal("nether-v1", ReadFile("world/DIM-1/region/r.0.0.mca"));
+        Assert.Equal("v2", ReadFile("world/level.dat"));
+        Assert.Equal("end-v2", ReadFile("world/DIM1/region/r.0.0.mca"));
+    }
+
+    [Fact]
+    public async Task MovesDimensions_SameLayout_IsFalse()
+    {
+        WriteWorld("v1");
+        WriteFile("world/DIM-1/region/r.0.0.mca", "nether-v1");
+        var v1 = await BackUpAsync();
+
+        Assert.False(BackupStore.MovesDimensions(Dir, v1, splitDimensions: false));
+    }
 }
