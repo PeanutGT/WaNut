@@ -21,6 +21,16 @@ public static class MemoryLimits
     public static int DefaultServerMb(long totalPhysicalMb) =>
         Math.Clamp(PreferredDefaultMb, MinimumMb, MaxServerMb(totalPhysicalMb));
 
+    /// <summary>What Windows and the Minecraft client keep when several servers run at once.</summary>
+    public const int KeptForWindowsMb = 3072;
+
+    /// <summary>
+    /// True when starting a server with <paramref name="startingMb"/> next to the running ones would leave Windows less
+    /// than <see cref="KeptForWindowsMb"/>. One server alone is already held to <see cref="MaxServerMb"/> by the slider.
+    /// </summary>
+    public static bool IsTooMuchTogether(int startingMb, IReadOnlyCollection<int> runningMb, long totalPhysicalMb) =>
+        runningMb.Count > 0 && startingMb + runningMb.Sum() > totalPhysicalMb - KeptForWindowsMb;
+
     public static long TotalPhysicalMb()
     {
         if (OperatingSystem.IsWindows())

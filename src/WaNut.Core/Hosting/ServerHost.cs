@@ -1,25 +1,31 @@
 namespace WaNut.Core.Hosting;
 
 /// <summary>
-/// Owns the running server. Only one server runs at a time (blueprint decision 5).
+/// Owns the running servers. Several may run at once (blueprint decision 5), but each server only once.
 /// </summary>
 public sealed class ServerHost
 {
     private readonly Lock _gate = new();
+    private readonly Dictionary<string, ServerProcess> _processes = [];
 
-    public ServerProcess? Current { get; private set; }
-
-    public string? CurrentInstanceId { get; private set; }
-
-    /// <summary>The id of the server that is running, or null when none is.</summary>
-    public string? RunningInstanceId
+    /// <summary>The ids of the servers that are running.</summary>
+    public IReadOnlyList<string> RunningInstanceIds
     {
         get
         {
             lock (_gate)
             {
-                return Current is { IsRunning: true } ? CurrentInstanceId : null;
+                return [.. _processes.Where(p => p.Value.IsRunning).Select(p => p.Key)];
             }
+        }
+    }
+
+    /// <summary>The server's latest process, running or exited, or null when it never started.</summary>
+    public ServerProcess? Get(string instanceId)
+    {
+        lock (_gate)
+        {
+            return _processes.GetValueOrDefault(instanceId);
         }
     }
 
@@ -28,18 +34,18 @@ public sealed class ServerHost
     {
         lock (_gate)
         {
-            if (Current is { IsRunning: true })
+            var previous = _processes.GetValueOrDefault(instanceId);
+            if (previous is { IsRunning: true })
             {
-                throw new ServerStartException(ServerStartProblem.AnotherServerRunning);
+                throw new ServerStartException(ServerStartProblem.AlreadyRunning);
             }
 
             var process = new ServerProcess(launch);
             beforeStart?.Invoke(process);
             process.Start();
 
-            Current?.Dispose();
-            Current = process;
-            CurrentInstanceId = instanceId;
+            previous?.Dispose();
+            _processes[instanceId] = process;
             return process;
         }
     }
