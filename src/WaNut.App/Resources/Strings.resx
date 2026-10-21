@@ -144,9 +144,6 @@
   <data name="Status_Stopping" xml:space="preserve">
     <value>Saving world…</value>
   </data>
-  <data name="Server_Crashed" xml:space="preserve">
-    <value>The server stopped unexpectedly (exit code {0}). The last lines in the Console usually say why.</value>
-  </data>
   <data name="Server_Exited" xml:space="preserve">
     <value>Server stopped (exit code {0}).</value>
   </data>
@@ -2090,5 +2087,161 @@ Stop the server and update?</value>
   </data>
   <data name="Restore_Confirm" xml:space="preserve">
     <value>Restore</value>
+  </data>
+  <data name="Server_CrashSummary" xml:space="preserve">
+    <value>WaNut: {0}</value>
+  </data>
+  <data name="Crash_Unknown_Title" xml:space="preserve">
+    <value>The server stopped unexpectedly</value>
+  </data>
+  <data name="Crash_Unknown_Text" xml:space="preserve">
+    <value>WaNut couldn't tell why (exit code {0}). The crash report or the last lines in the Console usually say. Copy the messages to ask a friend or a forum for help.</value>
+  </data>
+  <data name="Crash_PortInUse_Title" xml:space="preserve">
+    <value>Another program is using this server's port</value>
+  </data>
+  <data name="Crash_PortInUse_Text" xml:space="preserve">
+    <value>Something else on this PC, often another server that is still running, already uses the port, so this server couldn't open. Close the other program, or switch this server to port {1}. Friends then join with the new address.</value>
+  </data>
+  <data name="Crash_PortInUse_TextNoFree" xml:space="preserve">
+    <value>Something else on this PC, often another server that is still running, already uses the port, so this server couldn't open. Close the other program and start again.</value>
+  </data>
+  <data name="Crash_DuplicateMod_Title" xml:space="preserve">
+    <value>The same mod is installed twice: {0}</value>
+  </data>
+  <data name="Crash_DuplicateMod_Text" xml:space="preserve">
+    <value>{0} is in the mods folder more than once ({1}). A server can only load one copy. WaNut can keep the newest and move the others to a folder next to it.</value>
+  </data>
+  <data name="Crash_MissingMod_Title" xml:space="preserve">
+    <value>A needed mod is missing: {0}</value>
+  </data>
+  <data name="Crash_MissingMod_Text" xml:space="preserve">
+    <value>{1} needs {0} to run, but it isn't installed. WaNut can download it from Modrinth.</value>
+  </data>
+  <data name="Crash_MissingMod_TextNoInstall" xml:space="preserve">
+    <value>{1} needs {0} to run, but it isn't installed. Add it to the server and start again.</value>
+  </data>
+  <data name="Crash_AMod" xml:space="preserve">
+    <value>A mod</value>
+  </data>
+  <data name="Crash_IncompatibleMod_Title" xml:space="preserve">
+    <value>A mod doesn't fit this server: {0}</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextMinecraft" xml:space="preserve">
+    <value>{0} is made for another Minecraft version; this server runs {1}. Turn it off, or install its version for {1} from the Mods tab.</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextLoader" xml:space="preserve">
+    <value>{0} needs another version of {1} than this server has. Turn it off, or install a version of it that fits from the Mods tab.</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextConflict" xml:space="preserve">
+    <value>These mods don't work together: {0}. Turn one of them off.</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextOther" xml:space="preserve">
+    <value>{0} needs another version of {1}. Turn it off, or update both from the Mods tab.</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_Title" xml:space="preserve">
+    <value>A mod only works in the game, not on a server: {0}</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_Text" xml:space="preserve">
+    <value>{0} belongs in the players' Minecraft (like minimaps, shaders or menus), not on the server. Turn it off here; players can keep it in their own game.</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_TextUnknown" xml:space="preserve">
+    <value>A mod made for the players' Minecraft (like minimaps, shaders or menus) is on the server, but the messages don't say which. Look in the mods folder for one and remove it.</value>
+  </data>
+  <data name="Crash_OutOfMemory_Title" xml:space="preserve">
+    <value>The server ran out of memory</value>
+  </data>
+  <data name="Crash_OutOfMemory_Text" xml:space="preserve">
+    <value>It had {0:0.#} GB. Give it more on the Server tab, or use fewer mods or a shorter view distance.</value>
+  </data>
+  <data name="Crash_MemoryTooHigh_Title" xml:space="preserve">
+    <value>Java couldn't get the memory this server is set to</value>
+  </data>
+  <data name="Crash_MemoryTooHigh_Text" xml:space="preserve">
+    <value>This server is set to {0:0.#} GB, more than the PC can give right now. Lower it on the Server tab, or close other programs and try again.</value>
+  </data>
+  <data name="Crash_WrongJava_Title" xml:space="preserve">
+    <value>This needs a newer Java</value>
+  </data>
+  <data name="Crash_WrongJava_TextMod" xml:space="preserve">
+    <value>{0} needs Java {1}, but Minecraft {3} runs on Java {2}. Turn it off, or install its version for Minecraft {3} from the Mods tab.</value>
+  </data>
+  <data name="Crash_WrongJava_Text" xml:space="preserve">
+    <value>The server needs Java {0}, but it was started with Java {1}. Check its type and version on the Server tab.</value>
+  </data>
+  <data name="Crash_BrokenWorld_Title" xml:space="preserve">
+    <value>The world's files couldn't be read</value>
+  </data>
+  <data name="Crash_BrokenWorld_Text" xml:space="preserve">
+    <value>The world may be damaged, for example by a power cut while it was saving. Restore it from a backup on the Backups tab: WaNut makes one before every start.</value>
+  </data>
+  <data name="Crash_ModCrashed_Title" xml:space="preserve">
+    <value>A mod crashed the server: {0}</value>
+  </data>
+  <data name="Crash_ModCrashed_Text" xml:space="preserve">
+    <value>The crash points at {0}. Update it from the Mods tab or turn it off, then start again.</value>
+  </data>
+  <data name="Crash_Fix_UsePort" xml:space="preserve">
+    <value>Use port {0}</value>
+  </data>
+  <data name="Crash_Fix_Install" xml:space="preserve">
+    <value>Install {0}</value>
+  </data>
+  <data name="Crash_Fix_TurnOffOlder" xml:space="preserve">
+    <value>Turn off the older copy</value>
+  </data>
+  <data name="Crash_Fix_TurnOff" xml:space="preserve">
+    <value>Turn off {0}</value>
+  </data>
+  <data name="Crash_Fix_Memory" xml:space="preserve">
+    <value>Change memory</value>
+  </data>
+  <data name="Crash_Fix_Backups" xml:space="preserve">
+    <value>Go to Backups</value>
+  </data>
+  <data name="Crash_Fix_OpenMods" xml:space="preserve">
+    <value>Open mods folder</value>
+  </data>
+  <data name="Crash_OpenReport" xml:space="preserve">
+    <value>Open crash report</value>
+  </data>
+  <data name="Crash_CopyLines" xml:space="preserve">
+    <value>Copy messages</value>
+  </data>
+  <data name="Crash_CopyLinesHelp" xml:space="preserve">
+    <value>Copies the server's last messages, to paste when asking for help.</value>
+  </data>
+  <data name="Crash_Dismiss" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Crash_Copied" xml:space="preserve">
+    <value>The server's last messages are on the clipboard.</value>
+  </data>
+  <data name="Crash_CopyFailed" xml:space="preserve">
+    <value>Another program is using the clipboard. Try again.</value>
+  </data>
+  <data name="Crash_Done_Port" xml:space="preserve">
+    <value>Done: the server now uses port {0}. Start it again; friends join with the new address.</value>
+  </data>
+  <data name="Crash_FixFailed" xml:space="preserve">
+    <value>That didn't work: {0}</value>
+  </data>
+  <data name="Crash_TurnOffConfirm" xml:space="preserve">
+    <value>Move {0} to the {1} folder? The server won't load it, and you can move it back later.</value>
+  </data>
+  <data name="Crash_Done_TurnedOff" xml:space="preserve">
+    <value>Done: moved {0} to the {1} folder. Start the server again.</value>
+  </data>
+  <data name="Crash_InstallConfirm" xml:space="preserve">
+    <value>Download {0} from Modrinth and add it to this server?</value>
+  </data>
+  <data name="Crash_Installing" xml:space="preserve">
+    <value>Installing {0}…</value>
+  </data>
+  <data name="Crash_Done_Installed" xml:space="preserve">
+    <value>Done: installed {0}. Start the server again.</value>
+  </data>
+  <data name="Crash_InstallFailed" xml:space="preserve">
+    <value>WaNut couldn't find {0} on Modrinth by itself. Pick it from the search on the Mods tab.</value>
   </data>
 </root>

@@ -260,7 +260,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 ### Phase 3: Quality of Life & Safety
 * [x] Scheduled backups and backup restore improvements.
 * [x] Visual Player Manager (kick, ban, OP, whitelist, avatars).
-* [ ] Smart Crash Analyzer (duplicate mods, missing Fabric API, port in use) with plain-language fixes.
+* [x] Smart Crash Analyzer (duplicate mods, missing Fabric API, port in use) with plain-language fixes.
 * [ ] Several servers running at the same time (decision 5, revisit).
 
 ---
@@ -342,6 +342,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 ### Phase 3 build order (one branch and PR per step; scope confirmed with Peanut before each starts)
 22. ✓ Scheduled backups while the server runs (save-off / save-all flush / save-on), "Back up now" while online, and restoring only the Overworld, Nether or End (section 5, "Backups"). Confirmed with Peanut 2026-10-20.
 23. ✓ Visual player manager: faces from the player's Mojang skin (face plus hat layer, cached a day in `cache/skins`; no account or default skin shows the initial), a ⋯ menu on online players (kick right away; ban asks first with an optional reason; make or remove OP; add to or remove from whitelist), the ban list with Unban, and "Players who joined before" under More settings. Changes made while stopped are queued like whitelist changes. No IP bans for now (a household shares one IP). Confirmed with Peanut 2026-10-20 (1A–5A).
+24. ✓ Smart crash analysis: when a server crashes or fails to start, WaNut reads this run's console lines and the new crash report (`Core/Crashes/CrashAnalyzer`) and shows a card above the tabs with the cause in plain words and one fix button. Causes: port in use (switch to the next free port), the same mod twice (turn off the older copy), a missing mod such as Fabric API (install from Modrinth, falling back to a Mods tab search), a mod for another Minecraft version or loader, a client-only mod, a mod that needs newer Java (turn it off), out of memory or memory set too high (Server tab), unreadable world (Backups tab), a mod named by a mixin, entrypoint or "Suspected Mods" (turn it off), and unknown (open the crash report, copy the last 80 lines). "Turn off" moves jars to `mods-disabled` (or `plugins-disabled`) after a confirmation; nothing is deleted. Causes that would fail again on every start skip the automatic crash restart. A stop that was asked for (WaNut or a typed `stop`) is never a crash; exit code 0 without a known cause still counts as a normal stop. Confirmed with Peanut 2026-10-21 (1A–5A; no log upload).
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.

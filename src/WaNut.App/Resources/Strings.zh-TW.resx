@@ -144,9 +144,6 @@
   <data name="Status_Stopping" xml:space="preserve">
     <value>正在儲存世界…</value>
   </data>
-  <data name="Server_Crashed" xml:space="preserve">
-    <value>伺服器意外停止（結束代碼 {0}）。主控台最後幾行通常會說明原因。</value>
-  </data>
   <data name="Server_Exited" xml:space="preserve">
     <value>伺服器已停止（結束代碼 {0}）。</value>
   </data>
@@ -2070,5 +2067,161 @@
   </data>
   <data name="Restore_Confirm" xml:space="preserve">
     <value>還原</value>
+  </data>
+  <data name="Server_CrashSummary" xml:space="preserve">
+    <value>WaNut：{0}</value>
+  </data>
+  <data name="Crash_Unknown_Title" xml:space="preserve">
+    <value>伺服器意外停止了</value>
+  </data>
+  <data name="Crash_Unknown_Text" xml:space="preserve">
+    <value>WaNut 看不出原因（結束代碼 {0}）。當機報告或主控台最後幾行通常會寫。可以複製訊息，問朋友或到論壇求助。</value>
+  </data>
+  <data name="Crash_PortInUse_Title" xml:space="preserve">
+    <value>有別的程式在用這台伺服器的連接埠</value>
+  </data>
+  <data name="Crash_PortInUse_Text" xml:space="preserve">
+    <value>這台電腦上有別的東西（常常是還開著的另一台伺服器）已經在用這個連接埠，所以伺服器開不起來。把那個程式關掉，或讓這台伺服器改用連接埠 {1}。改了之後朋友要用新的地址加入。</value>
+  </data>
+  <data name="Crash_PortInUse_TextNoFree" xml:space="preserve">
+    <value>這台電腦上有別的東西（常常是還開著的另一台伺服器）已經在用這個連接埠，所以伺服器開不起來。把那個程式關掉再啟動一次。</value>
+  </data>
+  <data name="Crash_DuplicateMod_Title" xml:space="preserve">
+    <value>同一個模組裝了兩次：{0}</value>
+  </data>
+  <data name="Crash_DuplicateMod_Text" xml:space="preserve">
+    <value>mods 資料夾裡有不只一個 {0}（{1}）。伺服器只能載入一份。WaNut 可以留下最新的，把其他的移到旁邊的資料夾。</value>
+  </data>
+  <data name="Crash_MissingMod_Title" xml:space="preserve">
+    <value>缺少需要的模組：{0}</value>
+  </data>
+  <data name="Crash_MissingMod_Text" xml:space="preserve">
+    <value>{1} 需要 {0} 才能執行，但還沒安裝。WaNut 可以從 Modrinth 下載。</value>
+  </data>
+  <data name="Crash_MissingMod_TextNoInstall" xml:space="preserve">
+    <value>{1} 需要 {0} 才能執行，但還沒安裝。把它加到伺服器後再啟動。</value>
+  </data>
+  <data name="Crash_AMod" xml:space="preserve">
+    <value>有個模組</value>
+  </data>
+  <data name="Crash_IncompatibleMod_Title" xml:space="preserve">
+    <value>有模組不適合這台伺服器：{0}</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextMinecraft" xml:space="preserve">
+    <value>{0} 是給別的 Minecraft 版本用的，這台伺服器是 {1}。把它停用，或到模組分頁裝它的 {1} 版本。</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextLoader" xml:space="preserve">
+    <value>{0} 需要和這台伺服器不同版本的 {1}。把它停用，或到模組分頁裝適合的版本。</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextConflict" xml:space="preserve">
+    <value>這些模組不能一起用：{0}。停用其中一個。</value>
+  </data>
+  <data name="Crash_IncompatibleMod_TextOther" xml:space="preserve">
+    <value>{0} 需要另一個版本的 {1}。把它停用，或到模組分頁把兩個都更新。</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_Title" xml:space="preserve">
+    <value>有模組只能裝在遊戲裡，不能裝在伺服器：{0}</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_Text" xml:space="preserve">
+    <value>{0} 是裝在玩家自己 Minecraft 裡的（像小地圖、光影、選單），不是裝在伺服器上。在這裡停用就好，玩家自己的遊戲可以繼續用。</value>
+  </data>
+  <data name="Crash_ClientOnlyMod_TextUnknown" xml:space="preserve">
+    <value>伺服器上有一個裝在玩家遊戲裡用的模組（像小地圖、光影、選單），但訊息沒寫是哪一個。請到 mods 資料夾找出來移掉。</value>
+  </data>
+  <data name="Crash_OutOfMemory_Title" xml:space="preserve">
+    <value>伺服器的記憶體用完了</value>
+  </data>
+  <data name="Crash_OutOfMemory_Text" xml:space="preserve">
+    <value>它有 {0:0.#} GB。到伺服器分頁給它多一點，或少裝一些模組、把視野距離調短。</value>
+  </data>
+  <data name="Crash_MemoryTooHigh_Title" xml:space="preserve">
+    <value>Java 拿不到設定的記憶體</value>
+  </data>
+  <data name="Crash_MemoryTooHigh_Text" xml:space="preserve">
+    <value>這台伺服器設成 {0:0.#} GB，比電腦現在能給的還多。到伺服器分頁調低，或關掉其他程式再試一次。</value>
+  </data>
+  <data name="Crash_WrongJava_Title" xml:space="preserve">
+    <value>需要更新的 Java</value>
+  </data>
+  <data name="Crash_WrongJava_TextMod" xml:space="preserve">
+    <value>{0} 需要 Java {1}，但 Minecraft {3} 用的是 Java {2}。把它停用，或到模組分頁裝它的 Minecraft {3} 版本。</value>
+  </data>
+  <data name="Crash_WrongJava_Text" xml:space="preserve">
+    <value>伺服器需要 Java {0}，但啟動時用的是 Java {1}。到伺服器分頁確認它的類型和版本。</value>
+  </data>
+  <data name="Crash_BrokenWorld_Title" xml:space="preserve">
+    <value>讀不到世界的檔案</value>
+  </data>
+  <data name="Crash_BrokenWorld_Text" xml:space="preserve">
+    <value>世界可能壞掉了，例如存檔時剛好停電。到備份分頁從備份還原：WaNut 每次啟動前都會先備份。</value>
+  </data>
+  <data name="Crash_ModCrashed_Title" xml:space="preserve">
+    <value>有模組讓伺服器當機：{0}</value>
+  </data>
+  <data name="Crash_ModCrashed_Text" xml:space="preserve">
+    <value>當機報告指向 {0}。到模組分頁更新它或把它停用，再啟動一次。</value>
+  </data>
+  <data name="Crash_Fix_UsePort" xml:space="preserve">
+    <value>改用連接埠 {0}</value>
+  </data>
+  <data name="Crash_Fix_Install" xml:space="preserve">
+    <value>安裝 {0}</value>
+  </data>
+  <data name="Crash_Fix_TurnOffOlder" xml:space="preserve">
+    <value>停用舊的那份</value>
+  </data>
+  <data name="Crash_Fix_TurnOff" xml:space="preserve">
+    <value>停用 {0}</value>
+  </data>
+  <data name="Crash_Fix_Memory" xml:space="preserve">
+    <value>調整記憶體</value>
+  </data>
+  <data name="Crash_Fix_Backups" xml:space="preserve">
+    <value>前往備份</value>
+  </data>
+  <data name="Crash_Fix_OpenMods" xml:space="preserve">
+    <value>打開 mods 資料夾</value>
+  </data>
+  <data name="Crash_OpenReport" xml:space="preserve">
+    <value>打開當機報告</value>
+  </data>
+  <data name="Crash_CopyLines" xml:space="preserve">
+    <value>複製訊息</value>
+  </data>
+  <data name="Crash_CopyLinesHelp" xml:space="preserve">
+    <value>複製伺服器最後的訊息，求助時可以貼上。</value>
+  </data>
+  <data name="Crash_Dismiss" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Crash_Copied" xml:space="preserve">
+    <value>伺服器最後的訊息已經複製到剪貼簿。</value>
+  </data>
+  <data name="Crash_CopyFailed" xml:space="preserve">
+    <value>剪貼簿正被別的程式使用，請再試一次。</value>
+  </data>
+  <data name="Crash_Done_Port" xml:space="preserve">
+    <value>完成：伺服器改用連接埠 {0}。再啟動一次；朋友要用新的地址加入。</value>
+  </data>
+  <data name="Crash_FixFailed" xml:space="preserve">
+    <value>沒有成功：{0}</value>
+  </data>
+  <data name="Crash_TurnOffConfirm" xml:space="preserve">
+    <value>把 {0} 移到 {1} 資料夾嗎？伺服器就不會載入它，之後也可以搬回來。</value>
+  </data>
+  <data name="Crash_Done_TurnedOff" xml:space="preserve">
+    <value>完成：已把 {0} 移到 {1} 資料夾。再啟動一次伺服器。</value>
+  </data>
+  <data name="Crash_InstallConfirm" xml:space="preserve">
+    <value>從 Modrinth 下載 {0} 並加到這台伺服器嗎？</value>
+  </data>
+  <data name="Crash_Installing" xml:space="preserve">
+    <value>正在安裝 {0}…</value>
+  </data>
+  <data name="Crash_Done_Installed" xml:space="preserve">
+    <value>完成：已安裝 {0}。再啟動一次伺服器。</value>
+  </data>
+  <data name="Crash_InstallFailed" xml:space="preserve">
+    <value>WaNut 沒辦法自己在 Modrinth 找到 {0}。請在模組分頁的搜尋結果裡挑選。</value>
   </data>
 </root>

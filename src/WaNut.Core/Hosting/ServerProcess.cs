@@ -41,6 +41,9 @@ public sealed class ServerProcess(ServerLaunch launch) : IServerConsole, IDispos
     /// <summary>True once <see cref="Kill"/> was called, so a non-zero exit code is not mistaken for a crash.</summary>
     public bool WasKilled { get; private set; }
 
+    /// <summary>"stop" was sent, by WaNut or typed in the console: an exit after it was asked for, not a crash.</summary>
+    public bool StopRequested { get; private set; }
+
     public IReadOnlyList<string> Players
     {
         get
@@ -113,6 +116,11 @@ public sealed class ServerProcess(ServerLaunch launch) : IServerConsole, IDispos
         if (line.Length == 0)
         {
             return;
+        }
+
+        if (line.Equals("stop", StringComparison.OrdinalIgnoreCase))
+        {
+            StopRequested = true;
         }
 
         await _inputLock.WaitAsync(cancellationToken).ConfigureAwait(false);

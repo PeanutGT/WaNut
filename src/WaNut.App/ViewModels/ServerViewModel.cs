@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
@@ -47,6 +48,10 @@ public sealed partial class ServerViewModel : ObservableObject
     // Set for an automatic restart, so the crash's last lines stay readable above the new start.
     private bool _keepConsole;
 
+    // This run's output only, for the crash analysis: the console may still show the run before an automatic restart.
+    private readonly Queue<string> _runLines = new();
+    private DateTime _startedUtc;
+
     public ServerViewModel(
         InstanceMetadata metadata,
         ServerController controller,
@@ -74,6 +79,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
         Performance = new PerformanceViewModel(this);
+        CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
         controller.PreparingChanged += OnPreparingChanged;
@@ -85,6 +91,9 @@ public sealed partial class ServerViewModel : ObservableObject
 
     /// <summary>Raised after the server was copied, so the list can show and select the copy.</summary>
     public event EventHandler<InstanceMetadata>? Duplicated;
+
+    /// <summary>Raised when a fix button wants one of this server's tabs shown.</summary>
+    public event EventHandler<ServerTab>? TabRequested;
 
     public InstanceMetadata Metadata { get; private set; }
 
@@ -104,6 +113,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public PerformanceViewModel Performance { get; }
 
     public ModsViewModel Mods { get; }
+
+    public CrashHelpViewModel CrashHelp { get; }
 
     public string Id => Metadata.Id;
 
@@ -248,6 +259,11 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void BeginPreparing()
     {
         ErrorText = null;
+        if (!_keepConsole)
+        {
+            CrashHelp.Hide();
+        }
+
         JavaDownloadFraction = null;
         DownloadedJava = false;
         _javaEta.Reset();
@@ -300,6 +316,8 @@ public sealed partial class ServerViewModel : ObservableObject
     }
 
     internal void ShowError(string message) => ErrorText = message;
+
+    internal void RequestTab(ServerTab tab) => TabRequested?.Invoke(this, tab);
 
     /// <summary>Saves changed metadata, such as game rules or queued commands, to instance.json.</summary>
     internal void UpdateMetadata(InstanceMetadata metadata)
@@ -398,7 +416,14 @@ public sealed partial class ServerViewModel : ObservableObject
         Players.Clear();
         OnPropertyChanged(nameof(PlayersHeader));
 
+        lock (_runLines)
+        {
+            _runLines.Clear();
+        }
+
+        _startedUtc = DateTime.UtcNow;
         process.OutputReceived += AddConsoleLine;
+        process.OutputReceived += KeepRunLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
         _wasOnline = false;
@@ -463,16 +488,21 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
 
-        // "stop" ends with exit code 0; anything else the user did not ask for is a crash.
-        if (exitCode == 0 || process.WasKilled)
+        // A stop the user asked for is never a crash. Some failures, such as a port in use, still end with exit code 0,
+        // so those runs are checked too; exit code 0 with nothing found is a normal stop, e.g. "/stop" typed in the game.
+        var diagnosis = process.WasKilled || process.StopRequested ? null : Diagnose();
+        if (process.WasKilled || process.StopRequested || (exitCode == 0 && diagnosis is null))
         {
             Notify(DiscordEvent.Stopped, "Discord_Stopped");
             return;
         }
 
-        ErrorText = string.Format(Text.Get("Server_Crashed"), exitCode);
+        CrashHelp.Show(diagnosis, exitCode, RunLines(), CrashAnalyzer.FindCrashReport(InstanceDir, _startedUtc));
+        AddConsoleLine(string.Format(Text.Get("Server_CrashSummary"), CrashHelp.Title));
         Notify(DiscordEvent.Crashed, "Discord_Crashed");
-        if (!Metadata.AutoRestart || !_wasOnline)
+
+        // A mod, port or memory problem fails the same way on every start: restarting would only repeat it.
+        if (!Metadata.AutoRestart || !_wasOnline || diagnosis is { WillRepeat: true })
         {
             return;
         }
@@ -486,6 +516,44 @@ public sealed partial class ServerViewModel : ObservableObject
         {
             ErrorText = string.Format(Text.Get("Server_CrashedTooOften"), exitCode, RestartPolicy.MaxRestarts, RestartPolicy.Window.TotalMinutes);
         }
+    }
+
+    private void KeepRunLine(string line)
+    {
+        lock (_runLines)
+        {
+            _runLines.Enqueue(line);
+            if (_runLines.Count > MaxConsoleLines)
+            {
+                _runLines.Dequeue();
+            }
+        }
+    }
+
+    private List<string> RunLines()
+    {
+        lock (_runLines)
+        {
+            return [.. _runLines];
+        }
+    }
+
+    private CrashDiagnosis? Diagnose()
+    {
+        string? report = null;
+        try
+        {
+            if (CrashAnalyzer.FindCrashReport(InstanceDir, _startedUtc) is { } path)
+            {
+                report = File.ReadAllText(path);
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // The console lines alone still tell most causes.
+        }
+
+        return CrashAnalyzer.Analyze(RunLines(), report);
     }
 
     private async Task RestartAfterCrashAsync(ServerProcess crashed)
