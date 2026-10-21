@@ -199,6 +199,37 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         WriteRecords(instanceDir, records);
     }
 
+    /// <summary>The folder next to mods or plugins where turned-off jars wait, e.g. "mods-disabled".</summary>
+    public static string DisabledFolderIn(string instanceDir, ModPlatform platform) => Path.Combine(instanceDir, platform.FolderName + "-disabled");
+
+    /// <summary>
+    /// Moves the jar to <see cref="DisabledFolderIn"/> instead of deleting it, so it can be moved back by hand.
+    /// Only call while the server is stopped.
+    /// </summary>
+    /// <returns>The path the jar was moved to.</returns>
+    public string Disable(string instanceDir, ModPlatform platform, string fileName)
+    {
+        if (!ModrinthClient.IsSafeJarName(fileName))
+        {
+            throw new ArgumentException($"\"{fileName}\" is not a jar in the {platform.FolderName} folder.", nameof(fileName));
+        }
+
+        var target = DisabledFolderIn(instanceDir, platform);
+        Directory.CreateDirectory(target);
+        var destination = Path.Combine(target, fileName);
+        for (var i = 2; File.Exists(destination); i++)
+        {
+            destination = Path.Combine(target, $"{Path.GetFileNameWithoutExtension(fileName)}-{i}.jar");
+        }
+
+        File.Move(Path.Combine(platform.FolderIn(instanceDir), fileName), destination);
+        var records = ReadRecords(instanceDir)
+            .Where(r => !string.Equals(r.FileName, fileName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        WriteRecords(instanceDir, records);
+        return destination;
+    }
+
     private static string HashFile(string folder, string fileName) => HashFile(Path.Combine(folder, fileName));
 
     private static string HashFile(string path)

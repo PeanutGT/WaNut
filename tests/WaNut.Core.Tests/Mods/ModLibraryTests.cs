@@ -141,6 +141,28 @@ public sealed class ModLibraryTests : IDisposable
     }
 
     [Fact]
+    public async Task Disable_InstalledMod_MovesJarToDisabledFolderAndDropsRecord()
+    {
+        AddProject("mod", "Cool Mod", "mod");
+        await _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod");
+        Directory.CreateDirectory(ModLibrary.DisabledFolderIn(_dir.Path, Fabric));
+        File.WriteAllText(Path.Combine(ModLibrary.DisabledFolderIn(_dir.Path, Fabric), "mod.jar"), "older");
+
+        var moved = _library.Disable(_dir.Path, Fabric, "mod.jar");
+
+        Assert.Equal(Path.Combine(_dir.Path, "mods-disabled", "mod-2.jar"), moved);
+        Assert.Equal("mod", File.ReadAllText(moved));
+        Assert.Empty(_library.ListInstalled(_dir.Path, Fabric));
+        Assert.DoesNotContain("mod.jar", File.ReadAllText(Path.Combine(_dir.Path, ModLibrary.RecordsFileName)), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Disable_PathOutsideFolder_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => _library.Disable(_dir.Path, Fabric, "../server.jar"));
+    }
+
+    [Fact]
     public void Remove_PathOutsideFolder_Throws()
     {
         Assert.Throws<ArgumentException>(() => _library.Remove(_dir.Path, Fabric, new InstalledMod("../server.jar")));
