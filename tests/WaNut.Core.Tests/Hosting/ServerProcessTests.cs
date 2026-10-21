@@ -114,6 +114,19 @@ public sealed class ServerProcessTests : IDisposable
         Assert.Equal(ServerStatus.Stopped, server.Status);
         Assert.Equal(0, await server.Exited);
         Assert.Empty(server.Players);
+        Assert.True(server.StopRequested);
+    }
+
+    [Fact]
+    public async Task SendCommandAsync_OtherCommand_DoesNotCountAsStop()
+    {
+        var server = StartFake();
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online);
+
+        await server.SendCommandAsync("say stop");
+
+        Assert.False(server.StopRequested);
+        await server.StopAsync(TimeSpan.FromSeconds(15));
     }
 
     [Fact]
