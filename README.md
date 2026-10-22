@@ -7,6 +7,8 @@
   </picture>
 </p>
 
+<p align="center"><b>English</b> · <a href="README.zh-TW.md">繁體中文</a></p>
+
 A Windows app for starting your own Minecraft: Java Edition server in a few clicks: no command line, no Java setup, no config files.
 
 > Status: early release (v0.2.5). Works, but expect rough edges.
