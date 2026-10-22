@@ -9,7 +9,7 @@
 
 A Windows app for starting your own Minecraft: Java Edition server in a few clicks: no command line, no Java setup, no config files.
 
-> Status: early release (v0.2.0). Works, but expect rough edges.
+> Status: early release (v0.2.5). Works, but expect rough edges.
 
 ## Features
 - Create a Vanilla, Paper, Fabric, Forge or NeoForge server (Minecraft 1.16.5 and newer) from a simple wizard
