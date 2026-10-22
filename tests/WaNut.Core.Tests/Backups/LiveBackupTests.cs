@@ -19,7 +19,7 @@ public sealed class LiveBackupTests : IDisposable
     public void Dispose() => _temp.Dispose();
 
     /// <summary>Answers "save-all flush" the way a server does, unless told to stay quiet.</summary>
-    private sealed class FakeConsole(bool confirmSave = true, bool exited = false) : IServerConsole
+    private sealed class FakeConsole(bool confirmSave = true, bool exited = false, Task? confirmWhen = null) : IServerConsole
     {
         public List<string> Commands { get; } = [];
 
@@ -35,8 +35,11 @@ public sealed class LiveBackupTests : IDisposable
             Commands.Add(command);
             if (command == "save-all flush" && confirmSave)
             {
-                OutputReceived?.Invoke("[12:00:00] [Server thread/INFO]: Saving the game (this may take a moment!)");
-                OutputReceived?.Invoke("[12:00:01] [Server thread/INFO]: Saved the game");
+                (confirmWhen ?? Task.CompletedTask).ContinueWith(_ =>
+                {
+                    OutputReceived?.Invoke("[12:00:00] [Server thread/INFO]: Saving the game (this may take a moment!)");
+                    OutputReceived?.Invoke("[12:00:01] [Server thread/INFO]: Saved the game");
+                }, TaskScheduler.Default);
             }
 
             return Task.CompletedTask;
@@ -76,5 +79,26 @@ public sealed class LiveBackupTests : IDisposable
         await Assert.ThrowsAsync<InvalidOperationException>(() => LiveBackup.CreateAsync(_store, _temp.Path, console, BackupReason.Manual));
 
         Assert.Empty(_store.List(_temp.Path));
+    }
+
+    [Fact]
+    public async Task CreateAsync_TwoServersAtOnce_SecondWaitsBeforePausingSaves()
+    {
+        using var other = new TempDir();
+        Directory.CreateDirectory(Path.Combine(other.Path, "world"));
+        File.WriteAllText(Path.Combine(other.Path, "world", "level.dat"), "v1");
+        var release = new TaskCompletionSource();
+        var first = new FakeConsole(confirmWhen: release.Task);
+        var second = new FakeConsole();
+
+        var firstBackup = LiveBackup.CreateAsync(_store, _temp.Path, first, BackupReason.Scheduled);
+        await FakeServer.WaitUntilAsync(() => first.Commands.Contains("save-all flush"));
+        var secondBackup = LiveBackup.CreateAsync(_store, other.Path, second, BackupReason.Scheduled);
+        await Task.Delay(100);
+
+        Assert.Empty(second.Commands);
+        release.SetResult();
+        await Task.WhenAll(firstBackup, secondBackup);
+        Assert.Equal(["save-off", "save-all flush", "save-on"], second.Commands);
     }
 }

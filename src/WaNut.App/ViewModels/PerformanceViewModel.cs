@@ -19,6 +19,8 @@ public sealed partial class PerformanceViewModel(ServerViewModel server) : Obser
 
     public bool HasNoData => !HasData;
 
+    internal UsageSample? Latest => _history.Latest;
+
     public string Scene => _history.Latest is { } latest ? $"perf-{UsageHistory.LoadOf(latest.CpuPercent).ToString().ToLowerInvariant()}" : "stopped";
 
     public string? MoodText => _history.Latest is { } latest ? Text.Get($"Performance_Mood_{UsageHistory.LoadOf(latest.CpuPercent)}") : null;
@@ -32,6 +34,22 @@ public sealed partial class PerformanceViewModel(ServerViewModel server) : Obser
         : null;
 
     public string? MemoryPeakText => HasData ? string.Format(Text.Get("Performance_Peak"), string.Format(Text.Get("Performance_Gigabytes"), _history.PeakMemory / Gigabyte)) : null;
+
+    /// <summary>
+    /// "2 servers together: CPU 35% · 7.2 GB": every running server added up, shown while more than one runs.
+    /// </summary>
+    public string? TotalText
+    {
+        get
+        {
+            var latest = server.RunningServers.Select(s => s.Performance.Latest).OfType<UsageSample>().ToList();
+            return latest.Count < 2
+                ? null
+                : string.Format(Text.Get("Performance_Total"), latest.Count, latest.Sum(s => s.CpuPercent), latest.Sum(s => s.MemoryBytes) / Gigabyte);
+        }
+    }
+
+    public bool HasTotal => TotalText is not null;
 
     public IReadOnlyList<double> CpuValues => [.. _history.Samples.Select(s => s.CpuPercent / 100)];
 
@@ -72,5 +90,7 @@ public sealed partial class PerformanceViewModel(ServerViewModel server) : Obser
         OnPropertyChanged(nameof(MemoryPeakText));
         OnPropertyChanged(nameof(CpuValues));
         OnPropertyChanged(nameof(MemoryValues));
+        OnPropertyChanged(nameof(TotalText));
+        OnPropertyChanged(nameof(HasTotal));
     }
 }

@@ -4,13 +4,17 @@ using System.Net.Http;
 using WaNut.App.Resources;
 using WaNut.App.ViewModels;
 using WaNut.Core.Backups;
+using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
+using WaNut.Core.Network;
+using WaNut.Core.Settings;
 
 namespace WaNut.App.Services;
 
 /// <summary>
-/// Starts and stops servers for the screens: one server at a time, and never a forced close without asking.
+/// Starts and stops servers for the screens. Several servers may run at once (decision 5), but only one gets ready
+/// at a time: the others wait in line. A forced close always asks first.
 /// </summary>
 public sealed class ServerController(
     ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall,
@@ -21,37 +25,45 @@ public sealed class ServerController(
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
 
-    /// <summary>The server whose process is running, or null when none is.</summary>
-    public ServerViewModel? Running { get; private set; }
+    // One server prepares at a time, so two never download the same Java or ask for the firewall at once.
+    private readonly SemaphoreSlim _prepareGate = new(1, 1);
+    private readonly Dictionary<ServerViewModel, CancellationTokenSource> _queue = [];
+    private readonly List<ServerViewModel> _started = [];
+
+    /// <summary>The servers whose process is running, in the order they were started.</summary>
+    public IReadOnlyList<ServerViewModel> RunningServers => [.. _started.Where(s => s.Process is { IsRunning: true })];
+
+    public bool HasRunningServer => _started.Any(s => s.Process is { IsRunning: true });
 
     /// <summary>The server being backed up or getting its Java before it starts, or null.</summary>
     public ServerViewModel? Preparing { get; private set; }
 
-    /// <summary>Raised when <see cref="Preparing"/> changes, so every server can grey out its Start button.</summary>
-    public event EventHandler? PreparingChanged;
+    /// <summary>True while a server gets ready or waits in line to.</summary>
+    public bool IsAnyPreparing => Preparing is not null || _queue.Count > 0;
 
-    public async Task StartAsync(ServerViewModel server)
+    /// <param name="automatic">A restart after a crash: no questions, since nobody may be watching.</param>
+    public async Task StartAsync(ServerViewModel server, bool automatic = false)
     {
-        // One server at a time (decision 5) includes one getting ready: its backup and Java download come first.
-        if (Preparing is not null)
+        if (server.IsPreparing || server.IsRunning)
         {
             return;
         }
 
-        if (Running is { } other && other != server && other.IsRunning)
+        server.BeginPreparing();
+        if (!await WaitForTurnAsync(server))
         {
-            if (!dialogs.Confirm(string.Format(Text.Get("Server_StopOtherConfirm"), other.Name, server.Name)))
+            server.EndPreparing();
+            return;
+        }
+
+        Preparing = server;
+        try
+        {
+            if (!automatic && !ConfirmMemory(server))
             {
                 return;
             }
 
-            await StopAsync(other);
-        }
-
-        server.BeginPreparing();
-        SetPreparing(server);
-        try
-        {
             if (!await BackUpBeforeStartAsync(server))
             {
                 return;
@@ -64,6 +76,11 @@ public sealed class ServerController(
                 notifier.NotifyIfAway(string.Format(Text.Get("Notify_JavaReady"), server.Name));
             }
 
+            if (!UseFreePort(server))
+            {
+                return;
+            }
+
             // Before java.exe first listens, so Windows never shows its own firewall prompt behind WaNut's window.
             if (await firewall.AskOnceAsync(launch.FileName, server.Metadata.JavaMajor) is { } change)
             {
@@ -71,27 +88,88 @@ public sealed class ServerController(
             }
 
             host.Start(server.Id, launch, server.Attach);
-            Running = server;
+            _started.Remove(server);
+            _started.Add(server);
         }
         catch (ServerStartException e)
         {
             server.ShowError(Text.Get($"Server_Error_{e.Problem}"));
         }
-        catch (Exception e) when (e is HttpRequestException or IOException or DownloadVerificationException or Win32Exception or InvalidDataException)
+        catch (Exception e) when (e is HttpRequestException or IOException or UnauthorizedAccessException or DownloadVerificationException or Win32Exception or InvalidDataException)
         {
             server.ShowError(string.Format(Text.Get("Server_StartFailed"), e.Message));
         }
         finally
         {
-            SetPreparing(null);
+            Preparing = null;
             server.EndPreparing();
+            _prepareGate.Release();
         }
     }
 
-    private void SetPreparing(ServerViewModel? server)
+    /// <summary>Waits while another server gets ready. False when the wait was cancelled with Stop.</summary>
+    private async Task<bool> WaitForTurnAsync(ServerViewModel server)
     {
-        Preparing = server;
-        PreparingChanged?.Invoke(this, EventArgs.Empty);
+        if (_prepareGate.Wait(0))
+        {
+            return true;
+        }
+
+        using var cancel = new CancellationTokenSource();
+        _queue[server] = cancel;
+        server.IsQueued = true;
+        try
+        {
+            await _prepareGate.WaitAsync(cancel.Token);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        finally
+        {
+            _queue.Remove(server);
+            server.IsQueued = false;
+        }
+    }
+
+    /// <summary>Warns when the servers together would leave Windows too little memory; the user may start anyway.</summary>
+    private bool ConfirmMemory(ServerViewModel server)
+    {
+        var running = RunningServers.Where(s => s != server).Select(s => s.Metadata.MemoryMb).ToList();
+        var total = MemoryLimits.TotalPhysicalMb();
+        if (!MemoryLimits.IsTooMuchTogether(server.Metadata.MemoryMb, running, total))
+        {
+            return true;
+        }
+
+        var together = (server.Metadata.MemoryMb + running.Sum()) / 1024.0;
+        return dialogs.Confirm(string.Format(Text.Get("Server_MemoryTogetherConfirm"), server.Name, together, total / 1024.0));
+    }
+
+    /// <summary>
+    /// Keeps the server's port unless another running server or program has it; then the next free one is saved
+    /// to server.properties and the console says so. False when no port nearby is free.
+    /// </summary>
+    private bool UseFreePort(ServerViewModel server)
+    {
+        var settings = ServerSettingsStore.Load(server.InstanceDir);
+        var taken = RunningServers.Where(s => s != server).Select(s => s.RunningPort).ToList();
+        if (ServerPorts.Pick(settings.Port, taken, CrashFixes.IsPortFree) is not { } port)
+        {
+            server.ShowError(string.Format(Text.Get("Server_NoFreePort"), settings.Port));
+            return false;
+        }
+
+        if (port != settings.Port)
+        {
+            ServerSettingsStore.Save(server.InstanceDir, settings, settings with { Port = port });
+            server.OnPortMoved(settings.Port, port);
+        }
+
+        server.RunningPort = port;
+        return true;
     }
 
     /// <summary>
@@ -149,6 +227,12 @@ public sealed class ServerController(
     /// </summary>
     public async Task StopAsync(ServerViewModel server)
     {
+        if (_queue.TryGetValue(server, out var waiting))
+        {
+            waiting.Cancel();
+            return;
+        }
+
         var process = server.Process;
         if (process is null || !process.IsRunning)
         {
@@ -168,26 +252,19 @@ public sealed class ServerController(
         }
     }
 
-    /// <summary>Stops the running server, if any, and removes its router rule and ends the playit agent before WaNut closes.</summary>
+    /// <summary>Stops every running server at once, then removes the router rules and ends the playit agent before WaNut closes.</summary>
     public async Task ShutdownAsync()
     {
-        if (Running is { IsRunning: true } running)
+        foreach (var waiting in _queue.Values.ToList())
         {
-            await StopAsync(running);
+            waiting.Cancel();
         }
 
+        await Task.WhenAll(RunningServers.Select(StopAsync));
         await portForwards.CloseAnyAsync();
         tunnels.StopAny();
     }
 
-    public bool HasRunningServer => Running is { IsRunning: true };
-
-    /// <summary>A deleted server must not be kept as the last one that ran.</summary>
-    public void Forget(ServerViewModel server)
-    {
-        if (Running == server)
-        {
-            Running = null;
-        }
-    }
+    /// <summary>A deleted server must not be kept as one that ran.</summary>
+    public void Forget(ServerViewModel server) => _started.Remove(server);
 }

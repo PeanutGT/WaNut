@@ -28,4 +28,14 @@ public sealed class MemoryLimitsTests
     {
         Assert.True(MemoryLimits.TotalPhysicalMb() > 0);
     }
+
+    [Theory]
+    [InlineData(4096, new[] { 4096 }, 16384, false)]
+    [InlineData(7168, new[] { 4096, 3072 }, 16384, true)]
+    [InlineData(5120, new[] { 4096 }, 12288, false)]
+    [InlineData(6144, new int[0], 8192, false)]
+    public void IsTooMuchTogether_RunningServers_LeavesWindowsThreeGigabytes(int startingMb, int[] runningMb, long totalMb, bool expected)
+    {
+        Assert.Equal(expected, MemoryLimits.IsTooMuchTogether(startingMb, runningMb, totalMb));
+    }
 }

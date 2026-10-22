@@ -11,6 +11,9 @@ public static class LiveBackup
     /// <summary>How long the server gets to confirm "save-all flush" before the backup is given up.</summary>
     public static readonly TimeSpan SaveTimeout = TimeSpan.FromMinutes(2);
 
+    // Servers running side by side share one disk: their backups take turns, and saving stays on while one waits.
+    private static readonly SemaphoreSlim OneAtATime = new(1, 1);
+
     public static async Task<BackupInfo?> CreateAsync(
         BackupStore store, string instanceDir, IServerConsole console, BackupReason reason,
         IProgress<double>? progress = null, TimeSpan? saveTimeout = null, CancellationToken cancellationToken = default)
@@ -24,6 +27,7 @@ public static class LiveBackup
             }
         }
 
+        await OneAtATime.WaitAsync(cancellationToken);
         console.OutputReceived += OnLine;
         try
         {
@@ -51,6 +55,8 @@ public static class LiveBackup
             {
                 // The server has exited; it saves again on its next start anyway.
             }
+
+            OneAtATime.Release();
         }
     }
 }

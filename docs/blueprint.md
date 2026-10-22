@@ -14,7 +14,7 @@ Build an intuitive, zero-friction Windows desktop application that enables casua
 | 2 | UI language | English first. All UI text lives in resource files from day one, so Traditional Chinese (zh-TW) is a translation file, not a code change. |
 | 3 | Playing with friends | Phase 1 targets LAN and virtual-LAN tools (Radmin VPN, ZeroTier, Tailscale). Built-in tunnel (playit.gg) and UPnP move later. |
 | 4 | File location | `%APPDATA%\WaNut\` by default. Settings let the user move the `instances/` folder (e.g. to drive D:). "Open folder" button on every server. |
-| 5 | Concurrent servers | One running server at a time. Multiple servers may exist; only one runs. Revisit later. |
+| 5 | Concurrent servers | Phase 1–2: one running server at a time. Since step 25 (Phase 3) several servers may run at once; details in section 3. |
 | 6 | Forge / NeoForge | Later phase. Phase 1: Vanilla, Paper, Fabric. Added in step 17 (Phase 2). |
 | 7 | Backups | Phase 1: automatic world backup before each start, with automatic cleanup (keep last N, delete older than X days). |
 | 8 | Self-update | Yes. The launcher checks GitHub Releases of PeanutGT/WaNut and updates itself. |
@@ -109,7 +109,12 @@ Users pick server type and version from dropdowns, fetched from official APIs:
   * Never use `taskkill /F` or `Process.Kill()` as the primary shutdown.
   * Send `stop`, show a "Saving world..." spinner, wait for exit. Only if the server is still running after a long timeout, ask the user before force-closing.
 * **Windows Job Object failsafe:** `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, so a launcher crash leaves no zombie `java.exe`.
-* **One server at a time** (decision 5): starting a second server asks to stop the first.
+* **Several servers at once** (decision 5, step 25): each server has its own process in the shared Job Object.
+  * **Ports:** a new or duplicated server gets a port no other server has (25565, 25566, …). At start, a port another running server or program holds moves to the next free one (saved to `server.properties`); the console says so and friends need the new address. No free port in the next 100 stops the start with a message.
+  * **Memory:** starting a server whose RAM, added to the running servers', leaves Windows less than 3 GB asks first; the user may start anyway. No fixed limit on the number of servers. Crash restarts never ask.
+  * **One prepares at a time:** the backup, Java download and firewall question before a start run for one server at a time. Starting another meanwhile puts it in line ("Waiting for another server to get ready…"); Stop leaves the line.
+  * **Shared parts:** live backups (scheduled or "Back up now") take turns, so two zips never run together and a waiting server keeps saving. UPnP keeps one rule per server. One playit agent carries every server's tunnel and ends with the last such server. The firewall rule is per `java.exe`, so servers on the same Java share it.
+  * **Screens:** the server list shows each server's status dot and "· 3 online". The notification-area menu has one Stop per running server plus "Stop all servers"; its dot is green while any server is online. The Performance tab adds "All servers together" while more than one runs. Closing WaNut or installing an update stops every server.
 
 ---
 
@@ -261,7 +266,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 * [x] Scheduled backups and backup restore improvements.
 * [x] Visual Player Manager (kick, ban, OP, whitelist, avatars).
 * [x] Smart Crash Analyzer (duplicate mods, missing Fabric API, port in use) with plain-language fixes.
-* [ ] Several servers running at the same time (decision 5, revisit).
+* [x] Several servers running at the same time (decision 5).
 
 ---
 
@@ -343,6 +348,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 22. ✓ Scheduled backups while the server runs (save-off / save-all flush / save-on), "Back up now" while online, and restoring only the Overworld, Nether or End (section 5, "Backups"). Confirmed with Peanut 2026-10-20.
 23. ✓ Visual player manager: faces from the player's Mojang skin (face plus hat layer, cached a day in `cache/skins`; no account or default skin shows the initial), a ⋯ menu on online players (kick right away; ban asks first with an optional reason; make or remove OP; add to or remove from whitelist), the ban list with Unban, and "Players who joined before" under More settings. Changes made while stopped are queued like whitelist changes. No IP bans for now (a household shares one IP). Confirmed with Peanut 2026-10-20 (1A–5A).
 24. ✓ Smart crash analysis: when a server crashes or fails to start, WaNut reads this run's console lines and the new crash report (`Core/Crashes/CrashAnalyzer`) and shows a card above the tabs with the cause in plain words and one fix button. Causes: port in use (switch to the next free port), the same mod twice (turn off the older copy), a missing mod such as Fabric API (install from Modrinth, falling back to a Mods tab search), a mod for another Minecraft version or loader, a client-only mod, a mod that needs newer Java (turn it off), out of memory or memory set too high (Server tab), unreadable world (Backups tab), a mod named by a mixin, entrypoint or "Suspected Mods" (turn it off), and unknown (open the crash report, copy the last 80 lines). "Turn off" moves jars to `mods-disabled` (or `plugins-disabled`) after a confirmation; nothing is deleted. Causes that would fail again on every start skip the automatic crash restart. A stop that was asked for (WaNut or a typed `stop`) is never a crash; exit code 0 without a known cause still counts as a normal stop. Confirmed with Peanut 2026-10-21 (1A–5A; no log upload).
+25. ✓ Several servers at once (decision 5, section 3): own ports for new servers and a move to the next free port at start, a memory warning across running servers, one server preparing at a time with the others in line, live backups taking turns, UPnP and playit per server, list status with player count, per-server Stop in the notification area, and the Performance tab's total. Confirmed with Peanut 2026-10-21 (1A 2A 3A 4B 5A 6A 7A 8B).
 
 ### Development and testing
 * Code lives in the WaNut repo; work goes through pull requests for Peanut to review.
