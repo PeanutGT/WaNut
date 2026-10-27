@@ -14,16 +14,35 @@ A Windows app for starting your own Minecraft: Java Edition server in a few clic
 > Status: early release (v0.2.5). Works, but expect rough edges.
 
 ## Features
-- Create a Vanilla, Paper, Fabric, Forge or NeoForge server (Minecraft 1.16.5 and newer) from a simple wizard
+**Create**
+- Make a Vanilla, Paper, Fabric, Forge or NeoForge server (Minecraft 1.16.5 and newer) from a simple wizard
 - Start from a modpack: a Modrinth `.mrpack` or a CurseForge server pack sets up the loader, mods and configs for you
 - Import a world, and a Fabric world's mods are installed with it
 - Java is downloaded automatically for the Minecraft version you pick
-- Live console, player list and safe shutdown that never corrupts your world
-- Game settings, whitelist and OP list without editing files; "More settings" and an Advanced mode for the rest
-- Automatic world backup before every start, with restore and cleanup rules
-- Play with friends over LAN or a virtual LAN (Radmin VPN, ZeroTier, Tailscale, Hamachi), with the firewall rule added for you
-- English and Traditional Chinese, light and dark colors, and a pixel peanut to keep you company
+- Run several servers at the same time, each on its own free port
+
+**Run**
+- Live console, safe shutdown that never corrupts your world, and a Performance tab with CPU and memory charts
+- Player list with faces, plus a menu to kick, ban, OP or whitelist someone
+- Game settings, whitelist, OP and ban lists without editing files; "More settings" and an Advanced mode for the rest
+- Search and install mods from Modrinth, and turn mods off without deleting them
+- When a server crashes, WaNut explains the cause in plain words and offers a fix button
+
+**Keep it safe**
+- Automatic world backup before every start and on a schedule while the server runs
+- Restore a whole backup or only one dimension, with cleanup rules so backups don't fill your disk
+
+**Play with friends**
+- Over LAN or a virtual LAN (Radmin VPN, ZeroTier, Tailscale, Hamachi), with the firewall rule added for you
+- Over the internet by opening the router port with UPnP, or through a playit.gg tunnel when that's not possible
+- Share an invite card with the address, and post server events to Discord
+
+**Friendly**
+- English and Traditional Chinese, light and dark colors, and a pixel peanut that gives you a guided tour
+- Download times left, and a notification when long jobs finish
 - Updates itself from GitHub Releases
+
+Some of these are on `main` and arrive in the next release.
 See [docs/blueprint.md](docs/blueprint.md) for the full design.
 
 ## Meet the peanut
