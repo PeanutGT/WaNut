@@ -7,6 +7,16 @@
   </picture>
 </p>
 
+<p align="center">
+  <a href="https://github.com/PeanutGT/WaNut/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/PeanutGT/WaNut/ci.yml?branch=main&label=CI" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/PeanutGT/WaNut" alt="License: GPL-3.0"></a>
+  <a href="https://github.com/PeanutGT/WaNut/releases/latest"><img src="https://img.shields.io/github/v/release/PeanutGT/WaNut?color=e07a3a" alt="Latest release"></a>
+  <a href="https://github.com/PeanutGT/WaNut/releases"><img src="https://img.shields.io/github/downloads/PeanutGT/WaNut/total?color=8a5a3c" alt="Downloads"></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078d4" alt="Windows">
+  <img src="https://img.shields.io/badge/Minecraft-1.16.5%2B-62b47a" alt="Minecraft 1.16.5+">
+  <img src="https://img.shields.io/badge/.NET-10-512bd4" alt=".NET 10">
+</p>
+
 <p align="center"><b>English</b> · <a href="README.zh-TW.md">繁體中文</a></p>
 
 A Windows app for starting your own Minecraft: Java Edition server in a few clicks: no command line, no Java setup, no config files.
@@ -67,3 +77,8 @@ Requires Windows and the .NET 10 SDK.
 dotnet build
 dotnet test
 ```
+
+## License
+WaNut is free software under the [GNU General Public License v3.0](LICENSE). You can use, study, change and share it; if you share a changed version, it must stay open source under the same license.
+
+WaNut is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft. It does not include Minecraft: the server files are downloaded from their official sources on your PC.

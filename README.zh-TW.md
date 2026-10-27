@@ -7,6 +7,16 @@
   </picture>
 </p>
 
+<p align="center">
+  <a href="https://github.com/PeanutGT/WaNut/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/PeanutGT/WaNut/ci.yml?branch=main&label=CI" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/PeanutGT/WaNut" alt="License: GPL-3.0"></a>
+  <a href="https://github.com/PeanutGT/WaNut/releases/latest"><img src="https://img.shields.io/github/v/release/PeanutGT/WaNut?color=e07a3a" alt="Latest release"></a>
+  <a href="https://github.com/PeanutGT/WaNut/releases"><img src="https://img.shields.io/github/downloads/PeanutGT/WaNut/total?color=8a5a3c" alt="Downloads"></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078d4" alt="Windows">
+  <img src="https://img.shields.io/badge/Minecraft-1.16.5%2B-62b47a" alt="Minecraft 1.16.5+">
+  <img src="https://img.shields.io/badge/.NET-10-512bd4" alt=".NET 10">
+</p>
+
 <p align="center"><a href="README.md">English</a> · <b>繁體中文</b></p>
 
 WaNut 是一個 Windows 應用程式，點幾下就能開好自己的 Minecraft: Java Edition 伺服器：不用打指令、不用自己裝 Java、也不用改設定檔。
@@ -67,3 +77,8 @@ WaNut 是一個 Windows 應用程式，點幾下就能開好自己的 Minecraft:
 dotnet build
 dotnet test
 ```
+
+## 授權
+WaNut 是自由軟體，採用 [GNU 通用公共授權條款第 3 版（GPL-3.0）](LICENSE)。你可以使用、研究、修改和分享它；如果分享修改過的版本，也必須以相同授權條款開放原始碼。
+
+WaNut 不是 Minecraft 官方產品，也未經 Mojang 或 Microsoft 認可或與其有關。WaNut 不包含 Minecraft 本體：伺服器檔案會在你的電腦上從官方來源下載。
