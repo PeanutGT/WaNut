@@ -225,8 +225,23 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             try
             {
-                var result = await _library.InstallAsync(
-                    _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress);
+                ModInstallResult result;
+                try
+                {
+                    result = await _library.InstallAsync(
+                        _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress);
+                }
+                catch (IncompatibleModsException e)
+                {
+                    if (!_dialogs.Confirm(string.Format(Text.Get("Mods_IncompatibleConfirm"), item.Title, string.Join(", ", e.Installed))))
+                    {
+                        return string.Format(Text.Get("Mods_IncompatibleSkipped"), item.Title);
+                    }
+
+                    result = await _library.InstallAsync(
+                        _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress);
+                }
+
                 return InstallMessage(item.Title, result);
             }
             catch (NoCompatibleVersionException)

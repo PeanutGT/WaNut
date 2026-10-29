@@ -134,6 +134,30 @@ public sealed class ModrinthClientTests
     }
 
     [Fact]
+    public void ParseIdentifiedVersions_IncompatibleDependencies_ListsProjectsOnly()
+    {
+        var versions = ModrinthClient.ParseIdentifiedVersions(Json("""
+            {"h1":{"id":"v1","project_id":"AANobbMI","dependencies":[
+              {"project_id":"YL57xq9U","dependency_type":"incompatible"},
+              {"project_id":null,"version_id":"abc","dependency_type":"incompatible"},
+              {"project_id":"P7dR8mSH","dependency_type":"required"}]}}
+            """));
+
+        Assert.Equal(["YL57xq9U"], versions["h1"].IncompatibleProjectIds);
+    }
+
+    [Fact]
+    public void ParseBestVersion_IncompatibleDependency_IsListedApartFromRequired()
+    {
+        var json = $"[{Version("v1", "release", "2026-10-01T00:00:00Z", dependencies: """[{"project_id":"api","dependency_type":"required"},{"project_id":"optifine","dependency_type":"incompatible"}]""")}]";
+
+        var version = ModrinthClient.ParseBestVersion(Json(json), Fabric, "1.21.1")!;
+
+        Assert.Equal(["api"], version.RequiredProjectIds);
+        Assert.Equal(["optifine"], version.IncompatibleProjectIds);
+    }
+
+    [Fact]
     public void ParseIdentifiedFiles_Map_ReturnsProjectPerHash()
     {
         var files = ModrinthClient.ParseIdentifiedFiles(Json("""{"h1":{"id":"v1","project_id":"P7dR8mSH"}}"""));

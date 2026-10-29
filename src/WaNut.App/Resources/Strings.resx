@@ -1338,6 +1338,14 @@ Stop the servers and update?</value>
   <data name="Mods_NoVersion" xml:space="preserve">
     <value>{0} has no version for {1} {2}.</value>
   </data>
+  <data name="Mods_IncompatibleConfirm" xml:space="preserve">
+    <value>Modrinth says {0} does not work together with {1}, which this server already has. Having both can stop the server from starting.
+
+Install {0} anyway?</value>
+  </data>
+  <data name="Mods_IncompatibleSkipped" xml:space="preserve">
+    <value>{0} was not installed.</value>
+  </data>
   <data name="Mods_VerifyFailed" xml:space="preserve">
     <value>The download of {0} didn't match its checksum, so it wasn't installed. Try again later.</value>
   </data>

@@ -1320,6 +1320,14 @@
   <data name="Mods_NoVersion" xml:space="preserve">
     <value>{0} 沒有適合 {1} {2} 的版本。</value>
   </data>
+  <data name="Mods_IncompatibleConfirm" xml:space="preserve">
+    <value>Modrinth 標示 {0} 和這台伺服器已安裝的 {1} 不能一起用，兩個都裝可能會讓伺服器開不起來。
+
+仍要安裝 {0} 嗎？</value>
+  </data>
+  <data name="Mods_IncompatibleSkipped" xml:space="preserve">
+    <value>沒有安裝 {0}。</value>
+  </data>
   <data name="Mods_VerifyFailed" xml:space="preserve">
     <value>{0} 的下載檔和校驗碼不符，所以沒有安裝。請稍後再試。</value>
   </data>

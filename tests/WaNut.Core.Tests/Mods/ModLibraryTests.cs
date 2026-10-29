@@ -57,9 +57,10 @@ public sealed class ModLibraryTests : IDisposable
     [Fact]
     public async Task InstallAsync_DependencyAlreadyInstalled_IsNotDownloadedAgain()
     {
-        AddProject("api", "Fabric API", "api");
+        var api = AddProject("api", "Fabric API", "api");
         AddProject("mod", "Cool Mod", "mod", dependencies: """[{"project_id":"api","dependency_type":"required"}]""");
         await _library.InstallAsync(_dir.Path, Fabric, Game, "api", "Fabric API");
+        _http.Add(ModrinthClient.VersionFilesUrl, $$$"""{"{{{Sha512(api)}}}":{"id":"api-v","project_id":"api"}}""");
         _http.Requests.Clear();
 
         var result = await _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod");
@@ -81,6 +82,50 @@ public sealed class ModLibraryTests : IDisposable
 
         Assert.Equal(["Cool Mod"], result.Installed);
         Assert.False(File.Exists(Path.Combine(ModsDir, "api.jar")));
+    }
+
+    [Fact]
+    public async Task InstallAsync_NewModMarksInstalledOneIncompatible_ThrowsBeforeDownloading()
+    {
+        var other = AddProject("other", "Other Mod", "other");
+        AddProject("mod", "Cool Mod", "mod", dependencies: """[{"project_id":"other","dependency_type":"incompatible"}]""");
+        await _library.InstallAsync(_dir.Path, Fabric, Game, "other", "Other Mod");
+        _http.Add(ModrinthClient.VersionFilesUrl, $$$"""{"{{{Sha512(other)}}}":{"id":"other-v","project_id":"other"}}""");
+
+        var e = await Assert.ThrowsAsync<IncompatibleModsException>(() => _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod"));
+
+        Assert.Equal(["Other Mod"], e.Installed);
+        Assert.False(File.Exists(Path.Combine(ModsDir, "mod.jar")));
+    }
+
+    [Fact]
+    public async Task InstallAsync_InstalledModMarksDependencyIncompatible_Throws()
+    {
+        var other = AddProject("other", "Other Mod", "other");
+        AddProject("lib", "Some Lib", "lib");
+        AddProject("mod", "Cool Mod", "mod", dependencies: """[{"project_id":"lib","dependency_type":"required"}]""");
+        await _library.InstallAsync(_dir.Path, Fabric, Game, "other", "Other Mod");
+        _http.Add(
+            ModrinthClient.VersionFilesUrl,
+            $$$"""{"{{{Sha512(other)}}}":{"id":"other-v","project_id":"other","dependencies":[{"project_id":"lib","dependency_type":"incompatible"}]}}""");
+
+        var e = await Assert.ThrowsAsync<IncompatibleModsException>(() => _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod"));
+
+        Assert.Equal("Cool Mod", e.Title);
+        Assert.Equal(["Other Mod"], e.Installed);
+    }
+
+    [Fact]
+    public async Task InstallAsync_IncompatibleButAllowed_Installs()
+    {
+        AddProject("other", "Other Mod", "other");
+        AddProject("mod", "Cool Mod", "mod", dependencies: """[{"project_id":"other","dependency_type":"incompatible"}]""");
+        await _library.InstallAsync(_dir.Path, Fabric, Game, "other", "Other Mod");
+
+        var result = await _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod", allowIncompatible: true);
+
+        Assert.Equal(["Cool Mod"], result.Installed);
+        Assert.True(File.Exists(Path.Combine(ModsDir, "mod.jar")));
     }
 
     [Fact]
