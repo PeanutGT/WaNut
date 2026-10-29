@@ -56,7 +56,7 @@ public sealed class JvmArgumentsTests
     [InlineData(22)]
     public void Build_Java21To22_UsesGenerationalZgc(int javaMajor)
     {
-        var args = JvmArguments.Build(javaMajor, 4096, "server.jar");
+        var args = JvmArguments.Build(javaMajor, 8192, "server.jar");
 
         Assert.Contains("-XX:+UseZGC", args);
         Assert.Contains("-XX:+ZGenerational", args);
@@ -68,10 +68,30 @@ public sealed class JvmArgumentsTests
     [InlineData(25)]
     public void Build_Java23OrNewer_UsesZgcWithoutGenerationalFlag(int javaMajor)
     {
-        var args = JvmArguments.Build(javaMajor, 4096, "server.jar");
+        var args = JvmArguments.Build(javaMajor, 8192, "server.jar");
 
         Assert.Contains("-XX:+UseZGC", args);
         Assert.DoesNotContain("-XX:+ZGenerational", args);
+    }
+
+    [Theory]
+    [InlineData(21, 2048)]
+    [InlineData(25, 4096)]
+    public void Build_NewJavaWithSmallHeap_UsesAikarFlags(int javaMajor, int memoryMb)
+    {
+        var args = JvmArguments.Build(javaMajor, memoryMb, "server.jar");
+
+        Assert.Contains("-XX:+UseG1GC", args);
+        Assert.DoesNotContain("-XX:+UseZGC", args);
+    }
+
+    [Fact]
+    public void Build_NewJavaJustAboveSmallHeap_UsesZgc()
+    {
+        var args = JvmArguments.Build(25, JvmArguments.SmallHeapMb + 512, "server.jar");
+
+        Assert.Contains("-XX:+UseZGC", args);
+        Assert.DoesNotContain("-XX:+UseG1GC", args);
     }
 
     [Fact]

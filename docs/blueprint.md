@@ -68,7 +68,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
   * Java 17 and below: Aikar's Flags.
   * Java 21–22: `-XX:+UseZGC -XX:+ZGenerational`.
   * Java 23+: `-XX:+UseZGC` only (generational is the default there; the extra flag prints a warning or fails).
-  * Small heaps (under about 4 GB): consider Aikar's G1 flags even on Java 21+, to be decided during testing.
+  * Heaps of 4 GB or less: Aikar's G1 flags on every Java version (`JvmArguments.SmallHeapMb`); ZGC's own memory and threads cost a small server too much. The 4 GB line still needs a real-server check.
 
 ---
 
@@ -294,7 +294,7 @@ Keeping logic in `WaNut.Core` and the screens in `WaNut.App` means each feature 
 | `Java` | Looks up the needed Java version from Mojang data, downloads Temurin JRE from Adoptium, finds `java.exe`. |
 | `Instances` | Creates a server folder, writes `instance.json`, `eula.txt`, default `server.properties`. |
 | `Properties` | Reads and writes `server.properties` while keeping comments and unknown keys. |
-| `Jvm` | Builds the start arguments (RAM, Aikar or ZGC flags by Java version). |
+| `Jvm` | Builds the start arguments (RAM, Aikar or ZGC flags by Java version and heap size). |
 | `Process` | Starts `java.exe` hidden, streams console lines, sends commands, graceful `stop`, Job Object failsafe. |
 | `LogParser` | Detects Online, player join/leave from console lines. |
 | `Backups` | Zips worlds before start, applies keep-5 / 30-day cleanup, restores. |
