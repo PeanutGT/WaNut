@@ -1,13 +1,16 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using WaNut.Core.Http;
 
 namespace WaNut.Core.Mods;
 
 /// <summary>
-/// Searches Modrinth's API v2 for mods and plugins and finds the version that fits a server.
+/// Searches Modrinth's API v2 for mods and plugins and finds the version that fits a server. Requests turned away
+/// for going over Modrinth's rate limit are sent again after the wait it asks for.
 /// </summary>
-public sealed class ModrinthClient(HttpClient http)
+/// <param name="delay">Waits before sending a rate-limited request again; tests pass one that returns at once.</param>
+public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationToken, Task>? delay = null)
 {
     public const int PageSize = 20;
 
@@ -52,7 +55,7 @@ public sealed class ModrinthClient(HttpClient http)
     public async Task<ModSearchPage> SearchAsync(
         ModPlatform platform, string gameVersion, string query, int offset, CancellationToken cancellationToken = default)
     {
-        await using var stream = await http.GetStreamAsync(SearchUrl(platform, gameVersion, query, offset), cancellationToken).ConfigureAwait(false);
+        await using var stream = await GetStreamAsync(SearchUrl(platform, gameVersion, query, offset), cancellationToken).ConfigureAwait(false);
         return ParseSearch(stream);
     }
 
@@ -60,14 +63,14 @@ public sealed class ModrinthClient(HttpClient http)
     public async Task<ModVersion?> GetBestVersionAsync(
         string projectId, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default)
     {
-        await using var stream = await http.GetStreamAsync(VersionsUrl(projectId, platform, gameVersion), cancellationToken).ConfigureAwait(false);
+        await using var stream = await GetStreamAsync(VersionsUrl(projectId, platform, gameVersion), cancellationToken).ConfigureAwait(false);
         return ParseBestVersion(stream, platform, gameVersion);
     }
 
     /// <summary>A project's display name, used for dependencies, which Modrinth names only by id.</summary>
     public async Task<string> GetProjectTitleAsync(string projectId, CancellationToken cancellationToken = default)
     {
-        await using var stream = await http.GetStreamAsync(ProjectUrl(projectId), cancellationToken).ConfigureAwait(false);
+        await using var stream = await GetStreamAsync(ProjectUrl(projectId), cancellationToken).ConfigureAwait(false);
         var project = await JsonSerializer.DeserializeAsync<ProjectDto>(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
         return string.IsNullOrWhiteSpace(project?.Title) ? projectId : project.Title;
     }
@@ -79,28 +82,42 @@ public sealed class ModrinthClient(HttpClient http)
         (await IdentifyFilesAsync(sha512Hashes, cancellationToken).ConfigureAwait(false)).Values.ToHashSet(StringComparer.Ordinal);
 
     /// <summary>The project that published each file, by SHA-512 hash. Files Modrinth does not know are left out.</summary>
-    public async Task<IReadOnlyDictionary<string, string>> IdentifyFilesAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyDictionary<string, string>> IdentifyFilesAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default) =>
+        (await IdentifyVersionsAsync(sha512Hashes, cancellationToken).ConfigureAwait(false))
+            .ToDictionary(v => v.Key, v => v.Value.ProjectId, StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The project and incompatible projects of each file's version, by SHA-512 hash. Files Modrinth does not know
+    /// are left out.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<string, IdentifiedVersion>> IdentifyVersionsAsync(IReadOnlyCollection<string> sha512Hashes, CancellationToken cancellationToken = default)
     {
         if (sha512Hashes.Count == 0)
         {
-            return new Dictionary<string, string>();
+            return new Dictionary<string, IdentifiedVersion>();
         }
 
         var body = JsonSerializer.Serialize(new { hashes = sha512Hashes, algorithm = "sha512" });
-        using var content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
-        using var response = await http.PostAsync(VersionFilesUrl, content, cancellationToken).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+        using var response = await SendAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, VersionFilesUrl) { Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json") },
+            cancellationToken).ConfigureAwait(false);
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        return ParseIdentifiedFiles(stream);
+        return ParseIdentifiedVersions(stream);
     }
 
     public static IReadOnlySet<string> ParseIdentifiedProjects(Stream versionFilesJson) =>
         ParseIdentifiedFiles(versionFilesJson).Values.ToHashSet(StringComparer.Ordinal);
 
-    public static IReadOnlyDictionary<string, string> ParseIdentifiedFiles(Stream versionFilesJson)
+    public static IReadOnlyDictionary<string, string> ParseIdentifiedFiles(Stream versionFilesJson) =>
+        ParseIdentifiedVersions(versionFilesJson).ToDictionary(v => v.Key, v => v.Value.ProjectId, StringComparer.OrdinalIgnoreCase);
+
+    public static IReadOnlyDictionary<string, IdentifiedVersion> ParseIdentifiedVersions(Stream versionFilesJson)
     {
         var versions = JsonSerializer.Deserialize<Dictionary<string, IdentifiedDto>>(versionFilesJson) ?? [];
-        return versions.ToDictionary(v => v.Key, v => v.Value.ProjectId, StringComparer.OrdinalIgnoreCase);
+        return versions.ToDictionary(
+            v => v.Key,
+            v => new IdentifiedVersion(v.Value.ProjectId, IncompatibleIds(v.Value.Dependencies)),
+            StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>The title and server support of each project. Projects Modrinth no longer has are left out.</summary>
@@ -111,7 +128,7 @@ public sealed class ModrinthClient(HttpClient http)
             return [];
         }
 
-        await using var stream = await http.GetStreamAsync(ProjectsUrl(projectIds), cancellationToken).ConfigureAwait(false);
+        await using var stream = await GetStreamAsync(ProjectsUrl(projectIds), cancellationToken).ConfigureAwait(false);
         return ParseProjects(stream);
     }
 
@@ -176,7 +193,37 @@ public sealed class ModrinthClient(HttpClient http)
             .Select(d => d.ProjectId!)
             .Distinct(StringComparer.Ordinal)
             .ToList();
-        return new ModVersion(best.ProjectId, best.Id, best.VersionNumber, file.FileName, url, sha512, required);
+        return new ModVersion(best.ProjectId, best.Id, best.VersionNumber, file.FileName, url, sha512, required, IncompatibleIds(best.Dependencies));
+    }
+
+    /// <summary>
+    /// The projects a version is marked as not working with. Entries naming only a version, not a project, are left
+    /// out: WaNut matches installed mods by project.
+    /// </summary>
+    private static IReadOnlyList<string> IncompatibleIds(List<DependencyDto>? dependencies) =>
+        (dependencies ?? [])
+            .Where(d => d.DependencyType == "incompatible" && !string.IsNullOrEmpty(d.ProjectId))
+            .Select(d => d.ProjectId!)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+    private async Task<Stream> GetStreamAsync(Uri url, CancellationToken cancellationToken)
+    {
+        var response = await SendAsync(() => new HttpRequestMessage(HttpMethod.Get, url), cancellationToken).ConfigureAwait(false);
+        return await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>Sends with rate-limit retries; a failure status throws, as HttpClient.GetStreamAsync does.</summary>
+    private async Task<HttpResponseMessage> SendAsync(Func<HttpRequestMessage> createRequest, CancellationToken cancellationToken)
+    {
+        var response = await RateLimitRetry.SendAsync(http, createRequest, delay, cancellationToken).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode)
+        {
+            response.Dispose();
+            throw new HttpRequestException($"Modrinth answered {(int)response.StatusCode} ({response.ReasonPhrase}).", null, response.StatusCode);
+        }
+
+        return response;
     }
 
     /// <summary>The name comes from the internet and becomes a path: it must stay inside the folder and be a jar.</summary>
@@ -204,7 +251,8 @@ public sealed class ModrinthClient(HttpClient http)
         [property: JsonPropertyName("project_type")] string? ProjectType);
 
     private sealed record IdentifiedDto(
-        [property: JsonPropertyName("project_id")] string ProjectId);
+        [property: JsonPropertyName("project_id")] string ProjectId,
+        [property: JsonPropertyName("dependencies")] List<DependencyDto>? Dependencies);
 
     private sealed record ProjectDto(
         [property: JsonPropertyName("id")] string? Id,

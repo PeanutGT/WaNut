@@ -44,6 +44,6 @@ public sealed class CustomJvmArgumentsTests
         var args = JvmArguments.Build(21, 2048, "server.jar", ["-XX:+UseLargePages"]);
 
         Assert.Equal(["-XX:+UseLargePages", "-jar", "server.jar", "nogui"], args.TakeLast(4));
-        Assert.True(args.ToList().IndexOf("-XX:+UseZGC") < args.ToList().IndexOf("-XX:+UseLargePages"));
+        Assert.True(args.ToList().IndexOf("-XX:+UseG1GC") < args.ToList().IndexOf("-XX:+UseLargePages"));
     }
 }

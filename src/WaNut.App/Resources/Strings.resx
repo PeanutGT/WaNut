@@ -256,8 +256,11 @@ Choose No to keep waiting.</value>
   <data name="Game_SimulationDistance" xml:space="preserve">
     <value>Simulation distance</value>
   </data>
-  <data name="Game_DistanceHint" xml:space="preserve">
-    <value>In chunks. Lower numbers run smoother on a slower PC.</value>
+  <data name="Game_ViewDistanceHint" xml:space="preserve">
+    <value>Suggested: 8–10 chunks. Lower numbers run smoother on a slower PC.</value>
+  </data>
+  <data name="Game_SimulationDistanceHint" xml:space="preserve">
+    <value>Suggested: 4–6 chunks. This is how far away crops grow and mobs move; lowering it saves the most CPU.</value>
   </data>
   <data name="Game_Chunks" xml:space="preserve">
     <value>{0} chunks</value>
@@ -1334,6 +1337,14 @@ Stop the servers and update?</value>
   </data>
   <data name="Mods_NoVersion" xml:space="preserve">
     <value>{0} has no version for {1} {2}.</value>
+  </data>
+  <data name="Mods_IncompatibleConfirm" xml:space="preserve">
+    <value>Modrinth says {0} does not work together with {1}, which this server already has. Having both can stop the server from starting.
+
+Install {0} anyway?</value>
+  </data>
+  <data name="Mods_IncompatibleSkipped" xml:space="preserve">
+    <value>{0} was not installed.</value>
   </data>
   <data name="Mods_VerifyFailed" xml:space="preserve">
     <value>The download of {0} didn't match its checksum, so it wasn't installed. Try again later.</value>

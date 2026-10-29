@@ -8,6 +8,12 @@ public static class JvmArguments
     /// <summary>Above this heap size Aikar's flags switch to their large-heap values.</summary>
     private const int LargeHeapMb = 12 * 1024;
 
+    /// <summary>
+    /// Up to this heap size G1 is used even where ZGC is available: ZGC keeps extra memory and threads for itself,
+    /// which a small server cannot spare.
+    /// </summary>
+    public const int SmallHeapMb = 4 * 1024;
+
     // Console text is UTF-8 both ways, whatever the Windows code page is. The sun.* names cover Java 17 and older.
     private static readonly string[] EncodingFlags =
     [
@@ -116,7 +122,7 @@ public static class JvmArguments
 
     public static IReadOnlyList<string> GarbageCollectorFlags(int javaMajor, int memoryMb) => javaMajor switch
     {
-        <= 17 => AikarFlags(memoryMb),
+        _ when javaMajor <= 17 || memoryMb <= SmallHeapMb => AikarFlags(memoryMb),
         <= 22 => ["-XX:+UseZGC", "-XX:+ZGenerational"],
 
         // Generational ZGC is the default from Java 23; the extra flag only prints a warning there.

@@ -79,6 +79,7 @@
                       Value="{Binding ViewDistance, Delay=400}"
                       AutomationProperties.Name="{res:Text Game_ViewDistance}" />
             </DockPanel>
+            <TextBlock Text="{res:Text Game_ViewDistanceHint}" Style="{StaticResource Hint}" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}" Visibility="{Binding HasSimulationDistance, Converter={StaticResource Visible}}">
@@ -91,7 +92,7 @@
                       Value="{Binding SimulationDistance, Delay=400}"
                       AutomationProperties.Name="{res:Text Game_SimulationDistance}" />
             </DockPanel>
-            <TextBlock Text="{res:Text Game_DistanceHint}" Style="{StaticResource Hint}" />
+            <TextBlock Text="{res:Text Game_SimulationDistanceHint}" Style="{StaticResource Hint}" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">

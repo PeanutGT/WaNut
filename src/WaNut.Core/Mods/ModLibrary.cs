@@ -50,24 +50,49 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// Installs the project and the required dependencies the server does not have yet. Only call while the server
     /// is stopped: Windows locks the jars of a running server.
     /// </summary>
+    /// <param name="allowIncompatible">
+    /// False checks first whether Modrinth marks anything to install and an installed mod as not working together
+    /// (either side can say so). True skips that check, for a second try after the user said to go ahead.
+    /// </param>
     /// <returns>Nothing installed when the server already has the project, even as a jar copied in by hand.</returns>
     /// <exception cref="NoCompatibleVersionException">The project itself has no version for this server.</exception>
+    /// <exception cref="IncompatibleModsException">Something to install clashes with an installed mod.</exception>
     public async Task<ModInstallResult> InstallAsync(
         string instanceDir,
         ModPlatform platform,
         string gameVersion,
         string projectId,
         string title,
+        bool allowIncompatible = false,
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        var folder = platform.FolderIn(instanceDir);
         var installed = ListInstalled(instanceDir, platform);
         var known = installed.Where(m => m.ProjectId is not null).Select(m => m.ProjectId!).ToHashSet(StringComparer.Ordinal);
 
         // A dependency copied in by hand (often Fabric API) must not be downloaded a second time under another file
-        // name: two copies of one mod stop the server from starting.
-        var byHand = installed.Where(m => m.ProjectId is null).Select(m => HashFile(platform.FolderIn(instanceDir), m.FileName)).ToList();
-        known.UnionWith(await modrinth.IdentifyProjectsAsync(byHand, cancellationToken).ConfigureAwait(false));
+        // name: two copies of one mod stop the server from starting. The incompatibility check needs every jar's
+        // version, so then all of them are looked up.
+        var lookUp = new Dictionary<string, InstalledMod>(StringComparer.OrdinalIgnoreCase);
+        foreach (var mod in installed.Where(m => !allowIncompatible || m.ProjectId is null))
+        {
+            lookUp.TryAdd(HashFile(folder, mod.FileName), mod);
+        }
+
+        var identified = await modrinth.IdentifyVersionsAsync(lookUp.Keys, cancellationToken).ConfigureAwait(false);
+        var installedNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        var refusedBy = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var (hash, version) in identified)
+        {
+            var name = lookUp[hash].DisplayName;
+            known.Add(version.ProjectId);
+            installedNames.TryAdd(version.ProjectId, name);
+            foreach (var other in version.IncompatibleProjectIds)
+            {
+                (refusedBy.TryGetValue(other, out var names) ? names : refusedBy[other] = []).Add(name);
+            }
+        }
 
         // Work out every file first, so nothing is downloaded when the project itself cannot be installed.
         var plan = new List<(ModVersion Version, string Title)>();
@@ -101,7 +126,20 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             }
         }
 
-        var folder = platform.FolderIn(instanceDir);
+        if (!allowIncompatible)
+        {
+            var clashes = plan
+                .SelectMany(p => p.Version.IncompatibleProjectIds.Where(installedNames.ContainsKey).Select(id => installedNames[id])
+                    .Concat(refusedBy.GetValueOrDefault(p.Version.ProjectId) ?? []))
+                .Distinct(StringComparer.Ordinal)
+                .Order(StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+            if (clashes.Count > 0)
+            {
+                throw new IncompatibleModsException(title, clashes);
+            }
+        }
+
         Directory.CreateDirectory(folder);
         var records = ReadRecords(instanceDir).Where(r => File.Exists(Path.Combine(folder, r.FileName))).ToList();
         for (var i = 0; i < plan.Count; i++)
@@ -170,7 +208,8 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             var projectProgress = progress is null ? null : new SyncProgress<double>(f => progress.Report((step + f) / wanted.Count));
             try
             {
-                var result = await InstallAsync(instanceDir, platform, gameVersion, wanted[i].Id, wanted[i].Title, projectProgress, cancellationToken).ConfigureAwait(false);
+                // These mods already ran together in the game, so Modrinth's incompatibility marks are not checked.
+                var result = await InstallAsync(instanceDir, platform, gameVersion, wanted[i].Id, wanted[i].Title, allowIncompatible: true, projectProgress, cancellationToken).ConfigureAwait(false);
                 installed.AddRange(result.Installed);
                 noVersion.AddRange(result.MissingDependencies);
             }

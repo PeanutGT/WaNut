@@ -288,7 +288,22 @@ public sealed partial class CrashHelpViewModel(ServerViewModel server, IDialogSe
         try
         {
             var title = await mods.Modrinth.GetProjectTitleAsync(project);
-            var result = await mods.InstallAsync(server.InstanceDir, platform, server.Metadata.MinecraftVersion, project, title);
+            ModInstallResult result;
+            try
+            {
+                result = await mods.InstallAsync(server.InstanceDir, platform, server.Metadata.MinecraftVersion, project, title);
+            }
+            catch (IncompatibleModsException e)
+            {
+                if (!dialogs.Confirm(string.Format(Resources.Text.Get("Mods_IncompatibleConfirm"), title, string.Join(", ", e.Installed))))
+                {
+                    DoneText = string.Format(Resources.Text.Get("Mods_IncompatibleSkipped"), title);
+                    return;
+                }
+
+                result = await mods.InstallAsync(server.InstanceDir, platform, server.Metadata.MinecraftVersion, project, title, allowIncompatible: true);
+            }
+
             DoneText = string.Format(Resources.Text.Get("Crash_Done_Installed"), result.Installed.Count > 0 ? string.Join(", ", result.Installed) : title);
         }
         catch (Exception e) when (e is NoCompatibleVersionException or HttpRequestException or TaskCanceledException or JsonException
