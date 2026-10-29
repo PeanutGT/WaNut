@@ -252,8 +252,11 @@
   <data name="Game_SimulationDistance" xml:space="preserve">
     <value>模擬距離</value>
   </data>
-  <data name="Game_DistanceHint" xml:space="preserve">
-    <value>單位是區塊。電腦較慢時，數字調低會比較順。</value>
+  <data name="Game_ViewDistanceHint" xml:space="preserve">
+    <value>建議 8–10 個區塊。電腦較慢時，數字調低會比較順。</value>
+  </data>
+  <data name="Game_SimulationDistanceHint" xml:space="preserve">
+    <value>建議 4–6 個區塊。這是作物生長、生物活動的範圍，調低最能減輕 CPU 負擔。</value>
   </data>
   <data name="Game_Chunks" xml:space="preserve">
     <value>{0} 個區塊</value>
