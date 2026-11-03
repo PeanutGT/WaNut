@@ -14,6 +14,12 @@ public static class JvmArguments
     /// </summary>
     public const int SmallHeapMb = 4 * 1024;
 
+    /// <summary>
+    /// From Java 25 compact object headers are a product feature (JEP 519): object headers shrink from 12 to 8 bytes,
+    /// so the same world needs somewhat less heap. Earlier versions only have them as an experiment.
+    /// </summary>
+    public const int CompactObjectHeadersSince = 25;
+
     // Console text is UTF-8 both ways, whatever the Windows code page is. The sun.* names cover Java 17 and older.
     private static readonly string[] EncodingFlags =
     [
@@ -34,6 +40,12 @@ public static class JvmArguments
 
         var args = new List<string> { $"-Xms{memoryMb}M", $"-Xmx{memoryMb}M" };
         args.AddRange(GarbageCollectorFlags(javaMajor, memoryMb));
+        if (javaMajor >= CompactObjectHeadersSince)
+        {
+            // Custom options come later, so "-XX:-UseCompactObjectHeaders" there turns it back off.
+            args.Add("-XX:+UseCompactObjectHeaders");
+        }
+
         args.AddRange(EncodingFlags);
         args.AddRange(customArguments ?? []);
         args.AddRange(jarFile.StartsWith('@') ? [jarFile, "nogui"] : ["-jar", jarFile, "nogui"]);

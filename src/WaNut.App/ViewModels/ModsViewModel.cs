@@ -365,6 +365,29 @@ public sealed partial class ModsViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// File work started from another tab (installing spark on the Performance tab). It blocks Start and changes here
+    /// like an install on this tab, then rereads the folder; failures go back to the caller to word.
+    /// </summary>
+    internal async Task RunFromOtherTabAsync(string workText, Func<IProgress<double>, Task> work)
+    {
+        ErrorText = null;
+        DoneText = null;
+        WorkFraction = 0;
+        WorkText = workText;
+        _server.OnModWorkChanged();
+        try
+        {
+            await work(new Progress<double>(f => WorkFraction = f));
+        }
+        finally
+        {
+            WorkText = null;
+            _server.OnModWorkChanged();
+            Reload();
+        }
+    }
+
     /// <summary>A failure already worded for the user.</summary>
     private sealed class ModsProblem(string message) : Exception(message);
 }

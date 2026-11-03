@@ -103,4 +103,34 @@ public sealed class JvmArgumentsTests
         Assert.Contains("-Dsun.stdout.encoding=UTF-8", args);
         Assert.Contains("-Dstdout.encoding=UTF-8", args);
     }
+
+    [Theory]
+    [InlineData(25, 2048)]
+    [InlineData(25, 8192)]
+    [InlineData(26, 4096)]
+    public void Build_Java25OrNewer_UsesCompactObjectHeadersWithoutUnlock(int javaMajor, int memoryMb)
+    {
+        var args = JvmArguments.Build(javaMajor, memoryMb, "server.jar");
+
+        Assert.Contains("-XX:+UseCompactObjectHeaders", args);
+        if (memoryMb > JvmArguments.SmallHeapMb)
+        {
+            Assert.DoesNotContain("-XX:+UnlockExperimentalVMOptions", args);
+        }
+    }
+
+    [Theory]
+    [InlineData(17)]
+    [InlineData(21)]
+    [InlineData(24)]
+    public void Build_OlderJava_LeavesCompactObjectHeadersOff(int javaMajor) =>
+        Assert.DoesNotContain("-XX:+UseCompactObjectHeaders", JvmArguments.Build(javaMajor, 8192, "server.jar"));
+
+    [Fact]
+    public void Build_CustomOptions_CanTurnCompactObjectHeadersBackOff()
+    {
+        var args = JvmArguments.Build(25, 8192, "server.jar", ["-XX:-UseCompactObjectHeaders"]);
+
+        Assert.True(args.ToList().IndexOf("-XX:-UseCompactObjectHeaders") > args.ToList().IndexOf("-XX:+UseCompactObjectHeaders"));
+    }
 }

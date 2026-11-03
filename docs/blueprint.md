@@ -69,6 +69,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
   * Java 21–22: `-XX:+UseZGC -XX:+ZGenerational`.
   * Java 23+: `-XX:+UseZGC` only (generational is the default there; the extra flag prints a warning or fails).
   * Heaps of 4 GB or less: Aikar's G1 flags on every Java version (`JvmArguments.SmallHeapMb`); ZGC's own memory and threads cost a small server too much. The 4 GB line still needs a real-server check.
+  * Java 25+: also `-XX:+UseCompactObjectHeaders` (JEP 519, a product flag there, no unlock needed). Saves some heap; no number is promised in the UI. Custom JVM options come later, so `-XX:-UseCompactObjectHeaders` turns it off.
 
 ---
 

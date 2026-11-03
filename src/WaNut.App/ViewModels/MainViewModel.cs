@@ -9,6 +9,7 @@ using WaNut.Core.Instances;
 using WaNut.Core.Mods;
 using WaNut.Core.Network;
 using WaNut.Core.Onboarding;
+using WaNut.Core.Profiling;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;
@@ -24,6 +25,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly TunnelService _tunnels;
     private readonly IClipboardService _clipboard;
     private readonly ModLibrary _mods;
+    private readonly Spark _spark;
     private readonly DiscordNotifier _discord;
     private readonly PlayerFaces _faces;
 
@@ -39,6 +41,7 @@ public sealed partial class MainViewModel : ObservableObject
         IClipboardService clipboard,
         UpdateViewModel updates,
         ModLibrary mods,
+        Spark spark,
         DiscordNotifier discord,
         BackupCopyService backupCopies,
         GuideViewModel guide,
@@ -50,6 +53,7 @@ public sealed partial class MainViewModel : ObservableObject
         backupCopies.CopyFailed += OnBackupCopyFailed;
         _discord = discord;
         _mods = mods;
+        _spark = spark;
         _firewall = firewall;
         _portForwards = portForwards;
         _tunnels = tunnels;
@@ -168,7 +172,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private ServerViewModel NewServer(InstanceMetadata metadata)
     {
-        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _discord, _faces);
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _spark, _discord, _faces);
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
         server.TabRequested += OnTabRequested;

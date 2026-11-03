@@ -2288,4 +2288,52 @@ Start it anyway?</value>
   <data name="Performance_Total" xml:space="preserve">
     <value>{0} servers · CPU {1:0}% · memory {2:0.0} GB</value>
   </data>
+  <data name="Performance_SparkCaption" xml:space="preserve">
+    <value>Find what causes lag (spark)</value>
+  </data>
+  <data name="Performance_SparkBuiltIn" xml:space="preserve">
+    <value>Paper already has spark built in.</value>
+  </data>
+  <data name="Performance_SparkAbout" xml:space="preserve">
+    <value>spark is a free profiler that shows what slows the server down. Installing puts it in the {0} folder.</value>
+  </data>
+  <data name="Performance_SparkStopToInstall" xml:space="preserve">
+    <value>Stop the server to install spark.</value>
+  </data>
+  <data name="Performance_SparkInstall" xml:space="preserve">
+    <value>Install spark</value>
+  </data>
+  <data name="Performance_SparkInstalling" xml:space="preserve">
+    <value>Installing spark…</value>
+  </data>
+  <data name="Performance_SparkStartToProfile" xml:space="preserve">
+    <value>Start the server, then profile while it lags.</value>
+  </data>
+  <data name="Performance_SparkReady" xml:space="preserve">
+    <value>Records what the server does for {0} seconds, then opens the report in your browser. The report is uploaded to spark.lucko.me, and anyone with the link can see it.</value>
+  </data>
+  <data name="Performance_SparkProfile" xml:space="preserve">
+    <value>Profile for {0} seconds</value>
+  </data>
+  <data name="Performance_SparkProfiling" xml:space="preserve">
+    <value>Profiling… the report opens in about {0} seconds. Keep playing as usual.</value>
+  </data>
+  <data name="Performance_SparkOpenReport" xml:space="preserve">
+    <value>Open the last report</value>
+  </data>
+  <data name="Performance_SparkNoReport" xml:space="preserve">
+    <value>spark did not send a report link. The console shows what it said.</value>
+  </data>
+  <data name="Performance_SparkNoVersion" xml:space="preserve">
+    <value>Modrinth has no spark for {0} {1}.</value>
+  </data>
+  <data name="Performance_SparkVerifyFailed" xml:space="preserve">
+    <value>The downloaded spark file did not match its checksum, so it was not kept. Try again later.</value>
+  </data>
+  <data name="Performance_SparkInstallFailed" xml:space="preserve">
+    <value>Could not install spark: {0}</value>
+  </data>
+  <data name="Performance_SparkOpenFailed" xml:space="preserve">
+    <value>Could not open the browser: {0}</value>
+  </data>
 </root>

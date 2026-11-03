@@ -2268,4 +2268,52 @@
   <data name="Performance_Total" xml:space="preserve">
     <value>{0} 台 · CPU {1:0}% · 記憶體 {2:0.0} GB</value>
   </data>
+  <data name="Performance_SparkCaption" xml:space="preserve">
+    <value>找出卡頓原因（spark）</value>
+  </data>
+  <data name="Performance_SparkBuiltIn" xml:space="preserve">
+    <value>Paper 已內建 spark。</value>
+  </data>
+  <data name="Performance_SparkAbout" xml:space="preserve">
+    <value>spark 是免費的效能剖析工具，可以看出是什麼拖慢伺服器。安裝後會放在 {0} 資料夾。</value>
+  </data>
+  <data name="Performance_SparkStopToInstall" xml:space="preserve">
+    <value>先停止伺服器才能安裝 spark。</value>
+  </data>
+  <data name="Performance_SparkInstall" xml:space="preserve">
+    <value>安裝 spark</value>
+  </data>
+  <data name="Performance_SparkInstalling" xml:space="preserve">
+    <value>正在安裝 spark…</value>
+  </data>
+  <data name="Performance_SparkStartToProfile" xml:space="preserve">
+    <value>啟動伺服器後，在卡頓的時候開始剖析。</value>
+  </data>
+  <data name="Performance_SparkReady" xml:space="preserve">
+    <value>記錄伺服器 {0} 秒內在做什麼，再用瀏覽器打開報告。報告會上傳到 spark.lucko.me，拿到連結的人都看得到。</value>
+  </data>
+  <data name="Performance_SparkProfile" xml:space="preserve">
+    <value>剖析 {0} 秒</value>
+  </data>
+  <data name="Performance_SparkProfiling" xml:space="preserve">
+    <value>剖析中…大約 {0} 秒後打開報告，照常玩就好。</value>
+  </data>
+  <data name="Performance_SparkOpenReport" xml:space="preserve">
+    <value>打開上次的報告</value>
+  </data>
+  <data name="Performance_SparkNoReport" xml:space="preserve">
+    <value>spark 沒有給出報告連結，請看主控台它說了什麼。</value>
+  </data>
+  <data name="Performance_SparkNoVersion" xml:space="preserve">
+    <value>Modrinth 上沒有 {0} {1} 可用的 spark。</value>
+  </data>
+  <data name="Performance_SparkVerifyFailed" xml:space="preserve">
+    <value>下載的 spark 檔案和校驗碼不符，已經丟掉。請稍後再試。</value>
+  </data>
+  <data name="Performance_SparkInstallFailed" xml:space="preserve">
+    <value>無法安裝 spark：{0}</value>
+  </data>
+  <data name="Performance_SparkOpenFailed" xml:space="preserve">
+    <value>無法打開瀏覽器：{0}</value>
+  </data>
 </root>
