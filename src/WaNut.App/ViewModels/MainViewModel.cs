@@ -7,9 +7,9 @@ using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
-using WaNut.Core.Profiling;
 using WaNut.Core.Network;
 using WaNut.Core.Onboarding;
+using WaNut.Core.Profiling;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;

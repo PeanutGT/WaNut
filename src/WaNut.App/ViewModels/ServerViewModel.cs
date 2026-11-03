@@ -12,8 +12,8 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
-using WaNut.Core.Profiling;
 using WaNut.Core.Notifications;
+using WaNut.Core.Profiling;
 
 namespace WaNut.App.ViewModels;
 
