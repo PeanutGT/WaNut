@@ -12,6 +12,7 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Profiling;
 using WaNut.Core.Notifications;
 
 namespace WaNut.App.ViewModels;
@@ -64,6 +65,7 @@ public sealed partial class ServerViewModel : ObservableObject
         TunnelService tunnels,
         IClipboardService clipboard,
         ModLibrary mods,
+        Spark spark,
         DiscordNotifier discord,
         PlayerFaces faces)
     {
@@ -78,7 +80,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs);
-        Performance = new PerformanceViewModel(this);
+        Performance = new PerformanceViewModel(this, spark);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
@@ -301,6 +303,7 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         StartCommand.NotifyCanExecuteChanged();
         ServerSettings.OnFilesBusyChanged();
+        Performance.OnServerStatusChanged();
     }
 
     partial void OnIsPreparingChanged(bool value)
@@ -308,6 +311,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
         ServerSettings.OnFilesBusyChanged();
+        Performance.OnServerStatusChanged();
     }
 
     /// <summary>True once Java was downloaded while this server got ready to start.</summary>
@@ -359,6 +363,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists.Reload();
         Backups.Reload();
         Mods.OnTypeOrVersionChanged();
+        Performance.OnServerStatusChanged();
     }
 
     /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>
@@ -388,6 +393,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
         Connect.OnServerStatusChanged(value);
+        Performance.OnServerStatusChanged();
         if (value == ServerStatus.Online)
         {
             _wasOnline = true;

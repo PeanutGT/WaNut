@@ -14,6 +14,7 @@ using WaNut.Core.Instances;
 using WaNut.Core.Java;
 using WaNut.Core.Modpacks;
 using WaNut.Core.Mods;
+using WaNut.Core.Profiling;
 using WaNut.Core.Network;
 using WaNut.Core.Notifications;
 using WaNut.Core.Players;
@@ -114,6 +115,7 @@ public partial class App : Application
         services.AddSingleton<AppUpdater>();
         services.AddSingleton<ModrinthClient>();
         services.AddSingleton<ModLibrary>();
+        services.AddSingleton<Spark>();
         services.AddSingleton<ModpackInstaller>();
         services.AddSingleton<DiscordWebhook>();
         services.AddSingleton<DiscordNotifier>();

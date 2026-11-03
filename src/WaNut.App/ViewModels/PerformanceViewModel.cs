@@ -1,18 +1,45 @@
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
+using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
+using WaNut.Core.Mods;
+using WaNut.Core.Profiling;
 
 namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// The Performance tab: the running server's CPU and memory over the last ten minutes, and a peanut that is calm,
-/// sweating or overheating with the CPU load.
+/// sweating or overheating with the CPU load. Below them, the spark profiler: install it, profile for a while and open
+/// the report.
 /// </summary>
-public sealed partial class PerformanceViewModel(ServerViewModel server) : ObservableObject
+public sealed partial class PerformanceViewModel(ServerViewModel server, Spark spark) : ObservableObject
 {
     private const double Gigabyte = 1024.0 * 1024 * 1024;
 
     private readonly UsageHistory _history = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SparkHint))]
+    [NotifyCanExecuteChangedFor(nameof(InstallSparkCommand))]
+    private bool _isInstallingSpark;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SparkHint))]
+    [NotifyCanExecuteChangedFor(nameof(ProfileCommand))]
+    private bool _isProfiling;
+
+    [ObservableProperty]
+    private string? _sparkError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasReport))]
+    private Uri? _reportUrl;
 
     /// <summary>False before the first reading of a running server.</summary>
     public bool HasData => _history.Latest is not null;
@@ -60,6 +87,174 @@ public sealed partial class PerformanceViewModel(ServerViewModel server) : Obser
         {
             var top = Math.Max(AllocatedBytes, _history.PeakMemory) * 1.1;
             return [.. _history.Samples.Select(s => top > 0 ? s.MemoryBytes / top : 0)];
+        }
+    }
+
+    private SparkSource SparkSource => Spark.SourceFor(server.Metadata.Type, server.Metadata.MinecraftVersion);
+
+    /// <summary>Vanilla loads neither mods nor plugins, so the spark card is hidden.</summary>
+    public bool ShowSpark => SparkSource != SparkSource.None;
+
+    public bool SparkBuiltIn => SparkSource == SparkSource.BuiltIn;
+
+    public bool SparkInstalled => SafeIsSparkInstalled();
+
+    public bool ShowSparkInstall => ShowSpark && !SparkInstalled;
+
+    public bool ShowSparkProfile => ShowSpark && SparkInstalled;
+
+    public bool HasReport => ReportUrl is not null;
+
+    public string SparkProfileText => string.Format(Text.Get("Performance_SparkProfile"), Spark.ProfileSeconds);
+
+    /// <summary>One line under the spark caption saying what to do next.</summary>
+    public string SparkHint
+    {
+        get
+        {
+            if (IsInstallingSpark)
+            {
+                return Text.Get("Performance_SparkInstalling");
+            }
+
+            if (IsProfiling)
+            {
+                return string.Format(Text.Get("Performance_SparkProfiling"), Spark.ProfileSeconds);
+            }
+
+            if (!SparkInstalled)
+            {
+                return server.IsRunning
+                    ? Text.Get("Performance_SparkStopToInstall")
+                    : string.Format(Text.Get("Performance_SparkAbout"), ModPlatform.For(server.Metadata.Type)?.FolderName);
+            }
+
+            return server.IsOnline
+                ? string.Format(Text.Get("Performance_SparkReady"), Spark.ProfileSeconds)
+                : Text.Get("Performance_SparkStartToProfile");
+        }
+    }
+
+    /// <summary>The server started, stopped, changed type, or its mods folder changed.</summary>
+    internal void OnServerStatusChanged()
+    {
+        OnPropertyChanged(nameof(ShowSpark));
+        OnPropertyChanged(nameof(SparkBuiltIn));
+        OnPropertyChanged(nameof(SparkInstalled));
+        OnPropertyChanged(nameof(ShowSparkInstall));
+        OnPropertyChanged(nameof(ShowSparkProfile));
+        OnPropertyChanged(nameof(SparkHint));
+        InstallSparkCommand.NotifyCanExecuteChanged();
+        ProfileCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanInstallSpark))]
+    private async Task InstallSparkAsync()
+    {
+        SparkError = null;
+        IsInstallingSpark = true;
+        var meta = server.Metadata;
+        try
+        {
+            await server.Mods.RunFromOtherTabAsync(
+                Text.Get("Performance_SparkInstalling"),
+                progress => spark.InstallAsync(server.InstanceDir, meta.Type, meta.MinecraftVersion, progress));
+        }
+        catch (NoCompatibleVersionException)
+        {
+            SparkError = string.Format(Text.Get("Performance_SparkNoVersion"), meta.Type, meta.MinecraftVersion);
+        }
+        catch (DownloadVerificationException)
+        {
+            SparkError = Text.Get("Performance_SparkVerifyFailed");
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException
+                                       or KeyNotFoundException or InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            SparkError = string.Format(Text.Get("Performance_SparkInstallFailed"), e.Message);
+        }
+        finally
+        {
+            IsInstallingSpark = false;
+            OnServerStatusChanged();
+        }
+    }
+
+    private bool CanInstallSpark() => ShowSparkInstall && server.Mods.CanChange && !IsInstallingSpark;
+
+    /// <summary>Runs spark's profiler, waits for the report link it prints in the console, and opens it.</summary>
+    [RelayCommand(CanExecute = nameof(CanProfile))]
+    private async Task ProfileAsync()
+    {
+        if (server.Process is not { IsRunning: true } process)
+        {
+            return;
+        }
+
+        SparkError = null;
+        IsProfiling = true;
+        var found = new TaskCompletionSource<Uri>(TaskCreationOptions.RunContinuationsAsynchronously);
+        void OnLine(string line)
+        {
+            if (Spark.FindReportUrl(line) is { } url)
+            {
+                found.TrySetResult(url);
+            }
+        }
+
+        process.OutputReceived += OnLine;
+        try
+        {
+            await server.SendCommandAsync(Spark.ProfileCommand);
+
+            // The upload after the profile usually takes a few seconds; a minute more covers a slow connection.
+            var finished = await Task.WhenAny(found.Task, process.Exited, Task.Delay(TimeSpan.FromSeconds(Spark.ProfileSeconds + 60)));
+            if (finished == found.Task)
+            {
+                ReportUrl = found.Task.Result;
+                OpenReport();
+            }
+            else
+            {
+                SparkError = Text.Get("Performance_SparkNoReport");
+            }
+        }
+        finally
+        {
+            process.OutputReceived -= OnLine;
+            IsProfiling = false;
+        }
+    }
+
+    private bool CanProfile() => ShowSparkProfile && server.IsOnline && !IsProfiling;
+
+    [RelayCommand]
+    private void OpenReport()
+    {
+        if (ReportUrl is null)
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(ReportUrl.AbsoluteUri) { UseShellExecute = true });
+        }
+        catch (Win32Exception e)
+        {
+            SparkError = string.Format(Text.Get("Performance_SparkOpenFailed"), e.Message);
+        }
+    }
+
+    private bool SafeIsSparkInstalled()
+    {
+        try
+        {
+            return Spark.IsInstalled(server.InstanceDir, server.Metadata.Type, server.Metadata.MinecraftVersion);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return false;
         }
     }
 
