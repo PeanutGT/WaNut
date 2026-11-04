@@ -140,7 +140,7 @@ public sealed class LiveApiTests : IDisposable
         server.OutputReceived += lines.Enqueue;
         await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online || !server.IsRunning, timeoutMs: 300_000);
         Assert.Equal(ServerStatus.Online, server.Status);
-        Assert.True(server.IsTrackedByJob);
+        Assert.True(Assert.IsType<ServerProcess>(server).IsTrackedByJob);
 
         await server.SendCommandAsync("say hello from WaNut");
         await FakeServer.WaitUntilAsync(() => lines.Any(l => l.Contains("hello from WaNut", StringComparison.Ordinal)));

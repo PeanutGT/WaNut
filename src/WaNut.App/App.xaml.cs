@@ -92,6 +92,7 @@ public partial class App : Application
         services.AddSingleton<InstanceStore>();
         services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
+        services.AddSingleton<IServerRuntime, LocalServerRuntime>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
