@@ -3,10 +3,15 @@ namespace WaNut.Core.Hosting;
 /// <summary>
 /// Owns the running servers. Several may run at once (blueprint decision 5), but each server only once.
 /// </summary>
-public sealed class ServerHost
+public sealed class ServerHost(IServerRuntime runtime)
 {
     private readonly Lock _gate = new();
-    private readonly Dictionary<string, ServerProcess> _processes = [];
+    private readonly Dictionary<string, IRunningServer> _processes = [];
+
+    public ServerHost()
+        : this(new LocalServerRuntime())
+    {
+    }
 
     /// <summary>The ids of the servers that are running.</summary>
     public IReadOnlyList<string> RunningInstanceIds
@@ -21,7 +26,7 @@ public sealed class ServerHost
     }
 
     /// <summary>The server's latest process, running or exited, or null when it never started.</summary>
-    public ServerProcess? Get(string instanceId)
+    public IRunningServer? Get(string instanceId)
     {
         lock (_gate)
         {
@@ -30,7 +35,7 @@ public sealed class ServerHost
     }
 
     /// <param name="beforeStart">Runs before the process starts, so subscribers do not miss its first lines.</param>
-    public ServerProcess Start(string instanceId, ServerLaunch launch, Action<ServerProcess>? beforeStart = null)
+    public IRunningServer Start(string instanceId, ServerLaunch launch, Action<IRunningServer>? beforeStart = null)
     {
         lock (_gate)
         {
@@ -40,7 +45,7 @@ public sealed class ServerHost
                 throw new ServerStartException(ServerStartProblem.AlreadyRunning);
             }
 
-            var process = new ServerProcess(launch);
+            var process = runtime.Create(launch);
             beforeStart?.Invoke(process);
             process.Start();
 

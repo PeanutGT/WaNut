@@ -132,7 +132,7 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>"Vanilla 26.3", "Paper 26.3 build 133".</summary>
     public string TypeAndVersionText => string.Join(' ', new[] { Metadata.Type.ToString(), Metadata.MinecraftVersion, LoaderText }.Where(s => s.Length > 0));
 
-    public ServerProcess? Process { get; private set; }
+    public IRunningServer? Process { get; private set; }
 
     /// <summary>The server's server-icon.png, shown in the list and the header; null when it has none.</summary>
     [ObservableProperty]
@@ -430,7 +430,7 @@ public sealed partial class ServerViewModel : ObservableObject
     }
 
     /// <summary>Follows a process that is about to start. Its events arrive on background threads and are moved to the UI thread.</summary>
-    internal void Attach(ServerProcess process)
+    internal void Attach(IRunningServer process)
     {
         Process = process;
         Performance.Clear();
@@ -467,7 +467,7 @@ public sealed partial class ServerViewModel : ObservableObject
     /// Every two seconds until the process exits: reads its memory and CPU, backs the world up on the backup
     /// schedule, and stops it once it has been empty for the "stop when nobody is online" time. Runs on the UI thread.
     /// </summary>
-    private async Task WatchRunningAsync(ServerProcess process)
+    private async Task WatchRunningAsync(IRunningServer process)
     {
         var meter = new CpuMeter(Environment.ProcessorCount);
         var schedule = new BackupSchedule();
@@ -511,7 +511,7 @@ public sealed partial class ServerViewModel : ObservableObject
         }
     }
 
-    private void OnExited(ServerProcess process, int exitCode)
+    private void OnExited(IRunningServer process, int exitCode)
     {
         AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
 
@@ -583,7 +583,7 @@ public sealed partial class ServerViewModel : ObservableObject
         return CrashAnalyzer.Analyze(RunLines(), report);
     }
 
-    private async Task RestartAfterCrashAsync(ServerProcess crashed)
+    private async Task RestartAfterCrashAsync(IRunningServer crashed)
     {
         await Task.Delay(RestartDelay);
 
@@ -629,7 +629,7 @@ public sealed partial class ServerViewModel : ObservableObject
     private void Notify(DiscordEvent kind, string key, string? player = null) =>
         _discord.Notify(kind, string.Format(Text.Get(key), DiscordWebhook.Escape(Name), player is null ? null : DiscordWebhook.Escape(player)));
 
-    private void SyncPlayers(ServerProcess process)
+    private void SyncPlayers(IRunningServer process)
     {
         var before = Players.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var after = process.Players;

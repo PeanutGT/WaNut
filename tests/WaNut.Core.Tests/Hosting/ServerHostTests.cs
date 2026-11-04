@@ -83,4 +83,43 @@ public sealed class ServerHostTests : IDisposable
     {
         Assert.Empty(_host.RunningInstanceIds);
     }
+
+    [Fact]
+    public async Task Start_WithRuntime_StartsWhatTheRuntimeCreates()
+    {
+        var runtime = new RecordingRuntime();
+        var host = new ServerHost(runtime);
+        var launch = FakeServer.Launch(_temp.Path);
+
+        using var server = host.Start("first", launch);
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online);
+
+        Assert.Same(launch, Assert.Single(runtime.Launches));
+        Assert.Same(runtime.Created[0], server);
+        await server.StopAsync(TimeSpan.FromSeconds(15));
+    }
+
+    [Fact]
+    public void Start_RemoteRuntime_ThrowsNotSupported()
+    {
+        var host = new ServerHost(new RemoteServerRuntime());
+
+        Assert.Throws<NotSupportedException>(() => host.Start("first", FakeServer.Launch(_temp.Path)));
+        Assert.Null(host.Get("first"));
+    }
+
+    private sealed class RecordingRuntime : IServerRuntime
+    {
+        public List<ServerLaunch> Launches { get; } = [];
+
+        public List<IRunningServer> Created { get; } = [];
+
+        public IRunningServer Create(ServerLaunch launch)
+        {
+            Launches.Add(launch);
+            var server = new ServerProcess(launch);
+            Created.Add(server);
+            return server;
+        }
+    }
 }
