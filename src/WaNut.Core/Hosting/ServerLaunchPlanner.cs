@@ -16,6 +16,18 @@ public sealed class ServerLaunchPlanner(InstanceStore store, JavaRuntimeManager 
         CancellationToken cancellationToken = default)
     {
         var dir = store.InstanceDir(server.Id);
+        CheckFiles(dir, server);
+
+        // Normally installed when the server was created; downloaded again if the runtime folder was removed.
+        var javaExe = await java.EnsureInstalledAsync(server.JavaMajor, javaProgress, cancellationToken).ConfigureAwait(false);
+        // Saved options were checked when typed; if they no longer parse, start without them rather than not at all.
+        var custom = JvmArguments.ParseCustom(server.CustomJvmArguments, out _) ?? [];
+        return new ServerLaunch(javaExe, JvmArguments.Build(server.JavaMajor, server.MemoryMb, server.ServerJar, custom), dir);
+    }
+
+    /// <summary>The server jar and the accepted EULA must be there, wherever the server runs.</summary>
+    public static void CheckFiles(string dir, InstanceMetadata server)
+    {
         if (!File.Exists(Path.Combine(dir, server.ServerJar.TrimStart('@'))))
         {
             throw new ServerStartException(ServerStartProblem.ServerJarMissing);
@@ -25,11 +37,5 @@ public sealed class ServerLaunchPlanner(InstanceStore store, JavaRuntimeManager 
         {
             throw new ServerStartException(ServerStartProblem.EulaNotAccepted);
         }
-
-        // Normally installed when the server was created; downloaded again if the runtime folder was removed.
-        var javaExe = await java.EnsureInstalledAsync(server.JavaMajor, javaProgress, cancellationToken).ConfigureAwait(false);
-        // Saved options were checked when typed; if they no longer parse, start without them rather than not at all.
-        var custom = JvmArguments.ParseCustom(server.CustomJvmArguments, out _) ?? [];
-        return new ServerLaunch(javaExe, JvmArguments.Build(server.JavaMajor, server.MemoryMb, server.ServerJar, custom), dir);
     }
 }

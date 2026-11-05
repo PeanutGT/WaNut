@@ -14,6 +14,7 @@ using WaNut.Core.Instances;
 using WaNut.Core.Mods;
 using WaNut.Core.Notifications;
 using WaNut.Core.Profiling;
+using WaNut.Core.Remote.Run;
 
 namespace WaNut.App.ViewModels;
 
@@ -173,6 +174,11 @@ public sealed partial class ServerViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private double? _backupFraction;
 
+    /// <summary>What WaNut does on the VPS right now (connecting, Java, uploading, bringing the world back), or null.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusText))]
+    private string? _vpsText;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SendCommand))]
     private string _commandText = string.Empty;
@@ -205,7 +211,10 @@ public sealed partial class ServerViewModel : ObservableObject
 
     public string PlayersHeader => string.Format(Text.Get("Server_TabPlayers"), Players.Count);
 
-    public string StatusText => IsQueued ? Text.Get("Status_Queued") : IsPreparing
+    /// <summary>True when this server is set to run on one of the user's VPS hosts.</summary>
+    public bool RunsOnVps => Metadata.VpsId is not null;
+
+    public string StatusText => IsQueued ? Text.Get("Status_Queued") : VpsText is { } vps && BackupFraction is null ? vps : IsPreparing
         ? (BackupFraction, JavaDownloadFraction) switch
         {
             ({ } backup, _) => string.Format(Text.Get("Status_BackingUp"), backup * 100),
@@ -277,9 +286,26 @@ public sealed partial class ServerViewModel : ObservableObject
         IsPreparing = true;
     }
 
+    /// <summary>
+    /// The server's folder comes back from the VPS after a run: nothing may start or change its files meanwhile. Unlike
+    /// <see cref="BeginPreparing"/> this keeps the crash card the run may have just shown.
+    /// </summary>
+    internal void BeginSyncBack(string text)
+    {
+        VpsText = text;
+        IsPreparing = true;
+    }
+
+    internal void EndSyncBack()
+    {
+        VpsText = null;
+        IsPreparing = false;
+    }
+
     internal void EndPreparing()
     {
         IsPreparing = false;
+        VpsText = null;
         JavaDownloadFraction = null;
         BackupFraction = null;
     }
@@ -469,7 +495,7 @@ public sealed partial class ServerViewModel : ObservableObject
     /// </summary>
     private async Task WatchRunningAsync(IRunningServer process)
     {
-        var meter = new CpuMeter(Environment.ProcessorCount);
+        var meter = new CpuMeter(process.ProcessorCount);
         var schedule = new BackupSchedule();
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         var stopping = false;
@@ -478,6 +504,7 @@ public sealed partial class ServerViewModel : ObservableObject
             while (await timer.WaitForNextTickAsync() && Process == process && process.GetUsage() is { } usage)
             {
                 var now = DateTimeOffset.UtcNow;
+                meter = meter.Cores == process.ProcessorCount ? meter : new CpuMeter(process.ProcessorCount);
                 if (meter.Sample(usage.CpuTime, now) is { } cpu)
                 {
                     UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
@@ -487,7 +514,8 @@ public sealed partial class ServerViewModel : ObservableObject
                 _empty.Update(Status == ServerStatus.Online, Players.Count, now);
                 schedule.Update(Status == ServerStatus.Online, Players.Count, now);
                 var every = Backups.App.BackupScheduleMinutes;
-                if (!stopping && every > 0 && !Backups.IsWorking && schedule.IsDue(now, TimeSpan.FromMinutes(every)))
+                // On a VPS the copy here is older than the running world; backups there come in a later step.
+                if (!stopping && every > 0 && !Backups.IsWorking && process is not RemoteServer && schedule.IsDue(now, TimeSpan.FromMinutes(every)))
                 {
                     schedule.Done(now);
                     AddConsoleLine(Text.Get("Server_ScheduledBackup"));
@@ -586,6 +614,7 @@ public sealed partial class ServerViewModel : ObservableObject
     private async Task RestartAfterCrashAsync(IRunningServer crashed)
     {
         await Task.Delay(RestartDelay);
+        await _controller.WaitForSyncBackAsync(this);
 
         // Only if nothing happened meanwhile: the user may have started this server again or deleted it.
         if (Process == crashed && Status == ServerStatus.Stopped && !IsPreparing && Directory.Exists(InstanceDir))

@@ -2492,4 +2492,64 @@
   <data name="Vps_KeyFilter" xml:space="preserve">
     <value>所有檔案|*.*</value>
   </data>
+  <data name="Server_VpsMissing" xml:space="preserve">
+    <value>這台伺服器設定在一台已從 App 設定移除的 VPS 上執行。請到伺服器分頁 &gt; 進階 重新選擇在哪裡執行。</value>
+  </data>
+  <data name="Server_VpsHostKeyNew" xml:space="preserve">
+    <value>WaNut 還沒確認過這台 VPS。請先到 App 設定 &gt; 我的 VPS 按「測試連線」。</value>
+  </data>
+  <data name="Server_VpsHostKeyChanged" xml:space="preserve">
+    <value>VPS 回應的主機金鑰變了，所以 WaNut 沒有連線。如果你重灌過 VPS，請到 App 設定 &gt; 我的 VPS 重新測試連線。</value>
+  </data>
+  <data name="Server_VpsLoginFailed" xml:space="preserve">
+    <value>無法登入 VPS。請到 App 設定 &gt; 我的 VPS 檢查使用者、金鑰或密碼。</value>
+  </data>
+  <data name="Server_VpsFailed" xml:space="preserve">
+    <value>無法在 VPS 上啟動伺服器：{0}</value>
+  </data>
+  <data name="Server_VpsSyncBackFailed" xml:space="preserve">
+    <value>無法把世界從 VPS 拿回來：{0}。世界仍安全地留在 VPS 上，下次啟動時 WaNut 會再試一次。</value>
+  </data>
+  <data name="Status_VpsConnecting" xml:space="preserve">
+    <value>正在連線到你的 VPS…</value>
+  </data>
+  <data name="Status_VpsPreparingJava" xml:space="preserve">
+    <value>正在 VPS 上準備 Java…</value>
+  </data>
+  <data name="Status_VpsUploading" xml:space="preserve">
+    <value>正在上傳到你的 VPS…</value>
+  </data>
+  <data name="Status_VpsUploadingPercent" xml:space="preserve">
+    <value>正在上傳到你的 VPS… {0:0}%</value>
+  </data>
+  <data name="Status_VpsDownloading" xml:space="preserve">
+    <value>正在把世界從 VPS 拿回來…</value>
+  </data>
+  <data name="Status_VpsDownloadingPercent" xml:space="preserve">
+    <value>正在把世界從 VPS 拿回來… {0:0}%</value>
+  </data>
+  <data name="Server_RunLocation" xml:space="preserve">
+    <value>在哪裡執行</value>
+  </data>
+  <data name="Server_RunHere" xml:space="preserve">
+    <value>這台電腦</value>
+  </data>
+  <data name="Server_RunVpsMissing" xml:space="preserve">
+    <value>（已移除的 VPS）</value>
+  </data>
+  <data name="Server_RunLocationHint" xml:space="preserve">
+    <value>在 VPS 上執行時，WaNut 每次啟動前上傳伺服器，停止後再拿回來。VPS 開著就會持續計費，費用由你和主機商自行處理。VPS 請在 App 設定 &gt; 我的 VPS 新增。</value>
+  </data>
+  <data name="Server_VpsCopyNote" xml:space="preserve">
+    <value>這個世界最新的版本還在 VPS 上。請先啟動一次伺服器，讓 WaNut 把它拿回來，再更改在哪裡執行。</value>
+  </data>
+  <data name="Connect_Kind_Vps" xml:space="preserve">
+    <value>你的 VPS</value>
+  </data>
+  <data name="Connect_Hint_Vps" xml:space="preserve">
+    <value>給網路上任何地方的朋友。VPS 主機商的防火牆要開放這個連接埠。</value>
+  </data>
+  <data name="Connect_VpsNote" xml:space="preserve">
+    <value>這台伺服器在你的 VPS 上執行，所以不會用到這台電腦的防火牆、路由器和 playit.gg。VPS 開著就會持續計費。</value>
+  </data>
 </root>

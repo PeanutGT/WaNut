@@ -2512,4 +2512,64 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   <data name="Vps_KeyFilter" xml:space="preserve">
     <value>All files|*.*</value>
   </data>
+  <data name="Server_VpsMissing" xml:space="preserve">
+    <value>This server is set to run on a VPS that is no longer in App settings. Pick where it runs in Server tab &gt; Advanced.</value>
+  </data>
+  <data name="Server_VpsHostKeyNew" xml:space="preserve">
+    <value>WaNut hasn't confirmed this VPS yet. Open App settings &gt; My VPS and use Test connection first.</value>
+  </data>
+  <data name="Server_VpsHostKeyChanged" xml:space="preserve">
+    <value>The VPS answered with a different host key, so WaNut didn't connect. If you reinstalled it, test the connection again in App settings &gt; My VPS.</value>
+  </data>
+  <data name="Server_VpsLoginFailed" xml:space="preserve">
+    <value>Couldn't sign in to the VPS. Check the user, key or password in App settings &gt; My VPS.</value>
+  </data>
+  <data name="Server_VpsFailed" xml:space="preserve">
+    <value>Couldn't start the server on the VPS: {0}</value>
+  </data>
+  <data name="Server_VpsSyncBackFailed" xml:space="preserve">
+    <value>Couldn't bring the world back from the VPS: {0}. It stays safe there, and WaNut tries again on the next start.</value>
+  </data>
+  <data name="Status_VpsConnecting" xml:space="preserve">
+    <value>Connecting to your VPS…</value>
+  </data>
+  <data name="Status_VpsPreparingJava" xml:space="preserve">
+    <value>Getting Java ready on your VPS…</value>
+  </data>
+  <data name="Status_VpsUploading" xml:space="preserve">
+    <value>Uploading to your VPS…</value>
+  </data>
+  <data name="Status_VpsUploadingPercent" xml:space="preserve">
+    <value>Uploading to your VPS… {0:0}%</value>
+  </data>
+  <data name="Status_VpsDownloading" xml:space="preserve">
+    <value>Bringing the world back from your VPS…</value>
+  </data>
+  <data name="Status_VpsDownloadingPercent" xml:space="preserve">
+    <value>Bringing the world back from your VPS… {0:0}%</value>
+  </data>
+  <data name="Server_RunLocation" xml:space="preserve">
+    <value>Where it runs</value>
+  </data>
+  <data name="Server_RunHere" xml:space="preserve">
+    <value>This PC</value>
+  </data>
+  <data name="Server_RunVpsMissing" xml:space="preserve">
+    <value>(removed VPS)</value>
+  </data>
+  <data name="Server_RunLocationHint" xml:space="preserve">
+    <value>On a VPS, WaNut uploads the server before each start and brings it back after it stops. Your host keeps charging while the VPS is on; that bill is between you and them. Add a VPS in App settings &gt; My VPS.</value>
+  </data>
+  <data name="Server_VpsCopyNote" xml:space="preserve">
+    <value>The newest copy of this world is still on the VPS. Start the server once so WaNut can bring it back before you change where it runs.</value>
+  </data>
+  <data name="Connect_Kind_Vps" xml:space="preserve">
+    <value>Your VPS</value>
+  </data>
+  <data name="Connect_Hint_Vps" xml:space="preserve">
+    <value>For friends anywhere on the internet. The port must be open in your VPS host's firewall.</value>
+  </data>
+  <data name="Connect_VpsNote" xml:space="preserve">
+    <value>This server runs on your VPS, so this PC's firewall, router and playit.gg aren't used. Your host keeps charging while the VPS is on.</value>
+  </data>
 </root>

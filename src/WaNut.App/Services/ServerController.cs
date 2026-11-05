@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
+using Renci.SshNet.Common;
 using WaNut.App.Resources;
 using WaNut.App.ViewModels;
 using WaNut.Core.Backups;
@@ -8,6 +9,8 @@ using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Network;
+using WaNut.Core.Remote;
+using WaNut.Core.Remote.Run;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.Services;
@@ -20,7 +23,9 @@ public sealed class ServerController(
     ServerHost host, ServerLaunchPlanner planner, IDialogService dialogs, BackupStore backups, AppSettingsViewModel app, FirewallService firewall,
     PortForwardService portForwards,
     TunnelService tunnels,
-    DesktopNotifier notifier)
+    DesktopNotifier notifier,
+    VpsLaunchPlanner vpsPlanner,
+    VpsConnector vpsConnector)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -29,6 +34,9 @@ public sealed class ServerController(
     private readonly SemaphoreSlim _prepareGate = new(1, 1);
     private readonly Dictionary<ServerViewModel, CancellationTokenSource> _queue = [];
     private readonly List<ServerViewModel> _started = [];
+
+    // Servers whose folder is coming back from the VPS after a run.
+    private readonly Dictionary<ServerViewModel, Task> _syncingBack = [];
 
     /// <summary>The servers whose process is running, in the order they were started.</summary>
     public IReadOnlyList<ServerViewModel> RunningServers => [.. _started.Where(s => s.Process is { IsRunning: true })];
@@ -49,6 +57,13 @@ public sealed class ServerController(
             return;
         }
 
+        VpsProfile? vps = null;
+        if (server.Metadata.VpsId is { } vpsId && (vps = app.VpsList.FirstOrDefault(v => v.Id == vpsId)) is null)
+        {
+            server.ShowError(Text.Get("Server_VpsMissing"));
+            return;
+        }
+
         server.BeginPreparing();
         if (!await WaitForTurnAsync(server))
         {
@@ -59,6 +74,12 @@ public sealed class ServerController(
         Preparing = server;
         try
         {
+            if (vps is not null)
+            {
+                await StartOnVpsAsync(server, vps);
+                return;
+            }
+
             if (!automatic && !ConfirmMemory(server))
             {
                 return;
@@ -99,6 +120,18 @@ public sealed class ServerController(
         {
             server.ShowError(string.Format(Text.Get("Server_StartFailed"), e.Message));
         }
+        catch (HostKeyException e)
+        {
+            server.ShowError(Text.Get(e.Changed ? "Server_VpsHostKeyChanged" : "Server_VpsHostKeyNew"));
+        }
+        catch (VpsLoginException)
+        {
+            server.ShowError(Text.Get("Server_VpsLoginFailed"));
+        }
+        catch (Exception e) when (e is VpsUnreachableException or SshException or InvalidOperationException)
+        {
+            server.ShowError(string.Format(Text.Get("Server_VpsFailed"), e.InnerException?.Message ?? e.Message));
+        }
         finally
         {
             Preparing = null;
@@ -106,6 +139,73 @@ public sealed class ServerController(
             _prepareGate.Release();
         }
     }
+
+    /// <summary>
+    /// The VPS way (plan step 3): bring back a newer VPS copy first, back up here, get the VPS ready and upload, then
+    /// start there. No firewall, port or memory checks on this PC: none of them apply to the VPS.
+    /// </summary>
+    private async Task StartOnVpsAsync(ServerViewModel server, VpsProfile vps)
+    {
+        if (server.Metadata.VpsCopyIsNewer)
+        {
+            server.VpsText = Text.Get("Status_VpsDownloading");
+            await vpsPlanner.DownloadAsync(server.Metadata, vps, new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100)));
+            server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
+            server.VpsText = null;
+        }
+
+        if (!await BackUpBeforeStartAsync(server))
+        {
+            return;
+        }
+
+        var steps = new Progress<VpsStep>(step => server.VpsText = Text.Get($"Status_Vps{step}"));
+        var upload = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsUploadingPercent"), p.Fraction * 100));
+        var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload);
+        server.VpsText = null;
+
+        // From here the VPS copy is the one that counts, until it has come back.
+        server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = true });
+        server.RunningPort = 0; // The VPS port takes nothing from this PC.
+        var process = host.Start(server.Id, launch, server.Attach, new RemoteServerRuntime(vpsConnector, vps));
+        _started.Remove(server);
+        _started.Add(server);
+        _syncingBack[server] = SyncBackAfterExitAsync(server, process, vps);
+    }
+
+    /// <summary>Once the run on the VPS ended, brings the server's folder back here. A failure is tried again on the next start.</summary>
+    private async Task SyncBackAfterExitAsync(ServerViewModel server, IRunningServer process, VpsProfile vps)
+    {
+        await process.Exited;
+        if (process is RemoteServer { ConnectionLost: true })
+        {
+            _syncingBack.Remove(server);
+            return;
+        }
+
+        server.BeginSyncBack(Text.Get("Status_VpsDownloading"));
+        try
+        {
+            var progress = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100));
+            await vpsPlanner.DownloadAsync(server.Metadata, vps, progress);
+            server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
+            server.Backups.Reload();
+            server.ServerSettings.Reload();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException)
+        {
+            server.ShowError(string.Format(Text.Get("Server_VpsSyncBackFailed"), e.InnerException?.Message ?? e.Message));
+        }
+        finally
+        {
+            server.EndSyncBack();
+            _syncingBack.Remove(server);
+        }
+    }
+
+    /// <summary>Completes once the server's folder is back from the VPS, or right away when nothing is coming back.</summary>
+    public Task WaitForSyncBackAsync(ServerViewModel server) =>
+        _syncingBack.GetValueOrDefault(server) ?? Task.CompletedTask;
 
     /// <summary>Waits while another server gets ready. False when the wait was cancelled with Stop.</summary>
     private async Task<bool> WaitForTurnAsync(ServerViewModel server)
@@ -137,7 +237,7 @@ public sealed class ServerController(
     /// <summary>Warns when the servers together would leave Windows too little memory; the user may start anyway.</summary>
     private bool ConfirmMemory(ServerViewModel server)
     {
-        var running = RunningServers.Where(s => s != server).Select(s => s.Metadata.MemoryMb).ToList();
+        var running = RunningServers.Where(s => s != server && s.Metadata.VpsId is null).Select(s => s.Metadata.MemoryMb).ToList();
         var total = MemoryLimits.TotalPhysicalMb();
         if (!MemoryLimits.IsTooMuchTogether(server.Metadata.MemoryMb, running, total))
         {
@@ -261,6 +361,9 @@ public sealed class ServerController(
         }
 
         await Task.WhenAll(RunningServers.Select(StopAsync));
+
+        // VPS servers bring their folder back before WaNut closes (keeping them running comes with the next step).
+        await Task.WhenAll(_syncingBack.Values.ToList());
         await portForwards.CloseAnyAsync();
         tunnels.StopAny();
     }

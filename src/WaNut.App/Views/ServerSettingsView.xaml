@@ -155,6 +155,15 @@
       <!-- Advanced mode only: plain wording, no peanut (decision 16). -->
       <StackPanel Visibility="{Binding App.AdvancedMode, Converter={StaticResource Visible}}">
         <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+        <TextBlock Text="{res:Text Server_RunLocation}" Style="{StaticResource Label}" />
+        <ComboBox ItemsSource="{Binding RunLocations}" SelectedItem="{Binding RunLocation}" DisplayMemberPath="Name"
+                  IsEnabled="{Binding CanChangeRunLocation}" HorizontalAlignment="Left" MinWidth="220"
+                  AutomationProperties.Name="{res:Text Server_RunLocation}"
+                  AutomationProperties.HelpText="{res:Text Server_RunLocationHint}" />
+        <TextBlock Text="{res:Text Server_RunLocationHint}" Style="{StaticResource Hint}" />
+        <TextBlock Text="{res:Text Server_VpsCopyNote}" Style="{StaticResource Hint}"
+                   Visibility="{Binding ShowVpsCopyNote, Converter={StaticResource Visible}}" />
+        <Border Height="14" />
         <TextBlock Text="{res:Text Server_JvmArguments}" Style="{StaticResource Label}" />
         <TextBox Text="{Binding CustomJvmArguments}" FontFamily="Consolas"
                  Tag="-XX:+UseLargePages"

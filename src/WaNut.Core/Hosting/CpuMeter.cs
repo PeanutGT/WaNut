@@ -7,6 +7,9 @@ namespace WaNut.Core.Hosting;
 public sealed class CpuMeter(int processorCount)
 {
     private TimeSpan? _lastCpu;
+
+    /// <summary>The core count the percentage is taken of.</summary>
+    public int Cores => processorCount;
     private DateTimeOffset _lastAt;
 
     /// <summary>Records a sample. Returns the percentage since the previous one, or null for the first sample.</summary>
