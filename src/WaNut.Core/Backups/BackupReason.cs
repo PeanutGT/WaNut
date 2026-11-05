@@ -23,4 +23,7 @@ public enum BackupReason
 
     /// <summary>Made on the backup schedule while the server was running.</summary>
     Scheduled,
+
+    /// <summary>Made right after the server's files came back from the user's VPS.</summary>
+    Vps,
 }

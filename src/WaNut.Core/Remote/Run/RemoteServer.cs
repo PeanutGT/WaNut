@@ -11,8 +11,10 @@ namespace WaNut.Core.Remote.Run;
 /// <see cref="ServerLaunch.WorkingDirectory"/> are paths under the SSH user's home folder. The console is read with
 /// tail over SSH, commands go into the runner's FIFO, and memory and CPU come from /proc every two seconds. If the
 /// connection drops, WaNut tries to get it back for a while and carries on reading where it stopped.
+/// With <paramref name="runnerPid"/> it follows a server already running there (started before WaNut was last closed)
+/// instead of starting one, and reads its console from the beginning so the status and players are right.
 /// </summary>
-public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Task<SshClient>> connect) : RunningServerBase
+public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Task<SshClient>> connect, int? runnerPid = null) : RunningServerBase
 {
     /// <summary>How often a lost connection is tried again, and how long to wait between tries.</summary>
     public static readonly TimeSpan ReconnectDelay = TimeSpan.FromSeconds(5);
@@ -35,6 +37,12 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
 
     /// <summary>True when the run ended because the VPS could no longer be reached, not because the server stopped.</summary>
     public bool ConnectionLost { get; private set; }
+
+    /// <summary>True when WaNut let go of the server with <see cref="Detach"/>: it keeps running on the VPS.</summary>
+    public bool Detached { get; private set; }
+
+    /// <summary>True when this run follows a server that was already running instead of starting one.</summary>
+    public bool Reattached => runnerPid is not null;
 
     public override int ProcessorCount => _cores;
 
@@ -91,6 +99,22 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
         }
     }
 
+    /// <summary>
+    /// Stops following the server without stopping it, for when WaNut closes (plan decision 5A). The run then ends
+    /// here as a requested stop, so nothing reads it as a crash or brings the folder back.
+    /// </summary>
+    public void Detach()
+    {
+        if (Exited.IsCompleted)
+        {
+            return;
+        }
+
+        Detached = true;
+        StopRequested = true;
+        _stop.Cancel();
+    }
+
     public override void Dispose()
     {
         _stop.Cancel();
@@ -133,8 +157,11 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
         try
         {
             _client = await connect(cancellationToken).ConfigureAwait(false);
-            var pid = (await LaunchAsync(_client, cancellationToken).ConfigureAwait(false)).Trim();
-            if (!int.TryParse(pid, NumberStyles.None, CultureInfo.InvariantCulture, out _runnerPid))
+            if (runnerPid is { } running)
+            {
+                _runnerPid = running;
+            }
+            else if (!int.TryParse((await LaunchAsync(_client, cancellationToken).ConfigureAwait(false)).Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out _runnerPid))
             {
                 throw new InvalidOperationException("The VPS did not start the server.");
             }
@@ -142,9 +169,9 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
             _ = WatchUsageAsync(cancellationToken);
             exitCode = await FollowAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception) when (cancellationToken.IsCancellationRequested)
         {
-            // Disposed while running.
+            // Detached or disposed while running: whatever the cut connection threw, the server is not ours to judge.
         }
         catch (Exception e) when (e is SshException or IOException or InvalidOperationException or VpsUnreachableException or VpsLoginException or HostKeyException or System.Net.Sockets.SocketException)
         {

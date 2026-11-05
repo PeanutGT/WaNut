@@ -81,12 +81,28 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isShuttingDown;
 
-    public bool HasRunningServer => _controller.HasRunningServer;
+    /// <summary>A server runs on this PC: closing WaNut would stop it, so the window asks first.</summary>
+    public bool HasRunningServer => _controller.LocalRunningServers.Count > 0;
 
-    /// <summary>"Survival, Creative": every running server, for the close question.</summary>
-    public string RunningServerNames => string.Join(Text.Get("Main_NameSeparator"), _controller.RunningServers.Select(s => s.Name));
+    /// <summary>Something must finish before WaNut closes: a server to stop or let go of, or a folder coming back from a VPS.</summary>
+    public bool NeedsShutdown => _controller.HasRunningServer || _controller.IsSyncingBack;
 
-    /// <summary>Stops every running server so their worlds are saved before WaNut closes.</summary>
+    /// <summary>"Survival, Creative": every server running on this PC, for the close question.</summary>
+    public string RunningServerNames => string.Join(Text.Get("Main_NameSeparator"), _controller.LocalRunningServers.Select(s => s.Name));
+
+    /// <summary>
+    /// Follows the servers left running on a VPS when WaNut last closed, and brings back the files of those that ended
+    /// meanwhile (plan decision 5A). Each one on its own, so a slow VPS holds up nothing else.
+    /// </summary>
+    public void ReconnectVpsServers()
+    {
+        foreach (var server in Servers.Where(s => s.FilesOnVps))
+        {
+            _ = _controller.ReconnectAsync(server);
+        }
+    }
+
+    /// <summary>Stops every server on this PC so their worlds are saved before WaNut closes; VPS servers keep running.</summary>
     public async Task ShutdownAsync()
     {
         IsShuttingDown = true;
