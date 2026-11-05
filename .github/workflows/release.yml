@@ -28,6 +28,10 @@ jobs:
             throw "Tag '${{ github.ref_name }}' is not a version like v1.2.3."
           }
           "version=$version" >> $env:GITHUB_OUTPUT
+          # A tag with a suffix such as v0.3.0-beta.1 becomes a GitHub pre-release. Installed copies only look at
+          # full releases (AppUpdater uses prerelease: false), so testers install it by hand and nobody is updated to it.
+          $pre = if ($version.Contains('-')) { '--pre' } else { '' }
+          "pre=$pre" >> $env:GITHUB_OUTPUT
 
       - name: Test
         run: |
@@ -48,4 +52,4 @@ jobs:
         run: vpk pack --packId WaNut --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe WaNut.exe --packTitle WaNut --packAuthors PeanutGT --icon src/WaNut.App/Assets/wanut.ico --shortcuts StartMenuRoot
 
       - name: Upload release
-        run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "WaNut ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}
+        run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "WaNut ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }} ${{ steps.version.outputs.pre }}
