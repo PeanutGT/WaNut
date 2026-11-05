@@ -34,7 +34,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     // Console lines from the server's threads and WaNut's own lines share one queue, so they stay in order, and a
     // burst of output reaches the UI thread as one batch instead of one post per line.
-    private readonly ConcurrentQueue<string> _pendingLines = new();
+    private readonly ConcurrentQueue<ConsoleLine> _pendingLines = new();
     private int _flushPosted;
 
     /// <summary>How long a crashed server waits before it is started again.</summary>
@@ -145,7 +145,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     internal void ReloadIcon() => Icon = ServerIconMaker.Load(InstanceDir);
 
-    public ObservableCollection<string> ConsoleLines { get; } = [];
+    public ObservableCollection<ConsoleLine> ConsoleLines { get; } = [];
 
     public ObservableCollection<string> Players { get; } = [];
 
@@ -688,7 +688,8 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Queues a console line from any thread; the UI thread adds every waiting line in one go.</summary>
     private void AddConsoleLine(string line)
     {
-        _pendingLines.Enqueue(line);
+        // The level is read here, off the UI thread and once per line, not each time a row scrolls into view.
+        _pendingLines.Enqueue(new ConsoleLine(line, ServerLogParser.GetLevel(line)));
         if (Interlocked.Exchange(ref _flushPosted, 1) == 0)
         {
             _ui.Post(_ => FlushConsoleLines(), null);
@@ -698,14 +699,23 @@ public sealed partial class ServerViewModel : ObservableObject
     private void FlushConsoleLines()
     {
         Volatile.Write(ref _flushPosted, 0);
+        var batch = new List<ConsoleLine>();
         while (_pendingLines.TryDequeue(out var line))
         {
-            ConsoleLines.Add(line);
+            batch.Add(line);
         }
 
-        while (ConsoleLines.Count > MaxConsoleLines)
+        // A burst (a modpack starting) can bring more lines than the console keeps: skip the ones that would go at once.
+        var skip = Math.Max(0, batch.Count - MaxConsoleLines);
+        var excess = ConsoleLines.Count + batch.Count - skip - MaxConsoleLines;
+        for (var i = 0; i < excess; i++)
         {
             ConsoleLines.RemoveAt(0);
+        }
+
+        for (var i = skip; i < batch.Count; i++)
+        {
+            ConsoleLines.Add(batch[i]);
         }
     }
 

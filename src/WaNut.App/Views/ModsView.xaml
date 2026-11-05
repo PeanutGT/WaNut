@@ -38,6 +38,23 @@
         </Setter.Value>
       </Setter>
     </Style>
+    <!-- A long plain list (a modpack can bring hundreds of mods): it scrolls on its own, so only the visible rows are built. -->
+    <Style x:Key="ScrollingList" TargetType="ListBox" BasedOn="{StaticResource PlainList}">
+      <Setter Property="MaxHeight" Value="420" />
+      <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+      <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
+      <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBox">
+            <ScrollViewer Focusable="False" CanContentScroll="True"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <ItemsPresenter />
+            </ScrollViewer>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -103,7 +120,7 @@
           <Button DockPanel.Dock="Right" Content="{res:Text Mods_OpenFolder}" Command="{Binding OpenFolderCommand}" Padding="10,3" />
           <TextBlock Text="{Binding InstalledHeader}" Style="{StaticResource SectionCaption}" VerticalAlignment="Center" />
         </DockPanel>
-        <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Installed}" AutomationProperties.Name="{Binding InstalledHeader}">
+        <ListBox Style="{StaticResource ScrollingList}" ItemsSource="{Binding Installed}" AutomationProperties.Name="{Binding InstalledHeader}">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">

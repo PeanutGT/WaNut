@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:res="clr-namespace:WaNut.App.Resources"
         xmlns:behaviors="clr-namespace:WaNut.App.Behaviors"
-        xmlns:converters="clr-namespace:WaNut.App.Converters"
         xmlns:hosting="clr-namespace:WaNut.Core.Hosting;assembly=WaNut.Core"
         xmlns:views="clr-namespace:WaNut.App.Views"
         xmlns:controls="clr-namespace:WaNut.App.Controls"
@@ -14,7 +13,6 @@
         MinWidth="760" MinHeight="480"
         WindowStartupLocation="CenterScreen">
   <Window.Resources>
-    <converters:LogLineLevelConverter x:Key="LogLineLevel" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!-- Status dot: gray when stopped, amber while busy, green when online. -->
@@ -422,14 +420,14 @@
                   </ListBox.Resources>
                   <ListBox.ItemTemplate>
                     <DataTemplate>
-                      <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,8,0">
+                      <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,0,8,0">
                         <TextBlock.Style>
                           <Style TargetType="TextBlock">
                             <Style.Triggers>
-                              <DataTrigger Binding="{Binding Converter={StaticResource LogLineLevel}}" Value="{x:Static hosting:LogLineLevel.Warning}">
+                              <DataTrigger Binding="{Binding Level}" Value="{x:Static hosting:LogLineLevel.Warning}">
                                 <Setter Property="Foreground" Value="{DynamicResource ConsoleWarnBrush}" />
                               </DataTrigger>
-                              <DataTrigger Binding="{Binding Converter={StaticResource LogLineLevel}}" Value="{x:Static hosting:LogLineLevel.Error}">
+                              <DataTrigger Binding="{Binding Level}" Value="{x:Static hosting:LogLineLevel.Error}">
                                 <Setter Property="Foreground" Value="{DynamicResource ConsoleErrorBrush}" />
                               </DataTrigger>
                             </Style.Triggers>
