@@ -34,7 +34,9 @@ public sealed partial class ModsViewModel : ObservableObject
         Reload();
     }
 
-    public ObservableCollection<InstalledModViewModel> Installed { get; } = [];
+    // Replaced as a whole on reload, so the list redraws once instead of once per mod.
+    [ObservableProperty]
+    private ObservableCollection<InstalledModViewModel> _installed = [];
 
     public ObservableCollection<ModResultViewModel> Results { get; } = [];
 
@@ -95,15 +97,12 @@ public sealed partial class ModsViewModel : ObservableObject
     /// <summary>Rereads the folder; after a type change the old results are for the wrong loader, so they go too.</summary>
     public void Reload()
     {
-        Installed.Clear();
+        var installed = new List<InstalledModViewModel>();
         if (Platform is { } platform)
         {
             try
             {
-                foreach (var mod in _library.ListInstalled(_server.InstanceDir, platform))
-                {
-                    Installed.Add(new InstalledModViewModel(mod));
-                }
+                installed.AddRange(_library.ListInstalled(_server.InstanceDir, platform).Select(mod => new InstalledModViewModel(mod)));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
@@ -111,6 +110,7 @@ public sealed partial class ModsViewModel : ObservableObject
             }
         }
 
+        Installed = new ObservableCollection<InstalledModViewModel>(installed);
         var installedIds = InstalledProjectIds();
         foreach (var result in Results)
         {
