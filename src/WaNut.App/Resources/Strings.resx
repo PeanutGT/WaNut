@@ -2528,7 +2528,7 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
     <value>Couldn't start the server on the VPS: {0}</value>
   </data>
   <data name="Server_VpsSyncBackFailed" xml:space="preserve">
-    <value>Couldn't bring the world back from the VPS: {0}. It stays safe there, and WaNut tries again on the next start.</value>
+    <value>Couldn't bring the world back from the VPS: {0} It stays safe there. Press "Check the VPS again" to try again.</value>
   </data>
   <data name="Status_VpsConnecting" xml:space="preserve">
     <value>Connecting to your VPS…</value>
@@ -2571,5 +2571,26 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   </data>
   <data name="Connect_VpsNote" xml:space="preserve">
     <value>This server runs on your VPS, so this PC's firewall, router and playit.gg aren't used. Your host keeps charging while the VPS is on.</value>
+  </data>
+  <data name="Server_VpsBannerRunning" xml:space="preserve">
+    <value>This server runs on your VPS, so its files are there. Settings, mods and backups unlock after it stops and its files come back here.</value>
+  </data>
+  <data name="Server_VpsBannerAway" xml:space="preserve">
+    <value>The newest files of this server are still on your VPS. Settings, mods and backups unlock once they are back here.</value>
+  </data>
+  <data name="Server_VpsReconnect" xml:space="preserve">
+    <value>Check the VPS again</value>
+  </data>
+  <data name="Server_VpsCheckFailed" xml:space="preserve">
+    <value>Couldn't reach your VPS: {0} The server and its files stay safe there. Press "Check the VPS again" to try again.</value>
+  </data>
+  <data name="Status_VpsChecking" xml:space="preserve">
+    <value>Checking your VPS…</value>
+  </data>
+  <data name="Backups_Reason_Vps" xml:space="preserve">
+    <value>Back from VPS</value>
+  </data>
+  <data name="Backups_AfterVpsFailed" xml:space="preserve">
+    <value>The files are back from the VPS, but backing them up failed: {0}</value>
   </data>
 </root>

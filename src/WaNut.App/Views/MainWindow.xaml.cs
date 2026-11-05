@@ -24,7 +24,11 @@ public partial class MainWindow : Window
         _tray = tray;
         GuideLayer.FindTarget = FindGuideTarget;
         viewModel.TabRequested += (_, tab) => ServerTabs.SelectedIndex = (int)tab;
-        Loaded += (_, _) => viewModel.StartPendingGuide();
+        Loaded += (_, _) =>
+        {
+            viewModel.StartPendingGuide();
+            viewModel.ReconnectVpsServers();
+        };
         tray.OpenRequested += (_, _) => ShowFromTray();
         tray.ExitRequested += (_, _) =>
         {
@@ -37,8 +41,22 @@ public partial class MainWindow : Window
     protected override async void OnClosing(CancelEventArgs e)
     {
         base.OnClosing(e);
-        if (_readyToClose || !_viewModel.HasRunningServer)
+        if (_readyToClose || !_viewModel.NeedsShutdown)
         {
+            return;
+        }
+
+        // Only VPS servers: they keep running there, so there is nothing to ask; let go of them and close.
+        if (!_viewModel.HasRunningServer)
+        {
+            e.Cancel = true;
+            if (!_viewModel.IsShuttingDown)
+            {
+                await _viewModel.ShutdownAsync();
+                _readyToClose = true;
+                Close();
+            }
+
             return;
         }
 

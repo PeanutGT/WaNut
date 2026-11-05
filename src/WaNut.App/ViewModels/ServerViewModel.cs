@@ -214,6 +214,36 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>True when this server is set to run on one of the user's VPS hosts.</summary>
     public bool RunsOnVps => Metadata.VpsId is not null;
 
+    /// <summary>
+    /// The newest files are on the VPS (it runs there, or they haven't come back yet): anything changed here would be
+    /// overwritten when they come back, so the tabs that change files are locked (plan step 4).
+    /// </summary>
+    public bool FilesOnVps => Metadata.VpsCopyIsNewer;
+
+    /// <summary>Settings, mods and backups can change the files here.</summary>
+    public bool CanEditFiles => !FilesOnVps;
+
+    /// <summary>Players can change while a VPS server runs (through its console), not while its files are away.</summary>
+    public bool CanEditPlayers => !FilesOnVps || IsRunning;
+
+    public string? VpsBannerText => !FilesOnVps ? null : Text.Get(IsRunning ? "Server_VpsBannerRunning" : "Server_VpsBannerAway");
+
+    /// <summary>"Check the VPS again": WaNut isn't following the server and isn't busy with it.</summary>
+    public bool CanReconnect => FilesOnVps && !IsRunning && !IsPreparing;
+
+    [RelayCommand(CanExecute = nameof(CanReconnect))]
+    private Task ReconnectAsync() => _controller.ReconnectAsync(this);
+
+    private void OnVpsStateChanged()
+    {
+        OnPropertyChanged(nameof(FilesOnVps));
+        OnPropertyChanged(nameof(CanEditFiles));
+        OnPropertyChanged(nameof(CanEditPlayers));
+        OnPropertyChanged(nameof(VpsBannerText));
+        OnPropertyChanged(nameof(CanReconnect));
+        ReconnectCommand.NotifyCanExecuteChanged();
+    }
+
     public string StatusText => IsQueued ? Text.Get("Status_Queued") : VpsText is { } vps && BackupFraction is null ? vps : IsPreparing
         ? (BackupFraction, JavaDownloadFraction) switch
         {
@@ -230,8 +260,8 @@ public sealed partial class ServerViewModel : ObservableObject
 
     private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
 
-    /// <summary>Deleting needs the server stopped and nothing else working on its files.</summary>
-    internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
+    /// <summary>Deleting needs the server stopped, its files here, and nothing else working on them.</summary>
+    internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && !FilesOnVps;
 
     /// <summary>The folder is gone: let go of the shared services and tell the list.</summary>
     internal void OnDeleted()
@@ -334,6 +364,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     partial void OnIsPreparingChanged(bool value)
     {
+        OnVpsStateChanged();
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
         ServerSettings.OnFilesBusyChanged();
@@ -378,6 +409,17 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(Metadata));
         OnPropertyChanged(nameof(LoaderText));
         OnPropertyChanged(nameof(TypeAndVersionText));
+        OnVpsStateChanged();
+    }
+
+    /// <summary>The folder may have changed under every tab, e.g. after it came back from the VPS.</summary>
+    internal void ReloadFiles()
+    {
+        GameSettings.Reload();
+        PlayerLists.Reload();
+        ServerSettings.Reload();
+        Backups.Reload();
+        Mods.Reload();
     }
 
     /// <summary>The server now has another type or Minecraft version: refresh every tab that depends on it.</summary>
@@ -413,6 +455,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
     partial void OnStatusChanged(ServerStatus value)
     {
+        OnVpsStateChanged();
         GameSettings.OnServerStatusChanged();
         PlayerLists.OnServerStatusChanged();
         ServerSettings.OnServerStatusChanged();
@@ -482,7 +525,7 @@ public sealed partial class ServerViewModel : ObservableObject
         _wasOnline = false;
         _ = WatchRunningAsync(process);
         process.Exited.ContinueWith(
-            t => _ui.Post(_ => OnExited(process, t.Result), null),
+            t => _ui.Post(_ => _ = OnExitedAsync(process, t.Result), null),
             CancellationToken.None,
             TaskContinuationOptions.OnlyOnRanToCompletion,
             TaskScheduler.Default);
@@ -539,9 +582,20 @@ public sealed partial class ServerViewModel : ObservableObject
         }
     }
 
-    private void OnExited(IRunningServer process, int exitCode)
+    private async Task OnExitedAsync(IRunningServer process, int exitCode)
     {
+        if (process is RemoteServer { Detached: true })
+        {
+            return; // WaNut is closing; the server keeps running on the VPS.
+        }
+
         AddConsoleLine(string.Format(Text.Get("Server_Exited"), exitCode));
+
+        // A crash report written on the VPS only reaches this PC with the folder, so wait for it before looking.
+        if (process is RemoteServer && !process.WasKilled && !process.StopRequested)
+        {
+            await _controller.WaitForSyncBackAsync(this);
+        }
 
         // A stop the user asked for is never a crash. Some failures, such as a port in use, still end with exit code 0,
         // so those runs are checked too; exit code 0 with nothing found is a normal stop, e.g. "/stop" typed in the game.

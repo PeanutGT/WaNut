@@ -102,6 +102,67 @@ public sealed class RemoteServerSshTests
     }
 
     [Fact]
+    public async Task DetachThenReattach_OverSsh_KeepsTheServerAndItsPlayers()
+    {
+        var root = await PrepareAsync();
+        try
+        {
+            using (var first = new RemoteServer(new ServerLaunch($"{root}/java", [], root), ConnectAsync))
+            {
+                first.Start();
+                await FakeServer.WaitUntilAsync(() => first.Status == ServerStatus.Online);
+                await first.SendCommandAsync("join Alex");
+                await FakeServer.WaitUntilAsync(() => first.Players.Contains("Alex"));
+
+                first.Detach();
+                await first.Exited.WaitAsync(TimeSpan.FromSeconds(15));
+                Assert.True(first.Detached);
+                Assert.True(first.StopRequested);
+            }
+
+            var run = VpsRun.Parse(await RunAsync(RunnerScript.ProbeCommand(root)));
+            Assert.Equal(VpsRunState.Running, run.State);
+
+            using var again = new RemoteServer(new ServerLaunch("unused", [], root), ConnectAsync, run.RunnerPid);
+            again.Start();
+            await FakeServer.WaitUntilAsync(() => again.Status == ServerStatus.Online && again.Players.Contains("Alex"));
+            Assert.True(again.Reattached);
+
+            Assert.True(await again.StopAsync(TimeSpan.FromSeconds(15)));
+            Assert.Equal(0, await again.Exited);
+            Assert.Equal(new VpsRun(VpsRunState.Ended, 0, 0), VpsRun.Parse(await RunAsync(RunnerScript.ProbeCommand(root))));
+        }
+        finally
+        {
+            await CleanUpAsync(root);
+        }
+    }
+
+    [Fact]
+    public async Task Probe_OverSsh_NothingRanOrStalePid_IsNone()
+    {
+        var root = await PrepareAsync();
+        try
+        {
+            Assert.Equal(VpsRunState.None, VpsRun.Parse(await RunAsync(RunnerScript.ProbeCommand(root))).State);
+
+            // A pid left by a run the VPS forgot (a reboot) that now belongs to something else.
+            await RunAsync($"mkdir -p \"$HOME/{root}/.wanut-run\" && echo 1 > \"$HOME/{root}/.wanut-run/pid\"");
+            Assert.Equal(VpsRunState.None, VpsRun.Parse(await RunAsync(RunnerScript.ProbeCommand(root))).State);
+        }
+        finally
+        {
+            await CleanUpAsync(root);
+        }
+    }
+
+    private static async Task<string> RunAsync(string command)
+    {
+        using var ssh = await ConnectAsync(CancellationToken.None);
+        return await WaNut.Core.Remote.VpsConnector.RunAsync(ssh, command);
+    }
+
+    [Fact]
     public async Task InstallJava_OverSsh_ChecksTheHashAndUnpacks()
     {
         var root = await PrepareAsync();

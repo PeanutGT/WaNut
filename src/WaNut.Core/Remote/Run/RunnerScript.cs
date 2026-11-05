@@ -141,6 +141,21 @@ public static class RunnerScript
         return $"if [ -s {exit} ]; then cat {exit}; elif kill -0 {runnerPid} 2>/dev/null; then echo running; else echo gone; fi";
     }
 
+    /// <summary>
+    /// What is on the VPS for a server WaNut did not start in this session: "running &lt;pid&gt;" while the runner still
+    /// runs, "exit &lt;code&gt;" once it ended, "none" when nothing ran there. The pid must still be a wanut-run.sh, so a
+    /// pid reused after a reboot is not taken for the server.
+    /// </summary>
+    public static string ProbeCommand(string serverRoot)
+    {
+        var run = RemoteShell.Home($"{serverRoot}/{RunFolder}");
+        return string.Join('\n',
+            $"run={run}",
+            "if [ -s \"$run/exit\" ]; then printf 'exit %s\\n' \"$(cat \"$run/exit\")\"",
+            "elif p=$(cat \"$run/pid\" 2>/dev/null) && [ -n \"$p\" ] && kill -0 \"$p\" 2>/dev/null && grep -q wanut-run /proc/\"$p\"/cmdline 2>/dev/null; then printf 'running %s\\n' \"$p\"",
+            "else echo none; fi");
+    }
+
     /// <summary>Copies stdin (the console lines) into the FIFO. Opened read-write, so it never waits when java is gone.</summary>
     public static string SendCommand(string serverRoot) =>
         $"exec cat 1<>{RemoteShell.Home(RunPath(serverRoot, "in"))}";

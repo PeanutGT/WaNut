@@ -343,6 +343,21 @@
           </Grid>
         </Border>
 
+        <!-- The newest files are on the VPS: the tabs that change files are locked until they come back (VPS plan step 4). -->
+        <Border DockPanel.Dock="Top" Margin="0,0,0,16" Style="{StaticResource NoticeBanner}" Padding="12,10"
+                Visibility="{Binding FilesOnVps, Converter={StaticResource BoolToVisibility}}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding VpsBannerText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="{res:Text Server_VpsReconnect}" Command="{Binding ReconnectCommand}"
+                    Margin="12,0,0,0" VerticalAlignment="Center"
+                    Visibility="{Binding CanReconnect, Converter={StaticResource BoolToVisibility}}" />
+          </Grid>
+        </Border>
+
         <TabControl x:Name="ServerTabs">
           <TabItem Header="{res:Text Server_TabConsole}">
             <DockPanel>
@@ -429,23 +444,23 @@
           </TabItem>
 
           <TabItem Header="{Binding PlayersHeader}">
-            <views:PlayersView />
+            <views:PlayersView IsEnabled="{Binding CanEditPlayers}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabGame}">
-            <views:GameSettingsView DataContext="{Binding GameSettings}" />
+            <views:GameSettingsView DataContext="{Binding GameSettings}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabServer}">
-            <views:ServerSettingsView DataContext="{Binding ServerSettings}" />
+            <views:ServerSettingsView DataContext="{Binding ServerSettings}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabBackups}">
-            <views:BackupsView DataContext="{Binding Backups}" />
+            <views:BackupsView DataContext="{Binding Backups}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{Binding Mods.Header}">
-            <views:ModsView DataContext="{Binding Mods}" />
+            <views:ModsView DataContext="{Binding Mods}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabConnect}">

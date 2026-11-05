@@ -43,6 +43,12 @@ public sealed class ServerController(
 
     public bool HasRunningServer => _started.Any(s => s.Process is { IsRunning: true });
 
+    /// <summary>A server's folder is on its way back from a VPS.</summary>
+    public bool IsSyncingBack => _syncingBack.Values.Any(t => !t.IsCompleted);
+
+    /// <summary>The running servers on this PC: only these stop when WaNut closes; VPS servers keep running.</summary>
+    public IReadOnlyList<ServerViewModel> LocalRunningServers => [.. RunningServers.Where(s => s.Process is not RemoteServer)];
+
     /// <summary>The server being backed up or getting its Java before it starts, or null.</summary>
     public ServerViewModel? Preparing { get; private set; }
 
@@ -141,15 +147,24 @@ public sealed class ServerController(
     }
 
     /// <summary>
-    /// The VPS way (plan step 3): bring back a newer VPS copy first, back up here, get the VPS ready and upload, then
-    /// start there. No firewall, port or memory checks on this PC: none of them apply to the VPS.
+    /// The VPS way (plan step 3): if the newest files are still on the VPS, follow the server when it still runs there
+    /// or bring its files back first; then back up here, get the VPS ready and upload, and start there. No firewall,
+    /// port or memory checks on this PC: none of them apply to the VPS.
     /// </summary>
     private async Task StartOnVpsAsync(ServerViewModel server, VpsProfile vps)
     {
         if (server.Metadata.VpsCopyIsNewer)
         {
+            server.VpsText = Text.Get("Status_VpsConnecting");
+            var run = await vpsPlanner.CheckRunAsync(server.Metadata, vps);
+            if (run.State == VpsRunState.Running)
+            {
+                Follow(server, vps, run.RunnerPid);
+                return;
+            }
+
             server.VpsText = Text.Get("Status_VpsDownloading");
-            await vpsPlanner.DownloadAsync(server.Metadata, vps, new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100)));
+            await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
             server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
             server.VpsText = null;
         }
@@ -166,42 +181,136 @@ public sealed class ServerController(
 
         // From here the VPS copy is the one that counts, until it has come back.
         server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = true });
+        Track(server, vps, host.Start(server.Id, launch, server.Attach, new RemoteServerRuntime(vpsConnector, vps)));
+    }
+
+    /// <summary>Follows a server that is already running on the VPS, such as one left running when WaNut closed.</summary>
+    private void Follow(ServerViewModel server, VpsProfile vps, int runnerPid) =>
+        Track(server, vps, host.Start(server.Id, VpsLaunchPlanner.AttachLaunch(server.Metadata), server.Attach, new RemoteServerRuntime(vpsConnector, vps, runnerPid)));
+
+    private void Track(ServerViewModel server, VpsProfile vps, IRunningServer process)
+    {
         server.RunningPort = 0; // The VPS port takes nothing from this PC.
-        var process = host.Start(server.Id, launch, server.Attach, new RemoteServerRuntime(vpsConnector, vps));
         _started.Remove(server);
         _started.Add(server);
         _syncingBack[server] = SyncBackAfterExitAsync(server, process, vps);
     }
 
-    /// <summary>Once the run on the VPS ended, brings the server's folder back here. A failure is tried again on the next start.</summary>
+    /// <summary>
+    /// For a server whose newest files are on a VPS while WaNut isn't following it (WaNut was closed, or the connection
+    /// was lost): follows it again when it still runs there, otherwise brings its files back. Runs when WaNut starts,
+    /// and from the "Check the VPS again" button.
+    /// </summary>
+    public async Task ReconnectAsync(ServerViewModel server)
+    {
+        if (!server.Metadata.VpsCopyIsNewer || server.IsRunning || server.IsPreparing || _syncingBack.ContainsKey(server))
+        {
+            return;
+        }
+
+        if (app.VpsList.FirstOrDefault(v => v.Id == server.Metadata.VpsId) is not { } vps)
+        {
+            server.ShowError(Text.Get("Server_VpsMissing"));
+            return;
+        }
+
+        server.ErrorText = null;
+        server.BeginSyncBack(Text.Get("Status_VpsChecking"));
+        VpsRun run;
+        try
+        {
+            run = await vpsPlanner.CheckRunAsync(server.Metadata, vps);
+        }
+        catch (Exception e) when (IsVpsProblem(e))
+        {
+            server.ShowError(string.Format(Text.Get("Server_VpsCheckFailed"), VpsMessage(e)));
+            return;
+        }
+        finally
+        {
+            server.EndSyncBack();
+        }
+
+        if (run.State == VpsRunState.Running)
+        {
+            Follow(server, vps, run.RunnerPid);
+            return;
+        }
+
+        var back = SyncBackAsync(server, vps);
+        _syncingBack[server] = back;
+        await back;
+    }
+
+    /// <summary>Once the run on the VPS ended, brings the server's folder back here. A failure keeps it on the VPS until the next try.</summary>
     private async Task SyncBackAfterExitAsync(ServerViewModel server, IRunningServer process, VpsProfile vps)
     {
         await process.Exited;
-        if (process is RemoteServer { ConnectionLost: true })
+        if (process is RemoteServer { ConnectionLost: true } or RemoteServer { Detached: true })
         {
             _syncingBack.Remove(server);
             return;
         }
 
+        await SyncBackAsync(server, vps);
+    }
+
+    /// <summary>Downloads the folder, then backs it up here, the same as before a start (plan step 4).</summary>
+    private async Task SyncBackAsync(ServerViewModel server, VpsProfile vps)
+    {
         server.BeginSyncBack(Text.Get("Status_VpsDownloading"));
         try
         {
-            var progress = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100));
-            await vpsPlanner.DownloadAsync(server.Metadata, vps, progress);
+            await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
             server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
-            server.Backups.Reload();
-            server.ServerSettings.Reload();
+            server.VpsText = null;
+            await BackUpAfterVpsAsync(server);
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException)
+        catch (Exception e) when (IsVpsProblem(e))
         {
-            server.ShowError(string.Format(Text.Get("Server_VpsSyncBackFailed"), e.InnerException?.Message ?? e.Message));
+            server.ShowError(string.Format(Text.Get("Server_VpsSyncBackFailed"), VpsMessage(e)));
         }
         finally
         {
             server.EndSyncBack();
+            server.ReloadFiles();
             _syncingBack.Remove(server);
         }
     }
+
+    /// <summary>The world as it came back from the VPS. A failure only shows on the Backups tab: the files are here now.</summary>
+    private async Task BackUpAfterVpsAsync(ServerViewModel server)
+    {
+        try
+        {
+            if (await backups.CreateAsync(server.InstanceDir, BackupReason.Vps, new Progress<double>(server.ReportBackup)) is not null)
+            {
+                CleanUp(server);
+            }
+        }
+        catch (Exception e) when (e is BackupException or IOException or UnauthorizedAccessException)
+        {
+            server.Backups.ErrorText = string.Format(Text.Get("Backups_AfterVpsFailed"), e is BackupException b ? Text.Get($"Backups_Problem_{b.Problem}") : e.Message);
+        }
+        finally
+        {
+            server.EndBackup();
+            server.Backups.Reload();
+        }
+    }
+
+    private static Progress<DownloadProgress> DownloadProgress(ServerViewModel server) =>
+        new(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100));
+
+    private static bool IsVpsProblem(Exception e) =>
+        e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException;
+
+    private static string VpsMessage(Exception e) => e switch
+    {
+        HostKeyException h => Text.Get(h.Changed ? "Server_VpsHostKeyChanged" : "Server_VpsHostKeyNew"),
+        VpsLoginException => Text.Get("Server_VpsLoginFailed"),
+        _ => e.InnerException?.Message ?? e.Message,
+    };
 
     /// <summary>Completes once the server's folder is back from the VPS, or right away when nothing is coming back.</summary>
     public Task WaitForSyncBackAsync(ServerViewModel server) =>
@@ -352,7 +461,11 @@ public sealed class ServerController(
         }
     }
 
-    /// <summary>Stops every running server at once, then removes the router rules and ends the playit agent before WaNut closes.</summary>
+    /// <summary>
+    /// Before WaNut closes: stops every server on this PC at once, lets go of the VPS servers (they keep running there
+    /// and WaNut follows them again on its next start, plan decision 5A), waits for folders coming back, then removes
+    /// the router rules and ends the playit agent.
+    /// </summary>
     public async Task ShutdownAsync()
     {
         foreach (var waiting in _queue.Values.ToList())
@@ -360,9 +473,16 @@ public sealed class ServerController(
             waiting.Cancel();
         }
 
-        await Task.WhenAll(RunningServers.Select(StopAsync));
+        // One already stopping on the VPS finishes and comes back; any other is left running there.
+        foreach (var server in RunningServers)
+        {
+            if (server.Process is RemoteServer remote && remote.Status != ServerStatus.Stopping)
+            {
+                remote.Detach();
+            }
+        }
 
-        // VPS servers bring their folder back before WaNut closes (keeping them running comes with the next step).
+        await Task.WhenAll(LocalRunningServers.Select(StopAsync));
         await Task.WhenAll(_syncingBack.Values.ToList());
         await portForwards.CloseAnyAsync();
         tunnels.StopAny();

@@ -43,7 +43,15 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
         var temp = full + ".wanut-part";
         try
         {
-            await sftp.UploadFileAsync(content, temp, cancellationToken).ConfigureAwait(false);
+            long sent = 0;
+            await sftp.UploadFileAsync(new CountingStream(content, n => sent = n), temp, cancellationToken).ConfigureAwait(false);
+
+            // A full disk or a dropped channel can leave a short file that looks fine; never let it replace the real one.
+            if (sftp.GetAttributes(temp).Size != sent)
+            {
+                throw new IOException($"The VPS kept fewer bytes of {path} than were sent. Is its disk full?");
+            }
+
             sftp.SetLastWriteTimeUtc(temp, modifiedUtc);
             await ReplaceAsync(temp, full, cancellationToken).ConfigureAwait(false);
         }

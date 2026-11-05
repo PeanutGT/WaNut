@@ -2508,7 +2508,7 @@
     <value>無法在 VPS 上啟動伺服器：{0}</value>
   </data>
   <data name="Server_VpsSyncBackFailed" xml:space="preserve">
-    <value>無法把世界從 VPS 拿回來：{0}。世界仍安全地留在 VPS 上，下次啟動時 WaNut 會再試一次。</value>
+    <value>無法把世界從 VPS 拿回來：{0} 世界仍安全地留在 VPS 上。按「再檢查一次 VPS」重試。</value>
   </data>
   <data name="Status_VpsConnecting" xml:space="preserve">
     <value>正在連線到你的 VPS…</value>
@@ -2551,5 +2551,26 @@
   </data>
   <data name="Connect_VpsNote" xml:space="preserve">
     <value>這台伺服器在你的 VPS 上執行，所以不會用到這台電腦的防火牆、路由器和 playit.gg。VPS 開著就會持續計費。</value>
+  </data>
+  <data name="Server_VpsBannerRunning" xml:space="preserve">
+    <value>這台伺服器在你的 VPS 上執行，檔案都在那裡。等它停止、檔案拿回這台電腦後，設定、模組和備份才能改。</value>
+  </data>
+  <data name="Server_VpsBannerAway" xml:space="preserve">
+    <value>這台伺服器最新的檔案還在你的 VPS 上。拿回這台電腦後，設定、模組和備份才能改。</value>
+  </data>
+  <data name="Server_VpsReconnect" xml:space="preserve">
+    <value>再檢查一次 VPS</value>
+  </data>
+  <data name="Server_VpsCheckFailed" xml:space="preserve">
+    <value>連不上你的 VPS：{0} 伺服器和檔案都安全地留在那裡。按「再檢查一次 VPS」重試。</value>
+  </data>
+  <data name="Status_VpsChecking" xml:space="preserve">
+    <value>正在檢查你的 VPS…</value>
+  </data>
+  <data name="Backups_Reason_Vps" xml:space="preserve">
+    <value>從 VPS 拿回</value>
+  </data>
+  <data name="Backups_AfterVpsFailed" xml:space="preserve">
+    <value>檔案已經從 VPS 拿回來，但備份失敗：{0}</value>
   </data>
 </root>

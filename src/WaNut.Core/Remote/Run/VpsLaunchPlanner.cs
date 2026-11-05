@@ -43,6 +43,17 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
         return new ServerLaunch(RemoteJava.JavaPath(server.JavaMajor), arguments, SftpSyncTree.ServerRoot(server.Id));
     }
 
+    /// <summary>What is on the VPS for this server right now: still running, ended while WaNut was away, or nothing.</summary>
+    public async Task<VpsRun> CheckRunAsync(InstanceMetadata server, VpsProfile vps, CancellationToken cancellationToken = default)
+    {
+        using var ssh = await connector.ConnectAsync(vps, null, cancellationToken).ConfigureAwait(false);
+        return VpsRun.Parse(await VpsConnector.RunAsync(ssh, RunnerScript.ProbeCommand(SftpSyncTree.ServerRoot(server.Id)), cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>The launch to follow a server already running on the VPS: only its folder matters, nothing is started.</summary>
+    public static ServerLaunch AttachLaunch(InstanceMetadata server) =>
+        new(RemoteJava.JavaPath(server.JavaMajor), [], SftpSyncTree.ServerRoot(server.Id));
+
     /// <summary>Makes this PC's folder match the VPS copy, after the server stopped there.</summary>
     public Task DownloadAsync(InstanceMetadata server, VpsProfile vps, IProgress<DownloadProgress>? progress = null, CancellationToken cancellationToken = default) =>
         SyncAsync(server.Id, vps, SyncDirection.Download, progress, cancellationToken);

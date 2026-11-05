@@ -113,4 +113,16 @@ public sealed class RemoteRunTests
     [Fact]
     public void UnitName_OddFolder_IsSafe() =>
         Assert.Equal("wanut-ubuntu-my-world.service", RunnerScript.UnitName("ubuntu", "wanut/servers/my world"));
+
+    [Theory]
+    [InlineData("running 4242\n", VpsRunState.Running, 4242, -1)]
+    [InlineData("exit 0\n", VpsRunState.Ended, 0, 0)]
+    [InlineData("exit 137", VpsRunState.Ended, 0, 137)]
+    [InlineData("exit", VpsRunState.Ended, 0, -1)]
+    [InlineData("none\n", VpsRunState.None, 0, -1)]
+    [InlineData("running 1", VpsRunState.None, 0, -1)]
+    [InlineData("running x", VpsRunState.None, 0, -1)]
+    [InlineData("", VpsRunState.None, 0, -1)]
+    public void VpsRunParse_ProbeOutput_ReadsStateAndNumbers(string output, VpsRunState state, int pid, int code) =>
+        Assert.Equal(new VpsRun(state, pid, code), VpsRun.Parse(output));
 }
