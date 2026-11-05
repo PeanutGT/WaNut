@@ -58,9 +58,9 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     public bool ShowStopToChange => _server.IsRunning;
 
-    /// <summary>"Back up now" works while stopped, and while online by pausing saving.</summary>
+    /// <summary>"Back up now" works while stopped, and while online by pausing saving (not on a VPS: the copy here is older).</summary>
     public bool CanBackUpNow => !IsWorking && !_server.IsPreparing
-        && (_server.Status == ServerStatus.Stopped || (_server.Status == ServerStatus.Online && _server.Process is not null));
+        && (_server.Status == ServerStatus.Stopped || (_server.Status == ServerStatus.Online && _server.Process is not null and not Core.Remote.Run.RemoteServer));
 
     public string WorkText => Working switch
     {

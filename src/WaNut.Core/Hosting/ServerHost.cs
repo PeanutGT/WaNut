@@ -35,7 +35,8 @@ public sealed class ServerHost(IServerRuntime runtime)
     }
 
     /// <param name="beforeStart">Runs before the process starts, so subscribers do not miss its first lines.</param>
-    public IRunningServer Start(string instanceId, ServerLaunch launch, Action<IRunningServer>? beforeStart = null)
+    /// <param name="where">Where this run happens, such as the user's VPS; null for the host's own runtime (this PC).</param>
+    public IRunningServer Start(string instanceId, ServerLaunch launch, Action<IRunningServer>? beforeStart = null, IServerRuntime? where = null)
     {
         lock (_gate)
         {
@@ -45,7 +46,7 @@ public sealed class ServerHost(IServerRuntime runtime)
                 throw new ServerStartException(ServerStartProblem.AlreadyRunning);
             }
 
-            var process = runtime.Create(launch);
+            var process = (where ?? runtime).Create(launch);
             beforeStart?.Invoke(process);
             process.Start();
 

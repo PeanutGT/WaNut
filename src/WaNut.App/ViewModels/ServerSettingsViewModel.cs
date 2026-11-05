@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -29,8 +31,25 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         App = app;
         var totalMb = MemoryLimits.TotalPhysicalMb();
         MaxMemoryMb = Math.Max(MemoryLimits.MaxServerMb(totalMb), server.Metadata.MemoryMb);
+        CollectionChangedEventManager.AddHandler(app.VpsList, (_, _) => LoadRunLocations());
         Reload();
     }
+
+    /// <summary>"This PC" and every VPS from App settings (Advanced mode only, plan decision 6A).</summary>
+    public ObservableCollection<RunLocationOption> RunLocations { get; } = [];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RunsOnVps))]
+    private RunLocationOption? _runLocation;
+
+    public bool RunsOnVps => RunLocation?.VpsId is not null;
+
+    /// <summary>
+    /// Only while stopped, and not while the newest world is still on the VPS: switching then would leave it there.
+    /// </summary>
+    public bool CanChangeRunLocation => _server.Status == ServerStatus.Stopped && !_server.IsPreparing && !_server.Metadata.VpsCopyIsNewer;
+
+    public bool ShowVpsCopyNote => _server.Metadata.VpsCopyIsNewer && !_server.IsRunning;
 
     /// <summary>For the Advanced mode switch.</summary>
     public AppSettingsViewModel App { get; }
@@ -107,6 +126,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             AutoRestart = _server.Metadata.AutoRestart;
             AutoStop = _server.Metadata.AutoStopMinutes > 0;
             AutoStopMinutes = AutoStop ? _server.Metadata.AutoStopMinutes : DefaultAutoStopMinutes;
+            LoadRunLocations();
             _loaded = ServerSettingsStore.Load(_server.InstanceDir);
             Port = _loaded.Port;
             OnlineMode = _loaded.OnlineMode;
@@ -208,6 +228,8 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         DuplicateServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(ShowNextStartHint));
+        OnPropertyChanged(nameof(CanChangeRunLocation));
+        OnPropertyChanged(nameof(ShowVpsCopyNote));
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();
@@ -217,6 +239,8 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     /// <summary>A backup, start or mod install began or ended: deleting and duplicating wait for it.</summary>
     internal void OnFilesBusyChanged()
     {
+        OnPropertyChanged(nameof(CanChangeRunLocation));
+        OnPropertyChanged(nameof(ShowVpsCopyNote));
         DeleteServerCommand.NotifyCanExecuteChanged();
         DuplicateServerCommand.NotifyCanExecuteChanged();
     }
@@ -245,9 +269,40 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             case nameof(AutoStop) or nameof(AutoStopMinutes):
                 SaveAutoStop();
                 break;
+            case nameof(RunLocation) when RunLocation is not null && RunLocation.VpsId != _server.Metadata.VpsId:
+                SaveMetadata(_server.Metadata with { VpsId = RunLocation.VpsId });
+                _server.Connect.OnRunLocationChanged();
+                break;
             case nameof(Port) or nameof(OnlineMode):
                 SaveProperties();
                 break;
+        }
+    }
+
+    private void LoadRunLocations()
+    {
+        var wasLoading = _loading;
+        _loading = true;
+        try
+        {
+            RunLocations.Clear();
+            RunLocations.Add(new RunLocationOption(null, Text.Get("Server_RunHere")));
+            foreach (var vps in App.VpsList)
+            {
+                RunLocations.Add(new RunLocationOption(vps.Id, vps.Name));
+            }
+
+            // A VPS removed from App settings still shows, so the choice is never silently lost.
+            if (_server.Metadata.VpsId is { } id && RunLocations.All(o => o.VpsId != id))
+            {
+                RunLocations.Add(new RunLocationOption(id, Text.Get("Server_RunVpsMissing")));
+            }
+
+            RunLocation = RunLocations.First(o => o.VpsId == _server.Metadata.VpsId);
+        }
+        finally
+        {
+            _loading = wasLoading;
         }
     }
 

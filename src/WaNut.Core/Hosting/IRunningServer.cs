@@ -28,6 +28,9 @@ public interface IRunningServer : IServerConsole, IDisposable
 
     IReadOnlyList<string> Players { get; }
 
+    /// <summary>The cores of the machine the server runs on, so its CPU time can be shown as a share of all of them.</summary>
+    int ProcessorCount { get; }
+
     void Start();
 
     /// <summary>

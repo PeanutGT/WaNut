@@ -19,6 +19,7 @@ using WaNut.Core.Notifications;
 using WaNut.Core.Players;
 using WaNut.Core.Profiling;
 using WaNut.Core.Remote;
+using WaNut.Core.Remote.Run;
 using WaNut.Core.Settings;
 using WaNut.Core.Tunnels;
 using WaNut.Core.Updates;
@@ -93,6 +94,7 @@ public partial class App : Application
         services.AddSingleton<InstanceStore>();
         services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
+        services.AddSingleton<VpsLaunchPlanner>();
         services.AddSingleton<IServerRuntime, LocalServerRuntime>();
         services.AddSingleton<ISecretProtector, DpapiProtector>();
         services.AddSingleton<SecretStore>();

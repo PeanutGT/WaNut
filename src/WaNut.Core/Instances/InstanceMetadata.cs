@@ -57,4 +57,14 @@ public sealed record InstanceMetadata
 
     /// <summary>Console commands waiting for the next start, such as "whitelist add Steve" added while stopped.</summary>
     public IReadOnlyList<string> PendingCommands { get; init; } = [];
+
+    /// <summary>Where the server runs: the id of one of the user's VPS profiles, or null for this PC.</summary>
+    public string? VpsId { get; init; }
+
+    /// <summary>
+    /// The VPS has a newer copy of this server than this PC: set once an upload finished and the server started there,
+    /// cleared once its folder came back. While set, the next start brings the VPS copy back before anything else, so
+    /// an older copy here never overwrites the world on the VPS.
+    /// </summary>
+    public bool VpsCopyIsNewer { get; init; }
 }

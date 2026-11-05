@@ -36,6 +36,15 @@ public sealed record VpsProfile
     /// </summary>
     public string? HostKey { get; init; }
 
+    /// <summary>What friends type in Minecraft to join a server on this VPS: "host:port", with brackets around IPv6.</summary>
+    public string Endpoint(int port)
+    {
+        var host = Host.Trim().Trim('[', ']');
+        var isIpv6 = System.Net.IPAddress.TryParse(host, out var ip) && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6;
+        var portText = port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return isIpv6 ? $"[{host}]:{portText}" : $"{host}:{portText}";
+    }
+
     /// <summary>The first thing that keeps this profile from being used, or null when every field is filled in.</summary>
     public VpsProfileProblem? Validate()
     {

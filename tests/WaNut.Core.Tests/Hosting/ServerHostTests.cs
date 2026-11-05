@@ -100,12 +100,18 @@ public sealed class ServerHostTests : IDisposable
     }
 
     [Fact]
-    public void Start_RemoteRuntime_ThrowsNotSupported()
+    public async Task Start_WithAnotherRuntime_UsesThatOneForThisRun()
     {
-        var host = new ServerHost(new RemoteServerRuntime());
+        var own = new RecordingRuntime();
+        var other = new RecordingRuntime();
+        var host = new ServerHost(own);
 
-        Assert.Throws<NotSupportedException>(() => host.Start("first", FakeServer.Launch(_temp.Path)));
-        Assert.Null(host.Get("first"));
+        var server = host.Start("first", FakeServer.Launch(_temp.Path), where: other);
+        await FakeServer.WaitUntilAsync(() => server.Status == ServerStatus.Online);
+
+        Assert.Empty(own.Created);
+        Assert.Same(other.Created[0], server);
+        await server.StopAsync(TimeSpan.FromSeconds(15));
     }
 
     private sealed class RecordingRuntime : IServerRuntime

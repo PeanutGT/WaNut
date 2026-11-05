@@ -7,55 +7,21 @@ namespace WaNut.Core.Hosting;
 /// One running Minecraft server: a hidden java.exe whose console is streamed to WaNut.
 /// Events are raised on background threads.
 /// </summary>
-public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
+public sealed class ServerProcess(ServerLaunch launch) : RunningServerBase
 {
     private static readonly Encoding Utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
-    private readonly Lock _gate = new();
     private readonly SemaphoreSlim _inputLock = new(1, 1);
-    private readonly HashSet<string> _players = new(StringComparer.OrdinalIgnoreCase);
-    private readonly TaskCompletionSource<int> _exited = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private Process? _process;
 
-    public event Action<string>? OutputReceived;
-
-    public event Action<ServerStatus>? StatusChanged;
-
-    public event Action? PlayersChanged;
-
     public ServerLaunch Launch { get; } = launch;
-
-    public ServerStatus Status { get; private set; } = ServerStatus.Stopped;
-
-    /// <summary>Completes with the exit code once the process has ended and all its output has been read.</summary>
-    public Task<int> Exited => _exited.Task;
-
-    public bool IsRunning => Status != ServerStatus.Stopped;
-
-    /// <summary>True from the moment the process has ended, before its players are cleared and its status changes.</summary>
-    public bool HasExited { get; private set; }
 
     /// <summary>Whether Windows will end the process if WaNut itself crashes.</summary>
     public bool IsTrackedByJob { get; private set; }
 
-    /// <summary>True once <see cref="Kill"/> was called, so a non-zero exit code is not mistaken for a crash.</summary>
-    public bool WasKilled { get; private set; }
+    protected override bool HasStarted => _process is not null;
 
-    /// <summary>"stop" was sent, by WaNut or typed in the console: an exit after it was asked for, not a crash.</summary>
-    public bool StopRequested { get; private set; }
-
-    public IReadOnlyList<string> Players
-    {
-        get
-        {
-            lock (_gate)
-            {
-                return _players.Order(StringComparer.OrdinalIgnoreCase).ToList();
-            }
-        }
-    }
-
-    public void Start()
+    public override void Start()
     {
         if (_process is not null)
         {
@@ -103,7 +69,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
     }
 
     /// <summary>Sends one console command, e.g. "say hi" or "op Steve".</summary>
-    public async Task SendCommandAsync(string command, CancellationToken cancellationToken = default)
+    public override async Task SendCommandAsync(string command, CancellationToken cancellationToken = default)
     {
         var process = _process;
         if (process is null || !IsRunning)
@@ -111,16 +77,9 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
             throw new InvalidOperationException("The server is not running.");
         }
 
-        // One line per command: a pasted newline must not turn into a second command.
-        var line = command.ReplaceLineEndings(" ").Trim();
-        if (line.Length == 0)
+        if (PrepareCommand(command) is not { } line)
         {
             return;
-        }
-
-        if (line.Equals("stop", StringComparison.OrdinalIgnoreCase))
-        {
-            StopRequested = true;
         }
 
         await _inputLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -135,43 +94,8 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
         }
     }
 
-    /// <summary>
-    /// Asks the server to save the world and exit, the same as typing "stop". Returns false if it is still running
-    /// after <paramref name="timeout"/>; the caller then asks the user before calling <see cref="Kill"/>.
-    /// </summary>
-    public async Task<bool> StopAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
-    {
-        if (_process is null || Exited.IsCompleted)
-        {
-            return true;
-        }
-
-        if (Status != ServerStatus.Stopping)
-        {
-            SetStatus(ServerStatus.Stopping);
-            try
-            {
-                await SendCommandAsync("stop", cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception e) when (e is IOException or InvalidOperationException)
-            {
-                // The process ended or closed its input on its own; the exit wait below settles it.
-            }
-        }
-
-        try
-        {
-            await Exited.WaitAsync(timeout, cancellationToken).ConfigureAwait(false);
-            return true;
-        }
-        catch (TimeoutException)
-        {
-            return false;
-        }
-    }
-
     /// <summary>The process's current memory and CPU time, or null when it is not running or Windows won't say.</summary>
-    public ProcessUsage? GetUsage()
+    public override ProcessUsage? GetUsage()
     {
         var process = _process;
         if (process is null || Exited.IsCompleted)
@@ -192,7 +116,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
     }
 
     /// <summary>Ends the process without saving. Only for when the user agreed after a stop timed out.</summary>
-    public void Kill()
+    public override void Kill()
     {
         WasKilled = true;
         try
@@ -205,7 +129,7 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         _process?.Dispose();
         _inputLock.Dispose();
@@ -215,80 +139,6 @@ public sealed class ServerProcess(ServerLaunch launch) : IRunningServer
     {
         // Also waits until the redirected output has been read to the end.
         await process.WaitForExitAsync().ConfigureAwait(false);
-        var exitCode = process.ExitCode;
-        HasExited = true;
-
-        bool hadPlayers;
-        lock (_gate)
-        {
-            hadPlayers = _players.Count > 0;
-            _players.Clear();
-        }
-
-        if (hadPlayers)
-        {
-            PlayersChanged?.Invoke();
-        }
-
-        SetStatus(ServerStatus.Stopped);
-        _exited.TrySetResult(exitCode);
-    }
-
-    private void OnLine(string? data)
-    {
-        if (data is null)
-        {
-            return;
-        }
-
-        var line = ServerLogParser.Clean(data);
-        OutputReceived?.Invoke(line);
-
-        var logEvent = ServerLogParser.Parse(line);
-        switch (logEvent?.Kind)
-        {
-            case LogEventKind.Online:
-                SetStatus(ServerStatus.Online, onlyFrom: ServerStatus.Starting);
-                break;
-            case LogEventKind.Stopping:
-                SetStatus(ServerStatus.Stopping, onlyFrom: null);
-                break;
-            case LogEventKind.PlayerJoined:
-                UpdatePlayers(set => set.Add(logEvent.PlayerName!));
-                break;
-            case LogEventKind.PlayerLeft:
-                UpdatePlayers(set => set.Remove(logEvent.PlayerName!));
-                break;
-        }
-    }
-
-    private void UpdatePlayers(Func<HashSet<string>, bool> change)
-    {
-        bool changed;
-        lock (_gate)
-        {
-            changed = change(_players);
-        }
-
-        if (changed)
-        {
-            PlayersChanged?.Invoke();
-        }
-    }
-
-    private void SetStatus(ServerStatus status, ServerStatus? onlyFrom = null)
-    {
-        lock (_gate)
-        {
-            // Once the process has exited, nothing brings the status back.
-            if (Status == status || _exited.Task.IsCompleted || (onlyFrom is not null && Status != onlyFrom))
-            {
-                return;
-            }
-
-            Status = status;
-        }
-
-        StatusChanged?.Invoke(status);
+        OnExited(process.ExitCode);
     }
 }

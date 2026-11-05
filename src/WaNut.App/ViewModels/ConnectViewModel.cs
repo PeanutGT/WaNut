@@ -129,6 +129,19 @@ public sealed partial class ConnectViewModel : ObservableObject
 
     public bool HasAddresses => Addresses.Count > 0;
 
+    /// <summary>The server runs on one of the user's VPS hosts: friends use its address, and this PC's network doesn't matter.</summary>
+    public bool RunsOnVps => _server.Metadata.VpsId is not null;
+
+    public bool ShowsThisPcNetwork => !RunsOnVps;
+
+    /// <summary>The Server tab changed where this server runs.</summary>
+    internal void OnRunLocationChanged()
+    {
+        OnPropertyChanged(nameof(RunsOnVps));
+        OnPropertyChanged(nameof(ShowsThisPcNetwork));
+        LoadAddresses();
+    }
+
     public bool ShowFirewallOk => FirewallState == Core.Network.FirewallState.Allowed;
 
     public bool ShowFirewallProblem => FirewallState is Core.Network.FirewallState.NotAllowed or Core.Network.FirewallState.Blocked;
@@ -149,7 +162,10 @@ public sealed partial class ConnectViewModel : ObservableObject
         CopiedText = null;
         ErrorText = null;
         LoadAddresses();
-        _ = CheckFirewallAsync(keepMessage: true);
+        if (!RunsOnVps)
+        {
+            _ = CheckFirewallAsync(keepMessage: true);
+        }
     }
 
     [RelayCommand]
@@ -265,6 +281,12 @@ public sealed partial class ConnectViewModel : ObservableObject
     /// <summary>The port is forwarded while the server runs, and the rule is removed once it stops.</summary>
     internal void OnServerStatusChanged(ServerStatus status)
     {
+        // The home router and playit.gg are for a server on this PC; a VPS is reached directly.
+        if (RunsOnVps && status != ServerStatus.Stopped)
+        {
+            return;
+        }
+
         if (status == ServerStatus.Starting && OpenRouterPort)
         {
             _ = OpenRouterPortNowAsync();
@@ -535,6 +557,17 @@ public sealed partial class ConnectViewModel : ObservableObject
     {
         var port = LoadPort();
         Addresses.Clear();
+        if (RunsOnVps)
+        {
+            if (App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId) is { } vps)
+            {
+                Addresses.Add(new ConnectAddressViewModel(AdapterKind.Vps, vps.Endpoint(port)));
+            }
+
+            OnPropertyChanged(nameof(HasAddresses));
+            return;
+        }
+
         try
         {
             foreach (var address in LocalAddresses.Get())

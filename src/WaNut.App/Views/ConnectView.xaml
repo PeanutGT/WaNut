@@ -136,177 +136,184 @@
       <TextBox Text="{Binding App.InviteNote}" MaxLength="200" Tag="{res:Text Invite_NotePlaceholder}"
                AutomationProperties.Name="{res:Text Invite_NoteLabel}" />
 
-      <!-- Windows Firewall -->
-      <TextBlock Text="{res:Text Connect_Firewall}" Style="{StaticResource Label}" Margin="0,22,0,6" />
-      <StackPanel Orientation="Horizontal">
-        <StackPanel.Style>
-          <Style TargetType="StackPanel">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding ShowFirewallProblem}" Value="True">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-              <DataTrigger Binding="{Binding FirewallText}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </StackPanel.Style>
-        <Image Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
-          <Image.Style>
-            <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
-              <Setter Property="Visibility" Value="Collapsed" />
+      <!-- On a VPS: friends use its address; this PC's network is not used. -->
+      <Border Style="{StaticResource WarningBanner}" Margin="0,22,0,0" Visibility="{Binding RunsOnVps, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Connect_VpsNote}" TextWrapping="Wrap" />
+      </Border>
+
+      <StackPanel Visibility="{Binding ShowsThisPcNetwork, Converter={StaticResource Visible}}">
+        <!-- Windows Firewall -->
+        <TextBlock Text="{res:Text Connect_Firewall}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+        <StackPanel Orientation="Horizontal">
+          <StackPanel.Style>
+            <Style TargetType="StackPanel">
               <Style.Triggers>
-                <DataTrigger Binding="{Binding ShowFirewallOk}" Value="True">
-                  <Setter Property="Visibility" Value="Visible" />
+                <DataTrigger Binding="{Binding ShowFirewallProblem}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding FirewallText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
               </Style.Triggers>
             </Style>
-          </Image.Style>
-        </Image>
-        <TextBlock Text="{Binding FirewallText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </StackPanel>
-
-      <Border Style="{StaticResource WarningBanner}" Visibility="{Binding ShowFirewallProblem, Converter={StaticResource Visible}}">
-        <StackPanel>
-          <TextBlock Text="{Binding FirewallText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-          <Button Content="{res:Text Connect_FirewallAllow}" Command="{Binding AllowFirewallCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
-          <TextBlock Text="{res:Text Connect_FirewallAllowHint}" Style="{StaticResource Hint}" />
+          </StackPanel.Style>
+          <Image Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
+            <Image.Style>
+              <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding ShowFirewallOk}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Image.Style>
+          </Image>
+          <TextBlock Text="{Binding FirewallText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
-      </Border>
 
-      <TextBlock Text="{Binding FirewallMessage}" Margin="0,6,0,0" AutomationProperties.LiveSetting="Polite">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource Hint}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding FirewallMessage}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
-
-      <!-- Router (UPnP): friends over the internet without another tool. -->
-      <TextBlock Text="{res:Text Connect_Router}" Style="{StaticResource Label}" Margin="0,22,0,6" />
-      <CheckBox Content="{res:Text Connect_RouterToggle}" IsChecked="{Binding OpenRouterPort}" />
-      <TextBlock Text="{res:Text Connect_RouterHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
-      <Expander Header="{res:Text Connect_RouterAbout}" Margin="22,6,0,0">
-        <StackPanel Margin="4,6,0,0">
-          <TextBlock Text="{res:Text Connect_RouterAboutWhat}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RouterAboutHow}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RouterAboutFails}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_RouterAboutSafe}" Style="{StaticResource Step}" />
-        </StackPanel>
-      </Expander>
-      <TextBlock Text="{res:Text Connect_RouterAsking}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
-                 Visibility="{Binding IsAskingRouter, Converter={StaticResource Visible}}" />
-      <TextBlock Text="{Binding RouterNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding RouterNote}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
-      <Border Margin="0,8,0,0">
-        <Border.Style>
-          <Style TargetType="Border" BasedOn="{StaticResource WarningBanner}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding RouterProblem}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </Border.Style>
-        <TextBlock Text="{Binding RouterProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </Border>
-
-      <!-- playit.gg tunnel: friends over the internet when the router lets nothing in. -->
-      <TextBlock Text="{res:Text Connect_Tunnel}" Style="{StaticResource Label}" Margin="0,22,0,6" />
-      <CheckBox Content="{res:Text Connect_TunnelToggle}" IsChecked="{Binding UsePlayitTunnel}" />
-      <TextBlock Text="{res:Text Connect_TunnelHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
-      <Expander Header="{res:Text Connect_TunnelAbout}" Margin="22,6,0,0">
-        <StackPanel Margin="4,6,0,0">
-          <TextBlock Text="{res:Text Connect_TunnelAboutWhat}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_TunnelAboutHow}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_TunnelAboutTradeoff}" Style="{StaticResource Step}" />
-        </StackPanel>
-      </Expander>
-      <TextBlock Text="{res:Text Connect_TunnelStarting}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
-                 Visibility="{Binding IsTunnelBusy, Converter={StaticResource Visible}}" />
-      <TextBlock Text="{Binding TunnelNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding TunnelNote}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
-      <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsWaitingForApproval, Converter={StaticResource Visible}}">
-        <Button Content="{res:Text Connect_TunnelOpenPage}" Command="{Binding OpenClaimPageCommand}" />
-        <Button Content="{res:Text Connect_TunnelCancel}" Command="{Binding CancelTunnelSetupCommand}" Margin="8,0,0,0" />
-      </StackPanel>
-      <Border Margin="0,8,0,0">
-        <Border.Style>
-          <Style TargetType="Border" BasedOn="{StaticResource WarningBanner}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding TunnelProblem}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </Border.Style>
-        <TextBlock Text="{Binding TunnelProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-      </Border>
-
-      <!-- More settings: playing over a virtual LAN tool -->
-      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
-        <StackPanel Margin="4,8,0,0">
-          <TextBlock Text="{res:Text Connect_GuideTitle}" Style="{StaticResource Label}" />
-          <TextBlock Text="{res:Text Connect_GuideIntro}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideHost}" FontWeight="SemiBold" Margin="0,6,0,6" />
-          <TextBlock Text="{res:Text Connect_GuideStep1}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideStep2}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideStep3}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideFriends}" FontWeight="SemiBold" Margin="0,6,0,6" />
-          <TextBlock Text="{res:Text Connect_GuideStep4}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideStep5}" Style="{StaticResource Step}" />
-          <TextBlock Text="{res:Text Connect_GuideTools}" FontWeight="SemiBold" Margin="0,6,0,6" />
-          <TextBlock Style="{StaticResource Step}">
-            <Run Text="{res:Text Connect_ToolRadmin}" />
-            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="RadminVpn"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
-          </TextBlock>
-          <TextBlock Style="{StaticResource Step}">
-            <Run Text="{res:Text Connect_ToolZeroTier}" />
-            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="ZeroTier"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
-          </TextBlock>
-          <TextBlock Style="{StaticResource Step}">
-            <Run Text="{res:Text Connect_ToolTailscale}" />
-            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Tailscale"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
-          </TextBlock>
-          <TextBlock Style="{StaticResource Step}">
-            <Run Text="{res:Text Connect_ToolHamachi}" />
-            <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Hamachi"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
-          </TextBlock>
-          <TextBlock Text="{res:Text Connect_GuideNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
-          <TextBlock Text="{res:Text Connect_GuideTrouble}" Style="{StaticResource Hint}" />
-
-          <TextBlock Text="{res:Text Connect_TunnelSettings}" Style="{StaticResource Label}" Margin="0,18,0,6" />
-          <TextBlock Style="{StaticResource Step}">
-            <Hyperlink Command="{Binding OpenPlayitTunnelsCommand}"><Run Text="{res:Text Connect_TunnelManage}" /></Hyperlink>
-          </TextBlock>
-          <StackPanel Visibility="{Binding IsTunnelSetUp, Converter={StaticResource Visible}}">
-            <Button Content="{res:Text Connect_TunnelForget}" Command="{Binding ForgetPlayitCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
-            <TextBlock Text="{res:Text Connect_TunnelForgetHint}" Style="{StaticResource Hint}" Margin="0,4,0,0" />
+        <Border Style="{StaticResource WarningBanner}" Visibility="{Binding ShowFirewallProblem, Converter={StaticResource Visible}}">
+          <StackPanel>
+            <TextBlock Text="{Binding FirewallText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            <Button Content="{res:Text Connect_FirewallAllow}" Command="{Binding AllowFirewallCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+            <TextBlock Text="{res:Text Connect_FirewallAllowHint}" Style="{StaticResource Hint}" />
           </StackPanel>
+        </Border>
+
+        <TextBlock Text="{Binding FirewallMessage}" Margin="0,6,0,0" AutomationProperties.LiveSetting="Polite">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource Hint}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding FirewallMessage}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Router (UPnP): friends over the internet without another tool. -->
+        <TextBlock Text="{res:Text Connect_Router}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+        <CheckBox Content="{res:Text Connect_RouterToggle}" IsChecked="{Binding OpenRouterPort}" />
+        <TextBlock Text="{res:Text Connect_RouterHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+        <Expander Header="{res:Text Connect_RouterAbout}" Margin="22,6,0,0">
+          <StackPanel Margin="4,6,0,0">
+            <TextBlock Text="{res:Text Connect_RouterAboutWhat}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_RouterAboutHow}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_RouterAboutFails}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_RouterAboutSafe}" Style="{StaticResource Step}" />
+          </StackPanel>
+        </Expander>
+        <TextBlock Text="{res:Text Connect_RouterAsking}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding IsAskingRouter, Converter={StaticResource Visible}}" />
+        <TextBlock Text="{Binding RouterNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding RouterNote}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource WarningBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding RouterProblem}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding RouterProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+
+        <!-- playit.gg tunnel: friends over the internet when the router lets nothing in. -->
+        <TextBlock Text="{res:Text Connect_Tunnel}" Style="{StaticResource Label}" Margin="0,22,0,6" />
+        <CheckBox Content="{res:Text Connect_TunnelToggle}" IsChecked="{Binding UsePlayitTunnel}" />
+        <TextBlock Text="{res:Text Connect_TunnelHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+        <Expander Header="{res:Text Connect_TunnelAbout}" Margin="22,6,0,0">
+          <StackPanel Margin="4,6,0,0">
+            <TextBlock Text="{res:Text Connect_TunnelAboutWhat}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_TunnelAboutHow}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_TunnelAboutTradeoff}" Style="{StaticResource Step}" />
+          </StackPanel>
+        </Expander>
+        <TextBlock Text="{res:Text Connect_TunnelStarting}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding IsTunnelBusy, Converter={StaticResource Visible}}" />
+        <TextBlock Text="{Binding TunnelNote}" Margin="0,8,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding TunnelNote}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsWaitingForApproval, Converter={StaticResource Visible}}">
+          <Button Content="{res:Text Connect_TunnelOpenPage}" Command="{Binding OpenClaimPageCommand}" />
+          <Button Content="{res:Text Connect_TunnelCancel}" Command="{Binding CancelTunnelSetupCommand}" Margin="8,0,0,0" />
         </StackPanel>
-      </Expander>
+        <Border Margin="0,8,0,0">
+          <Border.Style>
+            <Style TargetType="Border" BasedOn="{StaticResource WarningBanner}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding TunnelProblem}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <TextBlock Text="{Binding TunnelProblem}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+
+        <!-- More settings: playing over a virtual LAN tool -->
+        <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
+          <StackPanel Margin="4,8,0,0">
+            <TextBlock Text="{res:Text Connect_GuideTitle}" Style="{StaticResource Label}" />
+            <TextBlock Text="{res:Text Connect_GuideIntro}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideHost}" FontWeight="SemiBold" Margin="0,6,0,6" />
+            <TextBlock Text="{res:Text Connect_GuideStep1}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideStep2}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideStep3}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideFriends}" FontWeight="SemiBold" Margin="0,6,0,6" />
+            <TextBlock Text="{res:Text Connect_GuideStep4}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideStep5}" Style="{StaticResource Step}" />
+            <TextBlock Text="{res:Text Connect_GuideTools}" FontWeight="SemiBold" Margin="0,6,0,6" />
+            <TextBlock Style="{StaticResource Step}">
+              <Run Text="{res:Text Connect_ToolRadmin}" />
+              <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="RadminVpn"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+            </TextBlock>
+            <TextBlock Style="{StaticResource Step}">
+              <Run Text="{res:Text Connect_ToolZeroTier}" />
+              <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="ZeroTier"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+            </TextBlock>
+            <TextBlock Style="{StaticResource Step}">
+              <Run Text="{res:Text Connect_ToolTailscale}" />
+              <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Tailscale"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+            </TextBlock>
+            <TextBlock Style="{StaticResource Step}">
+              <Run Text="{res:Text Connect_ToolHamachi}" />
+              <Hyperlink Command="{Binding OpenSiteCommand}" CommandParameter="Hamachi"><Run Text="{res:Text Connect_ToolSite}" /></Hyperlink>
+            </TextBlock>
+            <TextBlock Text="{res:Text Connect_GuideNotListed}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
+            <TextBlock Text="{res:Text Connect_GuideTrouble}" Style="{StaticResource Hint}" />
+
+            <TextBlock Text="{res:Text Connect_TunnelSettings}" Style="{StaticResource Label}" Margin="0,18,0,6" />
+            <TextBlock Style="{StaticResource Step}">
+              <Hyperlink Command="{Binding OpenPlayitTunnelsCommand}"><Run Text="{res:Text Connect_TunnelManage}" /></Hyperlink>
+            </TextBlock>
+            <StackPanel Visibility="{Binding IsTunnelSetUp, Converter={StaticResource Visible}}">
+              <Button Content="{res:Text Connect_TunnelForget}" Command="{Binding ForgetPlayitCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+              <TextBlock Text="{res:Text Connect_TunnelForgetHint}" Style="{StaticResource Hint}" Margin="0,4,0,0" />
+            </StackPanel>
+          </StackPanel>
+        </Expander>
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </UserControl>

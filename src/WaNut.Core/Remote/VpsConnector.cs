@@ -108,6 +108,28 @@ public sealed class VpsConnector(SecretStore secrets)
         return ssh.Result;
     }
 
+    /// <summary>
+    /// Runs <paramref name="command"/> with <paramref name="input"/> as its standard input, so text such as a console
+    /// line or a file never goes through the remote shell. Returns standard output; a non-zero exit is an error.
+    /// </summary>
+    public static async Task<string> RunWithInputAsync(SshClient client, string command, string input, CancellationToken cancellationToken = default)
+    {
+        using var ssh = client.CreateCommand(command, Encoding.UTF8);
+        var running = ssh.ExecuteAsync(cancellationToken);
+        await using (var stdin = ssh.CreateInputStream())
+        {
+            await stdin.WriteAsync(Encoding.UTF8.GetBytes(input), cancellationToken).ConfigureAwait(false);
+        }
+
+        await running.ConfigureAwait(false);
+        if (ssh.ExitStatus is not 0)
+        {
+            throw new InvalidOperationException($"The VPS command failed ({ssh.ExitStatus}): {ssh.Error.Trim()}");
+        }
+
+        return ssh.Result;
+    }
+
     private AuthenticationMethod[] CreateAuthentication(VpsProfile profile, Func<SecretKind, string?>? typedSecret)
     {
         string? Secret(SecretKind kind) => typedSecret?.Invoke(kind) ?? secrets.Load(profile.Id, kind);

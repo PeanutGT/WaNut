@@ -15,4 +15,7 @@ public enum AdapterKind
 
     /// <summary>The server's playit.gg tunnel: friends anywhere, even when the router lets nothing in.</summary>
     Playit,
+
+    /// <summary>The user's own VPS, when the server runs there: friends anywhere.</summary>
+    Vps,
 }
