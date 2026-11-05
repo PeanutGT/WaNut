@@ -1,9 +1,11 @@
+using System.Collections.ObjectModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Notifications;
+using WaNut.Core.Remote;
 using WaNut.Core.Settings;
 
 namespace WaNut.App.ViewModels;
@@ -14,11 +16,15 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private readonly AppSettingsStore _store;
     private readonly ThemeService _themeService;
     private readonly DiscordWebhook _webhook;
+    private readonly SecretStore _secrets;
+    private readonly IDialogService _dialogs;
     private AppSettings _saved;
     private bool _loading;
 
-    public AppSettingsViewModel(AppSettingsStore store, ThemeService theme, DiscordWebhook webhook)
+    public AppSettingsViewModel(AppSettingsStore store, ThemeService theme, DiscordWebhook webhook, SecretStore secrets, IDialogService dialogs)
     {
+        _secrets = secrets;
+        _dialogs = dialogs;
         _webhook = webhook;
         _store = store;
         _themeService = theme;
@@ -41,6 +47,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         DiscordCrashed = settings.Discord.Crashed;
         DiscordPlayerJoined = settings.Discord.PlayerJoined;
         DiscordPlayerLeft = settings.Discord.PlayerLeft;
+        VpsList = new ObservableCollection<VpsProfile>(settings.Vps);
         _loading = false;
     }
 
@@ -179,6 +186,50 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         new(ThemeChoice.Dark, Resources.Text.Get("AppSettings_ThemeDark")),
     ];
 
+    /// <summary>The user's own Linux hosts. Shown only in advanced mode.</summary>
+    public ObservableCollection<VpsProfile> VpsList { get; }
+
+    [RelayCommand]
+    private void AddVps()
+    {
+        if (_dialogs.ShowVps(null) is { } added)
+        {
+            VpsList.Add(added);
+            Save();
+        }
+    }
+
+    [RelayCommand]
+    private void EditVps(VpsProfile profile)
+    {
+        var index = VpsList.IndexOf(profile);
+        if (index >= 0 && _dialogs.ShowVps(profile) is { } changed)
+        {
+            VpsList[index] = changed;
+            Save();
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveVps(VpsProfile profile)
+    {
+        if (!_dialogs.Confirm(string.Format(Resources.Text.Get("Vps_RemoveQuestion"), profile.Name)))
+        {
+            return;
+        }
+
+        VpsList.Remove(profile);
+        Save();
+        try
+        {
+            _secrets.DeleteAll(profile.Id);
+        }
+        catch (IOException e)
+        {
+            ErrorText = string.Format(Resources.Text.Get("Settings_SaveFailed"), e.Message);
+        }
+    }
+
     public BackupRules BackupRules => new() { KeepCount = BackupKeepCount, MaxAgeDays = BackupMaxAgeDays, ScheduleMinutes = BackupScheduleMinutes };
 
     public bool WasFirewallAsked(string javaExe) => _saved.FirewallAsked.Contains(javaExe, StringComparer.OrdinalIgnoreCase);
@@ -272,6 +323,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
                 Discord = Discord,
                 CloseAction = CloseAction,
                 BackupCopyDir = HasBackupCopyDir ? BackupCopyDir.Trim() : null,
+                Vps = [.. VpsList],
             };
             _store.Save(_saved);
             ErrorText = null;

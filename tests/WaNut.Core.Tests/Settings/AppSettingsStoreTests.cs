@@ -124,4 +124,23 @@ public sealed class AppSettingsStoreTests : IDisposable
         Assert.Equal(keep, rules.KeepCount);
         Assert.Equal(days, rules.MaxAgeDays);
     }
+
+    [Fact]
+    public void SaveThenLoad_VpsProfiles_RoundTripWithoutSecrets()
+    {
+        var store = new AppSettingsStore(new LauncherPaths(_dir.Path));
+        var vps = new WaNut.Core.Remote.VpsProfile { Name = "Home NAS", Host = "10.0.0.2", Port = 2222, User = "mc", Login = WaNut.Core.Remote.VpsLogin.Password, HostKey = "SHA256:abc" };
+
+        store.Save(new AppSettings { Vps = [vps] });
+
+        Assert.Equal(vps, store.Load().Vps.Single());
+    }
+
+    [Fact]
+    public void Load_OldConfigWithoutVps_GivesEmptyList()
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "config.json"), "{\"vps\": null}");
+
+        Assert.Empty(new AppSettingsStore(new LauncherPaths(_dir.Path)).Load().Vps);
+    }
 }

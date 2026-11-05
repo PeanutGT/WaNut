@@ -2,6 +2,7 @@ using System.Text.Json;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Notifications;
+using WaNut.Core.Remote;
 
 namespace WaNut.Core.Settings;
 
@@ -52,6 +53,9 @@ public sealed record AppSettings
 
     /// <summary>The folder the user picked for servers, or null for the default place in the data folder.</summary>
     public string? InstancesDir { get; init; }
+
+    /// <summary>The user's own Linux hosts (advanced mode). Their secrets are in <see cref="SecretStore"/>, never here.</summary>
+    public IReadOnlyList<VpsProfile> Vps { get; init; } = [];
 }
 
 public sealed class AppSettingsStore(LauncherPaths paths)
@@ -73,7 +77,7 @@ public sealed class AppSettingsStore(LauncherPaths paths)
         try
         {
             var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(paths.ConfigFile), JsonOptions) ?? new AppSettings();
-            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized(), FirewallAsked = settings.FirewallAsked ?? [], Discord = settings.Discord ?? new() };
+            return settings with { Backups = (settings.Backups ?? new BackupRules()).Normalized(), FirewallAsked = settings.FirewallAsked ?? [], Discord = settings.Discord ?? new(), Vps = settings.Vps ?? [] };
         }
         catch (JsonException)
         {

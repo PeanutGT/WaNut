@@ -2316,4 +2316,180 @@
   <data name="Performance_SparkOpenFailed" xml:space="preserve">
     <value>無法打開瀏覽器：{0}</value>
   </data>
+  <data name="Vps_Section" xml:space="preserve">
+    <value>我的 VPS</value>
+  </data>
+  <data name="Vps_SectionHint" xml:space="preserve">
+    <value>你自己的 Linux 主機（Hetzner、Oracle、Google Cloud、家裡的 NAS 等），用 SSH 連線。在上面執行伺服器會在之後的更新加入；目前可以先新增並測試連線。</value>
+  </data>
+  <data name="Vps_Billing" xml:space="preserve">
+    <value>VPS 開著時主機商會持續計費。WaNut 不會幫你開關 VPS，也看不到你的帳單。</value>
+  </data>
+  <data name="Vps_Add" xml:space="preserve">
+    <value>新增 VPS</value>
+  </data>
+  <data name="Vps_Edit" xml:space="preserve">
+    <value>編輯</value>
+  </data>
+  <data name="Vps_Remove" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Vps_RemoveQuestion" xml:space="preserve">
+    <value>要從 WaNut 移除「{0}」嗎？這台電腦上存的密碼或金鑰會一起刪除，VPS 上的東西不會變動。</value>
+  </data>
+  <data name="Vps_Title" xml:space="preserve">
+    <value>VPS</value>
+  </data>
+  <data name="Vps_Intro" xml:space="preserve">
+    <value>WaNut 用 SSH 登入。用一個能在自己家目錄安裝程式的帳號就好，不需要 root。</value>
+  </data>
+  <data name="Vps_NameLabel" xml:space="preserve">
+    <value>名稱</value>
+  </data>
+  <data name="Vps_HostLabel" xml:space="preserve">
+    <value>位址（IP 或主機名稱）</value>
+  </data>
+  <data name="Vps_PortLabel" xml:space="preserve">
+    <value>SSH 連接埠</value>
+  </data>
+  <data name="Vps_UserLabel" xml:space="preserve">
+    <value>使用者名稱</value>
+  </data>
+  <data name="Vps_LoginLabel" xml:space="preserve">
+    <value>登入方式</value>
+  </data>
+  <data name="Vps_LoginGeneratedKey" xml:space="preserve">
+    <value>WaNut 幫你產生的金鑰（建議）</value>
+  </data>
+  <data name="Vps_GeneratedKeyHint" xml:space="preserve">
+    <value>把這把公鑰加到 VPS 一次就好：從主機商網頁上的主控台登入，貼上複製的指令後按 Enter。</value>
+  </data>
+  <data name="Vps_PublicKeyLabel" xml:space="preserve">
+    <value>公鑰</value>
+  </data>
+  <data name="Vps_CopyCommand" xml:space="preserve">
+    <value>複製指令</value>
+  </data>
+  <data name="Vps_NewKey" xml:space="preserve">
+    <value>產生新金鑰</value>
+  </data>
+  <data name="Vps_CommandCopied" xml:space="preserve">
+    <value>已複製。貼到 VPS 上執行後，再測試連線。</value>
+  </data>
+  <data name="Vps_CopyFailed" xml:space="preserve">
+    <value>無法複製：另一個程式正在使用剪貼簿，請再試一次。</value>
+  </data>
+  <data name="Vps_LoginKeyFile" xml:space="preserve">
+    <value>我已經有的私鑰檔</value>
+  </data>
+  <data name="Vps_Browse" xml:space="preserve">
+    <value>瀏覽…</value>
+  </data>
+  <data name="Vps_PassphraseLabel" xml:space="preserve">
+    <value>金鑰密碼（沒有就留空）</value>
+  </data>
+  <data name="Vps_LoginPassword" xml:space="preserve">
+    <value>帳號密碼</value>
+  </data>
+  <data name="Vps_PasswordHint" xml:space="preserve">
+    <value>很多主機商會關閉密碼登入，用金鑰比較安全。</value>
+  </data>
+  <data name="Vps_SecretSaved" xml:space="preserve">
+    <value>已儲存。留空就沿用。</value>
+  </data>
+  <data name="Vps_SecretsLocal" xml:space="preserve">
+    <value>密碼和金鑰用你的 Windows 帳號加密，只存在這台電腦，也不會寫進記錄檔。</value>
+  </data>
+  <data name="Vps_Test" xml:space="preserve">
+    <value>測試連線</value>
+  </data>
+  <data name="Vps_Save" xml:space="preserve">
+    <value>儲存</value>
+  </data>
+  <data name="Vps_Testing" xml:space="preserve">
+    <value>連線中…</value>
+  </data>
+  <data name="Vps_TestOk" xml:space="preserve">
+    <value>連線成功：{0}、{1}、記憶體 {2} GB、可用空間 {3} GB。</value>
+  </data>
+  <data name="Vps_TestFailed" xml:space="preserve">
+    <value>測試沒有完成：{0}</value>
+  </data>
+  <data name="Vps_Unreachable" xml:space="preserve">
+    <value>連不到 VPS。請確認位址、連接埠，以及 VPS 有開機。（{0}）</value>
+  </data>
+  <data name="Vps_LoginRejected" xml:space="preserve">
+    <value>VPS 拒絕登入。請確認使用者名稱，以及金鑰已加到 VPS（或密碼正確）。</value>
+  </data>
+  <data name="Vps_LoginSecretMissing" xml:space="preserve">
+    <value>這個 Windows 帳號沒有存這台 VPS 的密碼或金鑰。請重新輸入，或產生新金鑰。</value>
+  </data>
+  <data name="Vps_LoginBadKeyFile" xml:space="preserve">
+    <value>WaNut 讀不到金鑰檔。請確認選的是私鑰（不是 .pub 檔），以及金鑰密碼正確。</value>
+  </data>
+  <data name="Vps_HostKeyFirst" xml:space="preserve">
+    <value>這是 WaNut 第一次連到這台 VPS。它的指紋是：
+
+{0}
+
+如果主機商有顯示指紋，請確認兩者相同。要信任這台 VPS 嗎？</value>
+  </data>
+  <data name="Vps_HostKeyChanged" xml:space="preserve">
+    <value>警告：這台 VPS 的指紋和之前不一樣：
+
+{0}
+
+只有重灌過 VPS 才會這樣，否則可能有人在中間竊聽。要信任新的指紋嗎？</value>
+  </data>
+  <data name="Vps_HostKeyNotTrusted" xml:space="preserve">
+    <value>沒有連線：沒有信任指紋 {0}。</value>
+  </data>
+  <data name="Vps_HostKeyChangedRefused" xml:space="preserve">
+    <value>沒有連線：VPS 的指紋變成 {0}。</value>
+  </data>
+  <data name="Vps_ProblemNoName" xml:space="preserve">
+    <value>請替 VPS 取個名稱。</value>
+  </data>
+  <data name="Vps_ProblemBadHost" xml:space="preserve">
+    <value>請輸入 VPS 的 IP 位址或主機名稱，不要有空格。</value>
+  </data>
+  <data name="Vps_ProblemBadPort" xml:space="preserve">
+    <value>SSH 連接埠是 1 到 65535 的數字（通常是 22）。</value>
+  </data>
+  <data name="Vps_ProblemNoUser" xml:space="preserve">
+    <value>請輸入使用者名稱，不要有空格。</value>
+  </data>
+  <data name="Vps_ProblemNoKeyFile" xml:space="preserve">
+    <value>請選擇你的私鑰檔。</value>
+  </data>
+  <data name="Vps_ProblemNoPassword" xml:space="preserve">
+    <value>請輸入密碼。</value>
+  </data>
+  <data name="Vps_HostProblemNotLinux" xml:space="preserve">
+    <value>這不是 Linux。WaNut 只能在 Linux 上執行伺服器。</value>
+  </data>
+  <data name="Vps_HostProblemUnsupportedCpu" xml:space="preserve">
+    <value>CPU 不是 x64 或 ARM64，沒有對應的 Java。</value>
+  </data>
+  <data name="Vps_HostProblemLowMemory" xml:space="preserve">
+    <value>記憶體不到 2 GB，Minecraft 伺服器會跑不動。</value>
+  </data>
+  <data name="Vps_HostProblemLowDisk" xml:space="preserve">
+    <value>可用空間不到 2 GB。</value>
+  </data>
+  <data name="Vps_HostProblemNoDownloader" xml:space="preserve">
+    <value>沒有安裝 curl 或 wget，VPS 無法下載 Java。請安裝 curl（sudo apt install curl）。</value>
+  </data>
+  <data name="Vps_HostProblemNoTar" xml:space="preserve">
+    <value>沒有安裝 tar，無法解壓縮 Java。請安裝 tar（sudo apt install tar）。</value>
+  </data>
+  <data name="Vps_UntestedDistro" xml:space="preserve">
+    <value>WaNut 在 Ubuntu 和 Debian 上測試過，這個系統可能也可以用。</value>
+  </data>
+  <data name="Vps_PickKeyTitle" xml:space="preserve">
+    <value>選擇你的 SSH 私鑰</value>
+  </data>
+  <data name="Vps_KeyFilter" xml:space="preserve">
+    <value>所有檔案|*.*</value>
+  </data>
 </root>

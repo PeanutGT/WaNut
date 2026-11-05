@@ -135,6 +135,33 @@
     <TextBlock Text="{res:Text AppSettings_AdvancedModeHint}" Style="{StaticResource MutedText}"
                FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
 
+    <!-- The user's own Linux hosts, for running servers there later. Advanced mode only. -->
+    <Expander Header="{res:Text Vps_Section}" Margin="-4,14,0,0" Visibility="{Binding AdvancedMode, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel Margin="4,8,0,0">
+      <TextBlock Text="{res:Text Vps_SectionHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,4" />
+      <TextBlock Text="{res:Text Vps_Billing}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
+      <ItemsControl ItemsSource="{Binding VpsList}" Focusable="False">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <DockPanel Margin="0,0,0,6">
+              <Button DockPanel.Dock="Right" Content="{res:Text Vps_Remove}" Margin="8,0,0,0"
+                      Command="{Binding DataContext.RemoveVpsCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+              <Button DockPanel.Dock="Right" Content="{res:Text Vps_Edit}" Margin="8,0,0,0"
+                      Command="{Binding DataContext.EditVpsCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                <TextBlock Style="{StaticResource MutedText}" FontSize="12" TextTrimming="CharacterEllipsis">
+                  <Run Text="{Binding User, Mode=OneWay}" /><Run Text="@" /><Run Text="{Binding Host, Mode=OneWay}" />
+                </TextBlock>
+              </StackPanel>
+            </DockPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Button Content="{res:Text Vps_Add}" Command="{Binding AddVpsCommand}" HorizontalAlignment="Left" />
+      </StackPanel>
+    </Expander>
+
     <Border Margin="0,14,0,0">
       <Border.Style>
         <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">

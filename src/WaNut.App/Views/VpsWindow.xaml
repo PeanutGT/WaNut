@@ -1,0 +1,111 @@
+<Window x:Class="WaNut.App.Views.VpsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:WaNut.App.Resources"
+        Title="{res:Text Vps_Title}"
+        Icon="pack://application:,,,/Assets/wanut.ico"
+        Style="{StaticResource AppWindow}"
+        Width="480" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </Window.Resources>
+
+  <!-- DataContext: VpsViewModel -->
+  <StackPanel Margin="24">
+    <StackPanel Orientation="Horizontal">
+      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
+      <TextBlock Text="{res:Text Vps_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+    </StackPanel>
+    <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,16" />
+
+    <TextBlock Text="{res:Text Vps_NameLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
+    <TextBox x:Name="NameBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="64"
+             AutomationProperties.Name="{res:Text Vps_NameLabel}" />
+
+    <Grid Margin="0,12,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="12" />
+        <ColumnDefinition Width="90" />
+      </Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock Text="{res:Text Vps_HostLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
+        <TextBox Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" Tag="203.0.113.5" InputMethod.IsInputMethodEnabled="False"
+                 AutomationProperties.Name="{res:Text Vps_HostLabel}" />
+      </StackPanel>
+      <StackPanel Grid.Column="2">
+        <TextBlock Text="{res:Text Vps_PortLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
+        <TextBox Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" MaxLength="5" InputMethod.IsInputMethodEnabled="False"
+                 AutomationProperties.Name="{res:Text Vps_PortLabel}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Text="{res:Text Vps_UserLabel}" FontWeight="SemiBold" Margin="0,12,0,6" />
+    <TextBox Text="{Binding User, UpdateSourceTrigger=PropertyChanged}" Tag="root" InputMethod.IsInputMethodEnabled="False"
+             AutomationProperties.Name="{res:Text Vps_UserLabel}" />
+
+    <TextBlock Text="{res:Text Vps_LoginLabel}" FontWeight="SemiBold" Margin="0,14,0,6" />
+    <RadioButton GroupName="Login" Content="{res:Text Vps_LoginGeneratedKey}" IsChecked="{Binding UsesGeneratedKey}" />
+    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesGeneratedKey, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="{res:Text Vps_GeneratedKeyHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,6" />
+      <TextBox Text="{Binding PublicKey, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"
+               AutomationProperties.Name="{res:Text Vps_PublicKeyLabel}" />
+      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+        <Button Content="{res:Text Vps_CopyCommand}" Command="{Binding CopyAuthorizeCommandCommand}" Margin="0,0,8,0" />
+        <Button Content="{res:Text Vps_NewKey}" Command="{Binding MakeNewKeyCommand}" />
+      </StackPanel>
+    </StackPanel>
+
+    <RadioButton GroupName="Login" Content="{res:Text Vps_LoginKeyFile}" IsChecked="{Binding UsesKeyFile}" Margin="0,6,0,0" />
+    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesKeyFile, Converter={StaticResource BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="{res:Text Vps_Browse}" Command="{Binding BrowseKeyFileCommand}" Margin="8,0,0,0" />
+        <TextBox Text="{Binding KeyFile, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{res:Text Vps_LoginKeyFile}" />
+      </DockPanel>
+      <TextBlock Text="{res:Text Vps_PassphraseLabel}" Margin="0,8,0,4" />
+      <PasswordBox x:Name="PassphraseBox" PasswordChanged="OnPassphraseChanged" AutomationProperties.Name="{res:Text Vps_PassphraseLabel}" />
+      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"
+                 Visibility="{Binding HasSavedPassphrase, Converter={StaticResource BoolToVisibility}}" />
+    </StackPanel>
+
+    <RadioButton GroupName="Login" Content="{res:Text Vps_LoginPassword}" IsChecked="{Binding UsesPassword}" Margin="0,6,0,0" />
+    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesPassword, Converter={StaticResource BoolToVisibility}}">
+      <PasswordBox x:Name="PasswordBox" PasswordChanged="OnPasswordChanged" AutomationProperties.Name="{res:Text Vps_LoginPassword}" />
+      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"
+                 Visibility="{Binding HasSavedPassword, Converter={StaticResource BoolToVisibility}}" />
+      <TextBlock Text="{res:Text Vps_PasswordHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+    </StackPanel>
+
+    <TextBlock Text="{res:Text Vps_SecretsLocal}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0" />
+
+    <DockPanel Margin="0,16,0,0">
+      <Button DockPanel.Dock="Left" Content="{res:Text Vps_Test}" Command="{Binding TestCommand}" VerticalAlignment="Top" Margin="0,0,12,0" />
+      <StackPanel>
+        <TextBlock Text="{Binding TestText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        <TextBlock Text="{Binding TestProblems}" Foreground="{DynamicResource ErrorTextBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+      </StackPanel>
+    </DockPanel>
+
+    <Border Margin="0,14,0,0">
+      <Border.Style>
+        <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding ErrorText}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
+    </Border>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button Content="{res:Text Vps_Save}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}"
+              MinWidth="80" Margin="0,0,8,0" IsDefault="True" />
+      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsCancel="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

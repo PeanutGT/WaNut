@@ -18,6 +18,7 @@ using WaNut.Core.Network;
 using WaNut.Core.Notifications;
 using WaNut.Core.Players;
 using WaNut.Core.Profiling;
+using WaNut.Core.Remote;
 using WaNut.Core.Settings;
 using WaNut.Core.Tunnels;
 using WaNut.Core.Updates;
@@ -93,6 +94,10 @@ public partial class App : Application
         services.AddSingleton<ServerCreator>();
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<IServerRuntime, LocalServerRuntime>();
+        services.AddSingleton<ISecretProtector, DpapiProtector>();
+        services.AddSingleton<SecretStore>();
+        services.AddSingleton<VpsConnector>();
+        services.AddSingleton<VpsTester>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
@@ -148,6 +153,8 @@ public partial class App : Application
         services.AddTransient<DeleteServerWindow>();
         services.AddTransient<DuplicateServerViewModel>();
         services.AddTransient<DuplicateServerWindow>();
+        services.AddTransient<VpsViewModel>();
+        services.AddTransient<VpsWindow>();
 
         return services.BuildServiceProvider();
     }
