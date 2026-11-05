@@ -37,13 +37,21 @@ public sealed class VpsConnector(SecretStore secrets)
     /// Secrets just typed in and not saved yet (null when none), so "Test connection" works before "Save". Anything
     /// it doesn't return comes from the <see cref="SecretStore"/>.
     /// </param>
-    public async Task<SshClient> ConnectAsync(VpsProfile profile, Func<SecretKind, string?>? typedSecret = null, CancellationToken cancellationToken = default)
+    public Task<SshClient> ConnectAsync(VpsProfile profile, Func<SecretKind, string?>? typedSecret = null, CancellationToken cancellationToken = default) =>
+        ConnectAsync(profile, typedSecret, info => new SshClient(info), cancellationToken);
+
+    /// <summary>The same as <see cref="ConnectAsync(VpsProfile, Func{SecretKind, string?}?, CancellationToken)"/>, for file transfer.</summary>
+    public Task<SftpClient> ConnectSftpAsync(VpsProfile profile, CancellationToken cancellationToken = default) =>
+        ConnectAsync(profile, null, info => new SftpClient(info), cancellationToken);
+
+    private async Task<TClient> ConnectAsync<TClient>(VpsProfile profile, Func<SecretKind, string?>? typedSecret, Func<ConnectionInfo, TClient> create, CancellationToken cancellationToken)
+        where TClient : BaseClient
     {
         var info = new ConnectionInfo(profile.Host.Trim().Trim('[', ']'), profile.Port, profile.User.Trim(), CreateAuthentication(profile, typedSecret))
         {
             Timeout = ConnectTimeout,
         };
-        var client = new SshClient(info);
+        var client = create(info);
         HostKeyException? hostKeyProblem = null;
         client.HostKeyReceived += (_, e) =>
         {
