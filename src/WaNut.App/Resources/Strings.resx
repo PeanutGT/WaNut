@@ -2336,4 +2336,180 @@ Start it anyway?</value>
   <data name="Performance_SparkOpenFailed" xml:space="preserve">
     <value>Could not open the browser: {0}</value>
   </data>
+  <data name="Vps_Section" xml:space="preserve">
+    <value>My VPS</value>
+  </data>
+  <data name="Vps_SectionHint" xml:space="preserve">
+    <value>Your own Linux host (from Hetzner, Oracle, Google Cloud, a home NAS and so on), reached over SSH. Running servers there comes in a later update; for now you can add one and test the connection.</value>
+  </data>
+  <data name="Vps_Billing" xml:space="preserve">
+    <value>Your host bills you while the VPS is on. WaNut never turns it on or off and never sees your bill.</value>
+  </data>
+  <data name="Vps_Add" xml:space="preserve">
+    <value>Add VPS</value>
+  </data>
+  <data name="Vps_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Vps_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Vps_RemoveQuestion" xml:space="preserve">
+    <value>Remove "{0}" from WaNut? Its saved password or key is deleted from this PC. Nothing on the VPS changes.</value>
+  </data>
+  <data name="Vps_Title" xml:space="preserve">
+    <value>VPS</value>
+  </data>
+  <data name="Vps_Intro" xml:space="preserve">
+    <value>WaNut signs in with SSH. Use an account that can install programs in its own home folder; root is not needed.</value>
+  </data>
+  <data name="Vps_NameLabel" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Vps_HostLabel" xml:space="preserve">
+    <value>Address (IP or host name)</value>
+  </data>
+  <data name="Vps_PortLabel" xml:space="preserve">
+    <value>SSH port</value>
+  </data>
+  <data name="Vps_UserLabel" xml:space="preserve">
+    <value>User name</value>
+  </data>
+  <data name="Vps_LoginLabel" xml:space="preserve">
+    <value>Sign in with</value>
+  </data>
+  <data name="Vps_LoginGeneratedKey" xml:space="preserve">
+    <value>A key WaNut makes for you (recommended)</value>
+  </data>
+  <data name="Vps_GeneratedKeyHint" xml:space="preserve">
+    <value>Add this public key to the VPS once: sign in through your host's web console, then paste the copied command and press Enter.</value>
+  </data>
+  <data name="Vps_PublicKeyLabel" xml:space="preserve">
+    <value>Public key</value>
+  </data>
+  <data name="Vps_CopyCommand" xml:space="preserve">
+    <value>Copy command</value>
+  </data>
+  <data name="Vps_NewKey" xml:space="preserve">
+    <value>Make a new key</value>
+  </data>
+  <data name="Vps_CommandCopied" xml:space="preserve">
+    <value>Copied. Paste it on the VPS, then test the connection.</value>
+  </data>
+  <data name="Vps_CopyFailed" xml:space="preserve">
+    <value>Couldn't copy: another program is using the clipboard. Try again.</value>
+  </data>
+  <data name="Vps_LoginKeyFile" xml:space="preserve">
+    <value>A private key file I already have</value>
+  </data>
+  <data name="Vps_Browse" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Vps_PassphraseLabel" xml:space="preserve">
+    <value>Key passphrase (leave empty if it has none)</value>
+  </data>
+  <data name="Vps_LoginPassword" xml:space="preserve">
+    <value>The account's password</value>
+  </data>
+  <data name="Vps_PasswordHint" xml:space="preserve">
+    <value>Many hosts turn password sign-in off. A key is safer.</value>
+  </data>
+  <data name="Vps_SecretSaved" xml:space="preserve">
+    <value>Saved. Leave empty to keep it.</value>
+  </data>
+  <data name="Vps_SecretsLocal" xml:space="preserve">
+    <value>Passwords and keys are encrypted for your Windows account and stay on this PC. They are never written to logs.</value>
+  </data>
+  <data name="Vps_Test" xml:space="preserve">
+    <value>Test connection</value>
+  </data>
+  <data name="Vps_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Vps_Testing" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="Vps_TestOk" xml:space="preserve">
+    <value>Connected: {0}, {1}, {2} GB memory, {3} GB free disk space.</value>
+  </data>
+  <data name="Vps_TestFailed" xml:space="preserve">
+    <value>The test didn't finish: {0}</value>
+  </data>
+  <data name="Vps_Unreachable" xml:space="preserve">
+    <value>Couldn't reach the VPS. Check the address and port, and that the VPS is on. ({0})</value>
+  </data>
+  <data name="Vps_LoginRejected" xml:space="preserve">
+    <value>The VPS refused to let WaNut in. Check the user name, and that the key was added (or the password is right).</value>
+  </data>
+  <data name="Vps_LoginSecretMissing" xml:space="preserve">
+    <value>No password or key is saved for this VPS on this Windows account. Type it again, or make a new key.</value>
+  </data>
+  <data name="Vps_LoginBadKeyFile" xml:space="preserve">
+    <value>WaNut couldn't read the key file. Check that it is a private key (not the .pub file) and that the passphrase is right.</value>
+  </data>
+  <data name="Vps_HostKeyFirst" xml:space="preserve">
+    <value>This is the first time WaNut connects to this VPS. Its fingerprint is:
+
+{0}
+
+If your host shows a fingerprint, check they match. Trust this VPS?</value>
+  </data>
+  <data name="Vps_HostKeyChanged" xml:space="preserve">
+    <value>Warning: this VPS shows a different fingerprint than before:
+
+{0}
+
+That is expected only if you reinstalled the VPS. Otherwise someone may be listening in. Trust the new fingerprint?</value>
+  </data>
+  <data name="Vps_HostKeyNotTrusted" xml:space="preserve">
+    <value>Not connected: the fingerprint {0} wasn't trusted.</value>
+  </data>
+  <data name="Vps_HostKeyChangedRefused" xml:space="preserve">
+    <value>Not connected: the VPS's fingerprint changed to {0}.</value>
+  </data>
+  <data name="Vps_ProblemNoName" xml:space="preserve">
+    <value>Give the VPS a name.</value>
+  </data>
+  <data name="Vps_ProblemBadHost" xml:space="preserve">
+    <value>Type the VPS's IP address or host name, without spaces.</value>
+  </data>
+  <data name="Vps_ProblemBadPort" xml:space="preserve">
+    <value>The SSH port is a number from 1 to 65535 (usually 22).</value>
+  </data>
+  <data name="Vps_ProblemNoUser" xml:space="preserve">
+    <value>Type the user name, without spaces.</value>
+  </data>
+  <data name="Vps_ProblemNoKeyFile" xml:space="preserve">
+    <value>Choose your private key file.</value>
+  </data>
+  <data name="Vps_ProblemNoPassword" xml:space="preserve">
+    <value>Type the password.</value>
+  </data>
+  <data name="Vps_HostProblemNotLinux" xml:space="preserve">
+    <value>This isn't Linux. WaNut can only run servers on Linux.</value>
+  </data>
+  <data name="Vps_HostProblemUnsupportedCpu" xml:space="preserve">
+    <value>The CPU is neither x64 nor ARM64, so there is no Java for it.</value>
+  </data>
+  <data name="Vps_HostProblemLowMemory" xml:space="preserve">
+    <value>Less than 2 GB of memory: a Minecraft server won't run well.</value>
+  </data>
+  <data name="Vps_HostProblemLowDisk" xml:space="preserve">
+    <value>Less than 2 GB of free disk space.</value>
+  </data>
+  <data name="Vps_HostProblemNoDownloader" xml:space="preserve">
+    <value>Neither curl nor wget is installed, so the VPS can't download Java. Install curl (sudo apt install curl).</value>
+  </data>
+  <data name="Vps_HostProblemNoTar" xml:space="preserve">
+    <value>tar isn't installed, so Java can't be unpacked. Install tar (sudo apt install tar).</value>
+  </data>
+  <data name="Vps_UntestedDistro" xml:space="preserve">
+    <value>WaNut is tested on Ubuntu and Debian. This system may still work.</value>
+  </data>
+  <data name="Vps_PickKeyTitle" xml:space="preserve">
+    <value>Choose your SSH private key</value>
+  </data>
+  <data name="Vps_KeyFilter" xml:space="preserve">
+    <value>All files|*.*</value>
+  </data>
 </root>

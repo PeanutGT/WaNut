@@ -1,6 +1,7 @@
 using WaNut.App.ViewModels;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
+using WaNut.Core.Remote;
 using WaNut.Core.Worlds;
 
 namespace WaNut.App.Services;
@@ -57,6 +58,12 @@ public interface IDialogService
 
     /// <summary>Asks for a Modrinth .mrpack file. Returns null if the user cancelled.</summary>
     string? PickModpack();
+
+    /// <summary>Shows the window to add (<paramref name="existing"/> null) or edit a VPS. Returns the saved profile, or null if cancelled.</summary>
+    VpsProfile? ShowVps(VpsProfile? existing);
+
+    /// <summary>Asks for an SSH private key file. Returns null if the user cancelled.</summary>
+    string? PickKeyFile();
 
     /// <summary>Asks where to save a .zip file. Returns null if the user cancelled.</summary>
     string? PickZipToSave(string fileName);

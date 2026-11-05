@@ -6,6 +6,7 @@ using WaNut.App.ViewModels;
 using WaNut.App.Views;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
+using WaNut.Core.Remote;
 using WaNut.Core.Worlds;
 
 namespace WaNut.App.Services;
@@ -117,6 +118,26 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
     public string? PickZipToSave(string fileName)
     {
         var dialog = new SaveFileDialog { Title = Text.Get("Export_SaveZipTitle"), Filter = Text.Get("World_ZipFilter"), FileName = fileName, DefaultExt = ".zip" };
+        return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
+    }
+
+    public VpsProfile? ShowVps(VpsProfile? existing)
+    {
+        var window = services.GetRequiredService<VpsWindow>();
+        window.ViewModel.Initialize(existing);
+        window.Owner = ActiveWindow();
+        return window.ShowDialog() == true ? window.ViewModel.Saved : null;
+    }
+
+    public string? PickKeyFile()
+    {
+        var dialog = new OpenFileDialog { Title = Text.Get("Vps_PickKeyTitle"), Filter = Text.Get("Vps_KeyFilter") };
+        var sshFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh");
+        if (System.IO.Directory.Exists(sshFolder))
+        {
+            dialog.InitialDirectory = sshFolder;
+        }
+
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
     }
 
