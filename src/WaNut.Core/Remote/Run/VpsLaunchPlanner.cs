@@ -19,6 +19,7 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
         VpsProfile vps,
         IProgress<VpsStep>? steps = null,
         IProgress<DownloadProgress>? upload = null,
+        IProgress<long>? memoryRead = null,
         CancellationToken cancellationToken = default)
     {
         var dir = store.InstanceDir(server.Id);
@@ -27,11 +28,15 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
         steps?.Report(VpsStep.Connecting);
         using (var ssh = await connector.ConnectAsync(vps, null, cancellationToken).ConfigureAwait(false))
         {
+            var info = HostProbe.Parse(await VpsConnector.RunAsync(ssh, HostProbe.Command, cancellationToken).ConfigureAwait(false));
+            memoryRead?.Report(info.MemoryMb);
+            CheckMemory(server.MemoryMb, info.MemoryMb);
+
             await VpsConnector.RunAsync(ssh, RunnerScript.InstallCommand(), cancellationToken).ConfigureAwait(false);
             if ((await VpsConnector.RunAsync(ssh, RemoteJava.IsInstalledCommand(server.JavaMajor), cancellationToken).ConfigureAwait(false)).Trim() != "yes")
             {
                 steps?.Report(VpsStep.PreparingJava);
-                await InstallJavaAsync(ssh, server.JavaMajor, cancellationToken).ConfigureAwait(false);
+                await InstallJavaAsync(ssh, server.JavaMajor, info.Architecture, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -64,10 +69,23 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
             ? serverJar[..^"win_args.txt".Length] + "unix_args.txt"
             : serverJar;
 
-    private async Task InstallJavaAsync(SshClient ssh, int major, CancellationToken cancellationToken)
+    /// <summary>
+    /// Stops the start when the server asks for more than <see cref="MemoryLimits.MaxServerMb"/> of the VPS's RAM, so
+    /// Java doesn't get killed for memory later. The number is never lowered behind the user's back. 0 (RAM not read)
+    /// lets it through.
+    /// </summary>
+    /// <exception cref="VpsMemoryException">Too much for this VPS.</exception>
+    public static void CheckMemory(int serverMb, long vpsMemoryMb)
     {
-        var info = HostProbe.Parse(await VpsConnector.RunAsync(ssh, HostProbe.Command, cancellationToken).ConfigureAwait(false));
-        var package = await adoptium.GetLatestJreAsync(major, "linux", RemoteJava.AdoptiumArchitecture(info.Architecture), cancellationToken).ConfigureAwait(false);
+        if (vpsMemoryMb > 0 && serverMb > MemoryLimits.MaxServerMb(vpsMemoryMb))
+        {
+            throw new VpsMemoryException(vpsMemoryMb);
+        }
+    }
+
+    private async Task InstallJavaAsync(SshClient ssh, int major, HostArchitecture architecture, CancellationToken cancellationToken)
+    {
+        var package = await adoptium.GetLatestJreAsync(major, "linux", RemoteJava.AdoptiumArchitecture(architecture), cancellationToken).ConfigureAwait(false);
         await VpsConnector.RunAsync(ssh, RemoteJava.InstallCommand(package), cancellationToken).ConfigureAwait(false);
     }
 

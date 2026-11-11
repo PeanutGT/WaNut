@@ -21,6 +21,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 {
     private readonly ServerViewModel _server;
     private readonly IDialogService _dialogs;
+    private readonly long _thisPcMb = MemoryLimits.TotalPhysicalMb();
     private ServerSettings _loaded = new();
     private bool _loading;
 
@@ -29,8 +30,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         _server = server;
         _dialogs = dialogs;
         App = app;
-        var totalMb = MemoryLimits.TotalPhysicalMb();
-        MaxMemoryMb = Math.Max(MemoryLimits.MaxServerMb(totalMb), server.Metadata.MemoryMb);
         CollectionChangedEventManager.AddHandler(app.VpsList, (_, _) => LoadRunLocations());
         Reload();
     }
@@ -56,7 +55,19 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     public int MinMemoryMb => MemoryLimits.MinimumMb;
 
-    public int MaxMemoryMb { get; }
+    /// <summary>
+    /// From the RAM of where the server runs: this PC, or the VPS once it reported its RAM. Never below the saved value,
+    /// so moving a server to a smaller VPS doesn't lower its memory unnoticed; <see cref="MemoryOverVpsText"/> says so.
+    /// </summary>
+    [ObservableProperty]
+    private int _maxMemoryMb = MemoryLimits.MinimumMb;
+
+    /// <summary>Set when the memory is more than the chosen VPS can give, so the start would be refused.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowMemoryOverVps))]
+    private string? _memoryOverVpsText;
+
+    public bool ShowMemoryOverVps => MemoryOverVpsText is not null;
 
     public int MemoryStepMb => MemoryLimits.StepMb;
 
@@ -259,6 +270,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         {
             case nameof(MemoryMb):
                 SaveMetadata(_server.Metadata with { MemoryMb = Math.Clamp(MemoryMb, MinMemoryMb, MaxMemoryMb) });
+                UpdateMemoryLimit();
                 break;
             case nameof(CustomJvmArguments):
                 SaveJvmArguments();
@@ -272,6 +284,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             case nameof(RunLocation) when RunLocation is not null && RunLocation.VpsId != _server.Metadata.VpsId:
                 SaveMetadata(_server.Metadata with { VpsId = RunLocation.VpsId });
                 _server.Connect.OnRunLocationChanged();
+                UpdateMemoryLimit();
                 break;
             case nameof(Port) or nameof(OnlineMode):
                 SaveProperties();
@@ -304,6 +317,30 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         {
             _loading = wasLoading;
         }
+
+        UpdateMemoryLimit();
+    }
+
+    private void UpdateMemoryLimit()
+    {
+        var vpsMb = App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId)?.MemoryMb ?? 0;
+
+        // A VPS not tested since this was added falls back to this PC; the start still checks the real RAM.
+        var limit = MemoryLimits.MaxServerMb(vpsMb > 0 ? vpsMb : _thisPcMb);
+        var wasLoading = _loading;
+        _loading = true;
+        try
+        {
+            MaxMemoryMb = Math.Max(limit, _server.Metadata.MemoryMb);
+        }
+        finally
+        {
+            _loading = wasLoading;
+        }
+
+        MemoryOverVpsText = vpsMb > 0 && _server.Metadata.MemoryMb > limit
+            ? string.Format(Text.Get("Server_MemoryOverVps"), vpsMb / 1024.0, limit / 1024.0)
+            : null;
     }
 
     private void SaveJvmArguments()

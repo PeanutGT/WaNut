@@ -210,6 +210,17 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         }
     }
 
+    /// <summary>Keeps the RAM a VPS reported at a start, so the Server tab's slider fits it. Saves only on a change.</summary>
+    public void RememberVpsMemory(string id, long memoryMb)
+    {
+        var index = VpsList.ToList().FindIndex(v => v.Id == id);
+        if (index >= 0 && memoryMb > 0 && VpsList[index].MemoryMb != memoryMb)
+        {
+            VpsList[index] = VpsList[index] with { MemoryMb = memoryMb };
+            Save();
+        }
+    }
+
     [RelayCommand]
     private void RemoveVps(VpsProfile profile)
     {
