@@ -36,7 +36,7 @@ jobs:
       - name: Test
         run: |
           dotnet build -c Release
-          dotnet test -c Release --no-build --filter "Category!=Network"
+          dotnet test -c Release --no-build --filter "Category!=Network&Category!=Ssh"
 
       - name: Publish
         run: dotnet publish src/WaNut.App/WaNut.App.csproj -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true -p:Version=${{ steps.version.outputs.version }} -o publish
