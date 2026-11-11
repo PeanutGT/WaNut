@@ -28,6 +28,8 @@ public sealed record HostInfo
 
     public long MemoryBytes { get; init; }
 
+    public long MemoryMb => MemoryBytes / (1024 * 1024);
+
     /// <summary>Free space in the home folder, where WaNut keeps everything.</summary>
     public long FreeDiskBytes { get; init; }
 

@@ -36,6 +36,12 @@ public sealed record VpsProfile
     /// </summary>
     public string? HostKey { get; init; }
 
+    /// <summary>
+    /// The VPS's RAM in MB, read by "Test connection" and again at each start; 0 until then. It caps the Server tab's
+    /// memory slider for servers that run here, since this PC's RAM says nothing about the VPS.
+    /// </summary>
+    public long MemoryMb { get; init; }
+
     /// <summary>What friends type in Minecraft to join a server on this VPS: "host:port", with brackets around IPv6.</summary>
     public string Endpoint(int port)
     {

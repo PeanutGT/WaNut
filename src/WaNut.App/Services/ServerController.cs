@@ -134,6 +134,10 @@ public sealed class ServerController(
         {
             server.ShowError(Text.Get("Server_VpsLoginFailed"));
         }
+        catch (VpsMemoryException e)
+        {
+            server.ShowError(string.Format(Text.Get("Server_VpsMemoryTooHigh"), server.Metadata.MemoryMb / 1024.0, e.VpsMemoryMb / 1024.0, e.MaxServerMb / 1024.0));
+        }
         catch (Exception e) when (e is VpsUnreachableException or SshException or InvalidOperationException)
         {
             server.ShowError(string.Format(Text.Get("Server_VpsFailed"), e.InnerException?.Message ?? e.Message));
@@ -176,7 +180,8 @@ public sealed class ServerController(
 
         var steps = new Progress<VpsStep>(step => server.VpsText = Text.Get($"Status_Vps{step}"));
         var upload = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsUploadingPercent"), p.Fraction * 100));
-        var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload);
+        var memoryRead = new Progress<long>(mb => app.RememberVpsMemory(vps.Id, mb));
+        var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload, memoryRead);
         server.VpsText = null;
 
         // From here the VPS copy is the one that counts, until it has come back.

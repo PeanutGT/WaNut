@@ -2504,6 +2504,12 @@
   <data name="Server_VpsLoginFailed" xml:space="preserve">
     <value>無法登入 VPS。請到 App 設定 &gt; 我的 VPS 檢查使用者、金鑰或密碼。</value>
   </data>
+  <data name="Server_VpsMemoryTooHigh" xml:space="preserve">
+    <value>伺服器設定用 {0:0.#} GB，但 VPS 只有 {1:0.#} GB。請到伺服器分頁調到最多 {2:0.#} GB 再啟動。</value>
+  </data>
+  <data name="Server_MemoryOverVps" xml:space="preserve">
+    <value>這台 VPS 有 {0:0.#} GB 記憶體，伺服器最多能用 {1:0.#} GB。請調低記憶體，不然會無法啟動。</value>
+  </data>
   <data name="Server_VpsFailed" xml:space="preserve">
     <value>無法在 VPS 上啟動伺服器：{0}</value>
   </data>

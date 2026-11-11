@@ -193,7 +193,7 @@ public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, 
                 try
                 {
                     var info = await tester.TestAsync(draft, TypedSecret, _test.Token);
-                    _profile = _profile with { Host = draft.Host, Port = draft.Port, HostKey = draft.HostKey };
+                    _profile = _profile with { Host = draft.Host, Port = draft.Port, HostKey = draft.HostKey, MemoryMb = info.MemoryMb };
                     TestText = Describe(info);
                     TestProblems = DescribeProblems(info);
                     return;

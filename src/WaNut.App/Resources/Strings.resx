@@ -2524,6 +2524,12 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   <data name="Server_VpsLoginFailed" xml:space="preserve">
     <value>Couldn't sign in to the VPS. Check the user, key or password in App settings &gt; My VPS.</value>
   </data>
+  <data name="Server_VpsMemoryTooHigh" xml:space="preserve">
+    <value>The server is set to {0:0.#} GB, but the VPS has only {1:0.#} GB. Give it at most {2:0.#} GB in the Server tab, then start again.</value>
+  </data>
+  <data name="Server_MemoryOverVps" xml:space="preserve">
+    <value>This VPS has {0:0.#} GB of RAM, so a server there can use at most {1:0.#} GB. Lower the memory, or the start will be refused.</value>
+  </data>
   <data name="Server_VpsFailed" xml:space="preserve">
     <value>Couldn't start the server on the VPS: {0}</value>
   </data>
