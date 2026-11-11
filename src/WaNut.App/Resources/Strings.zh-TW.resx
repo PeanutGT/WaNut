@@ -2555,6 +2555,24 @@
   <data name="Connect_Hint_Vps" xml:space="preserve">
     <value>給網路上任何地方的朋友。VPS 主機商的防火牆要開放這個連接埠。</value>
   </data>
+  <data name="Connect_VpsReachChecking" xml:space="preserve">
+    <value>正在從這台電腦檢查朋友連不連得到 {0}…</value>
+  </data>
+  <data name="Connect_VpsReach_Open" xml:space="preserve">
+    <value>朋友連得到 {0}。</value>
+  </data>
+  <data name="Connect_VpsReach_Refused" xml:space="preserve">
+    <value>朋友還連不到 {0}：VPS 拒絕了連線，大概是 VPS 自己的防火牆擋住連接埠 {1}（Oracle Cloud 的 Ubuntu 映像檔用 iptables 擋掉 SSH 以外的所有連接埠）。請在 VPS 上放行 TCP 連接埠 {1}，再檢查一次。</value>
+  </data>
+  <data name="Connect_VpsReach_NoAnswer" xml:space="preserve">
+    <value>朋友還連不到 {0}：VPS 沒有回應，大概是雲端廠商的防火牆擋住連接埠 {1}。請到廠商的網頁主控台放行 TCP 連接埠 {1} 的連入（Oracle Cloud：Security List；AWS：Security Group；Azure：網路安全性群組；Google Cloud：防火牆規則），再檢查一次。</value>
+  </data>
+  <data name="Connect_VpsReach_Unknown" xml:space="preserve">
+    <value>無法從這台電腦檢查 {0}。請確認這台電腦有連上網路，再檢查一次。</value>
+  </data>
+  <data name="Connect_VpsReachAgain" xml:space="preserve">
+    <value>再檢查一次</value>
+  </data>
   <data name="Connect_VpsNote" xml:space="preserve">
     <value>這台伺服器在你的 VPS 上執行，所以不會用到這台電腦的防火牆、路由器和 playit.gg。VPS 開著就會持續計費。</value>
   </data>
