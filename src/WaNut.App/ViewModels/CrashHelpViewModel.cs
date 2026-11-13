@@ -189,7 +189,7 @@ public sealed partial class CrashHelpViewModel(ServerViewModel server, IDialogSe
                 ? string.Format(Resources.Text.Get("Crash_ClientOnlyMod_Text"), names)
                 : Resources.Text.Get("Crash_ClientOnlyMod_TextUnknown"),
             CrashCause.OutOfMemory => string.Format(Resources.Text.Get("Crash_OutOfMemory_Text"), memory),
-            CrashCause.MemoryTooHigh => string.Format(Resources.Text.Get("Crash_MemoryTooHigh_Text"), memory),
+            CrashCause.MemoryTooHigh => string.Format(Resources.Text.Get(server.Metadata.VpsId is null ? "Crash_MemoryTooHigh_Text" : "Crash_MemoryTooHigh_TextVps"), memory),
             CrashCause.WrongJava => d.ModIds.Count > 0
                 ? string.Format(Resources.Text.Get("Crash_WrongJava_TextMod"), names, d.Detail ?? "?", server.Metadata.JavaMajor, game)
                 : string.Format(Resources.Text.Get("Crash_WrongJava_Text"), d.Detail ?? "?", server.Metadata.JavaMajor),

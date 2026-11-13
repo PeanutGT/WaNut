@@ -70,14 +70,14 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
             : serverJar;
 
     /// <summary>
-    /// Stops the start when the server asks for more than <see cref="MemoryLimits.MaxServerMb"/> of the VPS's RAM, so
-    /// Java doesn't get killed for memory later. The number is never lowered behind the user's back. 0 (RAM not read)
+    /// Stops the start when the server asks for more than <see cref="MemoryLimits.MaxVpsServerMb"/> of the VPS's RAM, so
+    /// Java doesn't fail to get its heap or get killed for memory later. The number is never lowered behind the user's back. 0 (RAM not read)
     /// lets it through.
     /// </summary>
     /// <exception cref="VpsMemoryException">Too much for this VPS.</exception>
     public static void CheckMemory(int serverMb, long vpsMemoryMb)
     {
-        if (vpsMemoryMb > 0 && serverMb > MemoryLimits.MaxServerMb(vpsMemoryMb))
+        if (vpsMemoryMb > 0 && serverMb > MemoryLimits.MaxVpsServerMb(vpsMemoryMb))
         {
             throw new VpsMemoryException(vpsMemoryMb);
         }

@@ -2148,6 +2148,9 @@
   <data name="Crash_MemoryTooHigh_Text" xml:space="preserve">
     <value>這台伺服器設成 {0:0.#} GB，比電腦現在能給的還多。到伺服器分頁調低，或關掉其他程式再試一次。</value>
   </data>
+  <data name="Crash_MemoryTooHigh_TextVps" xml:space="preserve">
+    <value>這台伺服器設成 {0:0.#} GB，比 VPS 能給的還多。到伺服器分頁調低，或改用記憶體更大的 VPS。</value>
+  </data>
   <data name="Crash_WrongJava_Title" xml:space="preserve">
     <value>需要更新的 Java</value>
   </data>
@@ -2506,6 +2509,12 @@
   </data>
   <data name="Server_VpsMemoryTooHigh" xml:space="preserve">
     <value>伺服器設定用 {0:0.#} GB，但 VPS 只有 {1:0.#} GB。請到伺服器分頁調到最多 {2:0.#} GB 再啟動。</value>
+  </data>
+  <data name="Server_MemoryVpsTooSmall" xml:space="preserve">
+    <value>這台 VPS 只有 {0:0.#} GB 記憶體，放不下 Minecraft 伺服器，啟動會被擋下。請改用更大的 VPS。</value>
+  </data>
+  <data name="Server_VpsMemoryTooSmall" xml:space="preserve">
+    <value>這台 VPS 只有 {1:0.#} GB 記憶體，扣掉 Linux 後放不下 Minecraft 伺服器。請改用至少 {3:0.#} GB 的 VPS。</value>
   </data>
   <data name="Server_MemoryOverVps" xml:space="preserve">
     <value>這台 VPS 有 {0:0.#} GB 記憶體，伺服器最多能用 {1:0.#} GB。請調低記憶體，不然會無法啟動。</value>

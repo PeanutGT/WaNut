@@ -23,6 +23,23 @@ public sealed class VpsMemoryTests
     }
 
     [Fact]
+    public void CheckMemory_OneGigabyteVps_RefusesEvenTheMinimum()
+    {
+        // Oracle's VM.Standard.E2.1.Micro reports about 954 MB: Java can't commit a 1 GB heap next to Linux there.
+        var e = Assert.Throws<VpsMemoryException>(() => VpsLaunchPlanner.CheckMemory(1024, 954));
+
+        Assert.True(e.VpsTooSmall);
+    }
+
+    [Theory]
+    [InlineData(954, 0)]
+    [InlineData(1536, 1024)]
+    [InlineData(2048, 1536)]
+    [InlineData(12288, 9216)]
+    public void MaxVpsServerMb_LeavesRoomForLinuxAndJava(long vpsMb, int expected) =>
+        Assert.Equal(expected, Core.Hosting.MemoryLimits.MaxVpsServerMb(vpsMb));
+
+    [Fact]
     public void CheckMemory_RamNotRead_LetsItThrough() =>
         VpsLaunchPlanner.CheckMemory(16384, 0);
 

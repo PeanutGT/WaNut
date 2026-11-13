@@ -2166,6 +2166,9 @@ Install {0} anyway?</value>
   <data name="Crash_MemoryTooHigh_Text" xml:space="preserve">
     <value>This server is set to {0:0.#} GB, more than the PC can give right now. Lower it on the Server tab, or close other programs and try again.</value>
   </data>
+  <data name="Crash_MemoryTooHigh_TextVps" xml:space="preserve">
+    <value>This server is set to {0:0.#} GB, more than the VPS can give it. Lower it on the Server tab, or run the server on a VPS with more memory.</value>
+  </data>
   <data name="Crash_WrongJava_Title" xml:space="preserve">
     <value>This needs a newer Java</value>
   </data>
@@ -2526,6 +2529,12 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   </data>
   <data name="Server_VpsMemoryTooHigh" xml:space="preserve">
     <value>The server is set to {0:0.#} GB, but the VPS has only {1:0.#} GB. Give it at most {2:0.#} GB in the Server tab, then start again.</value>
+  </data>
+  <data name="Server_MemoryVpsTooSmall" xml:space="preserve">
+    <value>This VPS has only {0:0.#} GB of memory, too little for a Minecraft server. The start will be refused; use a bigger VPS.</value>
+  </data>
+  <data name="Server_VpsMemoryTooSmall" xml:space="preserve">
+    <value>The VPS has only {1:0.#} GB of memory, too little for a Minecraft server next to Linux. Use a VPS with at least {3:0.#} GB.</value>
   </data>
   <data name="Server_MemoryOverVps" xml:space="preserve">
     <value>This VPS has {0:0.#} GB of RAM, so a server there can use at most {1:0.#} GB. Lower the memory, or the start will be refused.</value>
