@@ -40,6 +40,18 @@ public sealed class SecretStoreTests : IDisposable
     }
 
     [Fact]
+    public void Delete_BeforeAnySecretWasSaved_DoesNothing()
+    {
+        // The first VPS saved with a key file deletes its (never written) password while the folder is still missing.
+        Assert.False(Directory.Exists(_store.Folder));
+
+        _store.Delete("abc123", SecretKind.Password);
+        _store.DeleteAll("abc123");
+
+        Assert.False(_store.Has("abc123", SecretKind.Password));
+    }
+
+    [Fact]
     public void DeleteAll_RemovesEveryKindForThatVpsOnly()
     {
         _store.Save("abc123", SecretKind.Password, "a");

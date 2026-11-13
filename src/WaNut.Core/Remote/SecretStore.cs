@@ -41,7 +41,15 @@ public sealed class SecretStore(LauncherPaths paths, ISecretProtector protector)
 
     public bool Has(string profileId, SecretKind kind) => File.Exists(PathFor(profileId, kind));
 
-    public void Delete(string profileId, SecretKind kind) => File.Delete(PathFor(profileId, kind));
+    /// <summary>Does nothing when the secret, or the whole folder, was never written.</summary>
+    public void Delete(string profileId, SecretKind kind)
+    {
+        var path = PathFor(profileId, kind);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
 
     /// <summary>Removes every secret of a VPS, when the user removes it from WaNut.</summary>
     public void DeleteAll(string profileId)
