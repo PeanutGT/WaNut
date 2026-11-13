@@ -6,6 +6,7 @@
         Icon="pack://application:,,,/Assets/wanut.ico"
         Style="{StaticResource AppWindow}"
         Width="480" SizeToContent="Height"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
@@ -14,7 +15,14 @@
   </Window.Resources>
 
   <!-- DataContext: VpsViewModel -->
-  <StackPanel Margin="24">
+  <DockPanel Margin="24">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button Content="{res:Text Vps_Save}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}"
+              MinWidth="80" Margin="0,0,8,0" IsDefault="True" />
+      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsCancel="True" />
+    </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+    <StackPanel>
     <StackPanel Orientation="Horizontal">
       <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
       <TextBlock Text="{res:Text Vps_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -102,10 +110,7 @@
       <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
     </Border>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="{res:Text Vps_Save}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}"
-              MinWidth="80" Margin="0,0,8,0" IsDefault="True" />
-      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsCancel="True" />
     </StackPanel>
-  </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
 </Window>
