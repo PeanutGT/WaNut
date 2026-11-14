@@ -2343,6 +2343,21 @@
   <data name="Vps_Title" xml:space="preserve">
     <value>VPS</value>
   </data>
+  <data name="Vps_GuideLink" xml:space="preserve">
+    <value>要怎麼取得 VPS（Oracle Cloud 免費方案）？</value>
+  </data>
+  <data name="Vps_GuideFailed" xml:space="preserve">
+    <value>無法開啟瀏覽器。教學在 {0}</value>
+  </data>
+  <data name="Vps_OpenFirewall" xml:space="preserve">
+    <value>伺服器啟動時，自動在這台 VPS 的防火牆開連接埠</value>
+  </data>
+  <data name="Vps_OpenFirewallHint" xml:space="preserve">
+    <value>需要免密碼 sudo。WaNut 只會新增規則，不會刪掉任何規則。雲端廠商自己的防火牆（例如 Oracle 的 Security List）還是要到它的網站上開。</value>
+  </data>
+  <data name="Vps_OracleNote" xml:space="preserve">
+    <value>Oracle Cloud 可能會收回閒置一週（CPU、網路、記憶體用量都很低）的永久免費主機。每次停止後世界都會存回這台電腦，不會遺失，只是可能要重新建立主機。</value>
+  </data>
   <data name="Vps_Intro" xml:space="preserve">
     <value>WaNut 用 SSH 登入。用一個能在自己家目錄安裝程式的帳號就好，不需要 root。</value>
   </data>
@@ -2600,7 +2615,7 @@
   <data name="Server_VpsFirewallAsk" xml:space="preserve">
     <value>「{0}」的防火牆擋住了連接埠 {1}，朋友還連不進來。
 
-要讓 WaNut 每次啟動時，自動在這台 VPS 的防火牆開你的伺服器連接埠嗎？WaNut 只會新增規則，不會刪掉任何規則。選「否」的話，連線分頁會顯示讓你自己執行的指令。</value>
+要讓 WaNut 每次啟動時，自動在這台 VPS 的防火牆開你的伺服器連接埠嗎？WaNut 只會新增規則，不會刪掉任何規則。選「否」的話，連線分頁會顯示讓你自己執行的指令。之後可以在 App 設定 &gt; 我的 VPS 更改。</value>
   </data>
   <data name="Server_VpsFirewallOpened" xml:space="preserve">
     <value>已在 VPS 防火牆開放 TCP 連接埠 {0}。</value>

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,7 +16,12 @@ namespace WaNut.App.ViewModels;
 public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, IDialogService dialogs, IClipboardService clipboard)
     : ObservableObject
 {
+    // The guide lives in the repo (Peanut's decision 2A), one page per language.
+    private static readonly Uri GuideEnglish = new("https://github.com/PeanutGT/WaNut/blob/main/docs/vps-guide.md");
+    private static readonly Uri GuideChinese = new("https://github.com/PeanutGT/WaNut/blob/main/docs/vps-guide.zh-TW.md");
+
     private VpsProfile _profile = new() { Login = VpsLogin.GeneratedKey };
+    private bool _openFirewallTouched;
     private SshKeyPair? _newKey;
     private CancellationTokenSource? _test;
 
@@ -115,6 +121,33 @@ public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, 
     [ObservableProperty]
     private string? _errorText;
 
+    /// <summary>The answer to "open server ports in this VPS's firewall", which a start asks once; changeable here.</summary>
+    [ObservableProperty]
+    private bool _openFirewall;
+
+    /// <summary>From the last test or start; Oracle gets a note about reclaiming idle free hosts.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowOracleNote))]
+    private VpsProvider _provider;
+
+    public bool ShowOracleNote => Provider == VpsProvider.Oracle;
+
+    partial void OnOpenFirewallChanged(bool value) => _openFirewallTouched = true;
+
+    [RelayCommand]
+    private void OpenGuide()
+    {
+        var page = CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? GuideChinese : GuideEnglish;
+        try
+        {
+            Process.Start(new ProcessStartInfo(page.AbsoluteUri) { UseShellExecute = true });
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            ErrorText = string.Format(Text.Get("Vps_GuideFailed"), page.AbsoluteUri);
+        }
+    }
+
     public void Initialize(VpsProfile? existing)
     {
         if (existing is null)
@@ -130,6 +163,9 @@ public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, 
         Port = existing.Port.ToString(CultureInfo.InvariantCulture);
         User = existing.User;
         KeyFile = existing.KeyFile ?? string.Empty;
+        Provider = existing.Provider;
+        OpenFirewall = existing.OpenFirewall == true;
+        _openFirewallTouched = false;
         HasSavedPassword = secrets.Has(existing.Id, SecretKind.Password);
         HasSavedPassphrase = secrets.Has(existing.Id, SecretKind.KeyPassphrase);
 
@@ -194,6 +230,7 @@ public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, 
                 {
                     var info = await tester.TestAsync(draft, TypedSecret, _test.Token);
                     _profile = _profile with { Host = draft.Host, Port = draft.Port, HostKey = draft.HostKey, MemoryMb = info.MemoryMb, Provider = info.Provider };
+                    Provider = info.Provider;
                     TestText = Describe(info);
                     TestProblems = DescribeProblems(info);
                     return;
@@ -273,6 +310,9 @@ public sealed partial class VpsViewModel(SecretStore secrets, VpsTester tester, 
             Login = Login,
             KeyFile = Login == VpsLogin.KeyFile ? KeyFile.Trim() : null,
             PublicKey = Login == VpsLogin.GeneratedKey ? PublicKey : null,
+
+            // Left unasked until the user ticks or unticks the box, so the first start can still ask.
+            OpenFirewall = _openFirewallTouched ? OpenFirewall : _profile.OpenFirewall,
         };
 
         // A host typed differently is probably another machine, so its key must be confirmed again.

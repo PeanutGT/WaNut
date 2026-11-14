@@ -2363,6 +2363,21 @@ Start it anyway?</value>
   <data name="Vps_Title" xml:space="preserve">
     <value>VPS</value>
   </data>
+  <data name="Vps_GuideLink" xml:space="preserve">
+    <value>How do I get a VPS (free on Oracle Cloud)?</value>
+  </data>
+  <data name="Vps_GuideFailed" xml:space="preserve">
+    <value>Couldn't open the browser. The guide is at {0}</value>
+  </data>
+  <data name="Vps_OpenFirewall" xml:space="preserve">
+    <value>Open my servers' ports in this VPS's firewall when they start</value>
+  </data>
+  <data name="Vps_OpenFirewallHint" xml:space="preserve">
+    <value>Needs password-less sudo. WaNut only adds rules and never removes any. The cloud provider's own firewall (such as Oracle's Security List) still has to be opened on its website.</value>
+  </data>
+  <data name="Vps_OracleNote" xml:space="preserve">
+    <value>Oracle Cloud may take back an Always Free host that stays idle for a week (low CPU, network and memory use). Your worlds come back to this PC after each stop, so nothing is lost, but you may have to create the host again.</value>
+  </data>
   <data name="Vps_Intro" xml:space="preserve">
     <value>WaNut signs in with SSH. Use an account that can install programs in its own home folder; root is not needed.</value>
   </data>
@@ -2620,7 +2635,7 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   <data name="Server_VpsFirewallAsk" xml:space="preserve">
     <value>The firewall on “{0}” blocks port {1}, so friends can't join yet.
 
-Should WaNut open the ports of your servers in this VPS's firewall at each start? It only adds rules and never removes any. If you say no, the Connect tab shows the commands to run yourself.</value>
+Should WaNut open the ports of your servers in this VPS's firewall at each start? It only adds rules and never removes any. If you say no, the Connect tab shows the commands to run yourself. You can change this later in App settings &gt; My VPS.</value>
   </data>
   <data name="Server_VpsFirewallOpened" xml:space="preserve">
     <value>Opened TCP port {0} in the VPS firewall.</value>
