@@ -184,4 +184,45 @@ public sealed class ModrinthClientTests
     {
         Assert.Equal(ModrinthClient.ProjectsUrl(["a", "b"]), ModrinthClient.ProjectsUrl(["b", "a"]));
     }
+
+    [Theory]
+    [InlineData(ModSort.Newest, "index=newest")]
+    [InlineData(ModSort.Updated, "index=updated")]
+    [InlineData(ModSort.Downloads, "index=downloads")]
+    public void SearchUrl_WithSort_UsesThatIndex(ModSort sort, string expected)
+    {
+        var url = ModrinthClient.SearchUrl(ModPlatform.For(ServerType.Fabric)!, "1.21.1", "sodium", 0, sort);
+
+        Assert.Contains(expected, url.Query, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParseSearch_ReadsIconDateAndServerSide()
+    {
+        var json = """
+            {"hits":[{"project_id":"p","slug":"s","title":"T","downloads":5,"icon_url":"https://cdn.modrinth.com/data/p/icon.png",
+              "date_modified":"2026-11-11T13:44:04+00:00","server_side":"required"},
+             {"project_id":"q","title":"U","downloads":1,"icon_url":"http://insecure.example/icon.png"}],"total_hits":2}
+            """;
+
+        var page = ModrinthClient.ParseSearch(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json)));
+
+        Assert.Equal(new Uri("https://cdn.modrinth.com/data/p/icon.png"), page.Hits[0].IconUrl);
+        Assert.Equal(new DateTimeOffset(2026, 11, 11, 13, 44, 4, TimeSpan.Zero), page.Hits[0].Updated);
+        Assert.Equal("required", page.Hits[0].ServerSide);
+        Assert.Null(page.Hits[1].IconUrl);
+    }
+
+    [Fact]
+    public void ParseLatestVersions_SkipsUnsafeFiles()
+    {
+        var good = Version("v1", "release", "2026-10-01T00:00:00Z");
+        var bad = Version("v2", "release", "2026-10-01T00:00:00Z", fileName: "../evil.jar");
+        var json = $$"""{"aaa":{{good}},"bbb":{{bad}}}""";
+
+        var latest = ModrinthClient.ParseLatestVersions(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json)));
+
+        Assert.Equal(["aaa"], latest.Keys);
+        Assert.Equal("v1", latest["aaa"].VersionId);
+    }
 }

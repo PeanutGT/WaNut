@@ -2667,4 +2667,82 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Backups_AfterVpsFailed" xml:space="preserve">
     <value>The files are back from the VPS, but backing them up failed: {0}</value>
   </data>
+  <data name="Mods_Sort" xml:space="preserve">
+    <value>Sort by</value>
+  </data>
+  <data name="Mods_SortRelevance" xml:space="preserve">
+    <value>Best match</value>
+  </data>
+  <data name="Mods_SortDownloads" xml:space="preserve">
+    <value>Most downloaded</value>
+  </data>
+  <data name="Mods_SortNewest" xml:space="preserve">
+    <value>Newest</value>
+  </data>
+  <data name="Mods_SortUpdated" xml:space="preserve">
+    <value>Recently updated</value>
+  </data>
+  <data name="Mods_UpdatedToday" xml:space="preserve">
+    <value>updated today</value>
+  </data>
+  <data name="Mods_UpdatedDays" xml:space="preserve">
+    <value>updated {0} days ago</value>
+  </data>
+  <data name="Mods_UpdatedMonths" xml:space="preserve">
+    <value>updated {0} months ago</value>
+  </data>
+  <data name="Mods_UpdatedYears" xml:space="preserve">
+    <value>updated {0} years ago</value>
+  </data>
+  <data name="Mods_ServerRequired" xml:space="preserve">
+    <value>Needed on the server</value>
+  </data>
+  <data name="Mods_ServerOptional" xml:space="preserve">
+    <value>Optional on the server</value>
+  </data>
+  <data name="Mods_UpdatesAvailable" xml:space="preserve">
+    <value>{0} updates available</value>
+  </data>
+  <data name="Mods_UpToDate" xml:space="preserve">
+    <value>Everything is up to date.</value>
+  </data>
+  <data name="Mods_CheckingUpdates" xml:space="preserve">
+    <value>Checking for updates…</value>
+  </data>
+  <data name="Mods_UpdateCheckFailed" xml:space="preserve">
+    <value>Couldn't check for updates: {0}</value>
+  </data>
+  <data name="Mods_UpdateAll" xml:space="preserve">
+    <value>Update all</value>
+  </data>
+  <data name="Mods_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Mods_UpdateLabel" xml:space="preserve">
+    <value>Update {0}</value>
+  </data>
+  <data name="Mods_NewVersion" xml:space="preserve">
+    <value>New version: {0}</value>
+  </data>
+  <data name="Mods_BackingUp" xml:space="preserve">
+    <value>Backing up the world before updating…</value>
+  </data>
+  <data name="Mods_Updating" xml:space="preserve">
+    <value>Updating {0}…</value>
+  </data>
+  <data name="Mods_UpdateDone" xml:space="preserve">
+    <value>Updated {0}. The world was backed up first.</value>
+  </data>
+  <data name="Mods_UpdateDoneNoWorld" xml:space="preserve">
+    <value>Updated {0}.</value>
+  </data>
+  <data name="Mods_UpdateFailed" xml:space="preserve">
+    <value>Couldn't update {0}: {1}</value>
+  </data>
+  <data name="Mods_UpdateBackupFailed" xml:space="preserve">
+    <value>Nothing was updated, because the world backup failed: {0}</value>
+  </data>
+  <data name="Backups_Reason_ModUpdate" xml:space="preserve">
+    <value>Before an update</value>
+  </data>
 </root>

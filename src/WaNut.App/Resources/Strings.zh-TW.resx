@@ -2647,4 +2647,82 @@
   <data name="Backups_AfterVpsFailed" xml:space="preserve">
     <value>檔案已經從 VPS 拿回來，但備份失敗：{0}</value>
   </data>
+  <data name="Mods_Sort" xml:space="preserve">
+    <value>排序</value>
+  </data>
+  <data name="Mods_SortRelevance" xml:space="preserve">
+    <value>最相關</value>
+  </data>
+  <data name="Mods_SortDownloads" xml:space="preserve">
+    <value>最多下載</value>
+  </data>
+  <data name="Mods_SortNewest" xml:space="preserve">
+    <value>最新</value>
+  </data>
+  <data name="Mods_SortUpdated" xml:space="preserve">
+    <value>最近更新</value>
+  </data>
+  <data name="Mods_UpdatedToday" xml:space="preserve">
+    <value>今天更新</value>
+  </data>
+  <data name="Mods_UpdatedDays" xml:space="preserve">
+    <value>{0} 天前更新</value>
+  </data>
+  <data name="Mods_UpdatedMonths" xml:space="preserve">
+    <value>{0} 個月前更新</value>
+  </data>
+  <data name="Mods_UpdatedYears" xml:space="preserve">
+    <value>{0} 年前更新</value>
+  </data>
+  <data name="Mods_ServerRequired" xml:space="preserve">
+    <value>伺服器必裝</value>
+  </data>
+  <data name="Mods_ServerOptional" xml:space="preserve">
+    <value>伺服器可選</value>
+  </data>
+  <data name="Mods_UpdatesAvailable" xml:space="preserve">
+    <value>有 {0} 個可以更新</value>
+  </data>
+  <data name="Mods_UpToDate" xml:space="preserve">
+    <value>全部都是最新版。</value>
+  </data>
+  <data name="Mods_CheckingUpdates" xml:space="preserve">
+    <value>正在檢查更新…</value>
+  </data>
+  <data name="Mods_UpdateCheckFailed" xml:space="preserve">
+    <value>無法檢查更新：{0}</value>
+  </data>
+  <data name="Mods_UpdateAll" xml:space="preserve">
+    <value>全部更新</value>
+  </data>
+  <data name="Mods_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Mods_UpdateLabel" xml:space="preserve">
+    <value>更新 {0}</value>
+  </data>
+  <data name="Mods_NewVersion" xml:space="preserve">
+    <value>新版本：{0}</value>
+  </data>
+  <data name="Mods_BackingUp" xml:space="preserve">
+    <value>更新前先備份世界…</value>
+  </data>
+  <data name="Mods_Updating" xml:space="preserve">
+    <value>正在更新 {0}…</value>
+  </data>
+  <data name="Mods_UpdateDone" xml:space="preserve">
+    <value>已更新 {0}。更新前已先備份世界。</value>
+  </data>
+  <data name="Mods_UpdateDoneNoWorld" xml:space="preserve">
+    <value>已更新 {0}。</value>
+  </data>
+  <data name="Mods_UpdateFailed" xml:space="preserve">
+    <value>無法更新 {0}：{1}</value>
+  </data>
+  <data name="Mods_UpdateBackupFailed" xml:space="preserve">
+    <value>世界備份失敗，所以沒有更新任何東西：{0}</value>
+  </data>
+  <data name="Backups_Reason_ModUpdate" xml:space="preserve">
+    <value>更新模組前</value>
+  </data>
 </root>

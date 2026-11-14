@@ -26,4 +26,7 @@ public enum BackupReason
 
     /// <summary>Made right after the server's files came back from the user's VPS.</summary>
     Vps,
+
+    /// <summary>The world as it was just before mods or plugins were updated.</summary>
+    ModUpdate,
 }
