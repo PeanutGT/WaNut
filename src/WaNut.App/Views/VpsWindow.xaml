@@ -27,7 +27,10 @@
       <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
       <TextBlock Text="{res:Text Vps_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
-    <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,16" />
+    <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,4" />
+    <TextBlock Margin="0,0,0,16">
+      <Hyperlink Command="{Binding OpenGuideCommand}"><Run Text="{res:Text Vps_GuideLink}" /></Hyperlink>
+    </TextBlock>
 
     <TextBlock Text="{res:Text Vps_NameLabel}" FontWeight="SemiBold" Margin="0,0,0,6" />
     <TextBox x:Name="NameBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MaxLength="64"
@@ -89,6 +92,11 @@
 
     <TextBlock Text="{res:Text Vps_SecretsLocal}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0" />
 
+    <CheckBox IsChecked="{Binding OpenFirewall}" Margin="0,14,0,0">
+      <TextBlock Text="{res:Text Vps_OpenFirewall}" TextWrapping="Wrap" />
+    </CheckBox>
+    <TextBlock Text="{res:Text Vps_OpenFirewallHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="22,4,0,0" />
+
     <DockPanel Margin="0,16,0,0">
       <Button DockPanel.Dock="Left" Content="{res:Text Vps_Test}" Command="{Binding TestCommand}" VerticalAlignment="Top" Margin="0,0,12,0" />
       <StackPanel>
@@ -96,6 +104,10 @@
         <TextBlock Text="{Binding TestProblems}" Foreground="{DynamicResource ErrorTextBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
       </StackPanel>
     </DockPanel>
+
+    <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0" Visibility="{Binding ShowOracleNote, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="{res:Text Vps_OracleNote}" TextWrapping="Wrap" />
+    </Border>
 
     <Border Margin="0,14,0,0">
       <Border.Style>
