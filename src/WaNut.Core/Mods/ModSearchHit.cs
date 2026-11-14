@@ -19,6 +19,9 @@ public sealed record ModSearchHit(
     /// <summary>"required", "optional" or "unsupported": whether the project runs on a server.</summary>
     public string? ServerSide { get; init; }
 
+    /// <summary>"required", "optional" or "unsupported": whether players need the project in their game too.</summary>
+    public string? ClientSide { get; init; }
+
     /// <summary>The project's page on modrinth.com, e.g. https://modrinth.com/mod/sodium.</summary>
     public Uri PageUrl => new($"https://modrinth.com/{Uri.EscapeDataString(ProjectType)}/{Uri.EscapeDataString(Slug)}");
 }

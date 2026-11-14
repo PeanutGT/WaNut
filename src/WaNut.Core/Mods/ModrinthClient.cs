@@ -37,16 +37,89 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         }
 
         var trimmed = query.Trim();
-        var index = (sort ?? (trimmed.Length == 0 ? ModSort.Downloads : ModSort.Relevance)) switch
-        {
-            ModSort.Relevance => "relevance",
-            ModSort.Newest => "newest",
-            ModSort.Updated => "updated",
-            _ => "downloads",
-        };
+        var index = IndexName(sort ?? (trimmed.Length == 0 ? ModSort.Downloads : ModSort.Relevance));
         return new Uri(string.Create(
             CultureInfo.InvariantCulture,
             $"{ApiBase}/search?query={Uri.EscapeDataString(trimmed)}&facets={Escape(facets)}&index={index}&offset={offset}&limit={PageSize}"));
+    }
+
+    /// <summary>
+    /// Search URL for data packs or resource packs for this Minecraft version. Data packs come only as zips
+    /// ("datapack" loader); many are also published as mods, which this facet leaves to the Mods tab.
+    /// </summary>
+    public static Uri PackSearchUrl(WaNut.Core.Packs.PackKind kind, string gameVersion, string query, int offset, ModSort? sort = null)
+    {
+        List<string[]> facets =
+        [
+            [$"project_type:{TypeName(kind)}"],
+            [$"versions:{gameVersion}"],
+        ];
+        var trimmed = query.Trim();
+        var index = IndexName(sort ?? (trimmed.Length == 0 ? ModSort.Downloads : ModSort.Relevance));
+        return new Uri(string.Create(
+            CultureInfo.InvariantCulture,
+            $"{ApiBase}/search?query={Uri.EscapeDataString(trimmed)}&facets={Escape(facets)}&index={index}&offset={offset}&limit={PageSize}"));
+    }
+
+    public static Uri PackVersionsUrl(string projectId, WaNut.Core.Packs.PackKind kind, string gameVersion) =>
+        new($"{ApiBase}/project/{Uri.EscapeDataString(projectId)}/version?loaders={Escape(new[] { LoaderName(kind) })}&game_versions={Escape(new[] { gameVersion })}");
+
+    private static string TypeName(WaNut.Core.Packs.PackKind kind) => kind == WaNut.Core.Packs.PackKind.DataPack ? "datapack" : "resourcepack";
+
+    private static string LoaderName(WaNut.Core.Packs.PackKind kind) => kind == WaNut.Core.Packs.PackKind.DataPack ? "datapack" : "minecraft";
+
+    private static string IndexName(ModSort sort) => sort switch
+    {
+        ModSort.Relevance => "relevance",
+        ModSort.Newest => "newest",
+        ModSort.Updated => "updated",
+        _ => "downloads",
+    };
+
+    public async Task<ModSearchPage> SearchPacksAsync(
+        WaNut.Core.Packs.PackKind kind, string gameVersion, string query, int offset, ModSort? sort = null, CancellationToken cancellationToken = default)
+    {
+        await using var stream = await GetStreamAsync(PackSearchUrl(kind, gameVersion, query, offset, sort), cancellationToken).ConfigureAwait(false);
+        return ParseSearch(stream);
+    }
+
+    /// <summary>The newest release of a pack for this Minecraft version (a beta when there is none), or null.</summary>
+    public async Task<WaNut.Core.Packs.PackVersion?> GetBestPackVersionAsync(
+        string projectId, WaNut.Core.Packs.PackKind kind, string gameVersion, CancellationToken cancellationToken = default)
+    {
+        await using var stream = await GetStreamAsync(PackVersionsUrl(projectId, kind, gameVersion), cancellationToken).ConfigureAwait(false);
+        return ParseBestPackVersion(stream, kind, gameVersion);
+    }
+
+    /// <summary>The primary file must be an HTTPS .zip with SHA-512 and SHA-1 (players' games check the SHA-1).</summary>
+    public static WaNut.Core.Packs.PackVersion? ParseBestPackVersion(Stream versionsJson, WaNut.Core.Packs.PackKind kind, string gameVersion)
+    {
+        var versions = JsonSerializer.Deserialize<List<VersionDto>>(versionsJson)
+            ?? throw new InvalidDataException("The Modrinth version list is empty.");
+        var best = versions
+            .Where(v => v.GameVersions.Contains(gameVersion, StringComparer.Ordinal)
+                && v.Loaders.Contains(LoaderName(kind), StringComparer.Ordinal)
+                && v.Files.Count > 0)
+            .OrderBy(v => v.VersionType switch { "release" => 0, "beta" => 1, _ => 2 })
+            .ThenByDescending(v => v.DatePublished)
+            .FirstOrDefault();
+        if (best is null)
+        {
+            return null;
+        }
+
+        var file = best.Files.FirstOrDefault(f => f.Primary) ?? best.Files[0];
+        var url = SafeHttps(file.Url) ?? throw new InvalidDataException($"The Modrinth download {file.Url} is not HTTPS.");
+        if (!WaNut.Core.Packs.PackLibrary.IsSafeZipName(file.FileName))
+        {
+            throw new InvalidDataException($"The Modrinth file name \"{file.FileName}\" is not a plain .zip name.");
+        }
+
+        var sha512 = file.Hashes?.GetValueOrDefault("sha512")
+            ?? throw new InvalidDataException($"The Modrinth file {file.FileName} has no SHA-512 checksum.");
+        var sha1 = file.Hashes?.GetValueOrDefault("sha1")
+            ?? throw new InvalidDataException($"The Modrinth file {file.FileName} has no SHA-1 checksum.");
+        return new WaNut.Core.Packs.PackVersion(best.ProjectId, best.Id, best.VersionNumber, file.FileName, url, sha512, sha1);
     }
 
     public static Uri VersionsUrl(string projectId, ModPlatform platform, string gameVersion) =>
@@ -275,6 +348,7 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
                 IconUrl = SafeHttps(h.IconUrl),
                 Updated = h.DateModified,
                 ServerSide = h.ServerSide,
+                ClientSide = h.ClientSide,
             })
             .ToList();
         return new ModSearchPage(hits, result.TotalHits);
@@ -384,7 +458,8 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         [property: JsonPropertyName("project_type")] string? ProjectType,
         [property: JsonPropertyName("icon_url")] string? IconUrl = null,
         [property: JsonPropertyName("date_modified")] DateTimeOffset? DateModified = null,
-        [property: JsonPropertyName("server_side")] string? ServerSide = null);
+        [property: JsonPropertyName("server_side")] string? ServerSide = null,
+        [property: JsonPropertyName("client_side")] string? ClientSide = null);
 
     private sealed record IdentifiedDto(
         [property: JsonPropertyName("project_id")] string ProjectId,

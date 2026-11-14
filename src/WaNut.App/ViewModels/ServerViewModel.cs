@@ -13,6 +13,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
 using WaNut.Core.Notifications;
+using WaNut.Core.Packs;
 using WaNut.Core.Profiling;
 using WaNut.Core.Remote.Run;
 
@@ -66,6 +67,7 @@ public sealed partial class ServerViewModel : ObservableObject
         TunnelService tunnels,
         IClipboardService clipboard,
         ModLibrary mods,
+        PackLibrary packs,
         Spark spark,
         DiscordNotifier discord,
         PlayerFaces faces)
@@ -81,6 +83,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs, backups);
+        Packs = new PacksViewModel(this, packs, dialogs);
         Performance = new PerformanceViewModel(this, spark);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
@@ -115,6 +118,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public PerformanceViewModel Performance { get; }
 
     public ModsViewModel Mods { get; }
+
+    public PacksViewModel Packs { get; }
 
     public CrashHelpViewModel CrashHelp { get; }
 
@@ -258,10 +263,10 @@ public sealed partial class ServerViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanStart))]
     private Task StartAsync() => _controller.StartAsync(this);
 
-    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking;
+    private bool CanStart() => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && !Packs.IsWorking;
 
     /// <summary>Deleting needs the server stopped, its files here, and nothing else working on them.</summary>
-    internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && !FilesOnVps;
+    internal bool CanDelete => Status == ServerStatus.Stopped && !IsPreparing && !Backups.IsWorking && !Mods.IsWorking && !Packs.IsWorking && !FilesOnVps;
 
     /// <summary>The folder is gone: let go of the shared services and tell the list.</summary>
     internal void OnDeleted()
@@ -367,6 +372,7 @@ public sealed partial class ServerViewModel : ObservableObject
         OnVpsStateChanged();
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
+        Packs.OnServerStatusChanged();
         ServerSettings.OnFilesBusyChanged();
         Performance.OnServerStatusChanged();
     }
@@ -423,6 +429,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.Reload();
         Backups.Reload();
         Mods.Reload();
+        Packs.Reload();
     }
 
     /// <summary>The server now has another type or Minecraft version: refresh every tab that depends on it.</summary>
@@ -434,6 +441,7 @@ public sealed partial class ServerViewModel : ObservableObject
         PlayerLists.Reload();
         Backups.Reload();
         Mods.OnTypeOrVersionChanged();
+        Packs.OnTypeOrVersionChanged();
         Performance.OnServerStatusChanged();
     }
 
@@ -464,6 +472,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.OnServerStatusChanged();
         Backups.OnServerStatusChanged();
         Mods.OnServerStatusChanged();
+        Packs.OnServerStatusChanged();
         Connect.OnServerStatusChanged(value);
         Performance.OnServerStatusChanged();
         if (value == ServerStatus.Online)

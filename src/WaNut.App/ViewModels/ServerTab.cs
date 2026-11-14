@@ -9,6 +9,7 @@ public enum ServerTab
     Server,
     Backups,
     Mods,
+    Packs,
     Connect,
     Performance,
 }

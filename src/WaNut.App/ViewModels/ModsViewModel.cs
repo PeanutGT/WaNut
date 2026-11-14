@@ -540,7 +540,10 @@ public sealed partial class ModsViewModel : ObservableObject
                     _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress, chosenVersion: version);
             }
 
-            return InstallMessage(item.Title, result);
+            var message = InstallMessage(item.Title, result);
+            return result.Installed.Count > 0 && item.Hit.ClientSide == "required"
+                ? message + Environment.NewLine + string.Format(Text.Get("Mods_ClientAlsoNeeded"), item.Title)
+                : message;
         }
         catch (NoCompatibleVersionException)
         {
