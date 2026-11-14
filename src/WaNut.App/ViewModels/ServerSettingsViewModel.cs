@@ -71,8 +71,16 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     public int MemoryStepMb => MemoryLimits.StepMb;
 
+    /// <summary>Past 75% of this PC's memory on a server that runs here: allowed, with a warning.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowMemoryAboveRecommended))]
+    private int _recommendedMemoryMb = int.MaxValue;
+
+    public bool ShowMemoryAboveRecommended => MemoryMb > RecommendedMemoryMb;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MemoryText))]
+    [NotifyPropertyChangedFor(nameof(ShowMemoryAboveRecommended))]
     private int _memoryMb;
 
     [ObservableProperty]
@@ -333,6 +341,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         try
         {
             MaxMemoryMb = Math.Max(limit, _server.Metadata.MemoryMb);
+            RecommendedMemoryMb = vpsMb > 0 ? int.MaxValue : MemoryLimits.RecommendedServerMb(_thisPcMb);
         }
         finally
         {

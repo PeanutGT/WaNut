@@ -33,6 +33,8 @@
                 IsSnapToTickEnabled="True"
                 AutomationProperties.Name="{res:Text CreateServer_MemoryLabel}" />
         <TextBlock Text="{res:Text CreateServer_MemoryHint}" Style="{StaticResource Hint}" />
+        <TextBlock Text="{res:Text CreateServer_MemoryAboveRecommended}" Style="{StaticResource Hint}" Foreground="{DynamicResource WarningTextBrush}"
+                   Visibility="{Binding ShowMemoryAboveRecommended, Converter={StaticResource Visible}}" />
         <TextBlock Text="{Binding MemoryOverVpsText}" Style="{StaticResource Hint}" Foreground="{DynamicResource ErrorTextBrush}"
                    Visibility="{Binding ShowMemoryOverVps, Converter={StaticResource Visible}}" />
         <TextBlock Text="{res:Text Server_NextStartHint}" Style="{StaticResource Hint}"

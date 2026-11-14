@@ -61,7 +61,10 @@
     <value>{0:0.#} GB</value>
   </data>
   <data name="CreateServer_MemoryHint" xml:space="preserve">
-    <value>上限是這台電腦記憶體的 75%，讓 Windows 和 Minecraft 都跑得順。</value>
+    <value>建議不超過這台電腦記憶體的 75%。可以調更高，WaNut 一定會留 2 GB 給 Windows。</value>
+  </data>
+  <data name="CreateServer_MemoryAboveRecommended" xml:space="preserve">
+    <value>已超過 75%：這台電腦上的 Windows 和 Minecraft 可能會變慢或記憶體不足。</value>
   </data>
   <data name="CreateServer_EulaPrefix" xml:space="preserve">
     <value>我同意</value>

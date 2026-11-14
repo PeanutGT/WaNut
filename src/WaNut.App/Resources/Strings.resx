@@ -61,7 +61,10 @@
     <value>{0:0.#} GB</value>
   </data>
   <data name="CreateServer_MemoryHint" xml:space="preserve">
-    <value>Capped at 75% of this PC's memory so Windows and Minecraft stay responsive.</value>
+    <value>Up to 75% of this PC's memory is recommended. You can go higher; WaNut always leaves 2 GB for Windows.</value>
+  </data>
+  <data name="CreateServer_MemoryAboveRecommended" xml:space="preserve">
+    <value>Above 75%: Windows and Minecraft on this PC may slow down or run out of memory.</value>
   </data>
   <data name="CreateServer_EulaPrefix" xml:space="preserve">
     <value>I accept the</value>

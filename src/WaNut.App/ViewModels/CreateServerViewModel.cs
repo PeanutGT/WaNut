@@ -68,6 +68,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
         var totalMb = MemoryLimits.TotalPhysicalMb();
         MaxMemoryMb = MemoryLimits.MaxServerMb(totalMb);
+        RecommendedMemoryMb = MemoryLimits.RecommendedServerMb(totalMb);
         _memoryMb = MemoryLimits.DefaultServerMb(totalMb);
     }
 
@@ -199,6 +200,11 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public int MaxMemoryMb { get; }
 
+    public int RecommendedMemoryMb { get; }
+
+    /// <summary>Past 75% of this PC's memory: allowed, but Windows and the game may slow down.</summary>
+    public bool ShowMemoryAboveRecommended => MemoryMb > RecommendedMemoryMb;
+
     public int MemoryStepMb => MemoryLimits.StepMb;
 
     public InstanceMetadata? Created { get; private set; }
@@ -220,6 +226,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MemoryText))]
+    [NotifyPropertyChangedFor(nameof(ShowMemoryAboveRecommended))]
     private int _memoryMb;
 
     [ObservableProperty]

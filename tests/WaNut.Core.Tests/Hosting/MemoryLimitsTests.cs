@@ -9,7 +9,18 @@ public sealed class MemoryLimitsTests
     [InlineData(8192, 6144)]
     [InlineData(6000, 4096)]
     [InlineData(1024, 1024)]
-    public void MaxServerMb_TotalRam_IsSeventyFivePercentRoundedDown(long totalMb, int expected)
+    public void RecommendedServerMb_TotalRam_IsSeventyFivePercentRoundedDown(long totalMb, int expected)
+    {
+        Assert.Equal(expected, MemoryLimits.RecommendedServerMb(totalMb));
+    }
+
+    [Theory]
+    [InlineData(16384, 14336)]
+    [InlineData(32768, 30720)]
+    [InlineData(8192, 6144)]
+    [InlineData(6000, 4096)]
+    [InlineData(1024, 1024)]
+    public void MaxServerMb_TotalRam_KeepsTwoGigabytesButNeverBelowRecommended(long totalMb, int expected)
     {
         Assert.Equal(expected, MemoryLimits.MaxServerMb(totalMb));
     }
