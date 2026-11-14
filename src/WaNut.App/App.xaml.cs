@@ -123,6 +123,7 @@ public partial class App : Application
         services.AddSingleton<AppUpdater>();
         services.AddSingleton<ModrinthClient>();
         services.AddSingleton<ModLibrary>();
+        services.AddSingleton<WaNut.Core.Packs.PackLibrary>();
         services.AddSingleton<Spark>();
         services.AddSingleton<ModpackInstaller>();
         services.AddSingleton<DiscordWebhook>();

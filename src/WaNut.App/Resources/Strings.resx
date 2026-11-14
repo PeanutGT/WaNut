@@ -2832,4 +2832,91 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Mods_AddNothing" xml:space="preserve">
     <value>Nothing was added.</value>
   </data>
+  <data name="Server_TabPacks" xml:space="preserve">
+    <value>Packs</value>
+  </data>
+  <data name="Packs_ResourcePack" xml:space="preserve">
+    <value>Server resource pack</value>
+  </data>
+  <data name="Packs_ResourcePackHint" xml:space="preserve">
+    <value>Players' games download it from Modrinth when they join. Pick one from the list below.</value>
+  </data>
+  <data name="Packs_NoResourcePack" xml:space="preserve">
+    <value>No resource pack yet.</value>
+  </data>
+  <data name="Packs_Require" xml:space="preserve">
+    <value>Players must accept it (those who say no are disconnected)</value>
+  </data>
+  <data name="Packs_ClearResourcePack" xml:space="preserve">
+    <value>Stop using</value>
+  </data>
+  <data name="Packs_DataPacks" xml:space="preserve">
+    <value>Data packs</value>
+  </data>
+  <data name="Packs_InstalledDataPacks" xml:space="preserve">
+    <value>Data packs in the world ({0})</value>
+  </data>
+  <data name="Packs_DataPacksHint" xml:space="preserve">
+    <value>Data packs live in the world and change recipes, loot or add new content. They load the next time the server starts.</value>
+  </data>
+  <data name="Packs_EmptyDataPacks" xml:space="preserve">
+    <value>No data packs yet.</value>
+  </data>
+  <data name="Packs_KindDataPacks" xml:space="preserve">
+    <value>Data packs</value>
+  </data>
+  <data name="Packs_KindResourcePacks" xml:space="preserve">
+    <value>Resource packs</value>
+  </data>
+  <data name="Packs_FindDataPacks" xml:space="preserve">
+    <value>Find data packs on Modrinth</value>
+  </data>
+  <data name="Packs_FindResourcePacks" xml:space="preserve">
+    <value>Find resource packs on Modrinth</value>
+  </data>
+  <data name="Packs_Filter" xml:space="preserve">
+    <value>Showing packs for Minecraft {0}.</value>
+  </data>
+  <data name="Packs_UseResourcePack" xml:space="preserve">
+    <value>Use</value>
+  </data>
+  <data name="Packs_InUse" xml:space="preserve">
+    <value>In use</value>
+  </data>
+  <data name="Packs_Setting" xml:space="preserve">
+    <value>Saving the resource pack…</value>
+  </data>
+  <data name="Packs_ResourcePackSet" xml:space="preserve">
+    <value>Players now get {0} when they join.</value>
+  </data>
+  <data name="Packs_ResourcePackCleared" xml:space="preserve">
+    <value>The server no longer offers {0}.</value>
+  </data>
+  <data name="Packs_DataPackInstalled" xml:space="preserve">
+    <value>Installed {0}. It loads the next time the server starts.</value>
+  </data>
+  <data name="Packs_NoVersion" xml:space="preserve">
+    <value>{0} has no version for Minecraft {1}.</value>
+  </data>
+  <data name="Packs_RemoveConfirm" xml:space="preserve">
+    <value>Remove {0} from {1}? Things it added to the world may disappear.</value>
+  </data>
+  <data name="Packs_SaveFailed" xml:space="preserve">
+    <value>Couldn't save server.properties: {0}</value>
+  </data>
+  <data name="Packs_ListFailed" xml:space="preserve">
+    <value>Couldn't read the packs: {0}</value>
+  </data>
+  <data name="Packs_StopToChange" xml:space="preserve">
+    <value>Stop the server to change packs.</value>
+  </data>
+  <data name="Mods_ClientAlsoNeeded" xml:space="preserve">
+    <value>Friends also need {0} in their own game to join.</value>
+  </data>
+  <data name="Guide_PacksTitle" xml:space="preserve">
+    <value>Data packs and resource packs</value>
+  </data>
+  <data name="Guide_PacksText" xml:space="preserve">
+    <value>Add data packs to the world and pick a resource pack friends get when they join. Works on every server, Vanilla too.</value>
+  </data>
 </root>

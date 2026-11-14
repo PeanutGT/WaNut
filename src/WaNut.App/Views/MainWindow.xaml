@@ -461,6 +461,10 @@
             <views:ModsView DataContext="{Binding Mods}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
+          <TabItem Header="{res:Text Server_TabPacks}">
+            <views:PacksView DataContext="{Binding Packs}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+          </TabItem>
+
           <TabItem Header="{res:Text Server_TabConnect}">
             <views:ConnectView DataContext="{Binding Connect}" />
           </TabItem>

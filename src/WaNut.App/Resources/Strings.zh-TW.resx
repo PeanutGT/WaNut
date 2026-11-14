@@ -2812,4 +2812,91 @@
   <data name="Mods_AddNothing" xml:space="preserve">
     <value>沒有加入任何檔案。</value>
   </data>
+  <data name="Server_TabPacks" xml:space="preserve">
+    <value>資料包</value>
+  </data>
+  <data name="Packs_ResourcePack" xml:space="preserve">
+    <value>伺服器資源包</value>
+  </data>
+  <data name="Packs_ResourcePackHint" xml:space="preserve">
+    <value>玩家加入時，遊戲會自動從 Modrinth 下載。從下面的清單挑一個。</value>
+  </data>
+  <data name="Packs_NoResourcePack" xml:space="preserve">
+    <value>還沒有設定資源包。</value>
+  </data>
+  <data name="Packs_Require" xml:space="preserve">
+    <value>玩家必須接受（拒絕的人會被斷線）</value>
+  </data>
+  <data name="Packs_ClearResourcePack" xml:space="preserve">
+    <value>停止使用</value>
+  </data>
+  <data name="Packs_DataPacks" xml:space="preserve">
+    <value>資料包</value>
+  </data>
+  <data name="Packs_InstalledDataPacks" xml:space="preserve">
+    <value>世界裡的資料包（{0}）</value>
+  </data>
+  <data name="Packs_DataPacksHint" xml:space="preserve">
+    <value>資料包放在世界裡，可以改配方、戰利品或加入新內容。下次啟動伺服器時生效。</value>
+  </data>
+  <data name="Packs_EmptyDataPacks" xml:space="preserve">
+    <value>還沒有資料包。</value>
+  </data>
+  <data name="Packs_KindDataPacks" xml:space="preserve">
+    <value>資料包</value>
+  </data>
+  <data name="Packs_KindResourcePacks" xml:space="preserve">
+    <value>資源包</value>
+  </data>
+  <data name="Packs_FindDataPacks" xml:space="preserve">
+    <value>在 Modrinth 找資料包</value>
+  </data>
+  <data name="Packs_FindResourcePacks" xml:space="preserve">
+    <value>在 Modrinth 找資源包</value>
+  </data>
+  <data name="Packs_Filter" xml:space="preserve">
+    <value>顯示適用 Minecraft {0} 的項目。</value>
+  </data>
+  <data name="Packs_UseResourcePack" xml:space="preserve">
+    <value>使用</value>
+  </data>
+  <data name="Packs_InUse" xml:space="preserve">
+    <value>使用中</value>
+  </data>
+  <data name="Packs_Setting" xml:space="preserve">
+    <value>正在儲存資源包設定…</value>
+  </data>
+  <data name="Packs_ResourcePackSet" xml:space="preserve">
+    <value>玩家加入時會拿到 {0}。</value>
+  </data>
+  <data name="Packs_ResourcePackCleared" xml:space="preserve">
+    <value>伺服器不再提供 {0}。</value>
+  </data>
+  <data name="Packs_DataPackInstalled" xml:space="preserve">
+    <value>已安裝 {0}，下次啟動伺服器時生效。</value>
+  </data>
+  <data name="Packs_NoVersion" xml:space="preserve">
+    <value>{0} 沒有適用 Minecraft {1} 的版本。</value>
+  </data>
+  <data name="Packs_RemoveConfirm" xml:space="preserve">
+    <value>要從 {1} 移除 {0} 嗎？它加進世界的東西可能會消失。</value>
+  </data>
+  <data name="Packs_SaveFailed" xml:space="preserve">
+    <value>無法儲存 server.properties：{0}</value>
+  </data>
+  <data name="Packs_ListFailed" xml:space="preserve">
+    <value>無法讀取資料包：{0}</value>
+  </data>
+  <data name="Packs_StopToChange" xml:space="preserve">
+    <value>停止伺服器後才能變更。</value>
+  </data>
+  <data name="Mods_ClientAlsoNeeded" xml:space="preserve">
+    <value>朋友的遊戲也要裝 {0} 才能加入。</value>
+  </data>
+  <data name="Guide_PacksTitle" xml:space="preserve">
+    <value>資料包和資源包</value>
+  </data>
+  <data name="Guide_PacksText" xml:space="preserve">
+    <value>把資料包加進世界，或挑一個朋友加入時會自動下載的資源包。所有伺服器都能用，原版也行。</value>
+  </data>
 </root>
