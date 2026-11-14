@@ -326,7 +326,8 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         var vpsMb = App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId)?.MemoryMb ?? 0;
 
         // A VPS not tested since this was added falls back to this PC; the start still checks the real RAM.
-        var limit = MemoryLimits.MaxServerMb(vpsMb > 0 ? vpsMb : _thisPcMb);
+        var vpsLimit = MemoryLimits.MaxVpsServerMb(vpsMb);
+        var limit = vpsMb > 0 ? Math.Max(MemoryLimits.MinimumMb, vpsLimit) : MemoryLimits.MaxServerMb(_thisPcMb);
         var wasLoading = _loading;
         _loading = true;
         try
@@ -338,9 +339,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             _loading = wasLoading;
         }
 
-        MemoryOverVpsText = vpsMb > 0 && _server.Metadata.MemoryMb > limit
-            ? string.Format(Text.Get("Server_MemoryOverVps"), vpsMb / 1024.0, limit / 1024.0)
-            : null;
+        MemoryOverVpsText = vpsMb <= 0 || _server.Metadata.MemoryMb <= vpsLimit ? null
+            : vpsLimit < MemoryLimits.MinimumMb ? string.Format(Text.Get("Server_MemoryVpsTooSmall"), vpsMb / 1024.0)
+            : string.Format(Text.Get("Server_MemoryOverVps"), vpsMb / 1024.0, limit / 1024.0);
     }
 
     private void SaveJvmArguments()

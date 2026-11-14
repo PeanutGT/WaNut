@@ -136,7 +136,12 @@ public sealed class ServerController(
         }
         catch (VpsMemoryException e)
         {
-            server.ShowError(string.Format(Text.Get("Server_VpsMemoryTooHigh"), server.Metadata.MemoryMb / 1024.0, e.VpsMemoryMb / 1024.0, e.MaxServerMb / 1024.0));
+            server.ShowError(string.Format(
+                Text.Get(e.VpsTooSmall ? "Server_VpsMemoryTooSmall" : "Server_VpsMemoryTooHigh"),
+                server.Metadata.MemoryMb / 1024.0,
+                e.VpsMemoryMb / 1024.0,
+                e.MaxServerMb / 1024.0,
+                (MemoryLimits.MinimumMb + MemoryLimits.KeptForVpsSystemMb) / 1024.0));
         }
         catch (Exception e) when (e is VpsUnreachableException or SshException or InvalidOperationException)
         {

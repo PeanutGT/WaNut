@@ -18,6 +18,20 @@ public static class MemoryLimits
         return Math.Max(MinimumMb, max);
     }
 
+    /// <summary>What a VPS keeps for Linux and for Java beyond its heap (code, threads, buffers).</summary>
+    public const int KeptForVpsSystemMb = 512;
+
+    /// <summary>
+    /// The most a server on a VPS with <paramref name="vpsMb"/> of RAM may use: 75% of it, and never so much that
+    /// Linux and Java's own overhead don't fit beside it. Unlike <see cref="MaxServerMb"/> this can fall below
+    /// <see cref="MinimumMb"/>: such a VPS is too small for any server.
+    /// </summary>
+    public static int MaxVpsServerMb(long vpsMb)
+    {
+        var max = Math.Min(vpsMb * 3 / 4, vpsMb - KeptForVpsSystemMb);
+        return (int)Math.Max(0, max / StepMb * StepMb);
+    }
+
     public static int DefaultServerMb(long totalPhysicalMb) =>
         Math.Clamp(PreferredDefaultMb, MinimumMb, MaxServerMb(totalPhysicalMb));
 

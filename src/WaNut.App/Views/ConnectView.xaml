@@ -141,6 +141,20 @@
         <TextBlock Text="{res:Text Connect_VpsNote}" TextWrapping="Wrap" />
       </Border>
 
+      <!-- On a VPS: whether friends can reach it, checked from this PC once the server is up. -->
+      <StackPanel Visibility="{Binding RunsOnVps, Converter={StaticResource Visible}}" Margin="0,12,0,0">
+        <StackPanel Orientation="Horizontal" Visibility="{Binding ShowVpsReachOk, Converter={StaticResource Visible}}">
+          <Image Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Style="{StaticResource Peanut}" />
+          <TextBlock Text="{Binding VpsReachText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <TextBlock Text="{Binding VpsReachText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding ShowVpsReachInfo, Converter={StaticResource Visible}}" />
+        <Border Style="{StaticResource WarningBanner}" Visibility="{Binding ShowVpsReachProblem, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding VpsReachText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+        <Button Content="{res:Text Connect_VpsReachAgain}" Command="{Binding CheckVpsReachCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
+      </StackPanel>
+
       <StackPanel Visibility="{Binding ShowsThisPcNetwork, Converter={StaticResource Visible}}">
         <!-- Windows Firewall -->
         <TextBlock Text="{res:Text Connect_Firewall}" Style="{StaticResource Label}" Margin="0,22,0,6" />

@@ -10,6 +10,7 @@ using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Hosting;
 using WaNut.Core.Network;
+using WaNut.Core.Remote.Reach;
 using WaNut.Core.Settings;
 using WaNut.Core.Sharing;
 using WaNut.Core.Tunnels;
@@ -47,6 +48,9 @@ public sealed partial class ConnectViewModel : ObservableObject
     // The playit.gg address while the tunnel runs, and the approval in the browser while it is awaited.
     private string? _tunnelAddress;
     private CancellationTokenSource? _tunnelSetup;
+
+    // The check from this PC to the server on the VPS; cancelled when the server stops.
+    private CancellationTokenSource? _vpsReachCheck;
 
     public ConnectViewModel(
         ServerViewModel server, FirewallService firewall, PortForwardService portForwards, TunnelService tunnels, IClipboardService clipboard,
@@ -133,6 +137,29 @@ public sealed partial class ConnectViewModel : ObservableObject
     public bool RunsOnVps => _server.Metadata.VpsId is not null;
 
     public bool ShowsThisPcNetwork => !RunsOnVps;
+
+    /// <summary>The last check from this PC to the server on the VPS; null before the first one and once it stops.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VpsReachText), nameof(ShowVpsReachOk), nameof(ShowVpsReachProblem), nameof(ShowVpsReachInfo))]
+    private VpsReach? _vpsReach;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VpsReachText), nameof(ShowVpsReachOk), nameof(ShowVpsReachProblem), nameof(ShowVpsReachInfo))]
+    [NotifyCanExecuteChangedFor(nameof(CheckVpsReachCommand))]
+    private bool _isCheckingVpsReach;
+
+    public string? VpsReachText => VpsEndpoint() is not { } endpoint
+        ? null
+        : IsCheckingVpsReach
+            ? string.Format(Text.Get("Connect_VpsReachChecking"), endpoint)
+            : VpsReach is { } reach ? string.Format(Text.Get($"Connect_VpsReach_{reach}"), endpoint, LoadPort()) : null;
+
+    public bool ShowVpsReachOk => !IsCheckingVpsReach && VpsReach == Core.Remote.Reach.VpsReach.Open;
+
+    public bool ShowVpsReachProblem => !IsCheckingVpsReach && VpsReach is Core.Remote.Reach.VpsReach.Refused or Core.Remote.Reach.VpsReach.NoAnswer;
+
+    /// <summary>Checking, or a result that says nothing about the VPS: plain text.</summary>
+    public bool ShowVpsReachInfo => VpsReachText is not null && !ShowVpsReachOk && !ShowVpsReachProblem;
 
     /// <summary>The Server tab changed where this server runs.</summary>
     internal void OnRunLocationChanged()
@@ -281,7 +308,19 @@ public sealed partial class ConnectViewModel : ObservableObject
     /// <summary>The port is forwarded while the server runs, and the rule is removed once it stops.</summary>
     internal void OnServerStatusChanged(ServerStatus status)
     {
+        CheckVpsReachCommand.NotifyCanExecuteChanged();
+        if (status == ServerStatus.Stopped)
+        {
+            _vpsReachCheck?.Cancel();
+            VpsReach = null;
+        }
+
         // The home router and playit.gg are for a server on this PC; a VPS is reached directly.
+        if (RunsOnVps && status == ServerStatus.Online)
+        {
+            _ = CheckVpsReachAsync();
+        }
+
         if (RunsOnVps && status != ServerStatus.Stopped)
         {
             return;
@@ -550,6 +589,44 @@ public sealed partial class ConnectViewModel : ObservableObject
         {
             // Show the default port rather than no addresses at all.
             return ServerSettings.DefaultPort;
+        }
+    }
+
+    private string? VpsEndpoint() =>
+        RunsOnVps && App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId) is { } vps ? vps.Endpoint(LoadPort()) : null;
+
+    private bool CanCheckVpsReach() => RunsOnVps && _server.Status == ServerStatus.Online && !IsCheckingVpsReach;
+
+    /// <summary>
+    /// Once the server is up on the VPS: one connection from this PC to its address, the way a friend joins, so a
+    /// blocked port shows here instead of as "Connection timed out" in a friend's game.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanCheckVpsReach))]
+    private async Task CheckVpsReachAsync()
+    {
+        if (App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId) is not { } vps)
+        {
+            return;
+        }
+
+        _vpsReachCheck?.Cancel();
+        using var check = _vpsReachCheck = new CancellationTokenSource();
+        IsCheckingVpsReach = true;
+        try
+        {
+            VpsReach = await VpsReachability.CheckAsync(vps.Host, LoadPort(), cancellationToken: check.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // The server stopped meanwhile.
+        }
+        finally
+        {
+            if (_vpsReachCheck == check)
+            {
+                _vpsReachCheck = null;
+                IsCheckingVpsReach = false;
+            }
         }
     }
 
