@@ -525,6 +525,43 @@
     </Setter>
   </Style>
 
+  <!-- Radio button: same look as the check box, with a round box and a dot. -->
+  <Style TargetType="RadioButton">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RadioButton">
+          <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border x:Name="Box" Width="18" Height="18" CornerRadius="9" VerticalAlignment="Top" Margin="0,1,0,0"
+                    Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+              <Ellipse x:Name="Dot" Width="8" Height="8" Fill="{DynamicResource CardBrush}" Visibility="Collapsed" />
+            </Border>
+            <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource MutedTextBrush}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Box" Property="Background" Value="{DynamicResource TextBrush}" />
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
+              <Setter TargetName="Dot" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- Expander: "More settings" on each settings page. A chevron and the header; the content opens below. -->
   <Style x:Key="ExpanderHeader" TargetType="ToggleButton">
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />

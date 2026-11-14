@@ -201,6 +201,9 @@
         <TextBlock Text="{res:Text CreateServer_MemoryHint}"
                    Style="{StaticResource MutedText}"
                    TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock Text="{res:Text CreateServer_MemoryAboveRecommended}" Foreground="{DynamicResource WarningTextBrush}"
+                   TextWrapping="Wrap" Margin="0,4,0,0"
+                   Visibility="{Binding ShowMemoryAboveRecommended, Converter={StaticResource Visible}}" />
 
         <TextBlock Text="{res:Text CreateServer_OwnerLabel}" Style="{StaticResource FieldLabel}" />
         <TextBox Text="{Binding OwnerName, UpdateSourceTrigger=PropertyChanged}"

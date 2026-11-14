@@ -11,11 +11,24 @@ public static class MemoryLimits
     public const int StepMb = 512;
     public const int PreferredDefaultMb = 4096;
 
-    /// <summary>75% of physical memory, rounded down to the slider step, never below the minimum.</summary>
-    public static int MaxServerMb(long totalPhysicalMb)
+    /// <summary>What a single server always leaves for Windows, even when the player goes past the recommended amount.</summary>
+    public const int KeptForWindowsAloneMb = 2048;
+
+    /// <summary>75% of physical memory, rounded down to the slider step, never below the minimum. The safe zone.</summary>
+    public static int RecommendedServerMb(long totalPhysicalMb)
     {
         var max = (int)(totalPhysicalMb * 3 / 4 / StepMb * StepMb);
         return Math.Max(MinimumMb, max);
+    }
+
+    /// <summary>
+    /// The slider's top: all memory but <see cref="KeptForWindowsAloneMb"/>, never below <see cref="RecommendedServerMb"/>.
+    /// Above the recommended amount the UI warns that Windows may slow down.
+    /// </summary>
+    public static int MaxServerMb(long totalPhysicalMb)
+    {
+        var max = (int)((totalPhysicalMb - KeptForWindowsAloneMb) / StepMb * StepMb);
+        return Math.Max(RecommendedServerMb(totalPhysicalMb), max);
     }
 
     /// <summary>What a VPS keeps for Linux and for Java beyond its heap (code, threads, buffers).</summary>
@@ -33,7 +46,7 @@ public static class MemoryLimits
     }
 
     public static int DefaultServerMb(long totalPhysicalMb) =>
-        Math.Clamp(PreferredDefaultMb, MinimumMb, MaxServerMb(totalPhysicalMb));
+        Math.Clamp(PreferredDefaultMb, MinimumMb, RecommendedServerMb(totalPhysicalMb));
 
     /// <summary>What Windows and the Minecraft client keep when several servers run at once.</summary>
     public const int KeptForWindowsMb = 3072;
