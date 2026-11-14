@@ -154,7 +154,7 @@ public sealed partial class BackupStore(TimeProvider clock)
         for (var i = 0; i < backups.Count; i++)
         {
             var backup = backups[i];
-            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import or BackupReason.Reset;
+            var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import or BackupReason.Reset or BackupReason.ModUpdate;
             var tooMany = !isSafetyCopy && counted >= rules.KeepCount;
             if (i > 0 && (tooMany || backup.CreatedAt < oldest))
             {

@@ -20,7 +20,8 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
     /// Search URL limited to the server's loaders and Minecraft version. Fabric results also leave out client-only
     /// mods (minimaps, shaders), which do nothing on a server. An empty query lists the most downloaded projects.
     /// </summary>
-    public static Uri SearchUrl(ModPlatform platform, string gameVersion, string query, int offset)
+    /// <param name="sort">Null: most downloaded for an empty query, best match otherwise.</param>
+    public static Uri SearchUrl(ModPlatform platform, string gameVersion, string query, int offset, ModSort? sort = null)
     {
         List<string[]> facets =
         [
@@ -36,7 +37,13 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         }
 
         var trimmed = query.Trim();
-        var index = trimmed.Length == 0 ? "downloads" : "relevance";
+        var index = (sort ?? (trimmed.Length == 0 ? ModSort.Downloads : ModSort.Relevance)) switch
+        {
+            ModSort.Relevance => "relevance",
+            ModSort.Newest => "newest",
+            ModSort.Updated => "updated",
+            _ => "downloads",
+        };
         return new Uri(string.Create(
             CultureInfo.InvariantCulture,
             $"{ApiBase}/search?query={Uri.EscapeDataString(trimmed)}&facets={Escape(facets)}&index={index}&offset={offset}&limit={PageSize}"));
@@ -47,15 +54,17 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
 
     public static readonly Uri VersionFilesUrl = new($"{ApiBase}/version_files");
 
+    public static readonly Uri VersionFilesUpdateUrl = new($"{ApiBase}/version_files/update");
+
     public static Uri ProjectUrl(string projectId) => new($"{ApiBase}/project/{Uri.EscapeDataString(projectId)}");
 
     public static Uri ProjectsUrl(IEnumerable<string> projectIds) =>
         new($"{ApiBase}/projects?ids={Escape(projectIds.Order(StringComparer.Ordinal).ToArray())}");
 
     public async Task<ModSearchPage> SearchAsync(
-        ModPlatform platform, string gameVersion, string query, int offset, CancellationToken cancellationToken = default)
+        ModPlatform platform, string gameVersion, string query, int offset, ModSort? sort = null, CancellationToken cancellationToken = default)
     {
-        await using var stream = await GetStreamAsync(SearchUrl(platform, gameVersion, query, offset), cancellationToken).ConfigureAwait(false);
+        await using var stream = await GetStreamAsync(SearchUrl(platform, gameVersion, query, offset, sort), cancellationToken).ConfigureAwait(false);
         return ParseSearch(stream);
     }
 
@@ -105,6 +114,57 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         return ParseIdentifiedVersions(stream);
     }
 
+    /// <summary>
+    /// The newest release for this loader and Minecraft version of each file's project, by the file's SHA-512 hash.
+    /// Files Modrinth does not know, or whose project has no such release, are left out; a file that is already the
+    /// newest comes back as itself.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<string, ModVersion>> GetLatestVersionsAsync(
+        IReadOnlyCollection<string> sha512Hashes, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default)
+    {
+        if (sha512Hashes.Count == 0)
+        {
+            return new Dictionary<string, ModVersion>();
+        }
+
+        var body = JsonSerializer.Serialize(new
+        {
+            hashes = sha512Hashes,
+            algorithm = "sha512",
+            loaders = platform.Loaders,
+            game_versions = new[] { gameVersion },
+            version_types = new[] { "release" },
+        });
+        using var response = await SendAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, VersionFilesUpdateUrl) { Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json") },
+            cancellationToken).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        return ParseLatestVersions(stream);
+    }
+
+    /// <summary>Versions whose primary file is not a safe HTTPS jar with a SHA-512 are left out.</summary>
+    public static IReadOnlyDictionary<string, ModVersion> ParseLatestVersions(Stream updateJson)
+    {
+        var versions = JsonSerializer.Deserialize<Dictionary<string, VersionDto>>(updateJson) ?? [];
+        var latest = new Dictionary<string, ModVersion>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (hash, version) in versions)
+        {
+            try
+            {
+                if (version.Files.Count > 0)
+                {
+                    latest[hash] = ToModVersion(version);
+                }
+            }
+            catch (Exception e) when (e is InvalidDataException or UriFormatException)
+            {
+                // One odd file must not hide the other updates.
+            }
+        }
+
+        return latest;
+    }
+
     public static IReadOnlySet<string> ParseIdentifiedProjects(Stream versionFilesJson) =>
         ParseIdentifiedFiles(versionFilesJson).Values.ToHashSet(StringComparer.Ordinal);
 
@@ -147,7 +207,12 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
             ?? throw new InvalidDataException("The Modrinth search result is empty.");
 
         var hits = result.Hits
-            .Select(h => new ModSearchHit(h.ProjectId, h.Slug ?? h.ProjectId, h.Title, h.Description ?? string.Empty, h.Author ?? string.Empty, h.Downloads, h.ProjectType ?? "mod"))
+            .Select(h => new ModSearchHit(h.ProjectId, h.Slug ?? h.ProjectId, h.Title, h.Description ?? string.Empty, h.Author ?? string.Empty, h.Downloads, h.ProjectType ?? "mod")
+            {
+                IconUrl = Uri.TryCreate(h.IconUrl, UriKind.Absolute, out var icon) && icon.Scheme == Uri.UriSchemeHttps ? icon : null,
+                Updated = h.DateModified,
+                ServerSide = h.ServerSide,
+            })
             .ToList();
         return new ModSearchPage(hits, result.TotalHits);
     }
@@ -168,11 +233,12 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
             .OrderBy(v => v.VersionType switch { "release" => 0, "beta" => 1, _ => 2 })
             .ThenByDescending(v => v.DatePublished)
             .FirstOrDefault();
-        if (best is null)
-        {
-            return null;
-        }
+        return best is null ? null : ToModVersion(best);
+    }
 
+    /// <summary>The version's primary file, which must be an HTTPS .jar with a SHA-512 checksum.</summary>
+    private static ModVersion ToModVersion(VersionDto best)
+    {
         var file = best.Files.FirstOrDefault(f => f.Primary) ?? best.Files[0];
         var url = new Uri(file.Url);
         if (url.Scheme != Uri.UriSchemeHttps)
@@ -248,7 +314,10 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         [property: JsonPropertyName("description")] string? Description,
         [property: JsonPropertyName("author")] string? Author,
         [property: JsonPropertyName("downloads")] long Downloads,
-        [property: JsonPropertyName("project_type")] string? ProjectType);
+        [property: JsonPropertyName("project_type")] string? ProjectType,
+        [property: JsonPropertyName("icon_url")] string? IconUrl = null,
+        [property: JsonPropertyName("date_modified")] DateTimeOffset? DateModified = null,
+        [property: JsonPropertyName("server_side")] string? ServerSide = null);
 
     private sealed record IdentifiedDto(
         [property: JsonPropertyName("project_id")] string ProjectId,

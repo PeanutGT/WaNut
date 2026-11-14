@@ -223,6 +223,90 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         return new ModCopyResult(installed, noVersion.Distinct().ToList(), clientOnly, unknown);
     }
 
+    /// <summary>
+    /// The installed jars, WaNut's or copied in by hand, that have a newer release on Modrinth for this loader and
+    /// Minecraft version. Jars Modrinth does not know are left out.
+    /// </summary>
+    public async Task<IReadOnlyList<ModUpdate>> CheckUpdatesAsync(
+        string instanceDir, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default)
+    {
+        var folder = platform.FolderIn(instanceDir);
+        var byHash = new Dictionary<string, InstalledMod>(StringComparer.OrdinalIgnoreCase);
+        foreach (var mod in ListInstalled(instanceDir, platform))
+        {
+            byHash.TryAdd(await Task.Run(() => HashFile(folder, mod.FileName), cancellationToken).ConfigureAwait(false), mod);
+        }
+
+        var latest = await modrinth.GetLatestVersionsAsync(byHash.Keys, platform, gameVersion, cancellationToken).ConfigureAwait(false);
+        var newer = latest
+            .Where(l => !string.Equals(l.Key, l.Value.Sha512, StringComparison.OrdinalIgnoreCase)
+                && (byHash[l.Key].VersionId is not { } current || current != l.Value.VersionId))
+            .ToList();
+        if (newer.Count == 0)
+        {
+            return [];
+        }
+
+        var titles = (await modrinth.GetProjectsAsync(newer.Select(n => n.Value.ProjectId).Distinct(StringComparer.Ordinal).ToList(), cancellationToken).ConfigureAwait(false))
+            .ToDictionary(p => p.Id, p => p.Title, StringComparer.Ordinal);
+        return newer
+            .Select(n => new ModUpdate(byHash[n.Key], n.Value, titles.GetValueOrDefault(n.Value.ProjectId) ?? byHash[n.Key].DisplayName))
+            .OrderBy(u => u.Title, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Puts each update's new jar in place of the old one. The new file is downloaded and checked before the old one
+    /// goes, so a failed download leaves the mod as it was. Only call while the server is stopped.
+    /// </summary>
+    /// <returns>The titles of the mods that were updated, in order.</returns>
+    public async Task<IReadOnlyList<string>> UpdateAsync(
+        string instanceDir,
+        ModPlatform platform,
+        IReadOnlyList<ModUpdate> updates,
+        IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var folder = platform.FolderIn(instanceDir);
+        var done = new List<string>();
+        for (var i = 0; i < updates.Count; i++)
+        {
+            var (mod, version, title) = updates[i];
+            if (!ModrinthClient.IsSafeJarName(mod.FileName))
+            {
+                throw new ArgumentException($"\"{mod.FileName}\" is not a jar in the {platform.FolderName} folder.", nameof(updates));
+            }
+
+            var step = i;
+            var fileProgress = progress is null
+                ? null
+                : new SyncProgress<DownloadProgress>(p => progress.Report((step + (p.Fraction ?? 0)) / updates.Count));
+            var sameName = string.Equals(mod.FileName, version.FileName, StringComparison.OrdinalIgnoreCase);
+            var target = Path.Combine(folder, version.FileName);
+            var download = sameName ? target + ".update" : target;
+            await downloader.DownloadAsync(version.Url, download, ExpectedHash.Sha512(version.Sha512), fileProgress, cancellationToken).ConfigureAwait(false);
+            if (sameName)
+            {
+                File.Move(download, target, overwrite: true);
+            }
+            else
+            {
+                File.Delete(Path.Combine(folder, mod.FileName));
+            }
+
+            var records = ReadRecords(instanceDir)
+                .Where(r => !string.Equals(r.FileName, mod.FileName, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(r.FileName, version.FileName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            records.Add(new InstalledMod(version.FileName, version.ProjectId, version.VersionId, title));
+            WriteRecords(instanceDir, records);
+            done.Add(title);
+        }
+
+        progress?.Report(1);
+        return done;
+    }
+
     /// <summary>Deletes the jar. Only call while the server is stopped.</summary>
     public void Remove(string instanceDir, ModPlatform platform, InstalledMod mod)
     {

@@ -268,4 +268,85 @@ public sealed class ModLibraryTests : IDisposable
         Assert.Empty(result.NotOnModrinth);
         Assert.Empty(_http.Requests);
     }
+
+    [Fact]
+    public async Task CheckUpdatesAsync_NewerRelease_ReportsItWithTitle()
+    {
+        Directory.CreateDirectory(ModsDir);
+        var old = Encoding.UTF8.GetBytes("old");
+        File.WriteAllBytes(Path.Combine(ModsDir, "cool-1.0.jar"), old);
+        var current = Encoding.UTF8.GetBytes("current");
+        File.WriteAllBytes(Path.Combine(ModsDir, "same-1.0.jar"), current);
+        var newJar = Encoding.UTF8.GetBytes("new");
+        var newVersion = ModrinthClientTests.Version("v2", "release", "2026-11-01T00:00:00Z", fileName: "cool-2.0.jar", sha512: Sha512(newJar))
+            .Replace("\"project_id\":\"proj\"", "\"project_id\":\"cool\"", StringComparison.Ordinal);
+        var sameVersion = ModrinthClientTests.Version("s1", "release", "2026-10-01T00:00:00Z", fileName: "same-1.0.jar", sha512: Sha512(current));
+        _http.Add(ModrinthClient.VersionFilesUpdateUrl, $$"""{"{{Sha512(old)}}":{{newVersion}},"{{Sha512(current)}}":{{sameVersion}}}""")
+            .Add(ModrinthClient.ProjectsUrl(["cool"]), """[{"id":"cool","title":"Cool Mod","server_side":"required"}]""");
+
+        var updates = await _library.CheckUpdatesAsync(_dir.Path, Fabric, Game);
+
+        var update = Assert.Single(updates);
+        Assert.Equal("cool-1.0.jar", update.Mod.FileName);
+        Assert.Equal("cool-2.0.jar", update.Version.FileName);
+        Assert.Equal("Cool Mod", update.Title);
+    }
+
+    [Fact]
+    public async Task CheckUpdatesAsync_NoJars_AsksModrinthNothing()
+    {
+        var updates = await _library.CheckUpdatesAsync(_dir.Path, Fabric, Game);
+
+        Assert.Empty(updates);
+        Assert.Empty(_http.Requests);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_NewFileName_ReplacesOldJarAndRecord()
+    {
+        Directory.CreateDirectory(ModsDir);
+        File.WriteAllText(Path.Combine(ModsDir, "cool-1.0.jar"), "old");
+        var newJar = Encoding.UTF8.GetBytes("new");
+        var url = new Uri("https://cdn.modrinth.com/data/cool/cool-2.0.jar");
+        _http.Add(url, newJar);
+        var version = new ModVersion("cool", "v2", "2.0", "cool-2.0.jar", url, Sha512(newJar), [], []);
+
+        var done = await _library.UpdateAsync(_dir.Path, Fabric, [new ModUpdate(new InstalledMod("cool-1.0.jar"), version, "Cool Mod")]);
+
+        Assert.Equal(["Cool Mod"], done);
+        Assert.False(File.Exists(Path.Combine(ModsDir, "cool-1.0.jar")));
+        var mod = Assert.Single(_library.ListInstalled(_dir.Path, Fabric));
+        Assert.Equal(new InstalledMod("cool-2.0.jar", "cool", "v2", "Cool Mod"), mod);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_SameFileName_OverwritesJar()
+    {
+        Directory.CreateDirectory(ModsDir);
+        File.WriteAllText(Path.Combine(ModsDir, "cool.jar"), "old");
+        var newJar = Encoding.UTF8.GetBytes("new");
+        var url = new Uri("https://cdn.modrinth.com/data/cool/cool.jar");
+        _http.Add(url, newJar);
+        var version = new ModVersion("cool", "v2", "2.0", "cool.jar", url, Sha512(newJar), [], []);
+
+        await _library.UpdateAsync(_dir.Path, Fabric, [new ModUpdate(new InstalledMod("cool.jar"), version, "Cool Mod")]);
+
+        Assert.Equal("new", File.ReadAllText(Path.Combine(ModsDir, "cool.jar")));
+        Assert.Equal(["cool.jar"], Directory.GetFiles(ModsDir).Select(Path.GetFileName));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_HashMismatch_KeepsOldJar()
+    {
+        Directory.CreateDirectory(ModsDir);
+        File.WriteAllText(Path.Combine(ModsDir, "cool-1.0.jar"), "old");
+        var url = new Uri("https://cdn.modrinth.com/data/cool/cool-2.0.jar");
+        _http.Add(url, Encoding.UTF8.GetBytes("tampered"));
+        var version = new ModVersion("cool", "v2", "2.0", "cool-2.0.jar", url, Sha512(Encoding.UTF8.GetBytes("new")), [], []);
+
+        await Assert.ThrowsAsync<DownloadVerificationException>(() =>
+            _library.UpdateAsync(_dir.Path, Fabric, [new ModUpdate(new InstalledMod("cool-1.0.jar"), version, "Cool Mod")]));
+
+        Assert.Equal(["cool-1.0.jar"], Directory.GetFiles(ModsDir).Select(Path.GetFileName));
+    }
 }
