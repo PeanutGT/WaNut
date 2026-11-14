@@ -82,7 +82,7 @@ public sealed class ServerController(
         {
             if (vps is not null)
             {
-                await StartOnVpsAsync(server, vps);
+                await StartOnVpsAsync(server, vps, automatic);
                 return;
             }
 
@@ -160,7 +160,7 @@ public sealed class ServerController(
     /// or bring its files back first; then back up here, get the VPS ready and upload, and start there. No firewall,
     /// port or memory checks on this PC: none of them apply to the VPS.
     /// </summary>
-    private async Task StartOnVpsAsync(ServerViewModel server, VpsProfile vps)
+    private async Task StartOnVpsAsync(ServerViewModel server, VpsProfile vps, bool automatic)
     {
         if (server.Metadata.VpsCopyIsNewer)
         {
@@ -183,6 +183,8 @@ public sealed class ServerController(
             return;
         }
 
+        await OpenVpsFirewallAsync(server, vps, automatic);
+
         var steps = new Progress<VpsStep>(step => server.VpsText = Text.Get($"Status_Vps{step}"));
         var upload = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsUploadingPercent"), p.Fraction * 100));
         var memoryRead = new Progress<long>(mb => app.RememberVpsMemory(vps.Id, mb));
@@ -192,6 +194,64 @@ public sealed class ServerController(
         // From here the VPS copy is the one that counts, until it has come back.
         server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = true });
         Track(server, vps, host.Start(server.Id, launch, server.Attach, new RemoteServerRuntime(vpsConnector, vps)));
+    }
+
+    /// <summary>
+    /// Lets the server's port through the VPS's own firewall (Oracle's Ubuntu images block all but SSH). Asks once per
+    /// VPS (Peanut's decision 1A); when WaNut may not or can't, the Connect tab shows the commands to run instead.
+    /// Never stops the start: the reachability check after it tells whether friends get in.
+    /// </summary>
+    private async Task OpenVpsFirewallAsync(ServerViewModel server, VpsProfile vps, bool automatic)
+    {
+        server.Connect.VpsFirewallCommands = null;
+        server.VpsText = Text.Get("Status_VpsConnecting");
+        var port = ServerSettingsStore.Load(server.InstanceDir).Port;
+        var (info, firewall) = await vpsPlanner.CheckFirewallAsync(vps);
+        app.UpdateVps(vps.Id, v => v with { MemoryMb = info.MemoryMb, Provider = info.Provider });
+        if (firewall.IsOpen(port) == true)
+        {
+            return;
+        }
+
+        if (firewall.OpenCommand(port) is { } command && MayOpenFirewall(vps.Id, port, automatic))
+        {
+            server.VpsText = Text.Get("Status_VpsOpeningFirewall");
+            try
+            {
+                await vpsPlanner.OpenFirewallAsync(vps, command);
+                server.ShowConsoleNote(string.Format(Text.Get("Server_VpsFirewallOpened"), port));
+                return;
+            }
+            catch (InvalidOperationException e)
+            {
+                server.ShowConsoleNote(string.Format(Text.Get("Server_VpsFirewallFailed"), e.Message));
+            }
+        }
+
+        server.Connect.VpsFirewallCommands = firewall.ManualCommands(port);
+    }
+
+    private bool MayOpenFirewall(string vpsId, int port, bool automatic)
+    {
+        if (app.VpsList.FirstOrDefault(v => v.Id == vpsId) is not { } vps)
+        {
+            return false;
+        }
+
+        if (vps.OpenFirewall is { } answer)
+        {
+            return answer;
+        }
+
+        // A restart after a crash asks nothing, since nobody may be watching.
+        if (automatic)
+        {
+            return false;
+        }
+
+        var allowed = dialogs.Confirm(string.Format(Text.Get("Server_VpsFirewallAsk"), vps.Name, port));
+        app.UpdateVps(vpsId, v => v with { OpenFirewall = allowed });
+        return allowed;
     }
 
     /// <summary>Follows a server that is already running on the VPS, such as one left running when WaNut closed.</summary>

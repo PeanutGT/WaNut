@@ -14,6 +14,7 @@ public static class HostProbe
         "if [ -r /etc/os-release ]; then (. /etc/os-release; echo \"distro=$ID\"; echo \"like=$ID_LIKE\"; echo \"name=$PRETTY_NAME\"); fi; " +
         "awk \"/^MemTotal:/ {print \\\"memkb=\\\" \\$2}\" /proc/meminfo 2>/dev/null; " +
         "df -Pk \"$HOME\" 2>/dev/null | awk \"NR==2 {print \\\"diskkb=\\\" \\$4}\"; " +
+        "for f in chassis_asset_tag sys_vendor product_name; do echo \"dmi_$f=$(cat /sys/class/dmi/id/$f 2>/dev/null)\"; done; " +
         "for t in curl wget tar; do command -v $t >/dev/null 2>&1 && echo \"has=$t\"; done; true";
 
     public static string Command => $"sh -c '{Script}'";
@@ -44,12 +45,26 @@ public static class HostProbe
                 "has" when value == "curl" => info with { HasCurl = true },
                 "has" when value == "wget" => info with { HasWget = true },
                 "has" when value == "tar" => info with { HasTar = true },
+                "dmi_chassis_asset_tag" => info with { AssetTag = value },
+                "dmi_sys_vendor" => info with { SystemVendor = value },
+                "dmi_product_name" => info with { ProductName = value },
                 _ => info,
             };
         }
 
         return info;
     }
+
+    /// <summary>
+    /// Oracle's asset tag was read on a real instance (2026-11-14). The others follow the providers' docs and are not
+    /// checked on real hosts yet; a wrong guess only changes a hint text.
+    /// </summary>
+    public static VpsProvider ProviderOf(string assetTag, string systemVendor, string productName) =>
+        assetTag.Equals("OracleCloud.com", StringComparison.OrdinalIgnoreCase) ? VpsProvider.Oracle
+        : systemVendor.StartsWith("Amazon", StringComparison.OrdinalIgnoreCase) || productName.Contains("EC2", StringComparison.Ordinal) ? VpsProvider.Aws
+        : assetTag == "7783-7084-3265-9085-8269-3286-77" ? VpsProvider.Azure
+        : systemVendor.Equals("Google", StringComparison.OrdinalIgnoreCase) || productName.Contains("Google Compute Engine", StringComparison.Ordinal) ? VpsProvider.Gcp
+        : VpsProvider.Other;
 
     public static HostArchitecture ArchitectureOf(string machine) => machine.ToLowerInvariant() switch
     {

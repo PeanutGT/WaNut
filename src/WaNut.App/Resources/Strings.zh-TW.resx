@@ -2582,6 +2582,32 @@
   <data name="Connect_VpsReachAgain" xml:space="preserve">
     <value>再檢查一次</value>
   </data>
+  <data name="Connect_VpsReach_NoAnswer_Oracle" xml:space="preserve">
+    <value>朋友還連不到 {0}：VPS 沒有回應，大概是 Oracle Cloud 的 Security List 擋住連接埠 {1}。請到 Oracle Cloud 主控台打開你的主機，點它的子網路，再到 Security &gt; Default Security List &gt; Add Ingress Rules：Source CIDR 填 0.0.0.0/0、IP Protocol 選 TCP、Destination Port Range 填 {1}。然後再檢查一次。</value>
+  </data>
+  <data name="Connect_VpsFirewallCommandsLabel" xml:space="preserve">
+    <value>要在 VPS 自己的防火牆開這個連接埠，請在 VPS 上執行：</value>
+  </data>
+  <data name="Connect_VpsFirewallCopy" xml:space="preserve">
+    <value>複製指令</value>
+  </data>
+  <data name="Connect_VpsFirewallCopied" xml:space="preserve">
+    <value>已複製指令。</value>
+  </data>
+  <data name="Status_VpsOpeningFirewall" xml:space="preserve">
+    <value>正在 VPS 上開伺服器的連接埠…</value>
+  </data>
+  <data name="Server_VpsFirewallAsk" xml:space="preserve">
+    <value>「{0}」的防火牆擋住了連接埠 {1}，朋友還連不進來。
+
+要讓 WaNut 每次啟動時，自動在這台 VPS 的防火牆開你的伺服器連接埠嗎？WaNut 只會新增規則，不會刪掉任何規則。選「否」的話，連線分頁會顯示讓你自己執行的指令。</value>
+  </data>
+  <data name="Server_VpsFirewallOpened" xml:space="preserve">
+    <value>已在 VPS 防火牆開放 TCP 連接埠 {0}。</value>
+  </data>
+  <data name="Server_VpsFirewallFailed" xml:space="preserve">
+    <value>無法在 VPS 防火牆開放連接埠：{0}</value>
+  </data>
   <data name="Connect_VpsNote" xml:space="preserve">
     <value>這台伺服器在你的 VPS 上執行，所以不會用到這台電腦的防火牆、路由器和 playit.gg。VPS 開著就會持續計費。</value>
   </data>

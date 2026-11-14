@@ -140,7 +140,7 @@ public sealed partial class ConnectViewModel : ObservableObject
 
     /// <summary>The last check from this PC to the server on the VPS; null before the first one and once it stops.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(VpsReachText), nameof(ShowVpsReachOk), nameof(ShowVpsReachProblem), nameof(ShowVpsReachInfo))]
+    [NotifyPropertyChangedFor(nameof(VpsReachText), nameof(ShowVpsReachOk), nameof(ShowVpsReachProblem), nameof(ShowVpsReachInfo), nameof(ShowVpsFirewallCommands))]
     private VpsReach? _vpsReach;
 
     [ObservableProperty]
@@ -152,7 +152,32 @@ public sealed partial class ConnectViewModel : ObservableObject
         ? null
         : IsCheckingVpsReach
             ? string.Format(Text.Get("Connect_VpsReachChecking"), endpoint)
-            : VpsReach is { } reach ? string.Format(Text.Get($"Connect_VpsReach_{reach}"), endpoint, LoadPort()) : null;
+            : VpsReach is { } reach ? string.Format(Text.Get(ReachKey(reach)), endpoint, LoadPort()) : null;
+
+    /// <summary>For no answer, the cloud firewall's own name and steps when the provider is known.</summary>
+    private string ReachKey(VpsReach reach) =>
+        reach == Core.Remote.Reach.VpsReach.NoAnswer && App.VpsList.FirstOrDefault(v => v.Id == _server.Metadata.VpsId)?.Provider == Core.Remote.VpsProvider.Oracle
+            ? "Connect_VpsReach_NoAnswer_Oracle"
+            : $"Connect_VpsReach_{reach}";
+
+    /// <summary>
+    /// What to paste on the VPS to open the port when WaNut may not or can't (no password-less sudo); set at each VPS
+    /// start, null when nothing is known to be needed.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowVpsFirewallCommands))]
+    private string? _vpsFirewallCommands;
+
+    public bool ShowVpsFirewallCommands => VpsFirewallCommands is not null && VpsReach != Core.Remote.Reach.VpsReach.Open;
+
+    [RelayCommand]
+    private void CopyVpsFirewallCommands()
+    {
+        if (VpsFirewallCommands is { } commands)
+        {
+            CopiedText = _clipboard.TrySetText(commands) ? Text.Get("Connect_VpsFirewallCopied") : null;
+        }
+    }
 
     public bool ShowVpsReachOk => !IsCheckingVpsReach && VpsReach == Core.Remote.Reach.VpsReach.Open;
 

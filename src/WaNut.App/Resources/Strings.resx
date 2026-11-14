@@ -2602,6 +2602,32 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
   <data name="Connect_VpsReachAgain" xml:space="preserve">
     <value>Check again</value>
   </data>
+  <data name="Connect_VpsReach_NoAnswer_Oracle" xml:space="preserve">
+    <value>Friends can't reach {0} yet: the VPS didn't answer, so Oracle Cloud's Security List probably blocks port {1}. In the Oracle Cloud console, open your instance, click its subnet, then Security &gt; Default Security List &gt; Add Ingress Rules: Source CIDR 0.0.0.0/0, IP Protocol TCP, Destination Port Range {1}. Then check again.</value>
+  </data>
+  <data name="Connect_VpsFirewallCommandsLabel" xml:space="preserve">
+    <value>To open the port in the VPS's own firewall, run this on the VPS:</value>
+  </data>
+  <data name="Connect_VpsFirewallCopy" xml:space="preserve">
+    <value>Copy commands</value>
+  </data>
+  <data name="Connect_VpsFirewallCopied" xml:space="preserve">
+    <value>Commands copied.</value>
+  </data>
+  <data name="Status_VpsOpeningFirewall" xml:space="preserve">
+    <value>Opening the server's port on the VPS…</value>
+  </data>
+  <data name="Server_VpsFirewallAsk" xml:space="preserve">
+    <value>The firewall on “{0}” blocks port {1}, so friends can't join yet.
+
+Should WaNut open the ports of your servers in this VPS's firewall at each start? It only adds rules and never removes any. If you say no, the Connect tab shows the commands to run yourself.</value>
+  </data>
+  <data name="Server_VpsFirewallOpened" xml:space="preserve">
+    <value>Opened TCP port {0} in the VPS firewall.</value>
+  </data>
+  <data name="Server_VpsFirewallFailed" xml:space="preserve">
+    <value>Couldn't open the port in the VPS firewall: {0}</value>
+  </data>
   <data name="Connect_VpsNote" xml:space="preserve">
     <value>This server runs on your VPS, so this PC's firewall, router and playit.gg aren't used. Your host keeps charging while the VPS is on.</value>
   </data>

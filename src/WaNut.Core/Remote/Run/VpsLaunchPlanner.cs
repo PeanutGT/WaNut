@@ -4,6 +4,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Instances;
 using WaNut.Core.Java;
 using WaNut.Core.Jvm;
+using WaNut.Core.Remote.Firewall;
 using WaNut.Core.Remote.Sync;
 
 namespace WaNut.Core.Remote.Run;
@@ -46,6 +47,23 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
         var custom = JvmArguments.ParseCustom(server.CustomJvmArguments, out _) ?? [];
         var arguments = JvmArguments.Build(server.JavaMajor, server.MemoryMb, ForLinux(server.ServerJar), custom);
         return new ServerLaunch(RemoteJava.JavaPath(server.JavaMajor), arguments, SftpSyncTree.ServerRoot(server.Id));
+    }
+
+    /// <summary>What the VPS is and how its own firewall treats incoming connections, read before a start.</summary>
+    public async Task<(HostInfo Host, HostFirewall Firewall)> CheckFirewallAsync(VpsProfile vps, CancellationToken cancellationToken = default)
+    {
+        using var ssh = await connector.ConnectAsync(vps, null, cancellationToken).ConfigureAwait(false);
+        var host = HostProbe.Parse(await VpsConnector.RunAsync(ssh, HostProbe.Command, cancellationToken).ConfigureAwait(false));
+        var firewall = HostFirewall.Parse(await VpsConnector.RunAsync(ssh, HostFirewall.Command, cancellationToken).ConfigureAwait(false), host.Provider);
+        return (host, firewall);
+    }
+
+    /// <summary>Runs a command from <see cref="HostFirewall.OpenCommand"/>.</summary>
+    /// <exception cref="InvalidOperationException">The VPS refused it.</exception>
+    public async Task OpenFirewallAsync(VpsProfile vps, string command, CancellationToken cancellationToken = default)
+    {
+        using var ssh = await connector.ConnectAsync(vps, null, cancellationToken).ConfigureAwait(false);
+        await VpsConnector.RunAsync(ssh, command, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>What is on the VPS for this server right now: still running, ended while WaNut was away, or nothing.</summary>

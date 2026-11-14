@@ -152,6 +152,13 @@
         <Border Style="{StaticResource WarningBanner}" Visibility="{Binding ShowVpsReachProblem, Converter={StaticResource Visible}}">
           <TextBlock Text="{Binding VpsReachText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </Border>
+        <!-- When WaNut may not or can't open the VPS's own firewall: the commands to paste there. -->
+        <StackPanel Visibility="{Binding ShowVpsFirewallCommands, Converter={StaticResource Visible}}" Margin="0,8,0,0">
+          <TextBlock Text="{res:Text Connect_VpsFirewallCommandsLabel}" TextWrapping="Wrap" />
+          <TextBox Text="{Binding VpsFirewallCommands, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" Margin="0,4,0,0"
+                   AutomationProperties.Name="{res:Text Connect_VpsFirewallCommandsLabel}" />
+          <Button Content="{res:Text Connect_VpsFirewallCopy}" Command="{Binding CopyVpsFirewallCommandsCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+        </StackPanel>
         <Button Content="{res:Text Connect_VpsReachAgain}" Command="{Binding CheckVpsReachCommand}" HorizontalAlignment="Left" Margin="0,8,0,0" />
       </StackPanel>
 

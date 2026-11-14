@@ -213,10 +213,19 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     /// <summary>Keeps the RAM a VPS reported at a start, so the Server tab's slider fits it. Saves only on a change.</summary>
     public void RememberVpsMemory(string id, long memoryMb)
     {
-        var index = VpsList.ToList().FindIndex(v => v.Id == id);
-        if (index >= 0 && memoryMb > 0 && VpsList[index].MemoryMb != memoryMb)
+        if (memoryMb > 0)
         {
-            VpsList[index] = VpsList[index] with { MemoryMb = memoryMb };
+            UpdateVps(id, v => v with { MemoryMb = memoryMb });
+        }
+    }
+
+    /// <summary>Changes one saved VPS, such as what a start learned about it. Saves only when something changed.</summary>
+    public void UpdateVps(string id, Func<VpsProfile, VpsProfile> change)
+    {
+        var index = VpsList.ToList().FindIndex(v => v.Id == id);
+        if (index >= 0 && change(VpsList[index]) is var changed && changed != VpsList[index])
+        {
+            VpsList[index] = changed;
             Save();
         }
     }
