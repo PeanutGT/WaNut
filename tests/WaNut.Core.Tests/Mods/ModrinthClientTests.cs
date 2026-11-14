@@ -225,4 +225,35 @@ public sealed class ModrinthClientTests
         Assert.Equal(["aaa"], latest.Keys);
         Assert.Equal("v1", latest["aaa"].VersionId);
     }
+
+    [Fact]
+    public void ParseVersions_ListsCompatibleNewestFirstAndSkipsOthers()
+    {
+        var fabric = ModPlatform.For(ServerType.Fabric)!;
+        var json = "[" + string.Join(",",
+            Version("old", "release", "2026-01-01T00:00:00Z"),
+            Version("new", "beta", "2026-03-01T00:00:00Z"),
+            Version("forge", "release", "2026-04-01T00:00:00Z", loader: "forge"),
+            Version("bad", "release", "2026-05-01T00:00:00Z", fileName: "x.zip")) + "]";
+
+        var versions = ModrinthClient.ParseVersions(new MemoryStream(Encoding.UTF8.GetBytes(json)), fabric, "1.21.1");
+
+        Assert.Equal(["new", "old"], versions.Select(v => v.VersionId));
+        Assert.Equal("beta", versions[0].VersionType);
+    }
+
+    [Fact]
+    public void ParseProjectDetails_ReadsBodyAndHttpsGalleryFeaturedFirst()
+    {
+        var json = """
+            {"id":"p","title":"T","description":"short","body":"# Hi","icon_url":"https://cdn.modrinth.com/i.png","client_side":"required","server_side":"optional",
+             "gallery":[{"url":"https://cdn.modrinth.com/a.png","featured":false},{"url":"https://cdn.modrinth.com/b.png","featured":true},{"url":"http://x/c.png","featured":false}]}
+            """;
+
+        var details = ModrinthClient.ParseProjectDetails(new MemoryStream(Encoding.UTF8.GetBytes(json)));
+
+        Assert.Equal("# Hi", details.Body);
+        Assert.Equal(["https://cdn.modrinth.com/b.png", "https://cdn.modrinth.com/a.png"], details.Gallery.Select(g => g.AbsoluteUri));
+        Assert.Equal("required", details.ClientSide);
+    }
 }

@@ -2725,4 +2725,91 @@
   <data name="Backups_Reason_ModUpdate" xml:space="preserve">
     <value>更新模組前</value>
   </data>
+  <data name="Mods_Details" xml:space="preserve">
+    <value>詳情</value>
+  </data>
+  <data name="Mods_DetailsLabel" xml:space="preserve">
+    <value>{0} 的詳情</value>
+  </data>
+  <data name="ModDetails_Loading" xml:space="preserve">
+    <value>載入中…</value>
+  </data>
+  <data name="ModDetails_LoadFailed" xml:space="preserve">
+    <value>無法載入詳情：{0}</value>
+  </data>
+  <data name="ModDetails_Versions" xml:space="preserve">
+    <value>適用這個伺服器的版本</value>
+  </data>
+  <data name="ModDetails_NoVersions" xml:space="preserve">
+    <value>沒有能在這個伺服器上執行的版本。</value>
+  </data>
+  <data name="ModDetails_Gallery" xml:space="preserve">
+    <value>圖片</value>
+  </data>
+  <data name="ModDetails_About" xml:space="preserve">
+    <value>介紹</value>
+  </data>
+  <data name="ModDetails_Install" xml:space="preserve">
+    <value>安裝</value>
+  </data>
+  <data name="ModDetails_InstallLabel" xml:space="preserve">
+    <value>安裝版本 {0}</value>
+  </data>
+  <data name="ModDetails_Release" xml:space="preserve">
+    <value>正式版</value>
+  </data>
+  <data name="ModDetails_Beta" xml:space="preserve">
+    <value>測試版</value>
+  </data>
+  <data name="ModDetails_Alpha" xml:space="preserve">
+    <value>搶先版</value>
+  </data>
+  <data name="ModDetails_Installed" xml:space="preserve">
+    <value>這個伺服器已經裝了。</value>
+  </data>
+  <data name="ModDetails_StopToInstall" xml:space="preserve">
+    <value>停止伺服器後才能安裝。</value>
+  </data>
+  <data name="ModDetails_OpenPage" xml:space="preserve">
+    <value>在 Modrinth 開啟</value>
+  </data>
+  <data name="ModDetails_Close" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Mods_Select" xml:space="preserve">
+    <value>選取 {0}</value>
+  </data>
+  <data name="Mods_InstallSelected" xml:space="preserve">
+    <value>安裝選取的項目（{0}）</value>
+  </data>
+  <data name="Mods_ClearSelection" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="Mods_InstallingMany" xml:space="preserve">
+    <value>正在安裝第 {0}/{1} 個：{2}…</value>
+  </data>
+  <data name="Mods_DropHint" xml:space="preserve">
+    <value>小技巧：把 .jar 檔拖到這個分頁就能加入。</value>
+  </data>
+  <data name="Mods_Adding" xml:space="preserve">
+    <value>正在加入拖進來的檔案…</value>
+  </data>
+  <data name="Mods_AddDone" xml:space="preserve">
+    <value>已加入 {0}。</value>
+  </data>
+  <data name="Mods_AddSkipped" xml:space="preserve">
+    <value>伺服器已經有了，所以略過：{0}</value>
+  </data>
+  <data name="Mods_AddNotJars" xml:space="preserve">
+    <value>不是 .jar 檔，所以略過：{0}</value>
+  </data>
+  <data name="Mods_AddClientOnly" xml:space="preserve">
+    <value>Modrinth 標示這些只在遊戲端執行，可能讓伺服器無法啟動：{0}</value>
+  </data>
+  <data name="Mods_AddFailed" xml:space="preserve">
+    <value>無法加入檔案：{0}</value>
+  </data>
+  <data name="Mods_AddNothing" xml:space="preserve">
+    <value>沒有加入任何檔案。</value>
+  </data>
 </root>

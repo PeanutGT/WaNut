@@ -76,6 +76,69 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         return ParseBestVersion(stream, platform, gameVersion);
     }
 
+    /// <summary>Every version that runs on this loader and Minecraft version, newest first, for the details window.</summary>
+    public async Task<IReadOnlyList<ModVersion>> GetVersionsAsync(
+        string projectId, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default)
+    {
+        await using var stream = await GetStreamAsync(VersionsUrl(projectId, platform, gameVersion), cancellationToken).ConfigureAwait(false);
+        return ParseVersions(stream, platform, gameVersion);
+    }
+
+    /// <summary>The project's long description, pictures and sides, for the details window.</summary>
+    public async Task<ModProjectDetails> GetProjectDetailsAsync(string projectId, CancellationToken cancellationToken = default)
+    {
+        await using var stream = await GetStreamAsync(ProjectUrl(projectId), cancellationToken).ConfigureAwait(false);
+        return ParseProjectDetails(stream);
+    }
+
+    public static ModProjectDetails ParseProjectDetails(Stream projectJson)
+    {
+        var project = JsonSerializer.Deserialize<ProjectDetailsDto>(projectJson)
+            ?? throw new InvalidDataException("The Modrinth project is empty.");
+        var gallery = (project.Gallery ?? [])
+            .OrderByDescending(g => g.Featured)
+            .Select(g => SafeHttps(g.Url))
+            .OfType<Uri>()
+            .ToList();
+        return new ModProjectDetails(
+            project.Id,
+            string.IsNullOrWhiteSpace(project.Title) ? project.Id : project.Title,
+            project.Description ?? string.Empty,
+            project.Body ?? string.Empty,
+            SafeHttps(project.IconUrl),
+            gallery,
+            project.ClientSide,
+            project.ServerSide);
+    }
+
+    /// <summary>Compatible versions with a safe primary jar, newest first; the rest are left out.</summary>
+    public static IReadOnlyList<ModVersion> ParseVersions(Stream versionsJson, ModPlatform platform, string gameVersion)
+    {
+        var versions = JsonSerializer.Deserialize<List<VersionDto>>(versionsJson)
+            ?? throw new InvalidDataException("The Modrinth version list is empty.");
+        var list = new List<ModVersion>();
+        foreach (var version in versions
+            .Where(v => v.GameVersions.Contains(gameVersion, StringComparer.Ordinal)
+                && v.Loaders.Any(l => platform.Loaders.Contains(l, StringComparer.Ordinal))
+                && v.Files.Count > 0)
+            .OrderByDescending(v => v.DatePublished))
+        {
+            try
+            {
+                list.Add(ToModVersion(version));
+            }
+            catch (Exception e) when (e is InvalidDataException or UriFormatException)
+            {
+                // A version without a usable jar cannot be offered.
+            }
+        }
+
+        return list;
+    }
+
+    private static Uri? SafeHttps(string? url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps ? uri : null;
+
     /// <summary>A project's display name, used for dependencies, which Modrinth names only by id.</summary>
     public async Task<string> GetProjectTitleAsync(string projectId, CancellationToken cancellationToken = default)
     {
@@ -176,7 +239,7 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         var versions = JsonSerializer.Deserialize<Dictionary<string, IdentifiedDto>>(versionFilesJson) ?? [];
         return versions.ToDictionary(
             v => v.Key,
-            v => new IdentifiedVersion(v.Value.ProjectId, IncompatibleIds(v.Value.Dependencies)),
+            v => new IdentifiedVersion(v.Value.ProjectId, IncompatibleIds(v.Value.Dependencies)) { VersionId = v.Value.Id },
             StringComparer.OrdinalIgnoreCase);
     }
 
@@ -209,7 +272,7 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
         var hits = result.Hits
             .Select(h => new ModSearchHit(h.ProjectId, h.Slug ?? h.ProjectId, h.Title, h.Description ?? string.Empty, h.Author ?? string.Empty, h.Downloads, h.ProjectType ?? "mod")
             {
-                IconUrl = Uri.TryCreate(h.IconUrl, UriKind.Absolute, out var icon) && icon.Scheme == Uri.UriSchemeHttps ? icon : null,
+                IconUrl = SafeHttps(h.IconUrl),
                 Updated = h.DateModified,
                 ServerSide = h.ServerSide,
             })
@@ -259,7 +322,11 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
             .Select(d => d.ProjectId!)
             .Distinct(StringComparer.Ordinal)
             .ToList();
-        return new ModVersion(best.ProjectId, best.Id, best.VersionNumber, file.FileName, url, sha512, required, IncompatibleIds(best.Dependencies));
+        return new ModVersion(best.ProjectId, best.Id, best.VersionNumber, file.FileName, url, sha512, required, IncompatibleIds(best.Dependencies))
+        {
+            VersionType = best.VersionType,
+            Published = best.DatePublished,
+        };
     }
 
     /// <summary>
@@ -321,12 +388,27 @@ public sealed class ModrinthClient(HttpClient http, Func<TimeSpan, CancellationT
 
     private sealed record IdentifiedDto(
         [property: JsonPropertyName("project_id")] string ProjectId,
+        [property: JsonPropertyName("id")] string? Id,
         [property: JsonPropertyName("dependencies")] List<DependencyDto>? Dependencies);
 
     private sealed record ProjectDto(
         [property: JsonPropertyName("id")] string? Id,
         [property: JsonPropertyName("title")] string? Title,
         [property: JsonPropertyName("server_side")] string? ServerSide);
+
+    private sealed record ProjectDetailsDto(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("description")] string? Description,
+        [property: JsonPropertyName("body")] string? Body,
+        [property: JsonPropertyName("icon_url")] string? IconUrl,
+        [property: JsonPropertyName("gallery")] List<GalleryDto>? Gallery,
+        [property: JsonPropertyName("client_side")] string? ClientSide,
+        [property: JsonPropertyName("server_side")] string? ServerSide);
+
+    private sealed record GalleryDto(
+        [property: JsonPropertyName("url")] string? Url,
+        [property: JsonPropertyName("featured")] bool Featured);
 
     private sealed record VersionDto(
         [property: JsonPropertyName("id")] string Id,

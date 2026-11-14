@@ -10,6 +10,19 @@ namespace WaNut.App.ViewModels;
 /// <summary>One Modrinth search result on the Mods tab.</summary>
 public sealed partial class ModResultViewModel(ModSearchHit hit, bool isInstalled, bool showServerSide = true) : ObservableObject
 {
+    /// <summary>Ticked for "Install selected".</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
+    /// <summary>Raised when <see cref="IsSelected"/> changes, so the tab can count the ticked results.</summary>
+    public event Action? SelectionChanged;
+
+    partial void OnIsSelectedChanged(bool value) => SelectionChanged?.Invoke();
+
+    public string SelectLabel => string.Format(Text.Get("Mods_Select"), Title);
+
+    public string DetailsLabel => string.Format(Text.Get("Mods_DetailsLabel"), Title);
+
     private ImageSource? _icon;
     private bool _iconLoaded;
 
@@ -31,7 +44,7 @@ public sealed partial class ModResultViewModel(ModSearchHit hit, bool isInstalle
             if (!_iconLoaded)
             {
                 _iconLoaded = true;
-                _icon = LoadIcon(Hit.IconUrl);
+                _icon = LoadImage(Hit.IconUrl, 80);
             }
 
             return _icon;
@@ -97,7 +110,8 @@ public sealed partial class ModResultViewModel(ModSearchHit hit, bool isInstalle
         };
     }
 
-    private static BitmapImage? LoadIcon(Uri? url)
+    /// <summary>A web picture WPF fetches in the background, decoded at <paramref name="width"/> pixels to save memory.</summary>
+    internal static BitmapImage? LoadImage(Uri? url, int width)
     {
         if (url is null)
         {
@@ -109,7 +123,7 @@ public sealed partial class ModResultViewModel(ModSearchHit hit, bool isInstalle
             var image = new BitmapImage();
             image.BeginInit();
             image.UriSource = url;
-            image.DecodePixelWidth = 80;
+            image.DecodePixelWidth = width;
             image.CacheOption = BitmapCacheOption.OnLoad;
             image.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
             image.EndInit();

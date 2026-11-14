@@ -28,6 +28,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.ViewModel.Changed : null;
     }
 
+    public WaNut.Core.Mods.ModVersion? ShowModDetails(ModDetailsViewModel details)
+    {
+        var window = new ModDetailsWindow(details) { Owner = Application.Current.MainWindow };
+        return window.ShowDialog() == true ? details.Chosen : null;
+    }
+
     public void ShowAppSettings()
     {
         var window = services.GetRequiredService<AppSettingsWindow>();

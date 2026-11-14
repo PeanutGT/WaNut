@@ -41,6 +41,9 @@ public interface IDialogService
     /// </summary>
     IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts);
 
+    /// <summary>Shows a Modrinth project's details window. Returns the version the user chose to install, or null.</summary>
+    WaNut.Core.Mods.ModVersion? ShowModDetails(ModDetailsViewModel details);
+
     /// <summary>Asks a yes/no question. Returns true for yes.</summary>
     bool Confirm(string message);
 

@@ -57,7 +57,8 @@
     </Style>
   </UserControl.Resources>
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                AllowDrop="True" Background="Transparent" DragOver="OnDragOver" Drop="OnDrop">
     <StackPanel MaxWidth="640" HorizontalAlignment="Left" Margin="4,4,16,16">
       <!-- Vanilla: nothing to install, say how to get there. -->
       <TextBlock Text="{res:Text Mods_Vanilla}" TextWrapping="Wrap" MaxWidth="480" HorizontalAlignment="Left">
@@ -173,6 +174,7 @@
           <TextBlock Text="{Binding EmptyText}" FontSize="14" FontWeight="SemiBold" />
           <TextBlock Text="{res:Text Mods_EmptyHint}" Style="{StaticResource Hint}" Margin="0,2,0,0" />
         </StackPanel>
+        <TextBlock Text="{res:Text Mods_DropHint}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
 
         <!-- Find on Modrinth -->
         <TextBlock Text="{Binding FindHeader}" Style="{StaticResource SectionCaption}" Margin="0,28,0,8" />
@@ -198,15 +200,23 @@
           <TextBlock Text="{Binding FilterText}" Style="{StaticResource Hint}" Margin="0" VerticalAlignment="Center" />
         </DockPanel>
 
+        <!-- Shown while something is ticked. -->
+        <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,8" Visibility="{Binding HasSelection, Converter={StaticResource Visible}}">
+          <StackPanel Orientation="Horizontal">
+            <Button Content="{Binding InstallSelectedText}" Command="{Binding InstallSelectedCommand}" Style="{StaticResource PrimaryButton}" Padding="12,3" />
+            <Button Content="{res:Text Mods_ClearSelection}" Command="{Binding ClearSelectionCommand}" Padding="10,3" Margin="8,0,0,0" />
+          </StackPanel>
+        </Border>
+
         <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Results}" AutomationProperties.Name="{Binding FindHeader}">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,8">
                 <DockPanel>
                   <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                    <Button Content="{res:Text Mods_Page}" Padding="10,3" Margin="0,0,6,0"
-                            AutomationProperties.Name="{Binding PageLabel}"
-                            Command="{Binding DataContext.OpenPageCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                    <Button Content="{res:Text Mods_Details}" Padding="10,3" Margin="0,0,6,0"
+                            AutomationProperties.Name="{Binding DetailsLabel}"
+                            Command="{Binding DataContext.DetailsCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                             CommandParameter="{Binding}" />
                     <Grid MinWidth="80">
                       <Button Content="{res:Text Mods_Install}" Padding="10,3"
@@ -227,6 +237,19 @@
                                  Visibility="{Binding IsInstalled, Converter={StaticResource Visible}}" />
                     </Grid>
                   </StackPanel>
+                  <!-- Tick to install several at once; installed projects have nothing to tick. -->
+                  <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" Margin="0,0,8,0"
+                            AutomationProperties.Name="{Binding SelectLabel}">
+                    <CheckBox.Style>
+                      <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                            <Setter Property="Visibility" Value="Hidden" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </CheckBox.Style>
+                  </CheckBox>
                   <!-- Icon: a soft square stays when the project has no icon or it does not load. -->
                   <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="8" Margin="0,2,10,0" VerticalAlignment="Top"
                           Background="{DynamicResource SidebarBrush}" ClipToBounds="True">

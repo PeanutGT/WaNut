@@ -119,8 +119,8 @@ public sealed partial class ModsViewModel : ObservableObject
     private int _totalHits;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange))]
-    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(RemoveCommand), nameof(UpdateCommand), nameof(UpdateAllCommand))]
+    [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange), nameof(CanDrop))]
+    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(RemoveCommand), nameof(UpdateCommand), nameof(UpdateAllCommand), nameof(InstallSelectedCommand))]
     private string? _workText;
 
     [ObservableProperty]
@@ -165,6 +165,8 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             result.IsInstalled = installedIds.Contains(result.Hit.ProjectId);
         }
+
+        OnResultSelectionChanged();
 
         OnPropertyChanged(nameof(InstalledHeader));
         OnPropertyChanged(nameof(UpdateStatusText));
@@ -256,7 +258,9 @@ public sealed partial class ModsViewModel : ObservableObject
     internal void OnServerStatusChanged()
     {
         OnPropertyChanged(nameof(CanChange));
+        OnPropertyChanged(nameof(CanDrop));
         OnPropertyChanged(nameof(ShowStopToChange));
+        InstallSelectedCommand.NotifyCanExecuteChanged();
         InstallCommand.NotifyCanExecuteChanged();
         RemoveCommand.NotifyCanExecuteChanged();
         UpdateCommand.NotifyCanExecuteChanged();
@@ -288,12 +292,15 @@ public sealed partial class ModsViewModel : ObservableObject
             if (!append)
             {
                 Results.Clear();
+                OnResultSelectionChanged();
             }
 
             var installedIds = InstalledProjectIds();
             foreach (var hit in page.Hits.Where(h => Results.All(r => r.Hit.ProjectId != h.ProjectId)))
             {
-                Results.Add(new ModResultViewModel(hit, installedIds.Contains(hit.ProjectId), showServerSide: !IsPlugins));
+                var result = new ModResultViewModel(hit, installedIds.Contains(hit.ProjectId), showServerSide: !IsPlugins);
+                result.SelectionChanged += OnResultSelectionChanged;
+                Results.Add(result);
             }
 
             // A page with nothing new means Modrinth has no more, whatever its total said.
@@ -381,42 +388,172 @@ public sealed partial class ModsViewModel : ObservableObject
             return;
         }
 
-        await RunAsync(string.Format(Text.Get("Mods_Installing"), item.Title), async progress =>
+        await RunAsync(string.Format(Text.Get("Mods_Installing"), item.Title), progress => InstallOneAsync(platform, item, null, progress));
+    }
+
+    /// <summary>Opens the details window; a version picked there is installed here, with its dependencies.</summary>
+    [RelayCommand]
+    private async Task DetailsAsync(ModResultViewModel? item)
+    {
+        if (item is null || Platform is not { } platform)
         {
-            try
+            return;
+        }
+
+        var details = new ModDetailsViewModel(_library.Modrinth, item, platform, _server.Metadata.MinecraftVersion, CanChange);
+        if (_dialogs.ShowModDetails(details) is { } version && CanInstall(item))
+        {
+            await RunAsync(string.Format(Text.Get("Mods_Installing"), item.Title), progress => InstallOneAsync(platform, item, version, progress));
+        }
+    }
+
+    public int SelectedCount => Results.Count(r => r.IsSelected && !r.IsInstalled);
+
+    public bool HasSelection => SelectedCount > 0;
+
+    public string InstallSelectedText => string.Format(Text.Get("Mods_InstallSelected"), SelectedCount);
+
+    private void OnResultSelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+        OnPropertyChanged(nameof(InstallSelectedText));
+        InstallSelectedCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanInstallSelected))]
+    private async Task InstallSelectedAsync()
+    {
+        if (Platform is not { } platform)
+        {
+            return;
+        }
+
+        var items = Results.Where(r => r.IsSelected && !r.IsInstalled).ToList();
+        await RunAsync(string.Format(Text.Get("Mods_Installing"), string.Join(", ", items.Select(i => i.Title))), async progress =>
+        {
+            var messages = new List<string>();
+            var problems = new List<string>();
+            for (var i = 0; i < items.Count; i++)
             {
-                ModInstallResult result;
+                var step = i;
+                WorkText = string.Format(Text.Get("Mods_InstallingMany"), i + 1, items.Count, items[i].Title);
                 try
                 {
-                    result = await _library.InstallAsync(
-                        _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress);
+                    messages.Add(await InstallOneAsync(platform, items[i], null, new Progress<double>(f => progress.Report((step + f) / items.Count))));
+                    items[i].IsSelected = false;
                 }
-                catch (IncompatibleModsException e)
+                catch (ModsProblem e)
                 {
-                    if (!_dialogs.Confirm(string.Format(Text.Get("Mods_IncompatibleConfirm"), item.Title, string.Join(", ", e.Installed))))
-                    {
-                        return string.Format(Text.Get("Mods_IncompatibleSkipped"), item.Title);
-                    }
-
-                    result = await _library.InstallAsync(
-                        _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress);
+                    // One mod without a version for this server must not stop the others.
+                    problems.Add(e.Message);
                 }
 
-                return InstallMessage(item.Title, result);
+                // Later items may have come in as dependencies of earlier ones.
+                Reload();
             }
-            catch (NoCompatibleVersionException)
+
+            if (problems.Count > 0)
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_NoVersion"), item.Title, _server.Metadata.Type, _server.Metadata.MinecraftVersion));
+                ErrorText = string.Join(Environment.NewLine, problems);
             }
-            catch (DownloadVerificationException)
+
+            return string.Join(Environment.NewLine, messages);
+        });
+    }
+
+    private bool CanInstallSelected() => HasSelection && CanChange;
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        foreach (var result in Results)
+        {
+            result.IsSelected = false;
+        }
+    }
+
+    /// <summary>Jars dropped on the tab: copied in as they are and named from Modrinth when it knows them.</summary>
+    public bool CanDrop => IsSupported && CanChange;
+
+    public async Task AddJarsAsync(IReadOnlyList<string> paths)
+    {
+        if (Platform is not { } platform || !CanDrop || paths.Count == 0)
+        {
+            return;
+        }
+
+        await RunAsync(Text.Get("Mods_Adding"), async _ =>
+        {
+            JarAddResult result;
+            try
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_VerifyFailed"), item.Title));
+                result = await _library.AddJarsAsync(_server.InstanceDir, platform, paths);
             }
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_InstallFailed"), item.Title, e.Message));
+                throw new ModsProblem(string.Format(Text.Get("Mods_AddFailed"), e.Message));
             }
+
+            var lines = new List<string>
+            {
+                result.Added.Count > 0 ? string.Format(Text.Get("Mods_AddDone"), string.Join(", ", result.Added)) : Text.Get("Mods_AddNothing"),
+            };
+            if (result.Skipped.Count > 0)
+            {
+                lines.Add(string.Format(Text.Get("Mods_AddSkipped"), string.Join(", ", result.Skipped)));
+            }
+
+            if (result.NotJars.Count > 0)
+            {
+                lines.Add(string.Format(Text.Get("Mods_AddNotJars"), string.Join(", ", result.NotJars)));
+            }
+
+            if (result.ClientOnly.Count > 0)
+            {
+                ErrorText = string.Format(Text.Get("Mods_AddClientOnly"), string.Join(", ", result.ClientOnly));
+            }
+
+            return string.Join(Environment.NewLine, lines);
         });
+    }
+
+    /// <summary>Installs one project (a chosen version, or the best one) and words the result; failures come back as <see cref="ModsProblem"/>.</summary>
+    private async Task<string> InstallOneAsync(ModPlatform platform, ModResultViewModel item, ModVersion? version, IProgress<double> progress)
+    {
+        try
+        {
+            ModInstallResult result;
+            try
+            {
+                result = await _library.InstallAsync(
+                    _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress, chosenVersion: version);
+            }
+            catch (IncompatibleModsException e)
+            {
+                if (!_dialogs.Confirm(string.Format(Text.Get("Mods_IncompatibleConfirm"), item.Title, string.Join(", ", e.Installed))))
+                {
+                    return string.Format(Text.Get("Mods_IncompatibleSkipped"), item.Title);
+                }
+
+                result = await _library.InstallAsync(
+                    _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress, chosenVersion: version);
+            }
+
+            return InstallMessage(item.Title, result);
+        }
+        catch (NoCompatibleVersionException)
+        {
+            throw new ModsProblem(string.Format(Text.Get("Mods_NoVersion"), item.Title, _server.Metadata.Type, _server.Metadata.MinecraftVersion));
+        }
+        catch (DownloadVerificationException)
+        {
+            throw new ModsProblem(string.Format(Text.Get("Mods_VerifyFailed"), item.Title));
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            throw new ModsProblem(string.Format(Text.Get("Mods_InstallFailed"), item.Title, e.Message));
+        }
     }
 
     private bool CanInstall(ModResultViewModel? item) => item is { IsInstalled: false } && CanChange;
