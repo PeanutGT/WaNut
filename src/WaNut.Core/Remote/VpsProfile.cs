@@ -42,6 +42,15 @@ public sealed record VpsProfile
     /// </summary>
     public long MemoryMb { get; init; }
 
+    /// <summary>The cloud it runs on, read with <see cref="MemoryMb"/>; picks hint texts only.</summary>
+    public VpsProvider Provider { get; init; }
+
+    /// <summary>
+    /// The user's answer, asked once per VPS, to WaNut opening server ports in the VPS's own firewall at each start.
+    /// Null until asked; false shows the commands to run instead.
+    /// </summary>
+    public bool? OpenFirewall { get; init; }
+
     /// <summary>What friends type in Minecraft to join a server on this VPS: "host:port", with brackets around IPv6.</summary>
     public string Endpoint(int port)
     {

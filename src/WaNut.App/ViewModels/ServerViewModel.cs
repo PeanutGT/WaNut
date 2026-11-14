@@ -393,6 +393,9 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.Reload();
     }
 
+    /// <summary>A line from WaNut itself in the console, such as a port opened on the VPS.</summary>
+    internal void ShowConsoleNote(string text) => AddConsoleLine(text);
+
     /// <summary>"3 online" under the name in the server list; empty while the server is not online.</summary>
     public string ListPlayersText => IsOnline ? string.Format(Text.Get("Main_ListPlayers"), Players.Count) : string.Empty;
 

@@ -33,6 +33,15 @@ public sealed record HostInfo
     /// <summary>Free space in the home folder, where WaNut keeps everything.</summary>
     public long FreeDiskBytes { get; init; }
 
+    /// <summary>The DMI chassis asset tag, such as "OracleCloud.com"; empty when unreadable.</summary>
+    public string AssetTag { get; init; } = string.Empty;
+
+    public string SystemVendor { get; init; } = string.Empty;
+
+    public string ProductName { get; init; } = string.Empty;
+
+    public VpsProvider Provider => HostProbe.ProviderOf(AssetTag, SystemVendor, ProductName);
+
     public bool HasCurl { get; init; }
 
     public bool HasWget { get; init; }
