@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
+using WaNut.Core.Backups;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Mods;
@@ -23,16 +24,63 @@ public sealed partial class ModsViewModel : ObservableObject
     private readonly ServerViewModel _server;
     private readonly ModLibrary _library;
     private readonly IDialogService _dialogs;
+    private readonly BackupStore _backups;
     private CancellationTokenSource? _search;
+    private CancellationTokenSource? _updateCheck;
     private bool _searched;
+    private bool _updatesChecked;
 
-    public ModsViewModel(ServerViewModel server, ModLibrary library, IDialogService dialogs)
+    /// <summary>Newer releases of installed jars, by file name, from the last update check.</summary>
+    private Dictionary<string, ModUpdate> _updates = new(StringComparer.OrdinalIgnoreCase);
+
+    public ModsViewModel(ServerViewModel server, ModLibrary library, IDialogService dialogs, BackupStore backups)
     {
         _server = server;
         _library = library;
         _dialogs = dialogs;
+        _backups = backups;
         Reload();
     }
+
+    public IReadOnlyList<KeyValuePair<ModSort, string>> SortOptions { get; } =
+    [
+        new(ModSort.Relevance, Text.Get("Mods_SortRelevance")),
+        new(ModSort.Downloads, Text.Get("Mods_SortDownloads")),
+        new(ModSort.Newest, Text.Get("Mods_SortNewest")),
+        new(ModSort.Updated, Text.Get("Mods_SortUpdated")),
+    ];
+
+    /// <summary>Best match by default; with no search words that means most downloaded, as on modrinth.com.</summary>
+    [ObservableProperty]
+    private ModSort _sort = ModSort.Relevance;
+
+    partial void OnSortChanged(ModSort value)
+    {
+        if (_searched)
+        {
+            _ = SearchAsync();
+        }
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UpdateStatusText))]
+    private bool _isCheckingUpdates;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UpdateStatusText))]
+    private string? _updateCheckError;
+
+    public int UpdateCount => _updates.Count;
+
+    public bool HasUpdates => _updates.Count > 0;
+
+    /// <summary>The line above the installed list: checking, how many updates, up to date, or why the check failed.</summary>
+    public string? UpdateStatusText =>
+        IsCheckingUpdates ? Text.Get("Mods_CheckingUpdates")
+        : UpdateCheckError is { } error ? string.Format(Text.Get("Mods_UpdateCheckFailed"), error)
+        : !_updatesChecked || Installed.Count == 0 ? null
+        : _updates.Count > 0 ? string.Format(Text.Get("Mods_UpdatesAvailable"), _updates.Count)
+        : Text.Get("Mods_UpToDate");
 
     // Replaced as a whole on reload, so the list redraws once instead of once per mod.
     [ObservableProperty]
@@ -72,7 +120,7 @@ public sealed partial class ModsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange))]
-    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(RemoveCommand))]
+    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(RemoveCommand), nameof(UpdateCommand), nameof(UpdateAllCommand))]
     private string? _workText;
 
     [ObservableProperty]
@@ -102,7 +150,8 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             try
             {
-                installed.AddRange(_library.ListInstalled(_server.InstanceDir, platform).Select(mod => new InstalledModViewModel(mod)));
+                installed.AddRange(_library.ListInstalled(_server.InstanceDir, platform)
+                    .Select(mod => new InstalledModViewModel(mod, _updates.GetValueOrDefault(mod.FileName) is { } u && u.Mod == mod ? u : null)));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
@@ -118,15 +167,23 @@ public sealed partial class ModsViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(InstalledHeader));
+        OnPropertyChanged(nameof(UpdateStatusText));
+        UpdateCommand.NotifyCanExecuteChanged();
+        UpdateAllCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>The server changed type or version: everything on the tab depends on it.</summary>
     internal void OnTypeOrVersionChanged()
     {
         _search?.Cancel();
+        _updateCheck?.Cancel();
         Results.Clear();
         TotalHits = 0;
         _searched = false;
+        _updatesChecked = false;
+        _updates = new(StringComparer.OrdinalIgnoreCase);
+        UpdateCheckError = null;
+        IsCheckingUpdates = false;
         ErrorText = null;
         DoneText = null;
         Reload();
@@ -146,6 +203,54 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             _ = SearchAsync();
         }
+
+        if (IsSupported && !_updatesChecked && !IsCheckingUpdates)
+        {
+            _ = CheckUpdatesAsync();
+        }
+    }
+
+    /// <summary>Asks Modrinth for newer releases of every installed jar; quiet unless it finds some or fails.</summary>
+    private async Task CheckUpdatesAsync()
+    {
+        if (Platform is not { } platform || Installed.Count == 0)
+        {
+            _updates = new(StringComparer.OrdinalIgnoreCase);
+            _updatesChecked = true;
+            Reload();
+            return;
+        }
+
+        _updateCheck?.Cancel();
+        var check = _updateCheck = new CancellationTokenSource();
+        UpdateCheckError = null;
+        IsCheckingUpdates = true;
+        try
+        {
+            var updates = await _library.CheckUpdatesAsync(_server.InstanceDir, platform, _server.Metadata.MinecraftVersion, check.Token);
+            _updates = updates.ToDictionary(u => u.Mod.FileName, StringComparer.OrdinalIgnoreCase);
+            _updatesChecked = true;
+        }
+        catch (OperationCanceledException) when (check.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+        {
+            UpdateCheckError = e.Message;
+        }
+        finally
+        {
+            if (_updateCheck == check)
+            {
+                IsCheckingUpdates = false;
+            }
+        }
+
+        if (_updateCheck == check && !IsWorking)
+        {
+            Reload();
+        }
     }
 
     internal void OnServerStatusChanged()
@@ -154,6 +259,8 @@ public sealed partial class ModsViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowStopToChange));
         InstallCommand.NotifyCanExecuteChanged();
         RemoveCommand.NotifyCanExecuteChanged();
+        UpdateCommand.NotifyCanExecuteChanged();
+        UpdateAllCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -177,7 +284,7 @@ public sealed partial class ModsViewModel : ObservableObject
         IsSearching = true;
         try
         {
-            var page = await _library.Modrinth.SearchAsync(platform, _server.Metadata.MinecraftVersion, Query, append ? Results.Count : 0, search.Token);
+            var page = await _library.Modrinth.SearchAsync(platform, _server.Metadata.MinecraftVersion, Query, append ? Results.Count : 0, SearchSort, search.Token);
             if (!append)
             {
                 Results.Clear();
@@ -186,7 +293,7 @@ public sealed partial class ModsViewModel : ObservableObject
             var installedIds = InstalledProjectIds();
             foreach (var hit in page.Hits.Where(h => Results.All(r => r.Hit.ProjectId != h.ProjectId)))
             {
-                Results.Add(new ModResultViewModel(hit, installedIds.Contains(hit.ProjectId)));
+                Results.Add(new ModResultViewModel(hit, installedIds.Contains(hit.ProjectId), showServerSide: !IsPlugins));
             }
 
             // A page with nothing new means Modrinth has no more, whatever its total said.
@@ -211,6 +318,59 @@ public sealed partial class ModsViewModel : ObservableObject
                 LoadMoreCommand.NotifyCanExecuteChanged();
             }
         }
+    }
+
+    /// <summary>Null lets Modrinth's own default apply: most downloaded when nothing is typed.</summary>
+    private ModSort? SearchSort => Sort == ModSort.Relevance && Query.Trim().Length == 0 ? null : Sort;
+
+    [RelayCommand(CanExecute = nameof(CanUpdate))]
+    private Task UpdateAsync(InstalledModViewModel? item) =>
+        item?.Update is { } update ? RunUpdatesAsync([update]) : Task.CompletedTask;
+
+    private bool CanUpdate(InstalledModViewModel? item) => item is { HasUpdate: true } && CanChange;
+
+    [RelayCommand(CanExecute = nameof(CanUpdateAll))]
+    private Task UpdateAllAsync() => RunUpdatesAsync(Installed.Where(m => m.Update is not null).Select(m => m.Update!).ToList());
+
+    private bool CanUpdateAll() => Installed.Any(m => m.HasUpdate) && CanChange;
+
+    /// <summary>Backs up the world first (a new mod version can change blocks for good), then swaps the jars.</summary>
+    private async Task RunUpdatesAsync(IReadOnlyList<ModUpdate> updates)
+    {
+        if (updates.Count == 0 || Platform is not { } platform)
+        {
+            return;
+        }
+
+        var names = string.Join(", ", updates.Select(u => u.Title));
+        await RunAsync(Text.Get("Mods_BackingUp"), async progress =>
+        {
+            BackupInfo? backup;
+            try
+            {
+                backup = await _backups.CreateAsync(_server.InstanceDir, BackupReason.ModUpdate, new Progress<double>(f => progress.Report(f * 0.3)));
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
+            {
+                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), e.Message));
+            }
+
+            WorkText = string.Format(Text.Get("Mods_Updating"), names);
+            try
+            {
+                var done = await _library.UpdateAsync(
+                    _server.InstanceDir, platform, updates, new Progress<double>(f => progress.Report(0.3 + (f * 0.7))));
+                return string.Format(Text.Get(backup is null ? "Mods_UpdateDoneNoWorld" : "Mods_UpdateDone"), string.Join(", ", done));
+            }
+            catch (DownloadVerificationException)
+            {
+                throw new ModsProblem(string.Format(Text.Get("Mods_VerifyFailed"), names));
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
+            {
+                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateFailed"), names, e.Message));
+            }
+        });
     }
 
     [RelayCommand(CanExecute = nameof(CanInstall))]
@@ -362,6 +522,7 @@ public sealed partial class ModsViewModel : ObservableObject
             WorkText = null;
             _server.OnModWorkChanged();
             Reload();
+            _ = CheckUpdatesAsync();
         }
     }
 

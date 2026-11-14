@@ -118,8 +118,21 @@
         <!-- Installed -->
         <DockPanel Margin="0,0,0,8">
           <Button DockPanel.Dock="Right" Content="{res:Text Mods_OpenFolder}" Command="{Binding OpenFolderCommand}" Padding="10,3" />
+          <Button DockPanel.Dock="Right" Content="{res:Text Mods_UpdateAll}" Command="{Binding UpdateAllCommand}" Padding="10,3" Margin="0,0,8,0"
+                  Visibility="{Binding HasUpdates, Converter={StaticResource Visible}}" />
           <TextBlock Text="{Binding InstalledHeader}" Style="{StaticResource SectionCaption}" VerticalAlignment="Center" />
         </DockPanel>
+        <TextBlock Text="{Binding UpdateStatusText}" Margin="0,-4,0,6" AutomationProperties.LiveSetting="Polite">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource Hint}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding UpdateStatusText}" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
         <ListBox Style="{StaticResource ScrollingList}" ItemsSource="{Binding Installed}" AutomationProperties.Name="{Binding InstalledHeader}">
           <ListBox.ItemTemplate>
             <DataTemplate>
@@ -129,9 +142,17 @@
                           AutomationProperties.Name="{Binding RemoveLabel}"
                           Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                           CommandParameter="{Binding}" />
+                  <Button DockPanel.Dock="Right" Content="{res:Text Mods_Update}" Padding="10,3" Margin="0,0,6,0" VerticalAlignment="Center"
+                          Style="{StaticResource PrimaryButton}"
+                          AutomationProperties.Name="{Binding UpdateLabel}"
+                          Visibility="{Binding HasUpdate, Converter={StaticResource Visible}}"
+                          Command="{Binding DataContext.UpdateCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                          CommandParameter="{Binding}" />
                   <StackPanel>
                     <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding DetailText}" Style="{StaticResource MutedText}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding NewVersionText}" Foreground="{DynamicResource OnlineBadgeTextBrush}" FontSize="12" TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding HasUpdate, Converter={StaticResource Visible}}" />
                   </StackPanel>
                 </DockPanel>
               </Border>
@@ -167,7 +188,15 @@
           </TextBox>
           <Button Grid.Column="1" Content="{res:Text Mods_Search}" Command="{Binding SearchCommand}" Margin="8,0,0,0" MinWidth="80" />
         </Grid>
-        <TextBlock Text="{Binding FilterText}" Style="{StaticResource Hint}" Margin="0,0,0,10" />
+        <DockPanel Margin="0,4,0,10">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="8,0,0,0">
+            <TextBlock Text="{res:Text Mods_Sort}" Style="{StaticResource MutedText}" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0" />
+            <ComboBox ItemsSource="{Binding SortOptions}" DisplayMemberPath="Value" SelectedValuePath="Key"
+                      SelectedValue="{Binding Sort}" MinWidth="140"
+                      AutomationProperties.Name="{res:Text Mods_Sort}" />
+          </StackPanel>
+          <TextBlock Text="{Binding FilterText}" Style="{StaticResource Hint}" Margin="0" VerticalAlignment="Center" />
+        </DockPanel>
 
         <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Results}" AutomationProperties.Name="{Binding FindHeader}">
           <ListBox.ItemTemplate>
@@ -198,8 +227,20 @@
                                  Visibility="{Binding IsInstalled, Converter={StaticResource Visible}}" />
                     </Grid>
                   </StackPanel>
+                  <!-- Icon: a soft square stays when the project has no icon or it does not load. -->
+                  <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="8" Margin="0,2,10,0" VerticalAlignment="Top"
+                          Background="{DynamicResource SidebarBrush}" ClipToBounds="True">
+                    <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality"
+                           AutomationProperties.Name="" Focusable="False" />
+                  </Border>
                   <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <DockPanel>
+                      <Border DockPanel.Dock="Right" Background="{DynamicResource OnlineBadgeBrush}" CornerRadius="8" Padding="7,1" Margin="6,0,0,0"
+                              VerticalAlignment="Center" Visibility="{Binding HasServerSideText, Converter={StaticResource Visible}}">
+                        <TextBlock Text="{Binding ServerSideText}" Foreground="{DynamicResource OnlineBadgeTextBrush}" FontSize="11" />
+                      </Border>
+                      <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    </DockPanel>
                     <TextBlock Text="{Binding DetailText}" Style="{StaticResource MutedText}" FontSize="12" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
                   </StackPanel>

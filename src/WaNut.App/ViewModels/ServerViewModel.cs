@@ -80,7 +80,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
-        Mods = new ModsViewModel(this, mods, dialogs);
+        Mods = new ModsViewModel(this, mods, dialogs, backups);
         Performance = new PerformanceViewModel(this, spark);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
