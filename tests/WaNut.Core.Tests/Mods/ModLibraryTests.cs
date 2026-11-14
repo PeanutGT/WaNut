@@ -349,4 +349,55 @@ public sealed class ModLibraryTests : IDisposable
 
         Assert.Equal(["cool-1.0.jar"], Directory.GetFiles(ModsDir).Select(Path.GetFileName));
     }
+
+    [Fact]
+    public async Task InstallAsync_ChosenVersion_InstallsThatFileAndBestDependency()
+    {
+        AddProject("api", "Fabric API", "api");
+        var old = Encoding.UTF8.GetBytes("old cool");
+        var url = new Uri("https://cdn.modrinth.com/data/mod/cool-1.0.jar");
+        _http.Add(url, old);
+        var chosen = new ModVersion("mod", "v1", "1.0", "cool-1.0.jar", url, Sha512(old), ["api"], []);
+
+        var result = await _library.InstallAsync(_dir.Path, Fabric, Game, "mod", "Cool Mod", chosenVersion: chosen);
+
+        Assert.Equal(["Cool Mod", "Fabric API"], result.Installed);
+        Assert.True(File.Exists(Path.Combine(ModsDir, "cool-1.0.jar")));
+        Assert.True(File.Exists(Path.Combine(ModsDir, "api.jar")));
+    }
+
+    [Fact]
+    public async Task AddJarsAsync_KnownUnknownAndDuplicate_CopiesAndNamesThem()
+    {
+        var drop = Path.Combine(_dir.Path, "drop");
+        Directory.CreateDirectory(drop);
+        Directory.CreateDirectory(ModsDir);
+        File.WriteAllText(Path.Combine(ModsDir, "api-old.jar"), "api old");
+        var known = Path.Combine(drop, "cool.jar");
+        File.WriteAllText(known, "cool");
+        var unknown = Path.Combine(drop, "mystery.jar");
+        File.WriteAllText(unknown, "mystery");
+        var duplicate = Path.Combine(drop, "api-new.jar");
+        File.WriteAllText(duplicate, "api new");
+        var text = Path.Combine(drop, "readme.txt");
+        File.WriteAllText(text, "hi");
+        string Hash(string content) => Sha512(Encoding.UTF8.GetBytes(content));
+        _http.Add(ModrinthClient.VersionFilesUrl, $$$"""
+            {"{{{Hash("cool")}}}":{"id":"c1","project_id":"cool"},
+             "{{{Hash("api old")}}}":{"id":"a1","project_id":"api"},
+             "{{{Hash("api new")}}}":{"id":"a2","project_id":"api"}}
+            """)
+            .Add(ModrinthClient.ProjectsUrl(["api", "cool"]), """[{"id":"cool","title":"Cool Mod","server_side":"required"},{"id":"api","title":"Fabric API"}]""");
+
+        var result = await _library.AddJarsAsync(_dir.Path, Fabric, [known, unknown, duplicate, text]);
+
+        Assert.Equal(["Cool Mod", "mystery.jar"], result.Added);
+        Assert.Equal(["Fabric API"], result.Skipped);
+        Assert.Equal(["readme.txt"], result.NotJars);
+        Assert.Empty(result.ClientOnly);
+        var installed = _library.ListInstalled(_dir.Path, Fabric);
+        Assert.Contains(new InstalledMod("cool.jar", "cool", "c1", "Cool Mod"), installed);
+        Assert.Contains(new InstalledMod("mystery.jar"), installed);
+        Assert.False(File.Exists(Path.Combine(ModsDir, "api-new.jar")));
+    }
 }

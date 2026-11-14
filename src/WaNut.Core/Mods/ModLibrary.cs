@@ -54,6 +54,7 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// False checks first whether Modrinth marks anything to install and an installed mod as not working together
     /// (either side can say so). True skips that check, for a second try after the user said to go ahead.
     /// </param>
+    /// <param name="chosenVersion">A version picked in the details window; null installs the best one for the server.</param>
     /// <returns>Nothing installed when the server already has the project, even as a jar copied in by hand.</returns>
     /// <exception cref="NoCompatibleVersionException">The project itself has no version for this server.</exception>
     /// <exception cref="IncompatibleModsException">Something to install clashes with an installed mod.</exception>
@@ -65,7 +66,8 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         string title,
         bool allowIncompatible = false,
         IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        ModVersion? chosenVersion = null)
     {
         var folder = platform.FolderIn(instanceDir);
         var installed = ListInstalled(instanceDir, platform);
@@ -106,9 +108,11 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         queue.Enqueue((projectId, title));
         while (queue.TryDequeue(out var next) && plan.Count < MaxFilesPerInstall)
         {
-            var version = await modrinth.GetBestVersionAsync(next.ProjectId, platform, gameVersion, cancellationToken).ConfigureAwait(false);
+            var chosen = plan.Count == 0 && chosenVersion is not null
+                ? chosenVersion
+                : await modrinth.GetBestVersionAsync(next.ProjectId, platform, gameVersion, cancellationToken).ConfigureAwait(false);
             var name = next.Title ?? await modrinth.GetProjectTitleAsync(next.ProjectId, cancellationToken).ConfigureAwait(false);
-            if (version is null)
+            if (chosen is null)
             {
                 if (plan.Count == 0)
                 {
@@ -119,8 +123,8 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
                 continue;
             }
 
-            plan.Add((version, name));
-            foreach (var dependency in version.RequiredProjectIds.Where(known.Add))
+            plan.Add((chosen, name));
+            foreach (var dependency in chosen.RequiredProjectIds.Where(known.Add))
             {
                 queue.Enqueue((dependency, null));
             }
@@ -305,6 +309,86 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
 
         progress?.Report(1);
         return done;
+    }
+
+    /// <summary>
+    /// Copies jars the user dropped on the Mods tab into the folder and looks each up on Modrinth by SHA-512, so
+    /// known ones show their project's name. A jar of a project the server already has, or with a file name already
+    /// in the folder, is skipped: two copies of one mod stop the server. Only call while the server is stopped.
+    /// </summary>
+    public async Task<JarAddResult> AddJarsAsync(
+        string instanceDir, ModPlatform platform, IReadOnlyList<string> paths, CancellationToken cancellationToken = default)
+    {
+        var folder = platform.FolderIn(instanceDir);
+        var installed = ListInstalled(instanceDir, platform);
+        var byHash = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var notJars = new List<string>();
+        var skipped = new List<string>();
+        var names = installed.Select(m => m.FileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var path in paths)
+        {
+            var name = Path.GetFileName(path);
+            if (!ModrinthClient.IsSafeJarName(name) || !File.Exists(path))
+            {
+                notJars.Add(name);
+            }
+            else if (!names.Add(name))
+            {
+                skipped.Add(name);
+            }
+            else
+            {
+                byHash.TryAdd(await Task.Run(() => HashFile(path), cancellationToken).ConfigureAwait(false), path);
+            }
+        }
+
+        var installedHashes = new List<string>();
+        foreach (var mod in installed)
+        {
+            installedHashes.Add(await Task.Run(() => HashFile(folder, mod.FileName), cancellationToken).ConfigureAwait(false));
+        }
+
+        var identified = await modrinth.IdentifyVersionsAsync(byHash.Keys.Concat(installedHashes).ToList(), cancellationToken).ConfigureAwait(false);
+        var knownProjects = installedHashes
+            .Select(h => identified.GetValueOrDefault(h)?.ProjectId)
+            .OfType<string>()
+            .Concat(installed.Select(m => m.ProjectId).OfType<string>())
+            .ToHashSet(StringComparer.Ordinal);
+        var projects = (await modrinth.GetProjectsAsync(
+                byHash.Keys.Select(h => identified.GetValueOrDefault(h)?.ProjectId).OfType<string>().Distinct(StringComparer.Ordinal).ToList(),
+                cancellationToken).ConfigureAwait(false))
+            .ToDictionary(p => p.Id, StringComparer.Ordinal);
+
+        Directory.CreateDirectory(folder);
+        var records = ReadRecords(instanceDir).Where(r => File.Exists(Path.Combine(folder, r.FileName))).ToList();
+        var added = new List<string>();
+        var clientOnly = new List<string>();
+        foreach (var (hash, path) in byHash)
+        {
+            var name = Path.GetFileName(path);
+            var version = identified.GetValueOrDefault(hash);
+            var project = version is null ? null : projects.GetValueOrDefault(version.ProjectId);
+            if (version is not null && !knownProjects.Add(version.ProjectId))
+            {
+                skipped.Add(project?.Title ?? name);
+                continue;
+            }
+
+            File.Copy(path, Path.Combine(folder, name), overwrite: false);
+            if (version is not null)
+            {
+                records.Add(new InstalledMod(name, version.ProjectId, version.VersionId, project?.Title ?? name));
+                WriteRecords(instanceDir, records);
+            }
+
+            added.Add(project?.Title ?? name);
+            if (project is { IsClientOnly: true })
+            {
+                clientOnly.Add(project.Title);
+            }
+        }
+
+        return new JarAddResult(added, skipped, notJars, clientOnly);
     }
 
     /// <summary>Deletes the jar. Only call while the server is stopped.</summary>

@@ -12,4 +12,11 @@ public sealed record ModVersion(
     Uri Url,
     string Sha512,
     IReadOnlyList<string> RequiredProjectIds,
-    IReadOnlyList<string> IncompatibleProjectIds);
+    IReadOnlyList<string> IncompatibleProjectIds)
+{
+    /// <summary>"release", "beta" or "alpha".</summary>
+    public string VersionType { get; init; } = "release";
+
+    /// <summary>When the version came out; null when Modrinth did not say.</summary>
+    public DateTimeOffset? Published { get; init; }
+}

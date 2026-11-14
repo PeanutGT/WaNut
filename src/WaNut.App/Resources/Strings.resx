@@ -2745,4 +2745,91 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Backups_Reason_ModUpdate" xml:space="preserve">
     <value>Before an update</value>
   </data>
+  <data name="Mods_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Mods_DetailsLabel" xml:space="preserve">
+    <value>Details for {0}</value>
+  </data>
+  <data name="ModDetails_Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="ModDetails_LoadFailed" xml:space="preserve">
+    <value>Couldn't load the details: {0}</value>
+  </data>
+  <data name="ModDetails_Versions" xml:space="preserve">
+    <value>Versions for this server</value>
+  </data>
+  <data name="ModDetails_NoVersions" xml:space="preserve">
+    <value>No version runs on this server.</value>
+  </data>
+  <data name="ModDetails_Gallery" xml:space="preserve">
+    <value>Pictures</value>
+  </data>
+  <data name="ModDetails_About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="ModDetails_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="ModDetails_InstallLabel" xml:space="preserve">
+    <value>Install version {0}</value>
+  </data>
+  <data name="ModDetails_Release" xml:space="preserve">
+    <value>Release</value>
+  </data>
+  <data name="ModDetails_Beta" xml:space="preserve">
+    <value>Beta</value>
+  </data>
+  <data name="ModDetails_Alpha" xml:space="preserve">
+    <value>Alpha</value>
+  </data>
+  <data name="ModDetails_Installed" xml:space="preserve">
+    <value>This server already has it.</value>
+  </data>
+  <data name="ModDetails_StopToInstall" xml:space="preserve">
+    <value>Stop the server to install.</value>
+  </data>
+  <data name="ModDetails_OpenPage" xml:space="preserve">
+    <value>Open on Modrinth</value>
+  </data>
+  <data name="ModDetails_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Mods_Select" xml:space="preserve">
+    <value>Select {0}</value>
+  </data>
+  <data name="Mods_InstallSelected" xml:space="preserve">
+    <value>Install selected ({0})</value>
+  </data>
+  <data name="Mods_ClearSelection" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Mods_InstallingMany" xml:space="preserve">
+    <value>Installing {0} of {1}: {2}…</value>
+  </data>
+  <data name="Mods_DropHint" xml:space="preserve">
+    <value>Tip: drag .jar files onto this tab to add them.</value>
+  </data>
+  <data name="Mods_Adding" xml:space="preserve">
+    <value>Adding the dropped files…</value>
+  </data>
+  <data name="Mods_AddDone" xml:space="preserve">
+    <value>Added {0}.</value>
+  </data>
+  <data name="Mods_AddSkipped" xml:space="preserve">
+    <value>Already on the server, so skipped: {0}</value>
+  </data>
+  <data name="Mods_AddNotJars" xml:space="preserve">
+    <value>Not .jar files, so skipped: {0}</value>
+  </data>
+  <data name="Mods_AddClientOnly" xml:space="preserve">
+    <value>Modrinth says these only run in the game and can stop the server from starting: {0}</value>
+  </data>
+  <data name="Mods_AddFailed" xml:space="preserve">
+    <value>Couldn't add the files: {0}</value>
+  </data>
+  <data name="Mods_AddNothing" xml:space="preserve">
+    <value>Nothing was added.</value>
+  </data>
 </root>
