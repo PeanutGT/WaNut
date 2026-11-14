@@ -2603,7 +2603,7 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
     <value>Check again</value>
   </data>
   <data name="Connect_VpsReach_NoAnswer_Oracle" xml:space="preserve">
-    <value>Friends can't reach {0} yet: the VPS didn't answer, so Oracle Cloud's Security List probably blocks port {1}. In the Oracle Cloud console, open your instance, click its subnet, then Security &gt; Default Security List &gt; Add Ingress Rules: Source CIDR 0.0.0.0/0, IP Protocol TCP, Destination Port Range {1}. Then check again.</value>
+    <value>Friends can't reach {0} yet: the VPS didn't answer, so Oracle Cloud's Security List probably blocks port {1}. In the Oracle Cloud console, open your instance, click its subnet, then Security &gt; Default Security List &gt; Add Ingress Rules: Source CIDR 0.0.0.0/0, IP Protocol TCP, Destination Port Range {1} (leave Source Port Range empty: a port there blocks everyone). Then check again.</value>
   </data>
   <data name="Connect_VpsFirewallCommandsLabel" xml:space="preserve">
     <value>To open the port in the VPS's own firewall, run this on the VPS:</value>

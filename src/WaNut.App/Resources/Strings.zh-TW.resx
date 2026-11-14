@@ -2583,7 +2583,7 @@
     <value>再檢查一次</value>
   </data>
   <data name="Connect_VpsReach_NoAnswer_Oracle" xml:space="preserve">
-    <value>朋友還連不到 {0}：VPS 沒有回應，大概是 Oracle Cloud 的 Security List 擋住連接埠 {1}。請到 Oracle Cloud 主控台打開你的主機，點它的子網路，再到 Security &gt; Default Security List &gt; Add Ingress Rules：Source CIDR 填 0.0.0.0/0、IP Protocol 選 TCP、Destination Port Range 填 {1}。然後再檢查一次。</value>
+    <value>朋友還連不到 {0}：VPS 沒有回應，大概是 Oracle Cloud 的 Security List 擋住連接埠 {1}。請到 Oracle Cloud 主控台打開你的主機，點它的子網路，再到 Security &gt; Default Security List &gt; Add Ingress Rules：Source CIDR 填 0.0.0.0/0、IP Protocol 選 TCP、Destination Port Range 填 {1}（Source Port Range 要留空，填在那裡會擋掉所有人）。然後再檢查一次。</value>
   </data>
   <data name="Connect_VpsFirewallCommandsLabel" xml:space="preserve">
     <value>要在 VPS 自己的防火牆開這個連接埠，請在 VPS 上執行：</value>
