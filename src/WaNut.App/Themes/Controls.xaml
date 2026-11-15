@@ -537,6 +537,7 @@
 
   <!-- Tabs: plain text, the selected one dark with a green underline. -->
   <Style TargetType="TabControl">
+    <Setter Property="behaviors:TabIndicator.IsEnabled" Value="True" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Padding" Value="0" />
@@ -547,10 +548,16 @@
             <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
               <!-- A WrapPanel, not TabPanel: TabPanel ignores the tabs' margins and squeezes their text when the window is narrow.
                    Here a tab that does not fit moves to a second row whole. -->
-              <WrapPanel IsItemsHost="True" Margin="0,0,0,0" />
+              <Grid>
+                <WrapPanel IsItemsHost="True" />
+                <!-- The selection line; TabIndicator slides it under the selected tab. -->
+                <Rectangle x:Name="Indicator" Height="2" Width="0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                           Fill="{DynamicResource AccentBrush}" IsHitTestVisible="False" Visibility="Hidden" />
+              </Grid>
             </Border>
             <!-- The name lets screen readers and UI Automation reach the selected tab's content. -->
-            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="0,12,0,0" />
+            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" Margin="0,12,0,0"
+                              behaviors:ContentTransition.Trigger="{Binding SelectedIndex, RelativeSource={RelativeSource TemplatedParent}}" />
           </DockPanel>
         </ControlTemplate>
       </Setter.Value>
@@ -567,7 +574,8 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="TabItem">
-          <Border x:Name="Underline" Padding="0,6,0,6"
+          <!-- The transparent bottom border keeps room for the tab control's selection line. -->
+          <Border Padding="0,6,0,6"
                   BorderThickness="0,0,0,2" BorderBrush="Transparent" Background="Transparent">
             <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
           </Border>
@@ -578,7 +586,6 @@
             <Trigger Property="IsSelected" Value="True">
               <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
               <Setter Property="FontWeight" Value="SemiBold" />
-              <Setter TargetName="Underline" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
