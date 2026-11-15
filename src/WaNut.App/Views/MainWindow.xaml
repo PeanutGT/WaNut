@@ -242,32 +242,63 @@
             <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,6,0" />
 
             <!-- Status pill -->
-            <Border CornerRadius="11" Padding="12,3" Margin="0,0,12,0" VerticalAlignment="Center" BorderThickness="1">
-              <Border.Style>
-                <Style TargetType="Border">
-                  <Setter Property="Background" Value="{DynamicResource CardBrush}" />
-                  <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <!-- The busy and online colors are layers that fade in over the stopped look; the text color switches with them. -->
+            <Grid Margin="0,0,12,0" VerticalAlignment="Center">
+              <Grid.Style>
+                <Style TargetType="Grid">
                   <Setter Property="TextElement.Foreground" Value="{DynamicResource MutedTextBrush}" />
                   <Style.Triggers>
                     <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                      <Setter Property="Background" Value="{DynamicResource WarningBrush}" />
-                      <Setter Property="BorderBrush" Value="{DynamicResource WarningBorderBrush}" />
                       <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningTextBrush}" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding IsOnline}" Value="True">
-                      <Setter Property="Background" Value="{DynamicResource OnlineBadgeBrush}" />
-                      <Setter Property="BorderBrush" Value="{DynamicResource OnlineBadgeBrush}" />
                       <Setter Property="TextElement.Foreground" Value="{DynamicResource OnlineBadgeTextBrush}" />
                     </DataTrigger>
                   </Style.Triggers>
                 </Style>
-              </Border.Style>
-              <StackPanel Orientation="Horizontal">
+              </Grid.Style>
+              <Border CornerRadius="11" BorderThickness="1"
+                      Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" />
+              <Border CornerRadius="11" BorderThickness="1" Opacity="0"
+                      Background="{DynamicResource WarningBrush}" BorderBrush="{DynamicResource WarningBorderBrush}">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                        <DataTrigger.EnterActions>
+                          <BeginStoryboard Storyboard="{StaticResource FadeIn}" />
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                          <BeginStoryboard Storyboard="{StaticResource FadeOut}" />
+                        </DataTrigger.ExitActions>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+              </Border>
+              <Border CornerRadius="11" BorderThickness="1" Opacity="0"
+                      Background="{DynamicResource OnlineBadgeBrush}" BorderBrush="{DynamicResource OnlineBadgeBrush}">
+                <Border.Style>
+                  <Style TargetType="Border">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                        <DataTrigger.EnterActions>
+                          <BeginStoryboard Storyboard="{StaticResource FadeIn}" />
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                          <BeginStoryboard Storyboard="{StaticResource FadeOut}" />
+                        </DataTrigger.ExitActions>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </Border.Style>
+              </Border>
+              <StackPanel Orientation="Horizontal" Margin="12,3">
                 <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,6,0" />
                 <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold"
                            AutomationProperties.LiveSetting="Polite" />
               </StackPanel>
-            </Border>
+            </Grid>
 
             <!-- Start while stopped, Stop while running: one action at a time. -->
             <Button Content="{res:Text Server_Start}"

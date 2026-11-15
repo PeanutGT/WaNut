@@ -15,6 +15,15 @@
     Color feedback. A theme brush cannot be animated towards another theme brush, so each state is a layer
     named Hover, Selected or Fill that fades in over the resting look. Templates start these from their triggers.
   -->
+  <!-- For a layer that fades by its own style triggers, e.g. the colors of the status pill. -->
+  <Storyboard x:Key="FadeIn">
+    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1"
+                     Duration="{StaticResource MotionTransition}" EasingFunction="{StaticResource MotionEase}" />
+  </Storyboard>
+  <Storyboard x:Key="FadeOut">
+    <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0"
+                     Duration="{StaticResource MotionTransition}" EasingFunction="{StaticResource MotionEase}" />
+  </Storyboard>
   <Storyboard x:Key="ShowHover">
     <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1"
                      Duration="{StaticResource MotionFeedback}" EasingFunction="{StaticResource MotionEase}" />
@@ -104,6 +113,7 @@
 
   <!-- Banners: light background, matching text and a thin border, next to the content they are about. -->
   <Style x:Key="ErrorBanner" TargetType="Border">
+    <Setter Property="behaviors:Reveal.IsEnabled" Value="True" />
     <Setter Property="Background" Value="{DynamicResource ErrorBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource ErrorBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
@@ -795,6 +805,7 @@
 
   <!-- Progress bar, with a sliding block while the length of the work is unknown. -->
   <Style TargetType="ProgressBar">
+    <Setter Property="behaviors:SmoothProgress.IsEnabled" Value="True" />
     <Setter Property="Height" Value="6" />
     <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
     <Setter Property="Background" Value="{DynamicResource BorderBrush}" />
@@ -803,7 +814,8 @@
         <ControlTemplate TargetType="ProgressBar">
           <Grid x:Name="PART_Track" ClipToBounds="True">
             <Border Background="{TemplateBinding Background}" CornerRadius="3" />
-            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="{TemplateBinding Foreground}" CornerRadius="3" />
+            <!-- Not PART_Indicator: SmoothProgress sets the width, so it can glide. -->
+            <Border x:Name="Fill" Width="0" HorizontalAlignment="Left" Background="{TemplateBinding Foreground}" CornerRadius="3" />
             <Border x:Name="Slider" Width="80" HorizontalAlignment="Left" Background="{TemplateBinding Foreground}"
                     CornerRadius="3" Visibility="Collapsed">
               <Border.RenderTransform>
@@ -813,7 +825,7 @@
           </Grid>
           <ControlTemplate.Triggers>
             <Trigger Property="IsIndeterminate" Value="True">
-              <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed" />
+              <Setter TargetName="Fill" Property="Visibility" Value="Collapsed" />
               <Setter TargetName="Slider" Property="Visibility" Value="Visible" />
               <Trigger.EnterActions>
                 <BeginStoryboard x:Name="Sliding">
