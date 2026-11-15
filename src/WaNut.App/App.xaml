@@ -6,6 +6,7 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Themes/Motion.xaml" />
+        <ResourceDictionary Source="Themes/Text.xaml" />
         <ResourceDictionary Source="Themes/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
