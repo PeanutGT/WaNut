@@ -68,6 +68,39 @@
     <Setter Property="FontSize" Value="{StaticResource FontBody}" />
     <Setter Property="UseLayoutRounding" Value="True" />
     <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Window">
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}">
+            <Grid>
+              <AdornerDecorator>
+                <ContentPresenter />
+              </AdornerDecorator>
+              <!-- Small questions open here, over the window's content (InlinePanel). -->
+              <Grid x:Name="PanelLayer" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The box of a panel shown inside a window. -->
+  <Style x:Key="PanelCard" TargetType="Border">
+    <!-- Up to 420 wide; narrower in a small window. -->
+    <Setter Property="MaxWidth" Value="420" />
+    <Setter Property="MinWidth" Value="300" />
+    <Setter Property="Margin" Value="24" />
+    <Setter Property="Padding" Value="24" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource WindowBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlRadius}" />
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource TextBrush}" />
   </Style>
 
   <!-- The pixel peanut. Always scaled with nearest neighbor so the pixels stay sharp. -->

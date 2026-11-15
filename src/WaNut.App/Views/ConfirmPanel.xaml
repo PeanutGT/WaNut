@@ -1,0 +1,16 @@
+<UserControl x:Class="WaNut.App.Views.ConfirmPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources"
+             xmlns:controls="clr-namespace:WaNut.App.Controls">
+  <!-- A yes/no question shown inside the window the user is in (InlinePanel). ConfirmWindow is its stand-in when no window is open. -->
+  <StackPanel>
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+      <Button x:Name="YesButton" Content="{res:Text Common_Yes}" MinWidth="80" Margin="0,0,6,0" controls:InlinePanel.Answer="True" />
+      <!-- "No" is the safe answer, so it has the focus: Enter picks it, and so does Esc. -->
+      <Button x:Name="NoButton" Content="{res:Text Common_No}" MinWidth="80"
+              controls:InlinePanel.Answer="False" controls:InlinePanel.TakesFocus="True" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>
