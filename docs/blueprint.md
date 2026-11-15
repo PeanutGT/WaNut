@@ -134,7 +134,7 @@ Users pick server type and version from dropdowns, fetched from official APIs:
 
 ## 4b. Look, Tone and Settings Visibility
 
-* **Visual style:** follow `design/design-decisions.md` in the project files (warm off-white palette, warm dark mode that follows the Windows theme, green only for the primary action and Online state, 16x16 pixel peanut logo and `wanut.ico`).
+* **Visual style:** follow `docs/design.md` (warm off-white palette, warm dark mode that follows the Windows theme, green only for the primary action and Online state, 16x16 pixel peanut logo and `wanut.ico`).
 * **Mascot (decision 16):** the peanut appears often: empty states, Starting/Saving, success messages. Never in error messages or Advanced mode sections. This replaces "mascot sparingly" in the design notes.
 * **"More settings" (decision 15):** each settings page shows the common items first and the rest under an expander, e.g. the `server.properties` editor shows gamemode, difficulty and PvP first.
 * **Advanced mode (decision 15):** a switch in app settings. Items marked advanced-only are hidden until it is on. Phase 1 item: custom JVM arguments per server, added after WaNut's own flags.
