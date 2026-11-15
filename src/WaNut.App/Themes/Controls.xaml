@@ -624,7 +624,6 @@
 
   <Style TargetType="TabItem">
     <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
-    <Setter Property="FontSize" Value="{StaticResource FontSubheading}" />
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
     <!-- The gap sits outside the tab so the tab's bounds (the guide's ring, the focus ring) hug its text. -->
@@ -632,8 +631,10 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="TabItem">
-          <!-- The transparent bottom border keeps room for the tab control's selection line. -->
-          <Border Padding="0,6,0,6"
+          <!-- The transparent bottom border keeps room for the tab control's selection line.
+               The header's size and weight are set here, not on the tab: the tab's content inherits from the tab,
+               and its text stays body size and weight (docs/design.md, section 5). -->
+          <Border x:Name="Header" Padding="0,6,0,6" TextElement.FontSize="{StaticResource FontSubheading}"
                   BorderThickness="0,0,0,2" BorderBrush="Transparent" Background="Transparent">
             <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" />
           </Border>
@@ -643,7 +644,7 @@
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
               <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-              <Setter Property="FontWeight" Value="SemiBold" />
+              <Setter TargetName="Header" Property="TextElement.FontWeight" Value="SemiBold" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
