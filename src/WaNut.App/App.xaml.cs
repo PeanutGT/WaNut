@@ -160,7 +160,7 @@ public partial class App : Application
         services.AddTransient<DeleteServerViewModel>();
         services.AddTransient<DeleteServerPanel>();
         services.AddTransient<DuplicateServerViewModel>();
-        services.AddTransient<DuplicateServerWindow>();
+        services.AddTransient<DuplicateServerPanel>();
         services.AddTransient<VpsViewModel>();
         services.AddTransient<VpsWindow>();
 

@@ -69,10 +69,9 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public InstanceMetadata? ShowDuplicateServer(ServerViewModel server)
     {
-        var window = services.GetRequiredService<DuplicateServerWindow>();
-        window.ViewModel.Initialize(server);
-        window.Owner = Application.Current.MainWindow;
-        return window.ShowDialog() == true ? window.ViewModel.Copy : null;
+        var panel = services.GetRequiredService<DuplicateServerPanel>();
+        panel.ViewModel.Initialize(server);
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.ViewModel.Copy : null;
     }
 
     public string? AskResetWorld(string serverName)
