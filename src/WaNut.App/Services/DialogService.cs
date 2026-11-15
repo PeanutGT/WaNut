@@ -84,8 +84,8 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public string? AskBan(string playerName)
     {
-        var window = new BanWindow(string.Format(Text.Get("Ban_Question"), playerName)) { Owner = Application.Current.MainWindow };
-        return window.ShowDialog() == true ? window.Reason : null;
+        var panel = new BanPanel(string.Format(Text.Get("Ban_Question"), playerName));
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.Reason : null;
     }
 
     public IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts)
