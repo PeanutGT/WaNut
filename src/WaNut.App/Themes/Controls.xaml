@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!--
     Control styles for both themes. Colors always come from DynamicResource, so switching between
-    Light.xaml and Dark.xaml restyles every open window. Rules from design-decisions.md: 6px corners,
+    Light.xaml and Dark.xaml restyles every open window. Rules from docs/design.md: 6px corners,
     green only for the one primary button, the selected tab and the Online state.
   -->
 

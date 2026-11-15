@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Dark theme: warm brown (design-decisions.md). Every key here must also exist in the other theme. -->
+  <!-- Dark theme: warm brown (docs/design.md). Every key here must also exist in the other theme. -->
   <Color x:Key="CaptionColor">#27221C</Color>
   <Color x:Key="CaptionTextColor">#EDE6DA</Color>
   <SolidColorBrush x:Key="WindowBrush" Color="#1F1B16" />
