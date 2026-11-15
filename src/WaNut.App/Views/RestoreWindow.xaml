@@ -11,7 +11,7 @@
         ShowInTaskbar="False">
   <!-- Replaces the world (after a backup), so plain wording and Cancel as the default button. -->
   <StackPanel Margin="24">
-    <TextBlock Text="{res:Text Restore_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+    <TextBlock Text="{res:Text Restore_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
     <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
     <!-- Only when the backup holds more than one part of the world. -->

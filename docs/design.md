@@ -42,8 +42,10 @@
 
 ## 5. 文字
 
-- 內文字型：Segoe UI，中文明確指定微軟正黑體。
-- 標題與伺服器名稱用圓體（步驟 7；待定：候選是 Nunito 與 jf open 粉圓，要先查證授權、檔案大小與粗細數量，不合適就維持系統字並在這裡記下原因）。
+- 內文字型：Segoe UI，中文明確指定微軟正黑體（`BodyFont`，每個視窗的預設）。
+- 標題與伺服器名稱用圓體「昭源環方 Chiron GoRound TC」（`HeadingFont`）。寫法是在標題上加 `FontFamily="{StaticResource HeadingFont}"`。
+- 只打包 Bold 一個粗細（`Assets/Fonts/ChironGoRoundTC-700B.ttf`，24 MB，SIL OFL 1.1，授權檔放在旁邊），所以用這個字型的文字一律是粗體；沒有裁剪，字型裡沒有的字會改用 Segoe UI 或微軟正黑體。
+- 沒有選 jf open 粉圓，因為它只有單一粗細；沒有另外打包 Nunito，因為昭源環方的英文字母本身就是圓的。
 - 字級只有四級，定義在 `Themes/Text.xaml`。畫面寫 `FontSize="{StaticResource FontSmall}"`，不寫數字。行高交給字型決定，沒有另外指定。
 
 | 資源 | 字級 | 用途 |

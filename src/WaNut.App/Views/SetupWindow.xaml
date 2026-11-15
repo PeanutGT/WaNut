@@ -12,7 +12,7 @@
   <StackPanel Margin="24">
     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
       <Image Style="{StaticResource Peanut}" Width="72" Height="72" Margin="0,0,12,0" />
-      <TextBlock Text="{res:Text Setup_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <TextBlock Text="{res:Text Setup_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
     <TextBlock Text="{res:Text Setup_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,18" />
 

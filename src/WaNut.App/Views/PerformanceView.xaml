@@ -16,6 +16,7 @@
     </Style>
     <Style x:Key="Value" TargetType="TextBlock">
       <Setter Property="FontSize" Value="{StaticResource FontTitle}" />
+      <Setter Property="FontFamily" Value="{StaticResource HeadingFont}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
   </UserControl.Resources>

@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:WaNut.App.Controls">
   <!-- Deletes the world (after a backup), so plain wording and Cancel as the default button. Shown with InlinePanel. -->
   <StackPanel>
-    <TextBlock Text="{res:Text Reset_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+    <TextBlock Text="{res:Text Reset_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
     <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
     <TextBlock Text="{res:Text Reset_SeedLabel}" FontWeight="SemiBold" Margin="0,18,0,6" />
