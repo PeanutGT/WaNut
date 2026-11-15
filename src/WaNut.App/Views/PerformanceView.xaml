@@ -35,6 +35,11 @@
         </StackPanel>
       </DockPanel>
 
+      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,16"
+              Visibility="{Binding HasIdleWarning, Converter={StaticResource Visible}}">
+        <TextBlock Text="{Binding IdleWarning}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </Border>
+
       <Border Style="{StaticResource ChartCard}">
         <StackPanel>
           <DockPanel>

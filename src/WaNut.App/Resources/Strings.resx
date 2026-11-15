@@ -2922,4 +2922,19 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Guide_PacksText" xml:space="preserve">
     <value>Add data packs to the world and pick a resource pack friends get when they join. Works on every server, Vanilla too.</value>
   </data>
+  <data name="Server_IdleCpuHigh" xml:space="preserve">
+    <value>WaNut: nobody has been online for {0:0} minutes, but the server still uses {1:0}% of the CPU. A mod or plugin may be stuck; see the Performance tab.</value>
+  </data>
+  <data name="Server_LighterEntities" xml:space="preserve">
+    <value>Lighter mobs and villagers (Paper)</value>
+  </data>
+  <data name="Server_LighterEntitiesHint" xml:space="preserve">
+    <value>Saves CPU with big farms and villages: crowded mobs push each other less, villagers check their beds and work places less often, and TNT blasts are worked out together. Mob-cramming farms and some villager tricks may work a bit differently. Off puts Paper's defaults back.</value>
+  </data>
+  <data name="Server_LighterEntitiesStartFirst" xml:space="preserve">
+    <value>Start the server once first: Paper writes this setting's file on the first start.</value>
+  </data>
+  <data name="Performance_IdleCpuHigh" xml:space="preserve">
+    <value>Nobody has played for {0:0} minutes, yet the server keeps the CPU busy. A mod or plugin may be stuck, or a farm keeps running. Restart the server, or, for modded and Paper servers, run a spark profile below to see what is busy.</value>
+  </data>
 </root>

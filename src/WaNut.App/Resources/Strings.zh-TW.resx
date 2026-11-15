@@ -2902,4 +2902,19 @@
   <data name="Guide_PacksText" xml:space="preserve">
     <value>把資料包加進世界，或挑一個朋友加入時會自動下載的資源包。所有伺服器都能用，原版也行。</value>
   </data>
+  <data name="Server_IdleCpuHigh" xml:space="preserve">
+    <value>WaNut：已經 {0:0} 分鐘沒人在線上，伺服器還在用 {1:0}% 的 CPU，可能有模組或外掛卡住了，請看「效能」分頁。</value>
+  </data>
+  <data name="Server_LighterEntities" xml:space="preserve">
+    <value>減輕生物與村民負擔（Paper）</value>
+  </data>
+  <data name="Server_LighterEntitiesHint" xml:space="preserve">
+    <value>有大型農場或村莊時較省 CPU：擠在一起的生物比較少互相推擠、村民比較少檢查床和工作站、相鄰的 TNT 爆炸一起計算。靠擠壓殺怪的農場和部分村民機關可能會有點不同。關掉就恢復 Paper 預設值。</value>
+  </data>
+  <data name="Server_LighterEntitiesStartFirst" xml:space="preserve">
+    <value>請先啟動伺服器一次：Paper 第一次啟動時才會寫出這個設定檔。</value>
+  </data>
+  <data name="Performance_IdleCpuHigh" xml:space="preserve">
+    <value>已經 {0:0} 分鐘沒人在玩，伺服器卻一直讓 CPU 很忙。可能有模組或外掛卡住，或是有農場一直在跑。可以重新啟動伺服器；模組或 Paper 伺服器也能用下面的 spark 剖析看是什麼在忙。</value>
+  </data>
 </root>
