@@ -79,8 +79,8 @@
 
 ## 7. 視窗與面板
 
-- 小型確認流程（一般確認、關閉時的選擇、刪除伺服器、重置世界、封鎖玩家、複製伺服器）顯示成使用者所在視窗內的面板：有遮罩、可用 Esc 或點遮罩關閉、鍵盤焦點留在面板內。（步驟 8；目前一般確認、關閉時的選擇、封鎖玩家、重置世界已改，刪除伺服器與複製伺服器還是獨立視窗）
-- 面板由 `controls:InlinePanel.Show(視窗, 內容)` 開啟，它會像 `ShowDialog` 一樣等到使用者回答才返回。內容是一個 `UserControl`；按鈕用 `controls:InlinePanel.Answer="True"`／`"False"` 回答，用 `controls:InlinePanel.TakesFocus="True"` 指定開啟時的焦點，用 `controls:InlinePanel.IsDefault="True"` 指定焦點不在按鈕上時 Enter 會按的按鈕；要記錄比是／否更多的結果時，在 code-behind 呼叫 `InlinePanel.Close(this, true)`。面板開著時視窗不能關閉。
+- 小型確認流程（一般確認、關閉時的選擇、刪除伺服器、重置世界、封鎖玩家、複製伺服器）顯示成使用者所在視窗內的面板：有遮罩、可用 Esc 或點遮罩關閉、鍵盤焦點留在面板內。（步驟 8；目前只剩複製伺服器還是獨立視窗）
+- 面板由 `controls:InlinePanel.Show(視窗, 內容)` 開啟，它會像 `ShowDialog` 一樣等到使用者回答才返回。內容是一個 `UserControl`；按鈕用 `controls:InlinePanel.Answer="True"`／`"False"` 回答，用 `controls:InlinePanel.TakesFocus="True"` 指定開啟時的焦點，用 `controls:InlinePanel.IsDefault="True"` 指定焦點不在按鈕上時 Enter 會按的按鈕；要記錄比是／否更多的結果時，在 code-behind 呼叫 `InlinePanel.Close(this, true)`；工作進行到一半時不能直接關掉的內容，實作 `InlinePanel.IDismissHandler` 自己決定 Esc 和點遮罩要做什麼（例子是刪除伺服器）。面板開著時視窗不能關閉。
 - 外觀：最寬 420px（樣式 `PanelCard`）、遮罩用 `GuideDimBrush`、從下方 12px 淡入升到定位。
 - 沒有任何視窗開著時（例如啟動途中）退回使用獨立的 `ConfirmWindow`。
 - 其餘視窗（建立伺服器、設定、VPS、模組詳情、變更伺服器、匯入匯出世界、還原、初次設定）維持獨立視窗。

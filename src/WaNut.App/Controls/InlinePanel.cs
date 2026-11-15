@@ -18,6 +18,12 @@ namespace WaNut.App.Controls;
 /// </summary>
 public static class InlinePanel
 {
+    /// <summary>For panel content that must handle Esc and a click outside itself, e.g. to cancel work first.</summary>
+    public interface IDismissHandler
+    {
+        void Dismiss(bool byEscape);
+    }
+
     // The part of the AppWindow template that panels are put in.
     private const string LayerPart = "PanelLayer";
 
@@ -82,20 +88,37 @@ public static class InlinePanel
             frame.Continue = false;
         }
 
+        // Content that is in the middle of work decides for itself what backing out means.
+        void Dismiss(bool byEscape)
+        {
+            if (body is IDismissHandler handler)
+            {
+                handler.Dismiss(byEscape);
+            }
+            else
+            {
+                Close(false);
+            }
+        }
+
         overlay.SetValue(CloseProperty, (Action<bool>)Close);
-        dim.MouseLeftButtonDown += (_, _) => Close(false);
+        dim.MouseLeftButtonDown += (_, _) => Dismiss(byEscape: false);
         overlay.KeyDown += (_, e) =>
         {
             if (e.Key == Key.Escape)
             {
                 e.Handled = true;
-                Close(false);
+                Dismiss(byEscape: true);
             }
             else if (e.Key == Key.Enter && Find<ButtonBase>(body, GetIsDefault) is { IsEnabled: true } button)
             {
                 // A focused button has already taken Enter itself; this is Enter from a check box or a text box.
                 e.Handled = true;
                 button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                if (button.Command is { } command && command.CanExecute(button.CommandParameter))
+                {
+                    command.Execute(button.CommandParameter);
+                }
             }
         };
 

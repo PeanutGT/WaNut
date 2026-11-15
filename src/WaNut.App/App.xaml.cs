@@ -158,7 +158,7 @@ public partial class App : Application
         services.AddTransient<ExportWorldViewModel>();
         services.AddTransient<ExportWorldWindow>();
         services.AddTransient<DeleteServerViewModel>();
-        services.AddTransient<DeleteServerWindow>();
+        services.AddTransient<DeleteServerPanel>();
         services.AddTransient<DuplicateServerViewModel>();
         services.AddTransient<DuplicateServerWindow>();
         services.AddTransient<VpsViewModel>();
