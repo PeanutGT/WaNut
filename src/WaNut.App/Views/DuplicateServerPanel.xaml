@@ -10,7 +10,7 @@
   <!-- DataContext: DuplicateServerViewModel. Shown with InlinePanel. -->
   <StackPanel>
     <StackPanel Orientation="Horizontal">
-      <TextBlock Text="{res:Text Duplicate_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <TextBlock Text="{res:Text Duplicate_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
     <TextBlock Text="{res:Text Duplicate_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,18" />
 

@@ -5,7 +5,7 @@
              xmlns:controls="clr-namespace:WaNut.App.Controls">
   <!-- Keeps a player out until they are unbanned, so Cancel is the default button. Shown with InlinePanel. -->
   <StackPanel>
-    <TextBlock Text="{res:Text Ban_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+    <TextBlock Text="{res:Text Ban_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
     <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
     <TextBlock Text="{res:Text Ban_ReasonLabel}" FontWeight="SemiBold" Margin="0,18,0,6" />

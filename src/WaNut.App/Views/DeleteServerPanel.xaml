@@ -9,7 +9,7 @@
 
   <!-- A destructive action: plain, calm wording and no peanut (decision 16). Cancel is the default button. Shown with InlinePanel. -->
   <StackPanel>
-    <TextBlock Text="{res:Text Delete_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+    <TextBlock Text="{res:Text Delete_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
     <TextBlock Text="{Binding QuestionText}" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
     <StackPanel Margin="0,18,0,0" Visibility="{Binding HasWorld, Converter={StaticResource BoolToVisibility}}">

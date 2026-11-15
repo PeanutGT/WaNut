@@ -21,7 +21,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
     <StackPanel>
     <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
-      <TextBlock Text="{res:Text AppSettings_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <TextBlock Text="{res:Text AppSettings_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
 
     <!-- Language -->
