@@ -104,7 +104,7 @@
             </Style.Triggers>
           </Style>
         </StackPanel.Style>
-        <controls:PixelScene Scene="no-players" Width="48" Height="48" Margin="0,0,6,0" />
+        <controls:PixelScene Scene="no-players" Width="96" Height="96" Margin="0,0,6,0" />
         <TextBlock Text="{res:Text Server_NoPlayers}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
       </StackPanel>
 
@@ -162,7 +162,6 @@
                     </Style.Triggers>
                   </Style>
                 </StackPanel.Style>
-                <controls:PixelScene Scene="empty-list" Width="32" Height="32" Margin="0,0,6,0" />
                 <TextBlock Text="{res:Text Players_EmptyList}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
               </StackPanel>
               <DockPanel Margin="0,6,0,0">
@@ -205,7 +204,6 @@
                     </Style.Triggers>
                   </Style>
                 </StackPanel.Style>
-                <controls:PixelScene Scene="empty-list" Width="32" Height="32" Margin="0,0,6,0" />
                 <TextBlock Text="{res:Text Players_EmptyList}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
               </StackPanel>
               <DockPanel Margin="0,6,0,0">

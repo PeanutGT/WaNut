@@ -24,7 +24,6 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
     <StackPanel>
     <StackPanel Orientation="Horizontal">
-      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,12,0" />
       <TextBlock Text="{res:Text Vps_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
     <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,3" />

@@ -24,14 +24,7 @@ public partial class DesignRulesTests
         ["color"] = [],
         ["spacing"] = [],
         ["text size"] = [],
-        // Step 6 of docs/design-rollout.md brings the peanut and the scenes to 3x.
-        ["pixel art size"] =
-        [
-            "AppSettingsWindow.xaml", "BackupsView.xaml", "ChangeServerWindow.xaml", "CloseChoicePanel.xaml",
-            "ConnectView.xaml", "CreateServerWindow.xaml", "DuplicateServerWindow.xaml", "ExportWorldWindow.xaml",
-            "ImportWorldWindow.xaml", "MainWindow.xaml", "ModsView.xaml", "PacksView.xaml", "PerformanceView.xaml",
-            "PlayersView.xaml", "ServerSettingsView.xaml", "SetupWindow.xaml", "VpsWindow.xaml", "WorldPicker.xaml",
-        ],
+        ["pixel art size"] = [],
     };
 
     [Fact]

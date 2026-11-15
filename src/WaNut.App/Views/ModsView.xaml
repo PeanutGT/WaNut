@@ -83,7 +83,6 @@
         <!-- Working: the peanut wobbles while files download. -->
         <StackPanel Margin="0,0,0,12" Visibility="{Binding IsWorking, Converter={StaticResource Visible}}">
           <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-            <Image Style="{StaticResource BusyPeanut}" Width="22" Height="22" Margin="0,0,6,0" />
             <TextBlock Text="{Binding WorkText}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <ProgressBar Minimum="0" Maximum="1" Value="{Binding WorkFraction, Mode=OneWay}" Height="6"
