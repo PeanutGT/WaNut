@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
+using WaNut.Core.Collections;
 using WaNut.Core.Hosting;
 using WaNut.Core.Players;
 using WaNut.Core.Properties;
@@ -249,14 +250,10 @@ public sealed partial class PlayerListsViewModel : ObservableObject
         Reload();
     }
 
-    private void Fill(ObservableCollection<PlayerEntry> target, IEnumerable<string> names, string removeLabelKey = "Players_RemoveName")
-    {
-        target.Clear();
-        foreach (var name in names)
-        {
-            target.Add(Entry(name, string.Format(Text.Get(removeLabelKey), name)));
-        }
-    }
+    // Only rows that came or went change, so the list animates just those and kept rows keep their faces.
+    private void Fill(ObservableCollection<PlayerEntry> target, IEnumerable<string> names, string removeLabelKey = "Players_RemoveName") =>
+        ListSync.Sync(target, names, n => n, e => e.Name, n => Entry(n, string.Format(Text.Get(removeLabelKey), n)),
+            StringComparer.OrdinalIgnoreCase, isCurrent: (e, n) => e.Name == n);
 
     /// <summary>Who is online and who joined before, each marked with the lists they are on, for the ⋯ menu.</summary>
     private void FillPeople()
@@ -269,18 +266,23 @@ public sealed partial class PlayerListsViewModel : ObservableObject
         FillPeople(Recent, recent, isOnline: false);
     }
 
-    private void FillPeople(ObservableCollection<PlayerEntry> target, IEnumerable<string> names, bool isOnline)
+    private void FillPeople(ObservableCollection<PlayerEntry> target, IEnumerable<string> names, bool isOnline) =>
+        ListSync.Sync(target, names, n => n, e => e.Name,
+            n =>
+            {
+                var entry = Entry(n, string.Format(Text.Get("Players_MoreName"), n));
+                entry.IsOnline = isOnline;
+                Mark(entry);
+                return entry;
+            },
+            StringComparer.OrdinalIgnoreCase, isCurrent: (e, n) => e.Name == n, refresh: (e, _) => Mark(e));
+
+    /// <summary>Which lists the player is on, for the ⋯ menu.</summary>
+    private void Mark(PlayerEntry entry)
     {
-        target.Clear();
-        foreach (var name in names)
-        {
-            var entry = Entry(name, string.Format(Text.Get("Players_MoreName"), name));
-            entry.IsOnline = isOnline;
-            entry.IsOperator = Operators.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            entry.IsWhitelisted = Whitelist.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            entry.IsBanned = Banned.Any(e => e.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            target.Add(entry);
-        }
+        entry.IsOperator = Operators.Any(e => e.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
+        entry.IsWhitelisted = Whitelist.Any(e => e.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
+        entry.IsBanned = Banned.Any(e => e.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
     }
 
     private PlayerEntry Entry(string name, string actionLabel)

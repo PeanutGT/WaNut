@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Collections;
 using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
@@ -787,11 +788,8 @@ public sealed partial class ServerViewModel : ObservableObject
             }
         }
 
-        Players.Clear();
-        foreach (var player in process.Players)
-        {
-            Players.Add(player);
-        }
+        // Only joins and leaves change the list, so the Players tab animates just those rows.
+        ListSync.Sync(Players, process.Players, StringComparer.OrdinalIgnoreCase);
 
         OnPropertyChanged(nameof(PlayersHeader));
         OnPropertyChanged(nameof(ListPlayersText));

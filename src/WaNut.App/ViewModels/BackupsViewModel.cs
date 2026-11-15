@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Collections;
 using WaNut.Core.Hosting;
 using WaNut.Core.Worlds;
 
@@ -73,13 +74,11 @@ public sealed partial class BackupsViewModel : ObservableObject
 
     public void Reload()
     {
-        Items.Clear();
         try
         {
-            foreach (var backup in _store.List(_server.InstanceDir))
-            {
-                Items.Add(new BackupItemViewModel(backup));
-            }
+            // Only backups that came or went change, so the list animates just those rows.
+            ListSync.Sync(Items, _store.List(_server.InstanceDir), b => b.FilePath, i => i.Info.FilePath, b => new BackupItemViewModel(b),
+                StringComparer.OrdinalIgnoreCase, isCurrent: (i, b) => i.Info == b);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

@@ -26,11 +26,18 @@ public sealed partial class PlayerEntry(string name, string actionLabel) : Obser
 
     public bool IsOnline { get; set; }
 
-    public bool IsOperator { get; set; }
+    // Observable: a row stays when the lists change, so its ⋯ menu must follow.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(OperatorAction))]
+    private bool _isOperator;
 
-    public bool IsWhitelisted { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WhitelistAction))]
+    private bool _isWhitelisted;
 
-    public bool IsBanned { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BanAction))]
+    private bool _isBanned;
 
     public string OperatorAction => Text.Get(IsOperator ? "Players_RemoveOperator" : "Players_MakeOperator");
 

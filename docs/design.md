@@ -72,6 +72,7 @@
 
 - 內容切換（分頁、伺服器）：新內容淡入並從下方 6px 升到定位，舊內容直接消失。要讓一塊內容有這個過場，加上 `behaviors:ContentTransition.Trigger="{Binding 會改變的值}"`。分頁的選取線由 `behaviors:TabIndicator` 滑到新分頁；跨行時直接跳過去。
 - 狀態與訊息：三種橫幅樣式出現時從零高度展開（`behaviors:Reveal`，已寫在橫幅樣式裡）；會換色的狀態標示用淡入淡出的圖層加 `FadeIn`／`FadeOut`（例子是主視窗的狀態徽章）；進度條前進時滑動、倒退時直接到位（`behaviors:SmoothProgress`，已寫在進度條樣式裡）。
+- 清單項目（玩家、備份、已安裝模組）：新增的列從零高度展開，移除的列收合後才消失（`behaviors:ListMotion.ItemsSource` 取代 `ItemsSource`）。ViewModel 要用 `ListSync` 只增減有變動的項目，不要清空再重填；一次變動超過 6 列時直接切換。
 - 回彈由 `behaviors:Bounce` 負責：`SuccessMark` 出現時會回彈；已經在畫面上的東西用 `behaviors:Bounce.When="{Binding ...}"`（例子是伺服器上線時的狀態圖）。
 - **只有這些地方可以回彈：** 花生本身；伺服器成功上線；長時間工作完成（備份、下載、匯入匯出、模組包安裝）；複製或儲存成功的打勾圖示（只有圖示本身回彈）。其餘一律俐落。
 - **硬邊底緣：** 可按的東西（按鈕、可點的卡片）底部有 3px 實邊，按下時整顆下移 3px、實邊消失。不模糊、不漸層。顏色是 `ButtonEdgeBrush` 與 `PrimaryButtonEdgeBrush`，按鈕樣式用 `behaviors:Surface.EdgeBrush` 指定。

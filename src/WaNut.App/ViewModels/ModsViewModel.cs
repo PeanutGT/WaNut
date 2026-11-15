@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Collections;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Mods;
@@ -82,9 +83,10 @@ public sealed partial class ModsViewModel : ObservableObject
         : _updates.Count > 0 ? string.Format(Text.Get("Mods_UpdatesAvailable"), _updates.Count)
         : Text.Get("Mods_UpToDate");
 
-    // Replaced as a whole on reload, so the list redraws once instead of once per mod.
-    [ObservableProperty]
-    private ObservableCollection<InstalledModViewModel> _installed = [];
+    private ModUpdate? UpdateFor(InstalledMod mod) => _updates.GetValueOrDefault(mod.FileName) is { } u && u.Mod == mod ? u : null;
+
+    /// <summary>Kept in place on reload, so only mods that came or went animate (docs/design.md, section 6).</summary>
+    public ObservableCollection<InstalledModViewModel> Installed { get; } = [];
 
     public ObservableCollection<ModResultViewModel> Results { get; } = [];
 
@@ -145,13 +147,12 @@ public sealed partial class ModsViewModel : ObservableObject
     /// <summary>Rereads the folder; after a type change the old results are for the wrong loader, so they go too.</summary>
     public void Reload()
     {
-        var installed = new List<InstalledModViewModel>();
+        var installed = new List<InstalledMod>();
         if (Platform is { } platform)
         {
             try
             {
-                installed.AddRange(_library.ListInstalled(_server.InstanceDir, platform)
-                    .Select(mod => new InstalledModViewModel(mod, _updates.GetValueOrDefault(mod.FileName) is { } u && u.Mod == mod ? u : null)));
+                installed.AddRange(_library.ListInstalled(_server.InstanceDir, platform));
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
@@ -159,7 +160,8 @@ public sealed partial class ModsViewModel : ObservableObject
             }
         }
 
-        Installed = new ObservableCollection<InstalledModViewModel>(installed);
+        ListSync.Sync(Installed, installed, m => m.FileName, i => i.Mod.FileName, m => new InstalledModViewModel(m, UpdateFor(m)),
+            StringComparer.OrdinalIgnoreCase, isCurrent: (i, m) => i.Mod == m && i.Update == UpdateFor(m));
         var installedIds = InstalledProjectIds();
         foreach (var result in Results)
         {
