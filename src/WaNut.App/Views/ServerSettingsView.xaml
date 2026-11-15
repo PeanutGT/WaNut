@@ -116,6 +116,13 @@
             <TextBlock Text="{res:Text Server_AutoRestartHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
           </StackPanel>
 
+          <StackPanel Style="{StaticResource Item}" Visibility="{Binding ShowPaperTweaks, Converter={StaticResource Visible}}">
+            <CheckBox Content="{res:Text Server_LighterEntities}" IsChecked="{Binding LighterEntities}" IsEnabled="{Binding CanEditPaperTweaks}" />
+            <TextBlock Text="{res:Text Server_LighterEntitiesHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+            <TextBlock Text="{res:Text Server_LighterEntitiesStartFirst}" Style="{StaticResource Hint}" Margin="26,2,0,0"
+                       Visibility="{Binding ShowPaperTweaksStartFirst, Converter={StaticResource Visible}}" />
+          </StackPanel>
+
           <StackPanel Style="{StaticResource Item}">
             <StackPanel Orientation="Horizontal">
               <CheckBox Content="{res:Text Server_AutoStop}" IsChecked="{Binding AutoStop}" VerticalAlignment="Center" />

@@ -37,6 +37,13 @@ public sealed partial class PerformanceViewModel(ServerViewModel server, Spark s
     [ObservableProperty]
     private string? _sparkError;
 
+    /// <summary>Set while the server has kept the CPU busy with nobody online, as <see cref="IdleCpuWatch"/> decides.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasIdleWarning))]
+    private string? _idleWarning;
+
+    public bool HasIdleWarning => IdleWarning is not null;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasReport))]
     private Uri? _reportUrl;

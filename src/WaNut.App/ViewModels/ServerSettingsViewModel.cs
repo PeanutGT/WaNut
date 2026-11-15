@@ -149,6 +149,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             _loaded = ServerSettingsStore.Load(_server.InstanceDir);
             Port = _loaded.Port;
             OnlineMode = _loaded.OnlineMode;
+            LighterEntities = ShowPaperTweaks && PaperTweaks.IsOn(_server.InstanceDir);
         }
         catch (IOException e)
         {
@@ -157,6 +158,33 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         finally
         {
             _loading = false;
+        }
+
+        OnPropertyChanged(nameof(ShowPaperTweaks));
+        OnPropertyChanged(nameof(CanEditPaperTweaks));
+        OnPropertyChanged(nameof(ShowPaperTweaksStartFirst));
+    }
+
+    /// <summary>Paper 1.19+ only: the "lighter entities" switch in More settings.</summary>
+    public bool ShowPaperTweaks => PaperTweaks.Supports(_server.Metadata.Type, _server.Metadata.MinecraftVersion);
+
+    /// <summary>Paper writes the file on the first start and again when it stops, so only while stopped and after that.</summary>
+    public bool CanEditPaperTweaks => CanEditProperties && PaperTweaks.HasFile(_server.InstanceDir);
+
+    public bool ShowPaperTweaksStartFirst => ShowPaperTweaks && !PaperTweaks.HasFile(_server.InstanceDir);
+
+    [ObservableProperty]
+    private bool _lighterEntities;
+
+    private void SavePaperTweaks()
+    {
+        try
+        {
+            PaperTweaks.Set(_server.InstanceDir, LighterEntities);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
         }
     }
 
@@ -246,6 +274,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         DeleteServerCommand.NotifyCanExecuteChanged();
         DuplicateServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
+        OnPropertyChanged(nameof(CanEditPaperTweaks));
         OnPropertyChanged(nameof(ShowNextStartHint));
         OnPropertyChanged(nameof(CanChangeRunLocation));
         OnPropertyChanged(nameof(ShowVpsCopyNote));
@@ -296,6 +325,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
                 break;
             case nameof(Port) or nameof(OnlineMode):
                 SaveProperties();
+                break;
+            case nameof(LighterEntities):
+                SavePaperTweaks();
                 break;
         }
     }

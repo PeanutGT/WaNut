@@ -39,6 +39,7 @@ public sealed partial class ServerViewModel : ObservableObject
     // burst of output reaches the UI thread as one batch instead of one post per line.
     private readonly ConcurrentQueue<ConsoleLine> _pendingLines = new();
     private int _flushPosted;
+    private int _sawWorldGeneration;
 
     /// <summary>How long a crashed server waits before it is started again.</summary>
     private static readonly TimeSpan RestartDelay = TimeSpan.FromSeconds(5);
@@ -554,8 +555,10 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         var meter = new CpuMeter(process.ProcessorCount);
         var schedule = new BackupSchedule();
+        var idle = new IdleCpuWatch();
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         var stopping = false;
+        process.OutputReceived += NoteWorldGeneration;
         try
         {
             while (await timer.WaitForNextTickAsync() && Process == process && process.GetUsage() is { } usage)
@@ -566,6 +569,16 @@ public sealed partial class ServerViewModel : ObservableObject
                 {
                     UsageText = string.Format(Text.Get("Server_Usage"), usage.MemoryBytes / (1024.0 * 1024 * 1024), Metadata.MemoryMb / 1024.0, cpu);
                     Performance.Add(new UsageSample(now, cpu, usage.MemoryBytes));
+                    if (Interlocked.Exchange(ref _sawWorldGeneration, 0) == 1)
+                    {
+                        idle.Reset();
+                    }
+                    else if (idle.Update(Status == ServerStatus.Online, Players.Count, cpu, now))
+                    {
+                        var minutes = IdleCpuWatch.Duration.TotalMinutes;
+                        AddConsoleLine(string.Format(Text.Get("Server_IdleCpuHigh"), minutes, cpu));
+                        Performance.IdleWarning = string.Format(Text.Get("Performance_IdleCpuHigh"), minutes);
+                    }
                 }
 
                 _empty.Update(Status == ServerStatus.Online, Players.Count, now);
@@ -589,10 +602,21 @@ public sealed partial class ServerViewModel : ObservableObject
         }
         finally
         {
+            process.OutputReceived -= NoteWorldGeneration;
+            Performance.IdleWarning = null;
             if (Process == process)
             {
                 UsageText = null;
             }
+        }
+    }
+
+    // From the server's output thread: a pregeneration tool is busy on purpose, so the idle CPU check waits.
+    private void NoteWorldGeneration(string line)
+    {
+        if (IdleCpuWatch.IsWorldGeneration(line))
+        {
+            Interlocked.Exchange(ref _sawWorldGeneration, 1);
         }
     }
 
