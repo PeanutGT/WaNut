@@ -17,6 +17,12 @@ public static class MotionSettings
     /// <summary>The shared time for content that changes place, for animations started from code.</summary>
     public static Duration Transition => (Duration)Application.Current.FindResource("MotionTransition");
 
+    /// <summary>The time of a bounce, for animations started from code.</summary>
+    public static Duration Bounce => (Duration)Application.Current.FindResource("MotionBounce");
+
+    /// <summary>The curve of a bounce: a little past the end, then back.</summary>
+    public static IEasingFunction BounceEase => (IEasingFunction)Application.Current.FindResource("MotionBounceEase");
+
     /// <summary>The shared crisp curve, for animations started from code.</summary>
     public static IEasingFunction Ease => (IEasingFunction)Application.Current.FindResource("MotionEase");
 

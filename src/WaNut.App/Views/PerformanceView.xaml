@@ -23,7 +23,7 @@
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
     <StackPanel>
       <DockPanel Margin="0,0,0,18">
-        <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Scene}" Width="64" Height="64" Margin="0,0,12,0" />
+        <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Scene}" Width="96" Height="96" Margin="0,0,12,0" />
         <StackPanel VerticalAlignment="Center">
           <TextBlock Text="{Binding MoodText}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextWrapping="Wrap"
                      AutomationProperties.LiveSetting="Polite"

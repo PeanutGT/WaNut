@@ -33,7 +33,6 @@
     </ListBox>
 
     <StackPanel Orientation="Horizontal" Margin="0,6,0,0" Visibility="{Binding IsScanning, Converter={StaticResource Visible}}">
-      <Image Style="{StaticResource BusyPeanut}" Width="18" Height="18" Margin="0,0,6,0" />
       <TextBlock Text="{res:Text World_Scanning}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
     </StackPanel>
     <TextBlock Text="{res:Text World_NoneFound}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"

@@ -87,7 +87,6 @@
 
         <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
           <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-            <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,6,0" />
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}"

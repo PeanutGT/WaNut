@@ -68,7 +68,6 @@
             </Style.Triggers>
           </Style>
         </StackPanel.Style>
-        <controls:PixelScene Scene="friends" Width="32" Height="32" Margin="0,0,6,0" />
         <TextBlock Text="{Binding CopiedText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
       </StackPanel>
 
@@ -121,7 +120,7 @@
             </Style.Triggers>
           </Style>
         </StackPanel.Style>
-        <Image Style="{StaticResource Peanut}" Width="32" Height="32" Margin="0,0,12,0" VerticalAlignment="Top" />
+        <Image Style="{StaticResource Peanut}" Width="72" Height="72" Margin="0,0,12,0" VerticalAlignment="Top" />
         <StackPanel MaxWidth="480">
           <TextBlock Text="{res:Text Connect_Empty}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" />
           <TextBlock Text="{res:Text Connect_EmptyHint}" Style="{StaticResource Hint}" Margin="0,3,0,0" />
@@ -144,7 +143,7 @@
       <!-- On a VPS: whether friends can reach it, checked from this PC once the server is up. -->
       <StackPanel Visibility="{Binding RunsOnVps, Converter={StaticResource Visible}}" Margin="0,12,0,0">
         <StackPanel Orientation="Horizontal" Visibility="{Binding ShowVpsReachOk, Converter={StaticResource Visible}}">
-          <Image Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" Style="{StaticResource Peanut}" />
+          <Path Style="{StaticResource SuccessMark}" Margin="0,0,6,0" />
           <TextBlock Text="{Binding VpsReachText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
         <TextBlock Text="{Binding VpsReachText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"
@@ -178,18 +177,8 @@
               </Style.Triggers>
             </Style>
           </StackPanel.Style>
-          <Image Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center">
-            <Image.Style>
-              <Style TargetType="Image" BasedOn="{StaticResource Peanut}">
-                <Setter Property="Visibility" Value="Collapsed" />
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding ShowFirewallOk}" Value="True">
-                    <Setter Property="Visibility" Value="Visible" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Image.Style>
-          </Image>
+          <Path Style="{StaticResource SuccessMark}" Margin="0,0,6,0"
+                Visibility="{Binding ShowFirewallOk, Converter={StaticResource Visible}}" />
           <TextBlock Text="{Binding FirewallText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
 

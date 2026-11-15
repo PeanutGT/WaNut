@@ -10,6 +10,7 @@ namespace WaNut.App.Controls;
 
 /// <summary>
 /// One of the 32x32 peanut illustrations in Assets/Scenes, scaled with nearest neighbor so the pixels stay sharp.
+/// Always shown at 96px, three times its size (docs/design.md, section 3).
 /// Animated scenes loop through 4 frames of 0.25 s; a scene without a "-f2" frame (the type icons, no-backups) is static.
 /// </summary>
 public sealed class PixelScene : Image

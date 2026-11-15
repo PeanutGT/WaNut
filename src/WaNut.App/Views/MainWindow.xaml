@@ -62,7 +62,7 @@
             BorderThickness="0,0,1,0">
       <DockPanel Margin="12,18,12,12">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,18">
-          <Image Style="{StaticResource Peanut}" Width="32" Height="32" />
+          <Image Style="{StaticResource Peanut}" Width="72" Height="72" />
           <TextBlock Text="{res:Text App_Title}" FontSize="{StaticResource FontTitle}" FontWeight="Bold"
                      VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>
@@ -79,7 +79,6 @@
                 Visibility="{Binding ShowCard, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
             <StackPanel Orientation="Horizontal">
-              <controls:PixelScene Scene="updating" Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Top" />
               <TextBlock Text="{Binding CardText}" TextWrapping="Wrap" MaxWidth="150" FontWeight="SemiBold"
                          AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
@@ -158,7 +157,7 @@
       <!-- No servers yet: the peanut and one big green button -->
       <StackPanel Style="{StaticResource ShownWhenNoServers}"
                   HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
-        <controls:PixelScene Scene="no-servers" Width="128" Height="128" Margin="0,0,0,18" />
+        <controls:PixelScene Scene="no-servers" Width="96" Height="96" Margin="0,0,0,18" />
         <TextBlock Text="{res:Text Main_NoServers}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold"
                    HorizontalAlignment="Center" />
         <TextBlock Text="{res:Text Main_NoServersHint}" Style="{StaticResource MutedText}"
@@ -239,7 +238,8 @@
           </DockPanel>
           <StackPanel x:Name="StartStopPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <!-- The peanut acts out the status: asleep, starting, cheering, saving. -->
-            <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,6,0" />
+            <controls:PixelScene Scene="{Binding StatusScene}" Width="96" Height="96" Margin="0,0,6,0"
+                                 behaviors:Bounce.When="{Binding IsOnline}" />
 
             <!-- Status pill -->
             <!-- The busy and online colors are layers that fade in over the stopped look; the text color switches with them. -->
@@ -303,7 +303,7 @@
             <!-- Start while stopped, Stop while running: one action at a time. -->
             <Button Content="{res:Text Server_Start}"
                     Command="{Binding StartCommand}"
-                    MinWidth="90">
+                    MinWidth="90" VerticalAlignment="Center">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
                   <Style.Triggers>
@@ -316,7 +316,7 @@
             </Button>
             <Button Content="{res:Text Server_Stop}"
                     Command="{Binding StopCommand}"
-                    MinWidth="90">
+                    MinWidth="90" VerticalAlignment="Center">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                   <Setter Property="Visibility" Value="Collapsed" />
@@ -355,7 +355,6 @@
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <controls:PixelScene Scene="perf-hot" Width="48" Height="48" Margin="0,0,12,0" VerticalAlignment="Top" />
             <StackPanel Grid.Column="1">
               <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
               <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,3,0,0" />
@@ -519,7 +518,7 @@
         </Style>
       </Grid.Style>
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Image Style="{StaticResource BusyPeanut}" Width="64" Height="64" Margin="0,0,0,18" />
+        <Image Style="{StaticResource BusyPeanut}" Width="72" Height="72" Margin="0,0,0,18" />
         <ProgressBar IsIndeterminate="True" Width="220" Margin="0,0,0,12" />
         <TextBlock Text="{res:Text Main_SavingWorld}" FontSize="{StaticResource FontSubheading}" HorizontalAlignment="Center"
                    AutomationProperties.LiveSetting="Assertive" />

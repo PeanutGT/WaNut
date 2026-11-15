@@ -9,7 +9,22 @@
 
   <CornerRadius x:Key="ControlRadius">6</CornerRadius>
 
-  <BitmapImage x:Key="PeanutBitmap" UriSource="pack://application:,,,/Assets/peanut-16.png" />
+  <!-- 24x24, drawn by design/art/peanut.py; always shown at 72px. -->
+  <BitmapImage x:Key="PeanutBitmap" UriSource="pack://application:,,,/Assets/peanut-24.png" />
+
+  <!-- The mark next to "done" and "all good" messages; it pops in when it appears. -->
+  <Style x:Key="SuccessMark" TargetType="Path">
+    <Setter Property="Data" Value="M 3 9.5 L 7.5 14 L 15 5" />
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+    <Setter Property="Stroke" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="StrokeThickness" Value="2.5" />
+    <Setter Property="StrokeStartLineCap" Value="Round" />
+    <Setter Property="StrokeEndLineCap" Value="Round" />
+    <Setter Property="StrokeLineJoin" Value="Round" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="behaviors:Bounce.OnAppear" Value="True" />
+  </Style>
 
   <!--
     Color feedback. A theme brush cannot be animated towards another theme brush, so each state is a layer

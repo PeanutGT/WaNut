@@ -6,7 +6,6 @@
   <!-- Closing WaNut while a server runs: keep it running in the notification area, or stop it. Shown with InlinePanel. -->
   <StackPanel>
     <DockPanel>
-      <Image DockPanel.Dock="Left" Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center" />
       <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" VerticalAlignment="Center" />
     </DockPanel>
     <TextBlock Text="{res:Text Close_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />
