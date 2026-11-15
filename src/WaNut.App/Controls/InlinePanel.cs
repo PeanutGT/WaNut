@@ -32,6 +32,10 @@ public static class InlinePanel
     public static readonly DependencyProperty TakesFocusProperty = DependencyProperty.RegisterAttached(
         "TakesFocus", typeof(bool), typeof(InlinePanel), new PropertyMetadata(false));
 
+    /// <summary>On the button that Enter presses when focus is not on a button.</summary>
+    public static readonly DependencyProperty IsDefaultProperty = DependencyProperty.RegisterAttached(
+        "IsDefault", typeof(bool), typeof(InlinePanel), new PropertyMetadata(false));
+
     // On the layer of an open panel: how to close it.
     private static readonly DependencyProperty CloseProperty = DependencyProperty.RegisterAttached(
         "Close", typeof(Action<bool>), typeof(InlinePanel), new PropertyMetadata(null));
@@ -43,6 +47,10 @@ public static class InlinePanel
     public static bool GetTakesFocus(DependencyObject element) => (bool)element.GetValue(TakesFocusProperty);
 
     public static void SetTakesFocus(DependencyObject element, bool value) => element.SetValue(TakesFocusProperty, value);
+
+    public static bool GetIsDefault(DependencyObject element) => (bool)element.GetValue(IsDefaultProperty);
+
+    public static void SetIsDefault(DependencyObject element, bool value) => element.SetValue(IsDefaultProperty, value);
 
     /// <summary>True when the window is one of ours and on screen, so a panel can open in it.</summary>
     public static bool CanShowIn(Window window) => window.IsVisible && Layer(window) is not null;
@@ -83,6 +91,12 @@ public static class InlinePanel
                 e.Handled = true;
                 Close(false);
             }
+            else if (e.Key == Key.Enter && Find<ButtonBase>(body, GetIsDefault) is { IsEnabled: true } button)
+            {
+                // A focused button has already taken Enter itself; this is Enter from a check box or a text box.
+                e.Handled = true;
+                button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            }
         };
 
         // Like a dialog over it: the window cannot be closed while a question is open.
@@ -92,7 +106,7 @@ public static class InlinePanel
         var focusBefore = Keyboard.FocusedElement;
         layer.Children.Add(overlay);
         overlay.UpdateLayout();
-        if (!(FindFocusTarget(body)?.Focus() ?? false))
+        if (!(Find<UIElement>(body, GetTakesFocus)?.Focus() ?? false))
         {
             body.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
         }
@@ -124,37 +138,41 @@ public static class InlinePanel
         return answer;
     }
 
+    /// <summary>Closes the panel that <paramref name="inside"/> is in, for content that has more to record than yes or no.</summary>
+    public static void Close(DependencyObject inside, bool answer)
+    {
+        for (DependencyObject? at = inside; at is not null; at = VisualTreeHelper.GetParent(at))
+        {
+            if (at.GetValue(CloseProperty) is Action<bool> close)
+            {
+                close(answer);
+                return;
+            }
+        }
+    }
+
     private static Panel? Layer(Window window) => window.Template?.FindName(LayerPart, window) as Panel;
 
     private static void OnAnswerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is ButtonBase button && e.OldValue is null && e.NewValue is not null)
         {
-            button.Click += (_, _) =>
-            {
-                for (DependencyObject? at = button; at is not null; at = VisualTreeHelper.GetParent(at))
-                {
-                    if (at.GetValue(CloseProperty) is Action<bool> close)
-                    {
-                        close(GetAnswer(button) == true);
-                        return;
-                    }
-                }
-            };
+            button.Click += (_, _) => Close(button, GetAnswer(button) == true);
         }
     }
 
-    private static UIElement? FindFocusTarget(DependencyObject root)
+    private static T? Find<T>(DependencyObject root, Func<T, bool> matches)
+        where T : UIElement
     {
         for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
         {
             var child = VisualTreeHelper.GetChild(root, i);
-            if (child is UIElement { IsVisible: true } element && GetTakesFocus(element))
+            if (child is T { IsVisible: true } element && matches(element))
             {
                 return element;
             }
 
-            if (FindFocusTarget(child) is { } found)
+            if (Find(child, matches) is { } found)
             {
                 return found;
             }
