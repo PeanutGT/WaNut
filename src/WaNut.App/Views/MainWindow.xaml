@@ -388,14 +388,9 @@
                           <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonBorderBrush}" />
                           <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonTextBrush}" />
                           <Setter Property="FontWeight" Value="SemiBold" />
+                          <Setter Property="behaviors:Surface.HoverBrush" Value="{DynamicResource PrimaryButtonHoverBrush}" />
+                          <Setter Property="behaviors:Surface.EdgeBrush" Value="{DynamicResource PrimaryButtonEdgeBrush}" />
                         </DataTrigger>
-                        <MultiDataTrigger>
-                          <MultiDataTrigger.Conditions>
-                            <Condition Binding="{Binding IsRunning}" Value="True" />
-                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
-                          </MultiDataTrigger.Conditions>
-                          <Setter Property="Background" Value="{DynamicResource PrimaryButtonHoverBrush}" />
-                        </MultiDataTrigger>
                       </Style.Triggers>
                     </Style>
                   </Button.Style>

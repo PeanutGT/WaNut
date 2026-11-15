@@ -5,6 +5,7 @@
     <!-- ThemeService inserts Themes/Light.xaml or Themes/Dark.xaml in front of these at startup. -->
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/Motion.xaml" />
         <ResourceDictionary Source="Themes/Controls.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

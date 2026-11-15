@@ -21,6 +21,9 @@
   <SolidColorBrush x:Key="PrimaryButtonBorderBrush" Color="#356B23" />
   <SolidColorBrush x:Key="PrimaryButtonHoverBrush" Color="#356B23" />
   <SolidColorBrush x:Key="PrimaryButtonTextBrush" Color="#FFFFFF" />
+  <!-- The solid bottom edge of anything that can be pressed. -->
+  <SolidColorBrush x:Key="ButtonEdgeBrush" Color="#CFC5B3" />
+  <SolidColorBrush x:Key="PrimaryButtonEdgeBrush" Color="#2A561B" />
   <SolidColorBrush x:Key="OnlineBadgeBrush" Color="#E3F1DA" />
   <SolidColorBrush x:Key="OnlineBadgeTextBrush" Color="#356E1B" />
   <SolidColorBrush x:Key="OfflineDotBrush" Color="#B8BEC4" />
