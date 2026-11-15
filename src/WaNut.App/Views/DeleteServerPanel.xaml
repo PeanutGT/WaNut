@@ -1,21 +1,15 @@
-<Window x:Class="WaNut.App.Views.DeleteServerWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:res="clr-namespace:WaNut.App.Resources"
-        Title="{res:Text Delete_Title}"
-        Icon="pack://application:,,,/Assets/wanut.ico"
-        Style="{StaticResource AppWindow}"
-        Width="460" SizeToContent="Height"
-        ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
-  <Window.Resources>
+<UserControl x:Class="WaNut.App.Views.DeleteServerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources"
+             xmlns:controls="clr-namespace:WaNut.App.Controls">
+  <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-  </Window.Resources>
+  </UserControl.Resources>
 
-  <!-- A destructive action: plain, calm wording and no peanut (decision 16). Cancel is the default button. -->
-  <StackPanel Margin="24">
-    <TextBlock Text="{res:Text Delete_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+  <!-- A destructive action: plain, calm wording and no peanut (decision 16). Cancel is the default button. Shown with InlinePanel. -->
+  <StackPanel>
+    <TextBlock Text="{res:Text Delete_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
     <TextBlock Text="{Binding QuestionText}" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
     <StackPanel Margin="0,18,0,0" Visibility="{Binding HasWorld, Converter={StaticResource BoolToVisibility}}">
@@ -51,7 +45,8 @@
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{res:Text Delete_Confirm}" Command="{Binding DeleteCommand}" MinWidth="80" Margin="0,0,6,0" />
-      <Button x:Name="CancelButton" Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsDefault="True" IsCancel="True" />
+      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80"
+              controls:InlinePanel.IsDefault="True" controls:InlinePanel.TakesFocus="True" />
     </StackPanel>
   </StackPanel>
-</Window>
+</UserControl>

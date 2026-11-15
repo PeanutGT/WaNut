@@ -27,7 +27,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
-        <TextBlock Text="{res:Text Export_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+        <TextBlock Text="{res:Text Export_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
         <TextBlock Text="{Binding SourceText}" Style="{StaticResource MutedText}" Margin="0,3,0,0" />
 
         <TextBlock Text="{res:Text Export_TargetLabel}" Style="{StaticResource FieldLabel}" />

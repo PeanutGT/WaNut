@@ -27,7 +27,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
-        <TextBlock Text="{res:Text Change_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+        <TextBlock Text="{res:Text Change_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" />
         <TextBlock Style="{StaticResource MutedText}" Margin="0,3,0,0">
           <Run Text="{res:Text Change_Current}" />
           <Run Text="{Binding CurrentText, Mode=OneTime}" FontWeight="SemiBold" />

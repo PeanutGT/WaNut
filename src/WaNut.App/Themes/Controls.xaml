@@ -79,7 +79,7 @@
   <Style x:Key="AppWindow" TargetType="Window">
     <Setter Property="Background" Value="{DynamicResource WindowBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-    <Setter Property="FontFamily" Value="Segoe UI" />
+    <Setter Property="FontFamily" Value="{StaticResource BodyFont}" />
     <Setter Property="FontSize" Value="{StaticResource FontBody}" />
     <Setter Property="UseLayoutRounding" Value="True" />
     <Setter Property="TextOptions.TextFormattingMode" Value="Display" />

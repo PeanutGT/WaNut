@@ -13,4 +13,12 @@
   <sys:Double x:Key="FontSubheading">15</sys:Double>
   <!-- Window and page titles, the server name. -->
   <sys:Double x:Key="FontTitle">21</sys:Double>
+
+  <!-- Body text: Segoe UI, with Microsoft JhengHei named for Chinese so it does not depend on the PC's fallback. -->
+  <FontFamily x:Key="BodyFont">Segoe UI, Microsoft JhengHei</FontFamily>
+  <!--
+    Titles and server names: Chiron GoRound TC Bold, bundled in Assets/Fonts (SIL OFL 1.1, license next to it).
+    Only the Bold face is bundled, so text in this font is always bold.
+  -->
+  <FontFamily x:Key="HeadingFont">pack://application:,,,/Assets/Fonts/#Chiron GoRound TC, Segoe UI, Microsoft JhengHei</FontFamily>
 </ResourceDictionary>

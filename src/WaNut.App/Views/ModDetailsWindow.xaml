@@ -23,7 +23,7 @@
       <Button DockPanel.Dock="Right" Content="{res:Text ModDetails_OpenPage}" Command="{Binding OpenPageCommand}"
               Padding="12,3" VerticalAlignment="Center" />
       <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
         <TextBlock Text="{Binding Result.DetailText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextTrimming="CharacterEllipsis" />
       </StackPanel>
     </DockPanel>

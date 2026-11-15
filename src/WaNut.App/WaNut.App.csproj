@@ -29,6 +29,7 @@
     <Resource Include="Assets\wanut.ico" />
     <Resource Include="Assets\peanut-24.png" />
     <Resource Include="Assets\Scenes\*.png" />
+    <Resource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>

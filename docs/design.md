@@ -42,8 +42,10 @@
 
 ## 5. 文字
 
-- 內文字型：Segoe UI，中文明確指定微軟正黑體。
-- 標題與伺服器名稱用圓體（步驟 7；待定：候選是 Nunito 與 jf open 粉圓，要先查證授權、檔案大小與粗細數量，不合適就維持系統字並在這裡記下原因）。
+- 內文字型：Segoe UI，中文明確指定微軟正黑體（`BodyFont`，每個視窗的預設）。
+- 標題與伺服器名稱用圓體「昭源環方 Chiron GoRound TC」（`HeadingFont`）。寫法是在標題上加 `FontFamily="{StaticResource HeadingFont}"`。
+- 只打包 Bold 一個粗細（`Assets/Fonts/ChironGoRoundTC-700B.ttf`，24 MB，SIL OFL 1.1，授權檔放在旁邊），所以用這個字型的文字一律是粗體；沒有裁剪，字型裡沒有的字會改用 Segoe UI 或微軟正黑體。
+- 沒有選 jf open 粉圓，因為它只有單一粗細；沒有另外打包 Nunito，因為昭源環方的英文字母本身就是圓的。
 - 字級只有四級，定義在 `Themes/Text.xaml`。畫面寫 `FontSize="{StaticResource FontSmall}"`，不寫數字。行高交給字型決定，沒有另外指定。
 
 | 資源 | 字級 | 用途 |
@@ -79,8 +81,8 @@
 
 ## 7. 視窗與面板
 
-- 小型確認流程（一般確認、關閉時的選擇、刪除伺服器、重置世界、封鎖玩家、複製伺服器）顯示成使用者所在視窗內的面板：有遮罩、可用 Esc 或點遮罩關閉、鍵盤焦點留在面板內。（步驟 8；目前一般確認與關閉時的選擇已改，其餘四個還是獨立視窗）
-- 面板由 `controls:InlinePanel.Show(視窗, 內容)` 開啟，它會像 `ShowDialog` 一樣等到使用者回答才返回。內容是一個 `UserControl`；按鈕用 `controls:InlinePanel.Answer="True"`／`"False"` 回答，用 `controls:InlinePanel.TakesFocus="True"` 指定開啟時的焦點，用 `controls:InlinePanel.IsDefault="True"` 指定焦點不在按鈕上時 Enter 會按的按鈕；要記錄比是／否更多的結果時，在 code-behind 呼叫 `InlinePanel.Close(this, true)`。面板開著時視窗不能關閉。
+- 小型確認流程（一般確認、關閉時的選擇、刪除伺服器、重置世界、封鎖玩家、複製伺服器）顯示成使用者所在視窗內的面板：有遮罩、可用 Esc 或點遮罩關閉、鍵盤焦點留在面板內。（步驟 8；六個都已改完）
+- 面板由 `controls:InlinePanel.Show(視窗, 內容)` 開啟，它會像 `ShowDialog` 一樣等到使用者回答才返回。內容是一個 `UserControl`；按鈕用 `controls:InlinePanel.Answer="True"`／`"False"` 回答，用 `controls:InlinePanel.TakesFocus="True"` 指定開啟時的焦點，用 `controls:InlinePanel.IsDefault="True"` 指定焦點不在按鈕上時 Enter 會按的按鈕；要記錄比是／否更多的結果時，在 code-behind 呼叫 `InlinePanel.Close(this, true)`；工作進行到一半時不能直接關掉的內容，實作 `InlinePanel.IDismissHandler` 自己決定 Esc 和點遮罩要做什麼（例子是刪除伺服器）。面板開著時視窗不能關閉。
 - 外觀：最寬 420px（樣式 `PanelCard`）、遮罩用 `GuideDimBrush`、從下方 12px 淡入升到定位。
 - 沒有任何視窗開著時（例如啟動途中）退回使用獨立的 `ConfirmWindow`。
 - 其餘視窗（建立伺服器、設定、VPS、模組詳情、變更伺服器、匯入匯出世界、還原、初次設定）維持獨立視窗。

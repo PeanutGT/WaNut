@@ -60,32 +60,30 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public bool ShowDeleteServer(ServerViewModel server, out string? keptZip)
     {
-        var window = services.GetRequiredService<DeleteServerWindow>();
-        window.ViewModel.Initialize(server);
-        window.Owner = Application.Current.MainWindow;
-        var deleted = window.ShowDialog() == true;
-        keptZip = deleted ? window.ViewModel.KeptZip : null;
+        var panel = services.GetRequiredService<DeleteServerPanel>();
+        panel.ViewModel.Initialize(server);
+        var deleted = InlinePanel.Show(Application.Current.MainWindow, panel);
+        keptZip = deleted ? panel.ViewModel.KeptZip : null;
         return deleted;
     }
 
     public InstanceMetadata? ShowDuplicateServer(ServerViewModel server)
     {
-        var window = services.GetRequiredService<DuplicateServerWindow>();
-        window.ViewModel.Initialize(server);
-        window.Owner = Application.Current.MainWindow;
-        return window.ShowDialog() == true ? window.ViewModel.Copy : null;
+        var panel = services.GetRequiredService<DuplicateServerPanel>();
+        panel.ViewModel.Initialize(server);
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.ViewModel.Copy : null;
     }
 
     public string? AskResetWorld(string serverName)
     {
-        var window = new ResetWorldWindow(string.Format(Text.Get("Reset_Question"), serverName)) { Owner = Application.Current.MainWindow };
-        return window.ShowDialog() == true ? window.Seed : null;
+        var panel = new ResetWorldPanel(string.Format(Text.Get("Reset_Question"), serverName));
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.Seed : null;
     }
 
     public string? AskBan(string playerName)
     {
-        var window = new BanWindow(string.Format(Text.Get("Ban_Question"), playerName)) { Owner = Application.Current.MainWindow };
-        return window.ShowDialog() == true ? window.Reason : null;
+        var panel = new BanPanel(string.Format(Text.Get("Ban_Question"), playerName));
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.Reason : null;
     }
 
     public IReadOnlyCollection<WorldPart>? AskRestore(string serverName, string backupDate, IReadOnlyList<WorldPart> parts)
