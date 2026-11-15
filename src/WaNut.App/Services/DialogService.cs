@@ -78,8 +78,8 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
 
     public string? AskResetWorld(string serverName)
     {
-        var window = new ResetWorldWindow(string.Format(Text.Get("Reset_Question"), serverName)) { Owner = Application.Current.MainWindow };
-        return window.ShowDialog() == true ? window.Seed : null;
+        var panel = new ResetWorldPanel(string.Format(Text.Get("Reset_Question"), serverName));
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.Seed : null;
     }
 
     public string? AskBan(string playerName)
