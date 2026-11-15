@@ -191,7 +191,8 @@
       </TextBlock>
 
       <!-- Selected server -->
-      <DockPanel Margin="24,18,24,18" DataContext="{Binding SelectedServer}">
+      <DockPanel Margin="24,18,24,18" DataContext="{Binding SelectedServer}"
+                 behaviors:ContentTransition.Trigger="{Binding}">
         <DockPanel.Style>
           <Style TargetType="DockPanel">
             <Style.Triggers>
