@@ -16,19 +16,18 @@
 
   <!-- DataContext: VpsViewModel -->
   <DockPanel Margin="24">
-    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{res:Text Vps_Save}" Command="{Binding SaveCommand}" Style="{StaticResource PrimaryButton}"
-              MinWidth="80" Margin="0,0,8,0" IsDefault="True" />
+              MinWidth="80" Margin="0,0,6,0" IsDefault="True" />
       <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsCancel="True" />
     </StackPanel>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
     <StackPanel>
     <StackPanel Orientation="Horizontal">
-      <Image Style="{StaticResource Peanut}" Width="28" Height="28" Margin="0,0,10,0" />
-      <TextBlock Text="{res:Text Vps_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <TextBlock Text="{res:Text Vps_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
-    <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,4" />
-    <TextBlock Margin="0,0,0,16">
+    <TextBlock Text="{res:Text Vps_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,3" />
+    <TextBlock Margin="0,0,0,18">
       <Hyperlink Command="{Binding OpenGuideCommand}"><Run Text="{res:Text Vps_GuideLink}" /></Hyperlink>
     </TextBlock>
 
@@ -58,50 +57,50 @@
     <TextBox Text="{Binding User, UpdateSourceTrigger=PropertyChanged}" Tag="root" InputMethod.IsInputMethodEnabled="False"
              AutomationProperties.Name="{res:Text Vps_UserLabel}" />
 
-    <TextBlock Text="{res:Text Vps_LoginLabel}" FontWeight="SemiBold" Margin="0,14,0,6" />
+    <TextBlock Text="{res:Text Vps_LoginLabel}" FontWeight="SemiBold" Margin="0,12,0,6" />
     <RadioButton GroupName="Login" Content="{res:Text Vps_LoginGeneratedKey}" IsChecked="{Binding UsesGeneratedKey}" />
-    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesGeneratedKey, Converter={StaticResource BoolToVisibility}}">
-      <TextBlock Text="{res:Text Vps_GeneratedKeyHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,6" />
-      <TextBox Text="{Binding PublicKey, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="11"
+    <StackPanel Margin="24,6,0,3" Visibility="{Binding UsesGeneratedKey, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="{res:Text Vps_GeneratedKeyHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,0,0,6" />
+      <TextBox Text="{Binding PublicKey, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas" FontSize="{StaticResource FontSmall}"
                AutomationProperties.Name="{res:Text Vps_PublicKeyLabel}" />
       <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-        <Button Content="{res:Text Vps_CopyCommand}" Command="{Binding CopyAuthorizeCommandCommand}" Margin="0,0,8,0" />
+        <Button Content="{res:Text Vps_CopyCommand}" Command="{Binding CopyAuthorizeCommandCommand}" Margin="0,0,6,0" />
         <Button Content="{res:Text Vps_NewKey}" Command="{Binding MakeNewKeyCommand}" />
       </StackPanel>
     </StackPanel>
 
     <RadioButton GroupName="Login" Content="{res:Text Vps_LoginKeyFile}" IsChecked="{Binding UsesKeyFile}" Margin="0,6,0,0" />
-    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesKeyFile, Converter={StaticResource BoolToVisibility}}">
+    <StackPanel Margin="24,6,0,3" Visibility="{Binding UsesKeyFile, Converter={StaticResource BoolToVisibility}}">
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="{res:Text Vps_Browse}" Command="{Binding BrowseKeyFileCommand}" Margin="8,0,0,0" />
+        <Button DockPanel.Dock="Right" Content="{res:Text Vps_Browse}" Command="{Binding BrowseKeyFileCommand}" Margin="6,0,0,0" />
         <TextBox Text="{Binding KeyFile, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{res:Text Vps_LoginKeyFile}" />
       </DockPanel>
-      <TextBlock Text="{res:Text Vps_PassphraseLabel}" Margin="0,8,0,4" />
+      <TextBlock Text="{res:Text Vps_PassphraseLabel}" Margin="0,6,0,3" />
       <PasswordBox x:Name="PassphraseBox" PasswordChanged="OnPassphraseChanged" AutomationProperties.Name="{res:Text Vps_PassphraseLabel}" />
-      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"
+      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" Margin="0,3,0,0"
                  Visibility="{Binding HasSavedPassphrase, Converter={StaticResource BoolToVisibility}}" />
     </StackPanel>
 
     <RadioButton GroupName="Login" Content="{res:Text Vps_LoginPassword}" IsChecked="{Binding UsesPassword}" Margin="0,6,0,0" />
-    <StackPanel Margin="26,6,0,4" Visibility="{Binding UsesPassword, Converter={StaticResource BoolToVisibility}}">
+    <StackPanel Margin="24,6,0,3" Visibility="{Binding UsesPassword, Converter={StaticResource BoolToVisibility}}">
       <PasswordBox x:Name="PasswordBox" PasswordChanged="OnPasswordChanged" AutomationProperties.Name="{res:Text Vps_LoginPassword}" />
-      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0"
+      <TextBlock Text="{res:Text Vps_SecretSaved}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" Margin="0,3,0,0"
                  Visibility="{Binding HasSavedPassword, Converter={StaticResource BoolToVisibility}}" />
-      <TextBlock Text="{res:Text Vps_PasswordHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+      <TextBlock Text="{res:Text Vps_PasswordHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,3,0,0" />
     </StackPanel>
 
-    <TextBlock Text="{res:Text Vps_SecretsLocal}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0" />
+    <TextBlock Text="{res:Text Vps_SecretsLocal}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,12,0,0" />
 
-    <CheckBox IsChecked="{Binding OpenFirewall}" Margin="0,14,0,0">
+    <CheckBox IsChecked="{Binding OpenFirewall}" Margin="0,12,0,0">
       <TextBlock Text="{res:Text Vps_OpenFirewall}" TextWrapping="Wrap" />
     </CheckBox>
-    <TextBlock Text="{res:Text Vps_OpenFirewallHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="22,4,0,0" />
+    <TextBlock Text="{res:Text Vps_OpenFirewallHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="24,3,0,0" />
 
-    <DockPanel Margin="0,16,0,0">
+    <DockPanel Margin="0,18,0,0">
       <Button DockPanel.Dock="Left" Content="{res:Text Vps_Test}" Command="{Binding TestCommand}" VerticalAlignment="Top" Margin="0,0,12,0" />
       <StackPanel>
         <TextBlock Text="{Binding TestText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-        <TextBlock Text="{Binding TestProblems}" Foreground="{DynamicResource ErrorTextBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock Text="{Binding TestProblems}" Foreground="{DynamicResource ErrorTextBrush}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,3,0,0" />
       </StackPanel>
     </DockPanel>
 
@@ -109,7 +108,7 @@
       <TextBlock Text="{res:Text Vps_OracleNote}" TextWrapping="Wrap" />
     </Border>
 
-    <Border Margin="0,14,0,0">
+    <Border Margin="0,12,0,0">
       <Border.Style>
         <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
           <Style.Triggers>

@@ -11,31 +11,31 @@
       <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="10" />
-      <Setter Property="Padding" Value="16,12,16,14" />
-      <Setter Property="Margin" Value="0,0,0,14" />
+      <Setter Property="Padding" Value="18,12,18,12" />
+      <Setter Property="Margin" Value="0,0,0,12" />
     </Style>
     <Style x:Key="Value" TargetType="TextBlock">
-      <Setter Property="FontSize" Value="22" />
+      <Setter Property="FontSize" Value="{StaticResource FontTitle}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
     <StackPanel>
-      <DockPanel Margin="0,0,0,16">
-        <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Scene}" Width="64" Height="64" Margin="0,0,14,0" />
+      <DockPanel Margin="0,0,0,18">
+        <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Scene}" Width="96" Height="96" Margin="0,0,12,0" />
         <StackPanel VerticalAlignment="Center">
-          <TextBlock Text="{Binding MoodText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+          <TextBlock Text="{Binding MoodText}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextWrapping="Wrap"
                      AutomationProperties.LiveSetting="Polite"
                      Visibility="{Binding HasData, Converter={StaticResource Visible}}" />
-          <TextBlock Text="{res:Text Performance_Empty}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+          <TextBlock Text="{res:Text Performance_Empty}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextWrapping="Wrap"
                      Visibility="{Binding HasNoData, Converter={StaticResource Visible}}" />
-          <TextBlock Text="{res:Text Performance_Hint}" Style="{StaticResource MutedText}" FontSize="12"
-                     TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Text="{res:Text Performance_Hint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
+                     TextWrapping="Wrap" Margin="0,3,0,0" />
         </StackPanel>
       </DockPanel>
 
-      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,16"
+      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,18"
               Visibility="{Binding HasIdleWarning, Converter={StaticResource Visible}}">
         <TextBlock Text="{Binding IdleWarning}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
       </Border>
@@ -43,7 +43,7 @@
       <Border Style="{StaticResource ChartCard}">
         <StackPanel>
           <DockPanel>
-            <TextBlock DockPanel.Dock="Right" Text="{Binding CpuPeakText}" Style="{StaticResource MutedText}" FontSize="12"
+            <TextBlock DockPanel.Dock="Right" Text="{Binding CpuPeakText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
                        VerticalAlignment="Bottom" />
             <StackPanel>
               <TextBlock Text="{res:Text Performance_Cpu}" Style="{StaticResource SectionCaption}" />
@@ -51,7 +51,7 @@
                          Foreground="{DynamicResource AccentBrush}" />
             </StackPanel>
           </DockPanel>
-          <controls:UsageChart Values="{Binding CpuValues}" Height="110" Margin="0,10,0,0"
+          <controls:UsageChart Values="{Binding CpuValues}" Height="110" Margin="0,12,0,0"
                                Stroke="{DynamicResource AccentBrush}" GridBrush="{DynamicResource BorderBrush}"
                                AutomationProperties.Name="{res:Text Performance_CpuChart}" />
         </StackPanel>
@@ -60,7 +60,7 @@
       <Border Style="{StaticResource ChartCard}">
         <StackPanel>
           <DockPanel>
-            <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryPeakText}" Style="{StaticResource MutedText}" FontSize="12"
+            <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryPeakText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
                        VerticalAlignment="Bottom" />
             <StackPanel>
               <TextBlock Text="{res:Text Performance_Memory}" Style="{StaticResource SectionCaption}" />
@@ -68,7 +68,7 @@
                          Foreground="{DynamicResource WarningTextBrush}" />
             </StackPanel>
           </DockPanel>
-          <controls:UsageChart Values="{Binding MemoryValues}" Height="110" Margin="0,10,0,0"
+          <controls:UsageChart Values="{Binding MemoryValues}" Height="110" Margin="0,12,0,0"
                                Stroke="{DynamicResource WarningTextBrush}" GridBrush="{DynamicResource BorderBrush}"
                                AutomationProperties.Name="{res:Text Performance_MemoryChart}" />
         </StackPanel>
@@ -78,7 +78,7 @@
       <Border Style="{StaticResource ChartCard}" Visibility="{Binding HasTotal, Converter={StaticResource Visible}}">
         <StackPanel>
           <TextBlock Text="{res:Text Performance_TotalCaption}" Style="{StaticResource SectionCaption}" />
-          <TextBlock Text="{Binding TotalText}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Text="{Binding TotalText}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,3,0,0" />
         </StackPanel>
       </Border>
 
@@ -86,18 +86,18 @@
       <Border Style="{StaticResource ChartCard}" Visibility="{Binding ShowSpark, Converter={StaticResource Visible}}">
         <StackPanel>
           <TextBlock Text="{res:Text Performance_SparkCaption}" Style="{StaticResource SectionCaption}" />
-          <TextBlock Text="{res:Text Performance_SparkBuiltIn}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0"
+          <TextBlock Text="{res:Text Performance_SparkBuiltIn}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" Margin="0,3,0,0"
                      Visibility="{Binding SparkBuiltIn, Converter={StaticResource Visible}}" />
-          <TextBlock Text="{Binding SparkHint}" TextWrapping="Wrap" Margin="0,4,0,10" AutomationProperties.LiveSetting="Polite" />
+          <TextBlock Text="{Binding SparkHint}" TextWrapping="Wrap" Margin="0,3,0,12" AutomationProperties.LiveSetting="Polite" />
           <WrapPanel>
-            <Button Content="{res:Text Performance_SparkInstall}" Command="{Binding InstallSparkCommand}" Padding="10,3" Margin="0,0,8,0"
+            <Button Content="{res:Text Performance_SparkInstall}" Command="{Binding InstallSparkCommand}" Padding="12,3" Margin="0,0,6,0"
                     Visibility="{Binding ShowSparkInstall, Converter={StaticResource Visible}}" />
-            <Button Content="{Binding SparkProfileText}" Command="{Binding ProfileCommand}" Padding="10,3" Margin="0,0,8,0"
+            <Button Content="{Binding SparkProfileText}" Command="{Binding ProfileCommand}" Padding="12,3" Margin="0,0,6,0"
                     Visibility="{Binding ShowSparkProfile, Converter={StaticResource Visible}}" />
-            <Button Content="{res:Text Performance_SparkOpenReport}" Command="{Binding OpenReportCommand}" Padding="10,3"
+            <Button Content="{res:Text Performance_SparkOpenReport}" Command="{Binding OpenReportCommand}" Padding="12,3"
                     Visibility="{Binding HasReport, Converter={StaticResource Visible}}" />
           </WrapPanel>
-          <Border Margin="0,10,0,0">
+          <Border Margin="0,12,0,0">
             <Border.Style>
               <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
                 <Style.Triggers>

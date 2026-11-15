@@ -1,6 +1,7 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
+using WaNut.App.Controls;
 using WaNut.App.Resources;
 using WaNut.App.ViewModels;
 using WaNut.App.Views;
@@ -93,9 +94,9 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return window.ShowDialog() == true ? window.Parts : null;
     }
 
-    public bool Confirm(string message) => Show(new ConfirmWindow(message));
+    public bool Confirm(string message) => Ask(message, isQuestion: true);
 
-    public void Inform(string message) => Show(new ConfirmWindow(message, isQuestion: false));
+    public void Inform(string message) => Ask(message, isQuestion: false);
 
     public string? PickFolder(string? title = null)
     {
@@ -147,17 +148,15 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
     }
 
-    private static bool Show(ConfirmWindow window)
+    /// <summary>A panel inside the window the user is in; a small window of its own only when none is open.</summary>
+    private static bool Ask(string message, bool isQuestion)
     {
-        if (ActiveWindow() is { } owner)
+        if (ActiveWindow() is { } host && InlinePanel.CanShowIn(host))
         {
-            window.Owner = owner;
-        }
-        else
-        {
-            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            return InlinePanel.Show(host, new ConfirmPanel(message, isQuestion));
         }
 
+        var window = new ConfirmWindow(message, isQuestion) { WindowStartupLocation = WindowStartupLocation.CenterScreen };
         return window.ShowDialog() == true;
     }
 

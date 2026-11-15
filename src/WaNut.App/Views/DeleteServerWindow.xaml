@@ -15,28 +15,28 @@
 
   <!-- A destructive action: plain, calm wording and no peanut (decision 16). Cancel is the default button. -->
   <StackPanel Margin="24">
-    <TextBlock Text="{res:Text Delete_Title}" FontSize="20" FontWeight="SemiBold" />
-    <TextBlock Text="{Binding QuestionText}" TextWrapping="Wrap" FontSize="14" Margin="0,12,0,0" />
+    <TextBlock Text="{res:Text Delete_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+    <TextBlock Text="{Binding QuestionText}" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" Margin="0,12,0,0" />
 
-    <StackPanel Margin="0,16,0,0" Visibility="{Binding HasWorld, Converter={StaticResource BoolToVisibility}}">
+    <StackPanel Margin="0,18,0,0" Visibility="{Binding HasWorld, Converter={StaticResource BoolToVisibility}}">
       <CheckBox IsChecked="{Binding KeepWorld}" IsEnabled="{Binding IsIdle}">
         <TextBlock Text="{res:Text Delete_KeepWorld}" TextWrapping="Wrap" />
       </CheckBox>
-      <TextBlock Text="{res:Text Delete_KeepWorldHint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="26,4,0,0" />
+      <TextBlock Text="{res:Text Delete_KeepWorldHint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="24,3,0,0" />
     </StackPanel>
-    <TextBlock Text="{res:Text Delete_NoWorld}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,16,0,0"
+    <TextBlock Text="{res:Text Delete_NoWorld}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,18,0,0"
                Visibility="{Binding NoWorld, Converter={StaticResource BoolToVisibility}}" />
 
-    <Border Style="{StaticResource WarningBanner}" Margin="0,16,0,0">
+    <Border Style="{StaticResource WarningBanner}" Margin="0,18,0,0">
       <TextBlock Text="{res:Text Delete_Warning}" TextWrapping="Wrap" />
     </Border>
 
     <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-      <TextBlock Text="{res:Text Delete_Working}" Margin="0,0,0,8" AutomationProperties.LiveSetting="Polite" />
+      <TextBlock Text="{res:Text Delete_Working}" Margin="0,0,0,6" AutomationProperties.LiveSetting="Polite" />
       <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressFraction, Mode=OneWay}" AutomationProperties.Name="{res:Text Delete_Working}" />
     </StackPanel>
 
-    <Border Margin="0,14,0,0">
+    <Border Margin="0,12,0,0">
       <Border.Style>
         <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
           <Style.Triggers>
@@ -49,8 +49,8 @@
       <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
     </Border>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="{res:Text Delete_Confirm}" Command="{Binding DeleteCommand}" MinWidth="80" Margin="0,0,8,0" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+      <Button Content="{res:Text Delete_Confirm}" Command="{Binding DeleteCommand}" MinWidth="80" Margin="0,0,6,0" />
       <Button x:Name="CancelButton" Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" IsDefault="True" IsCancel="True" />
     </StackPanel>
   </StackPanel>

@@ -11,10 +11,10 @@
   <!-- DataContext: SetupViewModel -->
   <StackPanel Margin="24">
     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-      <Image Style="{StaticResource Peanut}" Width="40" Height="40" Margin="0,0,12,0" />
-      <TextBlock Text="{res:Text Setup_Title}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+      <Image Style="{StaticResource Peanut}" Width="72" Height="72" Margin="0,0,12,0" />
+      <TextBlock Text="{res:Text Setup_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
-    <TextBlock Text="{res:Text Setup_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,20" />
+    <TextBlock Text="{res:Text Setup_Intro}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,0,0,18" />
 
     <CheckBox Content="{res:Text Setup_DesktopShortcut}" IsChecked="{Binding DesktopShortcut}" />
 
@@ -30,17 +30,17 @@
       </StackPanel.Style>
       <TextBlock Text="{res:Text Setup_ServersFolder}" Margin="0,0,0,6" />
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="{res:Text Setup_Browse}" Command="{Binding BrowseCommand}" Margin="8,0,0,0" />
+        <Button DockPanel.Dock="Right" Content="{res:Text Setup_Browse}" Command="{Binding BrowseCommand}" Margin="6,0,0,0" />
         <TextBox Text="{Binding InstancesDir}" IsReadOnly="True" VerticalContentAlignment="Center" />
       </DockPanel>
-      <TextBlock Text="{res:Text Setup_ServersFolderHint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+      <TextBlock Text="{res:Text Setup_ServersFolderHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,3,0,0" />
     </StackPanel>
 
     <CheckBox Content="{res:Text Update_CheckOnStart}" IsChecked="{Binding CheckForUpdates}" Margin="0,18,0,0" />
     <TextBlock Text="{res:Text Update_CheckOnStartHint}" Style="{StaticResource MutedText}"
-               FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
+               FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="24,3,0,0" />
 
-    <Border Margin="0,14,0,0">
+    <Border Margin="0,12,0,0">
       <Border.Style>
         <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
           <Style.Triggers>

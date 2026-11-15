@@ -7,14 +7,14 @@
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="Visible" />
     <Style x:Key="Heading" TargetType="TextBlock">
-      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontSize" Value="{StaticResource FontSubheading}" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
     <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{StaticResource FontSmall}" />
       <Setter Property="TextWrapping" Value="Wrap" />
-      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
     <!-- A plain list: no selection or scrolling of its own, but each row is a list item screen readers can enter. -->
     <Style x:Key="PlainList" TargetType="ListBox">
@@ -47,20 +47,20 @@
     <!-- A player's skin face (or their initial while it loads or when they have none) and name. -->
     <DataTemplate x:Key="PlayerName">
       <StackPanel Orientation="Horizontal">
-        <Grid Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+        <Grid Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center">
           <Border CornerRadius="4" Background="{DynamicResource SelectedItemBrush}">
-            <TextBlock Text="{Binding Initial}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Initial}" FontSize="{StaticResource FontSmall}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <Image Source="{Binding Face}" RenderOptions.BitmapScalingMode="NearestNeighbor"
                  Visibility="{Binding HasFace, Converter={StaticResource Visible}}" />
         </Grid>
-        <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Center" />
+        <TextBlock Text="{Binding Name}" FontSize="{StaticResource FontSubheading}" VerticalAlignment="Center" />
       </StackPanel>
     </DataTemplate>
     <!-- Online and earlier players: name plus a ⋯ button whose menu acts on the player. Tag carries the lists' view model to the menu. -->
     <DataTemplate x:Key="PersonRow">
-      <DockPanel Margin="0,2">
-        <Button DockPanel.Dock="Right" Content="⋯" Padding="10,1" FontSize="14" Click="OnMoreClick"
+      <DockPanel Margin="0,3">
+        <Button DockPanel.Dock="Right" Content="⋯" Padding="12,0" FontSize="{StaticResource FontSubheading}" Click="OnMoreClick"
                 AutomationProperties.Name="{Binding ActionLabel}"
                 Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
           <Button.ContextMenu>
@@ -88,12 +88,12 @@
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="3,3,18,18">
       <!-- Online now -->
       <TextBlock Text="{res:Text Players_Online}" Style="{StaticResource Heading}" />
       <ListBox Style="{StaticResource PlainList}" DataContext="{Binding PlayerLists}" ItemsSource="{Binding Online}"
-               ItemTemplate="{StaticResource PersonRow}" Margin="0,0,0,4" AutomationProperties.Name="{res:Text Players_Online}" />
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+               ItemTemplate="{StaticResource PersonRow}" Margin="0,0,0,3" AutomationProperties.Name="{res:Text Players_Online}" />
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
         <StackPanel.Style>
           <Style TargetType="StackPanel">
             <Setter Property="Visibility" Value="Collapsed" />
@@ -104,11 +104,11 @@
             </Style.Triggers>
           </Style>
         </StackPanel.Style>
-        <controls:PixelScene Scene="no-players" Width="48" Height="48" Margin="0,0,8,0" />
+        <controls:PixelScene Scene="no-players" Width="96" Height="96" Margin="0,0,6,0" />
         <TextBlock Text="{res:Text Server_NoPlayers}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
       </StackPanel>
 
-      <Border Margin="0,16,0,0">
+      <Border Margin="0,18,0,0">
         <Border.Style>
           <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
             <Style.Triggers>
@@ -121,16 +121,16 @@
         <TextBlock Text="{Binding PlayerLists.NameError}" TextWrapping="Wrap" />
       </Border>
 
-      <Border Style="{StaticResource NoticeBanner}" Margin="0,16,0,0"
+      <Border Style="{StaticResource NoticeBanner}" Margin="0,18,0,0"
               Visibility="{Binding PlayerLists.HasPendingChanges, Converter={StaticResource Visible}}">
         <TextBlock Text="{res:Text Players_Pending}" TextWrapping="Wrap" />
       </Border>
 
       <!-- Whitelist -->
-      <TextBlock Text="{res:Text Players_Whitelist}" Style="{StaticResource Heading}" Margin="0,24,0,8" />
+      <TextBlock Text="{res:Text Players_Whitelist}" Style="{StaticResource Heading}" Margin="0,24,0,6" />
       <CheckBox Content="{res:Text Players_WhitelistOn}" IsChecked="{Binding PlayerLists.WhitelistOn}"
-                IsEnabled="{Binding PlayerLists.CanChangeWhitelistSwitch}" Margin="0,0,0,10" />
-      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,10"
+                IsEnabled="{Binding PlayerLists.CanChangeWhitelistSwitch}" Margin="0,0,0,12" />
+      <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,12"
               Visibility="{Binding PlayerLists.ShowEmptyWhitelistWarning, Converter={StaticResource Visible}}">
         <TextBlock Text="{res:Text Players_WhitelistEmpty}" TextWrapping="Wrap" />
       </Border>
@@ -141,8 +141,8 @@
               <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Whitelist}" AutomationProperties.Name="{res:Text Players_Whitelist}">
                 <ListBox.ItemTemplate>
                   <DataTemplate>
-                    <DockPanel Margin="0,2">
-                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
+                    <DockPanel Margin="0,3">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="12,3"
                               AutomationProperties.Name="{Binding ActionLabel}"
                               Command="{Binding DataContext.RemoveFromWhitelistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
@@ -151,7 +151,7 @@
                   </DataTemplate>
                 </ListBox.ItemTemplate>
               </ListBox>
-              <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
+              <StackPanel Orientation="Horizontal" Margin="0,3,0,6">
                 <StackPanel.Style>
                   <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Collapsed" />
@@ -162,12 +162,11 @@
                     </Style.Triggers>
                   </Style>
                 </StackPanel.Style>
-                <controls:PixelScene Scene="empty-list" Width="32" Height="32" Margin="0,0,8,0" />
                 <TextBlock Text="{res:Text Players_EmptyList}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
               </StackPanel>
-              <DockPanel Margin="0,8,0,0">
+              <DockPanel Margin="0,6,0,0">
                 <Button DockPanel.Dock="Right" Content="{res:Text Players_Add}" Command="{Binding AddToWhitelistCommand}"
-                        AutomationProperties.Name="{res:Text Players_AddToWhitelist}" MinWidth="72" Margin="8,0,0,0" />
+                        AutomationProperties.Name="{res:Text Players_AddToWhitelist}" MinWidth="72" Margin="6,0,0,0" />
                 <TextBox Text="{Binding NewWhitelistName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16"
                          Tag="{res:Text Players_NamePlaceholder}" AutomationProperties.Name="{res:Text Players_AddToWhitelist}"
                          InputMethod.IsInputMethodEnabled="False">
@@ -178,14 +177,14 @@
               </DockPanel>
 
               <!-- Operators -->
-              <TextBlock Text="{res:Text Players_Operators}" FontSize="15" FontWeight="SemiBold" Margin="0,28,0,4" />
-              <TextBlock Text="{res:Text Players_OperatorsHint}" Style="{StaticResource MutedText}" FontSize="12"
-                         TextWrapping="Wrap" Margin="0,0,0,8" />
+              <TextBlock Text="{res:Text Players_Operators}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" Margin="0,24,0,3" />
+              <TextBlock Text="{res:Text Players_OperatorsHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
+                         TextWrapping="Wrap" Margin="0,0,0,6" />
               <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Operators}" AutomationProperties.Name="{res:Text Players_Operators}">
                 <ListBox.ItemTemplate>
                   <DataTemplate>
-                    <DockPanel Margin="0,2">
-                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="10,3"
+                    <DockPanel Margin="0,3">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Remove}" Padding="12,3"
                               AutomationProperties.Name="{Binding ActionLabel}"
                               Command="{Binding DataContext.RemoveOperatorCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
@@ -194,7 +193,7 @@
                   </DataTemplate>
                 </ListBox.ItemTemplate>
               </ListBox>
-              <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
+              <StackPanel Orientation="Horizontal" Margin="0,3,0,6">
                 <StackPanel.Style>
                   <Style TargetType="StackPanel">
                     <Setter Property="Visibility" Value="Collapsed" />
@@ -205,12 +204,11 @@
                     </Style.Triggers>
                   </Style>
                 </StackPanel.Style>
-                <controls:PixelScene Scene="empty-list" Width="32" Height="32" Margin="0,0,8,0" />
                 <TextBlock Text="{res:Text Players_EmptyList}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
               </StackPanel>
-              <DockPanel Margin="0,8,0,0">
+              <DockPanel Margin="0,6,0,0">
                 <Button DockPanel.Dock="Right" Content="{res:Text Players_Add}" Command="{Binding AddOperatorCommand}"
-                        AutomationProperties.Name="{res:Text Players_AddOperator}" MinWidth="72" Margin="8,0,0,0" />
+                        AutomationProperties.Name="{res:Text Players_AddOperator}" MinWidth="72" Margin="6,0,0,0" />
                 <TextBox Text="{Binding NewOperatorName, UpdateSourceTrigger=PropertyChanged}" MaxLength="16"
                          Tag="{res:Text Players_NamePlaceholder}" AutomationProperties.Name="{res:Text Players_AddOperator}"
                          InputMethod.IsInputMethodEnabled="False">
@@ -221,14 +219,14 @@
               </DockPanel>
 
               <!-- Banned -->
-              <TextBlock Text="{res:Text Players_Banned}" FontSize="15" FontWeight="SemiBold" Margin="0,28,0,4" />
-              <TextBlock Text="{res:Text Players_BannedHint}" Style="{StaticResource MutedText}" FontSize="12"
-                         TextWrapping="Wrap" Margin="0,0,0,8" />
+              <TextBlock Text="{res:Text Players_Banned}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" Margin="0,24,0,3" />
+              <TextBlock Text="{res:Text Players_BannedHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
+                         TextWrapping="Wrap" Margin="0,0,0,6" />
               <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Banned}" AutomationProperties.Name="{res:Text Players_Banned}">
                 <ListBox.ItemTemplate>
                   <DataTemplate>
-                    <DockPanel Margin="0,2">
-                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Unban}" Padding="10,3"
+                    <DockPanel Margin="0,3">
+                      <Button DockPanel.Dock="Right" Content="{res:Text Players_Unban}" Padding="12,3"
                               AutomationProperties.Name="{Binding ActionLabel}"
                               Command="{Binding DataContext.UnbanCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                               CommandParameter="{Binding}" />
@@ -237,7 +235,7 @@
                   </DataTemplate>
                 </ListBox.ItemTemplate>
               </ListBox>
-              <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,6">
+              <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,3,0,6">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
                     <Setter Property="Visibility" Value="Collapsed" />
@@ -254,13 +252,13 @@
         </ContentControl.ContentTemplate>
       </ContentControl>
 
-      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,24,0,0">
-        <StackPanel Margin="4,0,0,0" DataContext="{Binding PlayerLists}">
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-3,24,0,0">
+        <StackPanel Margin="3,0,0,0" DataContext="{Binding PlayerLists}">
           <TextBlock Text="{res:Text Players_Recent}" Style="{StaticResource Heading}" />
           <TextBlock Text="{res:Text Players_RecentHint}" Style="{StaticResource Hint}" />
           <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding Recent}" ItemTemplate="{StaticResource PersonRow}"
                    AutomationProperties.Name="{res:Text Players_Recent}" />
-          <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,2,0,0">
+          <TextBlock Text="{res:Text Players_EmptyList}" Margin="0,3,0,0">
             <TextBlock.Style>
               <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
                 <Setter Property="Visibility" Value="Collapsed" />

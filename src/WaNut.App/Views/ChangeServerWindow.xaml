@@ -14,21 +14,21 @@
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     <Style x:Key="FieldLabel" TargetType="TextBlock">
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Margin" Value="0,14,0,6" />
+      <Setter Property="Margin" Value="0,12,0,6" />
     </Style>
   </Window.Resources>
 
   <DockPanel Margin="24">
-    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" Margin="0,0,8,0" />
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+      <Button Content="{res:Text Common_Cancel}" Command="{Binding CancelCommand}" MinWidth="80" Margin="0,0,6,0" />
       <Button Content="{res:Text Change_Confirm}" Command="{Binding ChangeCommand}" Style="{StaticResource PrimaryButton}"
               MinWidth="80" IsDefault="True" />
     </StackPanel>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
       <StackPanel>
-        <TextBlock Text="{res:Text Change_Title}" FontSize="20" FontWeight="SemiBold" />
-        <TextBlock Style="{StaticResource MutedText}" Margin="0,4,0,0">
+        <TextBlock Text="{res:Text Change_Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" />
+        <TextBlock Style="{StaticResource MutedText}" Margin="0,3,0,0">
           <Run Text="{res:Text Change_Current}" />
           <Run Text="{Binding CurrentText, Mode=OneTime}" FontWeight="SemiBold" />
         </TextBlock>
@@ -40,12 +40,12 @@
                  AutomationProperties.Name="{res:Text CreateServer_TypeLabel}"
                  Background="{DynamicResource CardBrush}"
                  BorderThickness="1"
-                 Padding="4">
+                 Padding="3">
           <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
               <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
               <Setter Property="AutomationProperties.HelpText" Value="{Binding Description}" />
-              <Setter Property="Padding" Value="10,7" />
+              <Setter Property="Padding" Value="12,6" />
             </Style>
           </ListBox.ItemContainerStyle>
           <ListBox.ItemTemplate>
@@ -62,20 +62,20 @@
         <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" DisplayMemberPath="Id"
                   IsEnabled="{Binding IsIdle}" AutomationProperties.Name="{res:Text CreateServer_VersionLabel}" />
 
-        <TextBlock Text="{res:Text Change_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,14,0,0" />
+        <TextBlock Text="{res:Text Change_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />
 
-        <TextBlock Text="{res:Text Change_Unchanged}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,8,0,0"
+        <TextBlock Text="{res:Text Change_Unchanged}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0"
                    Visibility="{Binding IsUnchanged, Converter={StaticResource BoolToVisibility}}" />
 
-        <TextBlock Text="{Binding ModsMovedText}" TextWrapping="Wrap" Margin="0,8,0,0"
+        <TextBlock Text="{Binding ModsMovedText}" TextWrapping="Wrap" Margin="0,6,0,0"
                    Visibility="{Binding ShowModsMovedNote, Converter={StaticResource BoolToVisibility}}" />
 
         <!-- Going back to an older version: a plain warning and a second, deliberate tick. -->
-        <Border Style="{StaticResource WarningBanner}" Margin="0,14,0,0"
+        <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0"
                 Visibility="{Binding ShowDowngradeWarning, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
             <TextBlock Text="{Binding DowngradeWarningText, Mode=OneTime}" TextWrapping="Wrap" />
-            <CheckBox IsChecked="{Binding DowngradeAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,10,0,0">
+            <CheckBox IsChecked="{Binding DowngradeAccepted}" IsEnabled="{Binding IsIdle}" Margin="0,12,0,0">
               <TextBlock Text="{res:Text Change_DowngradeAccept}" TextWrapping="Wrap" />
             </CheckBox>
           </StackPanel>
@@ -86,13 +86,12 @@
                    Visibility="{Binding WasCancelled, Converter={StaticResource BoolToVisibility}}" />
 
         <StackPanel Margin="0,18,0,0" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-            <Image Style="{StaticResource BusyPeanut}" Width="20" Height="20" Margin="0,0,8,0" />
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
           </StackPanel>
           <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}"
                        AutomationProperties.Name="{Binding StatusText}" />
-          <TextBlock Text="{Binding Eta.Text}" FontSize="12" Margin="0,6,0,0">
+          <TextBlock Text="{Binding Eta.Text}" FontSize="{StaticResource FontSmall}" Margin="0,6,0,0">
             <TextBlock.Style>
               <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
                 <Style.Triggers>
@@ -105,7 +104,7 @@
           </TextBlock>
         </StackPanel>
 
-        <Border Margin="0,14,0,0">
+        <Border Margin="0,12,0,0">
           <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
               <Style.Triggers>
