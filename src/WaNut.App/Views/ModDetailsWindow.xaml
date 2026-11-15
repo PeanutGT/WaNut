@@ -15,21 +15,21 @@
   <!-- DataContext: ModDetailsViewModel -->
   <DockPanel Margin="24">
     <!-- Header: icon, name, Modrinth link -->
-    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
       <Border DockPanel.Dock="Left" Width="56" Height="56" CornerRadius="10" Margin="0,0,12,0"
               Background="{DynamicResource SidebarBrush}" ClipToBounds="True">
         <Image Source="{Binding Icon}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" Focusable="False" />
       </Border>
       <Button DockPanel.Dock="Right" Content="{res:Text ModDetails_OpenPage}" Command="{Binding OpenPageCommand}"
-              Padding="10,3" VerticalAlignment="Center" />
+              Padding="12,3" VerticalAlignment="Center" />
       <StackPanel VerticalAlignment="Center">
-        <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-        <TextBlock Text="{Binding Result.DetailText}" Style="{StaticResource MutedText}" FontSize="12" TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{Binding Result.DetailText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextTrimming="CharacterEllipsis" />
       </StackPanel>
     </DockPanel>
 
     <Button DockPanel.Dock="Bottom" Content="{res:Text ModDetails_Close}" Command="{Binding CloseCommand}" IsCancel="True"
-            HorizontalAlignment="Right" MinWidth="88" Margin="0,14,0,0" />
+            HorizontalAlignment="Right" MinWidth="88" Margin="0,12,0,0" />
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel>
@@ -84,12 +84,12 @@
             <DataTemplate>
               <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,6">
                 <DockPanel>
-                  <Button DockPanel.Dock="Right" Content="{res:Text ModDetails_Install}" Padding="10,2" VerticalAlignment="Center"
+                  <Button DockPanel.Dock="Right" Content="{res:Text ModDetails_Install}" Padding="12,3" VerticalAlignment="Center"
                           AutomationProperties.Name="{Binding InstallLabel}"
                           Visibility="{Binding DataContext.CanInstall, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource Visible}}"
                           Command="{Binding DataContext.InstallCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                           CommandParameter="{Binding}" />
-                  <Border DockPanel.Dock="Left" CornerRadius="8" Padding="7,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                  <Border DockPanel.Dock="Left" CornerRadius="8" Padding="6,0" Margin="0,0,6,0" VerticalAlignment="Center">
                     <Border.Style>
                       <Style TargetType="Border">
                         <Setter Property="Background" Value="{DynamicResource OnlineBadgeBrush}" />
@@ -100,11 +100,11 @@
                         </Style.Triggers>
                       </Style>
                     </Border.Style>
-                    <TextBlock Text="{Binding TypeText}" FontSize="11" />
+                    <TextBlock Text="{Binding TypeText}" FontSize="{StaticResource FontSmall}" />
                   </Border>
                   <StackPanel>
                     <TextBlock Text="{Binding Number}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding DateText}" Style="{StaticResource MutedText}" FontSize="12" />
+                    <TextBlock Text="{Binding DateText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" />
                   </StackPanel>
                 </DockPanel>
               </Border>
@@ -133,7 +133,7 @@
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Border CornerRadius="6" ClipToBounds="True" Margin="0,0,8,6" Background="{DynamicResource SidebarBrush}">
+                  <Border CornerRadius="6" ClipToBounds="True" Margin="0,0,6,6" Background="{DynamicResource SidebarBrush}">
                     <Image Source="{Binding}" Height="150" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" />
                   </Border>
                 </DataTemplate>

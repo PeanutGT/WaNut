@@ -10,9 +10,9 @@
       <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
     <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{StaticResource FontSmall}" />
       <Setter Property="TextWrapping" Value="Wrap" />
-      <Setter Property="Margin" Value="0,4,0,0" />
+      <Setter Property="Margin" Value="0,3,0,0" />
     </Style>
     <Style x:Key="Item" TargetType="StackPanel">
       <Setter Property="Margin" Value="0,0,0,18" />
@@ -20,7 +20,7 @@
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="3,3,18,18">
       <!-- Always visible -->
       <StackPanel Style="{StaticResource Item}">
         <DockPanel Margin="0,0,0,6">
@@ -70,7 +70,7 @@
           </StackPanel>
         </StackPanel>
         <TextBlock Text="{res:Text Icon_Hint}" Style="{StaticResource Hint}" />
-        <Border Margin="0,8,0,0">
+        <Border Margin="0,6,0,0">
           <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
               <Style.Triggers>
@@ -85,8 +85,8 @@
       </StackPanel>
 
       <!-- More settings -->
-      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,18">
-        <StackPanel Margin="4,8,0,0">
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-3,0,0,18">
+        <StackPanel Margin="3,6,0,0">
           <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
                   Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}">
             <TextBlock Text="{res:Text Server_StopToChange}" TextWrapping="Wrap" />
@@ -96,7 +96,7 @@
             <TextBlock Text="{res:Text Change_Section}" Style="{StaticResource Label}" />
             <Button Content="{res:Text Change_Open}" Command="{Binding ChangeTypeOrVersionCommand}" HorizontalAlignment="Left" />
             <TextBlock Text="{res:Text Change_SectionHint}" Style="{StaticResource Hint}" />
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
               <StackPanel.Style>
                 <Style TargetType="StackPanel">
                   <Style.Triggers>
@@ -106,31 +106,31 @@
                   </Style.Triggers>
                 </Style>
               </StackPanel.Style>
-              <Image Style="{StaticResource Peanut}" Width="22" Height="22" Margin="0,0,8,0" />
+              <Image Style="{StaticResource Peanut}" Width="22" Height="22" Margin="0,0,6,0" />
               <TextBlock Text="{Binding ChangeDoneText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
             <CheckBox Content="{res:Text Server_AutoRestart}" IsChecked="{Binding AutoRestart}" />
-            <TextBlock Text="{res:Text Server_AutoRestartHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+            <TextBlock Text="{res:Text Server_AutoRestartHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}" Visibility="{Binding ShowPaperTweaks, Converter={StaticResource Visible}}">
             <CheckBox Content="{res:Text Server_LighterEntities}" IsChecked="{Binding LighterEntities}" IsEnabled="{Binding CanEditPaperTweaks}" />
-            <TextBlock Text="{res:Text Server_LighterEntitiesHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
-            <TextBlock Text="{res:Text Server_LighterEntitiesStartFirst}" Style="{StaticResource Hint}" Margin="26,2,0,0"
+            <TextBlock Text="{res:Text Server_LighterEntitiesHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
+            <TextBlock Text="{res:Text Server_LighterEntitiesStartFirst}" Style="{StaticResource Hint}" Margin="24,3,0,0"
                        Visibility="{Binding ShowPaperTweaksStartFirst, Converter={StaticResource Visible}}" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
             <StackPanel Orientation="Horizontal">
               <CheckBox Content="{res:Text Server_AutoStop}" IsChecked="{Binding AutoStop}" VerticalAlignment="Center" />
-              <TextBox Text="{Binding AutoStopMinutes}" IsEnabled="{Binding AutoStopMinutesEnabled}" Width="56" MaxLength="4" Margin="8,0,6,0"
+              <TextBox Text="{Binding AutoStopMinutes}" IsEnabled="{Binding AutoStopMinutesEnabled}" Width="56" MaxLength="4" Margin="6,0,6,0"
                        AutomationProperties.Name="{res:Text Server_AutoStopMinutes}" />
               <TextBlock Text="{res:Text Server_AutoStopMinutes}" VerticalAlignment="Center" />
             </StackPanel>
-            <TextBlock Text="{res:Text Server_AutoStopHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
+            <TextBlock Text="{res:Text Server_AutoStopHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
@@ -142,8 +142,8 @@
 
           <StackPanel Style="{StaticResource Item}">
             <CheckBox Content="{res:Text Server_OnlineMode}" IsChecked="{Binding OnlineMode}" IsEnabled="{Binding CanEditProperties}" />
-            <TextBlock Text="{res:Text Server_OnlineModeHint}" Style="{StaticResource Hint}" Margin="26,2,0,0" />
-            <Border Style="{StaticResource WarningBanner}" Margin="0,10,0,0"
+            <TextBlock Text="{res:Text Server_OnlineModeHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
+            <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0"
                     Visibility="{Binding ShowOnlineModeWarning, Converter={StaticResource Visible}}">
               <TextBlock Text="{res:Text Server_OnlineModeWarning}" TextWrapping="Wrap" />
             </Border>
@@ -165,7 +165,7 @@
 
       <!-- Advanced mode only: plain wording, no peanut (decision 16). -->
       <StackPanel Visibility="{Binding App.AdvancedMode, Converter={StaticResource Visible}}">
-        <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,10" />
+        <TextBlock Text="{res:Text Settings_AdvancedSection}" Style="{StaticResource SectionCaption}" Margin="0,0,0,12" />
         <TextBlock Text="{res:Text Server_RunLocation}" Style="{StaticResource Label}" />
         <ComboBox ItemsSource="{Binding RunLocations}" SelectedItem="{Binding RunLocation}" DisplayMemberPath="Name"
                   IsEnabled="{Binding CanChangeRunLocation}" HorizontalAlignment="Left" MinWidth="220"
@@ -182,7 +182,7 @@
                  AutomationProperties.HelpText="{res:Text Server_JvmArgumentsHint}"
                  InputMethod.IsInputMethodEnabled="False" />
         <TextBlock Text="{res:Text Server_JvmArgumentsHint}" Style="{StaticResource Hint}" />
-        <Border Margin="0,8,0,0">
+        <Border Margin="0,6,0,0">
           <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
               <Style.Triggers>

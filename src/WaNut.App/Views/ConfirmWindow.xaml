@@ -11,9 +11,9 @@
         ShowInTaskbar="False">
   <!-- A yes/no question in WaNut's own look and language, instead of a Windows message box whose buttons follow the PC's language. -->
   <StackPanel Margin="24">
-    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="14" />
+    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
-      <Button x:Name="YesButton" Content="{res:Text Common_Yes}" MinWidth="80" Margin="0,0,8,0" Click="OnYes" />
+      <Button x:Name="YesButton" Content="{res:Text Common_Yes}" MinWidth="80" Margin="0,0,6,0" Click="OnYes" />
       <!-- "No" is the safe answer, so Enter and Esc both pick it. -->
       <Button x:Name="NoButton" Content="{res:Text Common_No}" MinWidth="80" IsDefault="True" IsCancel="True" />
     </StackPanel>

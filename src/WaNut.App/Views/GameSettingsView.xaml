@@ -9,9 +9,9 @@
       <Setter Property="Margin" Value="0,0,0,6" />
     </Style>
     <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{StaticResource FontSmall}" />
       <Setter Property="TextWrapping" Value="Wrap" />
-      <Setter Property="Margin" Value="0,4,0,0" />
+      <Setter Property="Margin" Value="0,3,0,0" />
     </Style>
     <!-- When a control gets focus, the whole item scrolls into view, so its heading is never left above the top. -->
     <Style x:Key="Item" TargetType="StackPanel">
@@ -19,13 +19,13 @@
       <EventSetter Event="RequestBringIntoView" Handler="Item_RequestBringIntoView" />
     </Style>
     <Style x:Key="CheckHint" TargetType="TextBlock" BasedOn="{StaticResource Hint}">
-      <Setter Property="Margin" Value="26,2,0,0" />
+      <Setter Property="Margin" Value="24,3,0,0" />
     </Style>
     <BooleanToVisibilityConverter x:Key="Visible" />
   </UserControl.Resources>
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="4,4,16,16">
+    <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="3,3,18,18">
       <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
               Visibility="{Binding ShowStopHint, Converter={StaticResource Visible}}">
         <TextBlock Text="{res:Text Game_StopToChange}" TextWrapping="Wrap" />
@@ -49,7 +49,7 @@
 
       <StackPanel Style="{StaticResource Item}">
         <CheckBox Content="{res:Text Game_Pvp}" IsChecked="{Binding Pvp}" IsEnabled="{Binding CanEditPvp}" />
-        <CheckBox Content="{res:Text Game_KeepInventory}" IsChecked="{Binding KeepInventory}" Margin="0,10,0,0" />
+        <CheckBox Content="{res:Text Game_KeepInventory}" IsChecked="{Binding KeepInventory}" Margin="0,12,0,0" />
       </StackPanel>
 
       <StackPanel Style="{StaticResource Item}">
@@ -67,8 +67,8 @@
 
       <!-- More settings. Slider bounds match GameSettingsViewModel.MinDistance/MaxDistance; they are written
            as numbers here because Slider needs doubles and x:Static of an int const crashes at load. -->
-      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-4,0,0,0">
-        <StackPanel Margin="4,8,0,0">
+      <Expander Header="{res:Text Settings_MoreSettings}" Margin="-3,0,0,0">
+        <StackPanel Margin="3,6,0,0">
           <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Game_ViewDistance}" Style="{StaticResource Label}" />
             <DockPanel IsEnabled="{Binding CanEditProperties}">
@@ -104,10 +104,10 @@
 
           <StackPanel Style="{StaticResource Item}">
             <CheckBox Content="{res:Text Game_CommandBlocks}" IsChecked="{Binding CommandBlocks}" IsEnabled="{Binding CanEditCommandBlocks}" />
-            <CheckBox Content="{res:Text Game_SpawnMonsters}" IsChecked="{Binding SpawnMonsters}" IsEnabled="{Binding CanEditSpawnMonsters}" Margin="0,10,0,0" />
-            <CheckBox Content="{res:Text Game_AllowFlight}" IsChecked="{Binding AllowFlight}" IsEnabled="{Binding CanEditProperties}" Margin="0,10,0,0" />
+            <CheckBox Content="{res:Text Game_SpawnMonsters}" IsChecked="{Binding SpawnMonsters}" IsEnabled="{Binding CanEditSpawnMonsters}" Margin="0,12,0,0" />
+            <CheckBox Content="{res:Text Game_AllowFlight}" IsChecked="{Binding AllowFlight}" IsEnabled="{Binding CanEditProperties}" Margin="0,12,0,0" />
             <TextBlock Text="{res:Text Game_AllowFlightHint}" Style="{StaticResource CheckHint}" />
-            <CheckBox Content="{res:Text Game_Hardcore}" IsChecked="{Binding Hardcore}" IsEnabled="{Binding CanEditProperties}" Margin="0,10,0,0" />
+            <CheckBox Content="{res:Text Game_Hardcore}" IsChecked="{Binding Hardcore}" IsEnabled="{Binding CanEditProperties}" Margin="0,12,0,0" />
             <TextBlock Text="{res:Text Game_HardcoreHint}" Style="{StaticResource CheckHint}" />
           </StackPanel>
 

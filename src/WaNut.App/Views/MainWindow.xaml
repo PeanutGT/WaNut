@@ -60,37 +60,37 @@
             Background="{DynamicResource SidebarBrush}"
             BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="0,0,1,0">
-      <DockPanel Margin="12,16,12,12">
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,20">
+      <DockPanel Margin="12,18,12,12">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,18">
           <Image Style="{StaticResource Peanut}" Width="32" Height="32" />
-          <TextBlock Text="{res:Text App_Title}" FontSize="20" FontWeight="Bold"
-                     VerticalAlignment="Center" Margin="10,0,0,0" />
+          <TextBlock Text="{res:Text App_Title}" FontSize="{StaticResource FontTitle}" FontWeight="Bold"
+                     VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>
 
         <TextBlock DockPanel.Dock="Top" Text="{res:Text Main_MyServers}"
-                   Style="{StaticResource SectionCaption}" Margin="6,0,0,8" />
+                   Style="{StaticResource SectionCaption}" Margin="6,0,0,6" />
 
         <Button x:Name="AppSettingsButton" DockPanel.Dock="Bottom" Content="{res:Text AppSettings_Title}"
                 Command="{Binding OpenAppSettingsCommand}"
-                HorizontalAlignment="Stretch" Margin="0,8,0,0" />
+                HorizontalAlignment="Stretch" Margin="0,6,0,0" />
 
         <!-- A new WaNut version: the peanut brings the news. -->
         <Border DockPanel.Dock="Bottom" DataContext="{Binding Updates}" Style="{StaticResource NoticeBanner}" Margin="0,12,0,0"
                 Visibility="{Binding ShowCard, Converter={StaticResource BoolToVisibility}}">
           <StackPanel>
             <StackPanel Orientation="Horizontal">
-              <controls:PixelScene Scene="updating" Width="32" Height="32" Margin="0,0,8,0" VerticalAlignment="Top" />
+              <controls:PixelScene Scene="updating" Width="32" Height="32" Margin="0,0,6,0" VerticalAlignment="Top" />
               <TextBlock Text="{Binding CardText}" TextWrapping="Wrap" MaxWidth="150" FontWeight="SemiBold"
                          AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0" Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}">
               <Button Content="{res:Text Update_Now}" Command="{Binding UpdateNowCommand}" FontWeight="SemiBold" />
-              <Button Content="{res:Text Update_Later}" Command="{Binding LaterCommand}" Margin="8,0,0,0" />
+              <Button Content="{res:Text Update_Later}" Command="{Binding LaterCommand}" Margin="6,0,0,0" />
             </StackPanel>
-            <ProgressBar Margin="0,8,0,0" Height="6" Minimum="0" Maximum="100" Value="{Binding DownloadPercent, Mode=OneWay}"
+            <ProgressBar Margin="0,6,0,0" Height="6" Minimum="0" Maximum="100" Value="{Binding DownloadPercent, Mode=OneWay}"
                          AutomationProperties.Name="{Binding StatusText}"
                          Visibility="{Binding IsWorking, Converter={StaticResource BoolToVisibility}}" />
-            <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" FontSize="12" Margin="0,6,0,0" MaxWidth="180" HorizontalAlignment="Left">
+            <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" FontSize="{StaticResource FontSmall}" Margin="0,6,0,0" MaxWidth="180" HorizontalAlignment="Left">
               <TextBlock.Style>
                 <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
                   <Style.Triggers>
@@ -132,14 +132,14 @@
                   <ColumnDefinition Width="Auto" />
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,10,0" />
+                <Ellipse Style="{StaticResource StatusDot}" Margin="0,0,12,0" />
                 <!-- TextTrimming needs a width limit, so the icon docks left instead of using a horizontal StackPanel. -->
                 <DockPanel Grid.Column="1">
-                  <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,8,0" VerticalAlignment="Center"
+                  <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center"
                          Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
                   <StackPanel>
                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Style="{StaticResource MutedText}" FontSize="12">
+                    <TextBlock Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}">
                       <Run Text="{Binding Metadata.Type, Mode=OneWay}" />
                       <Run Text="{Binding Metadata.MinecraftVersion, Mode=OneWay}" />
                       <Run Text="{Binding ListPlayersText, Mode=OneWay}" Foreground="{DynamicResource AccentBrush}" />
@@ -158,21 +158,21 @@
       <!-- No servers yet: the peanut and one big green button -->
       <StackPanel Style="{StaticResource ShownWhenNoServers}"
                   HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="360">
-        <controls:PixelScene Scene="no-servers" Width="128" Height="128" Margin="0,0,0,20" />
-        <TextBlock Text="{res:Text Main_NoServers}" FontSize="20" FontWeight="SemiBold"
+        <controls:PixelScene Scene="no-servers" Width="128" Height="128" Margin="0,0,0,18" />
+        <TextBlock Text="{res:Text Main_NoServers}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold"
                    HorizontalAlignment="Center" />
         <TextBlock Text="{res:Text Main_NoServersHint}" Style="{StaticResource MutedText}"
-                   TextWrapping="Wrap" TextAlignment="Center" Margin="0,8,0,20" />
+                   TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,18" />
         <Button x:Name="EmptyCreateButton" Content="{res:Text Main_CreateServer}"
                 Command="{Binding CreateServerCommand}"
                 Style="{StaticResource PrimaryButton}"
-                FontSize="14" Padding="22,10" HorizontalAlignment="Center" />
+                FontSize="{StaticResource FontSubheading}" Padding="24,12" HorizontalAlignment="Center" />
       </StackPanel>
 
       <!-- Servers exist but none is selected -->
       <TextBlock Text="{res:Text Main_SelectServer}"
                  Foreground="{DynamicResource MutedTextBrush}"
-                 FontSize="15"
+                 FontSize="{StaticResource FontSubheading}"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center">
         <TextBlock.Style>
@@ -191,7 +191,7 @@
       </TextBlock>
 
       <!-- Selected server -->
-      <DockPanel Margin="24,20,24,20" DataContext="{Binding SelectedServer}">
+      <DockPanel Margin="24,18,24,18" DataContext="{Binding SelectedServer}">
         <DockPanel.Style>
           <Style TargetType="DockPanel">
             <Style.Triggers>
@@ -203,7 +203,7 @@
         </DockPanel.Style>
 
         <!-- Header: name, details, status and Start/Stop -->
-        <Grid DockPanel.Dock="Top" Margin="0,0,0,16">
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,18">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
@@ -212,8 +212,8 @@
             <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="48" Height="48" Margin="0,0,12,0" VerticalAlignment="Center"
                    Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
             <StackPanel>
-              <TextBlock Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-              <TextBlock Style="{StaticResource MutedText}" Margin="0,2,0,0">
+              <TextBlock Text="{Binding Name}" FontSize="{StaticResource FontTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+              <TextBlock Style="{StaticResource MutedText}" Margin="0,3,0,0">
                 <Run Text="{Binding TypeAndVersionText, Mode=OneWay}" />
                 <Run Text="·" />
                 <Run Text="{res:Text Main_Java}" />
@@ -223,7 +223,7 @@
                 <Run Text="MB" />
               </TextBlock>
               <!-- Live memory and CPU of java.exe while the server runs. -->
-              <TextBlock Text="{Binding UsageText}" Margin="0,2,0,0" FontSize="12" AutomationProperties.Name="{Binding UsageText}">
+              <TextBlock Text="{Binding UsageText}" Margin="0,3,0,0" FontSize="{StaticResource FontSmall}" AutomationProperties.Name="{Binding UsageText}">
                 <TextBlock.Style>
                   <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
                     <Style.Triggers>
@@ -238,10 +238,10 @@
           </DockPanel>
           <StackPanel x:Name="StartStopPanel" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
             <!-- The peanut acts out the status: asleep, starting, cheering, saving. -->
-            <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,8,0" />
+            <controls:PixelScene Scene="{Binding StatusScene}" Width="48" Height="48" Margin="0,0,6,0" />
 
             <!-- Status pill -->
-            <Border CornerRadius="11" Padding="10,3" Margin="0,0,12,0" VerticalAlignment="Center" BorderThickness="1">
+            <Border CornerRadius="11" Padding="12,3" Margin="0,0,12,0" VerticalAlignment="Center" BorderThickness="1">
               <Border.Style>
                 <Style TargetType="Border">
                   <Setter Property="Background" Value="{DynamicResource CardBrush}" />
@@ -299,7 +299,7 @@
           </StackPanel>
         </Grid>
 
-        <Border DockPanel.Dock="Top" Margin="0,0,0,16">
+        <Border DockPanel.Dock="Top" Margin="0,0,0,18">
           <Border.Style>
             <Style TargetType="Border" BasedOn="{StaticResource ErrorBanner}">
               <Style.Triggers>
@@ -313,8 +313,8 @@
         </Border>
 
         <!-- After a crash or failed start: the cause in plain words and, when WaNut can, a button that fixes it. -->
-        <Border DockPanel.Dock="Top" Margin="0,0,0,16" DataContext="{Binding CrashHelp}"
-                Style="{StaticResource ErrorBanner}" Padding="12,10"
+        <Border DockPanel.Dock="Top" Margin="0,0,0,18" DataContext="{Binding CrashHelp}"
+                Style="{StaticResource ErrorBanner}" Padding="12,12"
                 Visibility="{Binding IsShown, Converter={StaticResource BoolToVisibility}}"
                 AutomationProperties.Name="{Binding Title}">
           <Grid>
@@ -326,23 +326,23 @@
             <controls:PixelScene Scene="perf-hot" Width="48" Height="48" Margin="0,0,12,0" VerticalAlignment="Top" />
             <StackPanel Grid.Column="1">
               <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
-              <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,4,0,0" />
-              <WrapPanel Margin="0,10,0,0">
+              <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,3,0,0" />
+              <WrapPanel Margin="0,12,0,0">
                 <Button Style="{StaticResource PrimaryButton}" Content="{Binding FixText}" Command="{Binding FixCommand}"
-                        Margin="0,0,8,0" Visibility="{Binding HasFix, Converter={StaticResource BoolToVisibility}}" />
-                <Button Content="{res:Text Crash_OpenReport}" Command="{Binding OpenReportCommand}" Margin="0,0,8,0"
+                        Margin="0,0,6,0" Visibility="{Binding HasFix, Converter={StaticResource BoolToVisibility}}" />
+                <Button Content="{res:Text Crash_OpenReport}" Command="{Binding OpenReportCommand}" Margin="0,0,6,0"
                         Visibility="{Binding HasReport, Converter={StaticResource BoolToVisibility}}" />
                 <Button Content="{res:Text Crash_CopyLines}" Command="{Binding CopyLinesCommand}"
                         ToolTip="{res:Text Crash_CopyLinesHelp}" />
               </WrapPanel>
             </StackPanel>
-            <Button Grid.Column="2" Content="✕" Command="{Binding HideCommand}" VerticalAlignment="Top" Padding="8,4"
-                    Margin="8,0,0,0" ToolTip="{res:Text Crash_Dismiss}" AutomationProperties.Name="{res:Text Crash_Dismiss}" />
+            <Button Grid.Column="2" Content="✕" Command="{Binding HideCommand}" VerticalAlignment="Top" Padding="6,3"
+                    Margin="6,0,0,0" ToolTip="{res:Text Crash_Dismiss}" AutomationProperties.Name="{res:Text Crash_Dismiss}" />
           </Grid>
         </Border>
 
         <!-- The newest files are on the VPS: the tabs that change files are locked until they come back (VPS plan step 4). -->
-        <Border DockPanel.Dock="Top" Margin="0,0,0,16" Style="{StaticResource NoticeBanner}" Padding="12,10"
+        <Border DockPanel.Dock="Top" Margin="0,0,0,18" Style="{StaticResource NoticeBanner}" Padding="12,12"
                 Visibility="{Binding FilesOnVps, Converter={StaticResource BoolToVisibility}}">
           <Grid>
             <Grid.ColumnDefinitions>
@@ -360,7 +360,7 @@
           <TabItem Header="{res:Text Server_TabConsole}">
             <DockPanel>
               <!-- Command box -->
-              <Grid DockPanel.Dock="Bottom" Margin="0,10,0,0">
+              <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="Auto" />
@@ -379,7 +379,7 @@
                 <!-- Send is the green button while the server runs (Start is hidden then). -->
                 <Button Grid.Column="1" Content="{res:Text Server_Send}"
                         Command="{Binding SendCommand}"
-                        MinWidth="72" Margin="8,0,0,0">
+                        MinWidth="72" Margin="6,0,0,0">
                   <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                       <Style.Triggers>
@@ -398,12 +398,12 @@
               </Grid>
 
               <!-- Live console: plain lines, warnings and errors colored. -->
-              <Border Background="{DynamicResource ConsoleBrush}" CornerRadius="6" Padding="12,10,4,10">
+              <Border Background="{DynamicResource ConsoleBrush}" CornerRadius="6" Padding="12,12,3,12">
                 <ListBox ItemsSource="{Binding ConsoleLines}"
                          behaviors:AutoScroll.IsEnabled="True"
                          ItemContainerStyle="{StaticResource ConsoleLine}"
                          Foreground="{DynamicResource ConsoleTextBrush}"
-                         FontFamily="Consolas" FontSize="12"
+                         FontFamily="Consolas" FontSize="{StaticResource FontSmall}"
                          Focusable="False"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
@@ -415,7 +415,7 @@
                   </ListBox.Resources>
                   <ListBox.ItemTemplate>
                     <DataTemplate>
-                      <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,0,8,0">
+                      <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,0,6,0">
                         <TextBlock.Style>
                           <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -487,9 +487,9 @@
         </Style>
       </Grid.Style>
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Image Style="{StaticResource BusyPeanut}" Width="64" Height="64" Margin="0,0,0,16" />
+        <Image Style="{StaticResource BusyPeanut}" Width="64" Height="64" Margin="0,0,0,18" />
         <ProgressBar IsIndeterminate="True" Width="220" Margin="0,0,0,12" />
-        <TextBlock Text="{res:Text Main_SavingWorld}" FontSize="15" HorizontalAlignment="Center"
+        <TextBlock Text="{res:Text Main_SavingWorld}" FontSize="{StaticResource FontSubheading}" HorizontalAlignment="Center"
                    AutomationProperties.LiveSetting="Assertive" />
       </StackPanel>
     </Grid>

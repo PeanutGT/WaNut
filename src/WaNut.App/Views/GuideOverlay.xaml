@@ -19,23 +19,23 @@
 
     <Border x:Name="Bubble" HorizontalAlignment="Left" VerticalAlignment="Top" Width="340"
             Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="1" CornerRadius="10" Padding="16"
+            BorderThickness="1" CornerRadius="10" Padding="18"
             KeyboardNavigation.TabNavigation="Cycle"
             AutomationProperties.Name="{Binding Title}">
       <DockPanel>
-        <DockPanel DockPanel.Dock="Bottom" Margin="0,14,0,0" LastChildFill="False">
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0" LastChildFill="False">
           <Button DockPanel.Dock="Left" Content="{res:Text Guide_Skip}" Command="{Binding SkipCommand}" />
           <Button x:Name="NextButton" DockPanel.Dock="Right" Content="{Binding NextText}" Command="{Binding NextCommand}"
-                  Style="{StaticResource PrimaryButton}" MinWidth="80" Margin="8,0,0,0" />
+                  Style="{StaticResource PrimaryButton}" MinWidth="80" Margin="6,0,0,0" />
           <Button DockPanel.Dock="Right" Content="{res:Text Guide_Back}" Command="{Binding BackCommand}"
                   Visibility="{Binding CanGoBack, Converter={StaticResource BoolToVisibility}}" />
-          <TextBlock DockPanel.Dock="Right" Text="{Binding StepText}" Style="{StaticResource MutedText}" FontSize="12"
-                     VerticalAlignment="Center" Margin="0,0,10,0" />
+          <TextBlock DockPanel.Dock="Right" Text="{Binding StepText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}"
+                     VerticalAlignment="Center" Margin="0,0,12,0" />
         </DockPanel>
         <controls:PixelScene DockPanel.Dock="Left" Scene="{Binding Current.Scene}" Width="48" Height="48"
                              VerticalAlignment="Top" Margin="0,0,12,0" />
         <StackPanel>
-          <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Title}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextWrapping="Wrap" />
           <TextBlock Text="{Binding Body}" TextWrapping="Wrap" Margin="0,6,0,0"
                      AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
