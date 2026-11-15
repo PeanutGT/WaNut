@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using WaNut.App.Controls;
 using WaNut.App.Services;
 using WaNut.App.ViewModels;
 using WaNut.Core.Onboarding;
@@ -97,13 +98,13 @@ public partial class MainWindow : Window
             return _viewModel.AppSettings.CloseAction;
         }
 
-        var window = new CloseChoiceWindow(_viewModel.RunningServerNames) { Owner = this };
-        if (window.ShowDialog() != true || window.Choice is not { } choice)
+        var panel = new CloseChoicePanel(_viewModel.RunningServerNames);
+        if (!InlinePanel.Show(this, panel) || panel.Choice is not { } choice)
         {
             return CloseAction.Ask;
         }
 
-        if (window.Remember)
+        if (panel.Remember)
         {
             _viewModel.AppSettings.CloseAction = choice;
         }
