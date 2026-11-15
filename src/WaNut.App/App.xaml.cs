@@ -41,6 +41,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        MotionSettings.Apply(this, SystemParameters.ClientAreaAnimation);
         var paths = LauncherPaths.CreateDefault();
         var store = new AppSettingsStore(paths);
         var settings = store.Load();
