@@ -27,6 +27,8 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Older console lines are dropped so a long-running server does not slow the window down.</summary>
     public const int MaxConsoleLines = 2000;
 
+    private static readonly TimeSpan ConsoleFlushDelay = TimeSpan.FromMilliseconds(100);
+
     private readonly ProgressEta _javaEta = new();
     private readonly ServerController _controller;
     private readonly InstanceStore _store;
@@ -704,8 +706,16 @@ public sealed partial class ServerViewModel : ObservableObject
         _pendingLines.Enqueue(new ConsoleLine(line, ServerLogParser.GetLevel(line)));
         if (Interlocked.Exchange(ref _flushPosted, 1) == 0)
         {
-            _ui.Post(_ => FlushConsoleLines(), null);
+            _ = FlushSoonAsync();
         }
+    }
+
+    // A modpack starting can print thousands of lines a second. Waiting a moment lets them pile up, so the console
+    // updates (and scrolls) a few times a second instead of once per line, and the window stays responsive.
+    private async Task FlushSoonAsync()
+    {
+        await Task.Delay(ConsoleFlushDelay).ConfigureAwait(false);
+        _ui.Post(_ => FlushConsoleLines(), null);
     }
 
     private void FlushConsoleLines()

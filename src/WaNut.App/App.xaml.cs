@@ -43,17 +43,21 @@ public partial class App : Application
         base.OnStartup(e);
         var paths = LauncherPaths.CreateDefault();
         var store = new AppSettingsStore(paths);
-        WaNut.App.Resources.UiLanguage.Apply(store.Load().Language);
-        _theme.Start(store.Load().Theme);
-        if (!store.Load().SetupDone)
+        var settings = store.Load();
+        WaNut.App.Resources.UiLanguage.Apply(settings.Language);
+        _theme.Start(settings.Theme);
+        if (!settings.SetupDone)
         {
             // The setup window opens before the main window, so closing it must not end the app.
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             new SetupWindow(new SetupViewModel(paths, store)).ShowDialog();
             ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+            // Setup saves the servers folder the user picked.
+            settings = store.Load();
         }
 
-        _services = ConfigureServices(paths.WithInstancesDir(store.Load().InstancesDir), _theme);
+        _services = ConfigureServices(paths.WithInstancesDir(settings.InstancesDir), _theme);
         _services.GetRequiredService<LauncherPaths>().EnsureCreated();
 
         var mainWindow = _services.GetRequiredService<MainWindow>();

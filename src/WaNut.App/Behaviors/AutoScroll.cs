@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace WaNut.App.Behaviors;
 
@@ -17,6 +18,10 @@ public static class AutoScroll
     // Per scroll viewer: true while the user is following the newest line.
     private static readonly DependencyProperty IsFollowingProperty = DependencyProperty.RegisterAttached(
         "IsFollowing", typeof(bool), typeof(AutoScroll), new PropertyMetadata(true));
+
+    // Per list: true while a scroll to the end waits to run.
+    private static readonly DependencyProperty IsScrollQueuedProperty = DependencyProperty.RegisterAttached(
+        "IsScrollQueued", typeof(bool), typeof(AutoScroll), new PropertyMetadata(false));
 
     public static bool GetIsEnabled(DependencyObject element) => (bool)element.GetValue(IsEnabledProperty);
 
@@ -35,9 +40,16 @@ public static class AutoScroll
         // Items follows ItemsSource, so this keeps working when another server is selected.
         ((INotifyCollectionChanged)list.Items).CollectionChanged += (_, args) =>
         {
-            if (args.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Reset)
+            // A batch of new lines comes as one Add each: scroll once, after the whole batch is in.
+            if (args.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Reset
+                && !(bool)list.GetValue(IsScrollQueuedProperty))
             {
-                ScrollToEndIfFollowing(list);
+                list.SetValue(IsScrollQueuedProperty, true);
+                list.Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+                {
+                    list.SetValue(IsScrollQueuedProperty, false);
+                    ScrollToEndIfFollowing(list);
+                });
             }
         };
     }
