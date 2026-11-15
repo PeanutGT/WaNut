@@ -1,18 +1,15 @@
-using System.Windows;
+using System.Windows.Controls;
 
 namespace WaNut.App.Views;
 
 /// <summary>Asks before banning a player and takes the reason they see (empty for none).</summary>
-public partial class BanWindow : Window
+public partial class BanPanel : UserControl
 {
-    public BanWindow(string question)
+    public BanPanel(string question)
     {
         InitializeComponent();
         QuestionText.Text = question;
-        Loaded += (_, _) => CancelButton.Focus();
     }
 
     public string Reason => ReasonBox.Text.Trim();
-
-    private void OnConfirm(object sender, RoutedEventArgs e) => DialogResult = true;
 }
