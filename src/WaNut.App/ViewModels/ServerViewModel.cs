@@ -244,7 +244,7 @@ public sealed partial class ServerViewModel : ObservableObject
     /// </summary>
     public bool FilesOnVps => Metadata.VpsCopyIsNewer;
 
-    /// <summary>Settings, mods and backups can change the files here.</summary>
+    /// <summary>Game settings, mods, backups and the Server tab's file settings can change the files here.</summary>
     public bool CanEditFiles => !FilesOnVps;
 
     /// <summary>Players can change while a VPS server runs (through its console), not while its files are away.</summary>
@@ -274,6 +274,7 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(ReconnectText));
         OnPropertyChanged(nameof(CanReconnect));
         ReconnectCommand.NotifyCanExecuteChanged();
+        ServerSettings.OnVpsStateChanged();
     }
 
     public string StatusText => IsQueued ? Text.Get("Status_Queued") : VpsText is { } vps && BackupFraction is null ? vps : IsPreparing

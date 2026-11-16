@@ -21,6 +21,11 @@
 
   <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel MaxWidth="560" HorizontalAlignment="Left" Margin="3,3,18,18">
+      <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
+              Visibility="{Binding ShowFilesOnVpsNote, Converter={StaticResource Visible}}">
+        <TextBlock Text="{res:Text Server_FilesOnVpsSettingsNote}" TextWrapping="Wrap" />
+      </Border>
+
       <!-- Always visible -->
       <StackPanel Style="{StaticResource Item}">
         <DockPanel Margin="0,0,0,6">

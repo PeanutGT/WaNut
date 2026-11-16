@@ -2643,19 +2643,22 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
     <value>這台伺服器在你的 VPS 上執行，所以不會用到這台電腦的防火牆、路由器和 playit.gg。VPS 開著就會持續計費。</value>
   </data>
   <data name="Server_VpsBannerRunning" xml:space="preserve">
-    <value>這台伺服器在你的 VPS 上執行，檔案都在那裡。等它停止、檔案拿回這台電腦後，設定、模組和備份才能改。</value>
+    <value>這台伺服器在你的 VPS 上執行，檔案都在那裡。等它停止、檔案拿回這台電腦後，遊戲設定、模組、備份和會改到伺服器檔案的設定才能改。</value>
   </data>
   <data name="Server_VpsBannerAway" xml:space="preserve">
-    <value>這台伺服器最新的檔案還在你的 VPS 上。拿回這台電腦後，設定、模組和備份才能改。</value>
+    <value>這台伺服器最新的檔案還在你的 VPS 上。拿回這台電腦後，遊戲設定、模組、備份和會改到伺服器檔案的設定才能改。</value>
   </data>
   <data name="Server_KeepFilesOnVps" xml:space="preserve">
     <value>伺服器停止時，把檔案留在 VPS 上</value>
   </data>
   <data name="Server_KeepFilesOnVpsHint" xml:space="preserve">
-    <value>停止會比較快，下次啟動直接用 VPS 上的檔案。在你拿回來之前，這台電腦上的是舊版本：設定、模組和備份都不能改，也不會在這裡備份最新的世界。隨時可以用伺服器頁面上方的按鈕拿回來。</value>
+    <value>停止會比較快，下次啟動直接用 VPS 上的檔案。在你拿回來之前，這台電腦上的是舊版本：遊戲設定、模組、備份和會改到伺服器檔案的設定都不能改，也不會在這裡備份最新的世界。隨時可以用伺服器頁面上方的按鈕拿回來。隨時都能取消勾選：之後下次停止時，或下次啟動前，檔案就會拿回來。</value>
+  </data>
+  <data name="Server_FilesOnVpsSettingsNote" xml:space="preserve">
+    <value>最新的檔案還在你的 VPS 上，所以圖示、連接埠、帳號驗證和會改到伺服器資料夾的操作要等檔案拿回來。記憶體、自動重啟與停止、Java 參數和「把檔案留在 VPS 上」仍然可以改。</value>
   </data>
   <data name="Server_VpsBannerKept" xml:space="preserve">
-    <value>這台伺服器的檔案留在你的 VPS 上。拿回這台電腦後，設定、模組和備份才能改。</value>
+    <value>這台伺服器的檔案留在你的 VPS 上。拿回這台電腦後，遊戲設定、模組、備份和會改到伺服器檔案的設定才能改。</value>
   </data>
   <data name="Server_VpsBringBack" xml:space="preserve">
     <value>把檔案拿回來</value>
