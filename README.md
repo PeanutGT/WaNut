@@ -63,10 +63,6 @@ See [docs/blueprint.md](docs/blueprint.md) for the full design.
 A small pixel peanut keeps you company while your server runs.
 
 <p align="center">
-  <img src="docs/images/peanut-faces.png" alt="The peanut: calm, happy, nervous, sleepy and overheated" width="528">
-</p>
-
-<p align="center">
   <img src="docs/images/guide-hello.gif" alt="Peanut waving hello" width="96">
   <img src="docs/images/starting.gif" alt="Server starting" width="96">
   <img src="docs/images/online.gif" alt="Server online" width="96">
