@@ -239,13 +239,20 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Players can change while a VPS server runs (through its console), not while its files are away.</summary>
     public bool CanEditPlayers => !FilesOnVps || IsRunning;
 
-    public string? VpsBannerText => !FilesOnVps ? null : Text.Get(IsRunning ? "Server_VpsBannerRunning" : "Server_VpsBannerAway");
+    public string? VpsBannerText => !FilesOnVps ? null : Text.Get(IsRunning ? "Server_VpsBannerRunning"
+        : Metadata.KeepFilesOnVps ? "Server_VpsBannerKept" : "Server_VpsBannerAway");
 
-    /// <summary>"Check the VPS again": WaNut isn't following the server and isn't busy with it.</summary>
+    /// <summary>"Bring the files back" for a folder kept on the VPS, otherwise "Check the VPS again".</summary>
+    public string ReconnectText => Text.Get(Metadata.KeepFilesOnVps ? "Server_VpsBringBack" : "Server_VpsReconnect");
+
+    /// <summary>The banner button: WaNut isn't following the server and isn't busy with it.</summary>
     public bool CanReconnect => FilesOnVps && !IsRunning && !IsPreparing;
 
+    /// <summary>A VPS server whose folder comes back after it stops.</summary>
+    private bool BringsFolderBack => RunsOnVps && !Metadata.KeepFilesOnVps;
+
     [RelayCommand(CanExecute = nameof(CanReconnect))]
-    private Task ReconnectAsync() => _controller.ReconnectAsync(this);
+    private Task ReconnectAsync() => _controller.ReconnectAsync(this, userAsked: true);
 
     private void OnVpsStateChanged()
     {
@@ -253,6 +260,7 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(CanEditFiles));
         OnPropertyChanged(nameof(CanEditPlayers));
         OnPropertyChanged(nameof(VpsBannerText));
+        OnPropertyChanged(nameof(ReconnectText));
         OnPropertyChanged(nameof(CanReconnect));
         ReconnectCommand.NotifyCanExecuteChanged();
     }
@@ -327,7 +335,7 @@ public sealed partial class ServerViewModel : ObservableObject
         DownloadedJava = false;
         _javaEta.Reset();
         IsPreparing = true;
-        Steps.Begin(StepLists.ForStart(RunsOnVps));
+        Steps.Begin(StepLists.ForStart(RunsOnVps, usesVpsCopy: FilesOnVps && Metadata.KeepFilesOnVps));
     }
 
     /// <summary>
@@ -518,14 +526,14 @@ public sealed partial class ServerViewModel : ObservableObject
                 Steps.Finish(StepLists.Start);
                 break;
             case ServerStatus.Stopping:
-                Steps.Begin(StepLists.ForStop(RunsOnVps));
+                Steps.Begin(StepLists.ForStop(BringsFolderBack));
                 break;
             case ServerStatus.Stopped:
                 // Ended while starting: the crash card or error says why.
                 Steps.Hide(StepLists.Start);
 
-                // A VPS run's folder comes back next (EndSyncBack finishes the strip), unless WaNut let go of it.
-                if (Process is RemoteServer { ConnectionLost: false, Detached: false })
+                // A VPS run's folder comes back next (EndSyncBack finishes the strip), unless WaNut let go of it or it stays there.
+                if (Process is RemoteServer { ConnectionLost: false, Detached: false } && !Metadata.KeepFilesOnVps)
                 {
                     Steps.MoveTo(StepLists.Stop, "BringBack");
                 }

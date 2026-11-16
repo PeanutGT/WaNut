@@ -56,12 +56,18 @@ public static class StepLists
     };
 
     /// <summary>Starting a server: the backup before every start, Java, then the server itself until it is online.</summary>
-    public static StepFlow ForStart(bool onVps) => new(Start, onVps
-        ? ["Backup", "Connect", "Java", "Upload", "Launch", "LoadWorld", "Online"]
-        : ["Backup", "Java", "Launch", "LoadWorld", "Online"]);
+    /// <param name="onVps">It starts on the user's VPS.</param>
+    /// <param name="usesVpsCopy">The folder stayed on the VPS after the last stop: nothing is backed up or uploaded.</param>
+    public static StepFlow ForStart(bool onVps, bool usesVpsCopy = false) => new(Start, (onVps, usesVpsCopy) switch
+    {
+        (true, true) => ["Connect", "Java", "Launch", "LoadWorld", "Online"],
+        (true, false) => ["Backup", "Connect", "Java", "Upload", "Launch", "LoadWorld", "Online"],
+        _ => ["Backup", "Java", "Launch", "LoadWorld", "Online"],
+    });
 
-    /// <summary>Stopping: the server saves players and world and exits; a VPS server's folder then comes back here.</summary>
-    public static StepFlow ForStop(bool onVps) => new(Stop, onVps
+    /// <summary>Stopping: the server saves players and world and exits; a VPS server's folder may then come back here.</summary>
+    /// <param name="bringsFolderBack">A VPS server whose folder comes back after it stops.</param>
+    public static StepFlow ForStop(bool bringsFolderBack) => new(Stop, bringsFolderBack
         ? ["Players", "SaveWorld", "Close", "BringBack", "Stopped"]
         : ["Players", "SaveWorld", "Close", "Stopped"]);
 

@@ -21,6 +21,7 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
         IProgress<VpsStep>? steps = null,
         IProgress<DownloadProgress>? upload = null,
         IProgress<long>? memoryRead = null,
+        bool useVpsCopy = false,
         CancellationToken cancellationToken = default)
     {
         var dir = store.InstanceDir(server.Id);
@@ -41,8 +42,12 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
             }
         }
 
-        steps?.Report(VpsStep.Uploading);
-        await SyncAsync(server.Id, vps, SyncDirection.Upload, upload, cancellationToken).ConfigureAwait(false);
+        // A folder kept on the VPS is the newest copy: uploading the older one here would turn its world back.
+        if (!useVpsCopy)
+        {
+            steps?.Report(VpsStep.Uploading);
+            await SyncAsync(server.Id, vps, SyncDirection.Upload, upload, cancellationToken).ConfigureAwait(false);
+        }
 
         var custom = JvmArguments.ParseCustom(server.CustomJvmArguments, out _) ?? [];
         var arguments = JvmArguments.Build(server.JavaMajor, server.MemoryMb, ForLinux(server.ServerJar), custom);

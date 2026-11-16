@@ -160,10 +160,12 @@ public sealed class ServerController(
     /// <summary>
     /// The VPS way (plan step 3): if the newest files are still on the VPS, follow the server when it still runs there
     /// or bring its files back first; then back up here, get the VPS ready and upload, and start there. No firewall,
-    /// port or memory checks on this PC: none of them apply to the VPS.
+    /// port or memory checks on this PC: none of them apply to the VPS. A folder the user keeps on the VPS
+    /// (<see cref="InstanceMetadata.KeepFilesOnVps"/>) starts as it is there: nothing comes back, is backed up or uploaded.
     /// </summary>
     private async Task StartOnVpsAsync(ServerViewModel server, VpsProfile vps, bool automatic)
     {
+        var useVpsCopy = false;
         if (server.Metadata.VpsCopyIsNewer)
         {
             server.VpsText = Text.Get("Status_VpsConnecting");
@@ -174,13 +176,21 @@ public sealed class ServerController(
                 return;
             }
 
-            server.VpsText = Text.Get("Status_VpsDownloading");
-            await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
-            server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
-            server.VpsText = null;
+            if (server.Metadata.KeepFilesOnVps)
+            {
+                useVpsCopy = true;
+            }
+            else
+            {
+                server.VpsText = Text.Get("Status_VpsDownloading");
+                await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
+                server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
+                server.VpsText = null;
+            }
         }
 
-        if (!await BackUpBeforeStartAsync(server))
+        // The copy here is older than the one kept on the VPS, so backing it up would save nothing new.
+        if (!useVpsCopy && !await BackUpBeforeStartAsync(server))
         {
             return;
         }
@@ -203,7 +213,7 @@ public sealed class ServerController(
             server.Steps.MoveTo(StepLists.Start, "Upload");
         });
         var memoryRead = new Progress<long>(mb => app.RememberVpsMemory(vps.Id, mb));
-        var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload, memoryRead);
+        var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload, memoryRead, useVpsCopy);
         server.VpsText = null;
 
         // From here the VPS copy is the one that counts, until it has come back.
@@ -285,9 +295,10 @@ public sealed class ServerController(
     /// <summary>
     /// For a server whose newest files are on a VPS while WaNut isn't following it (WaNut was closed, or the connection
     /// was lost): follows it again when it still runs there, otherwise brings its files back. Runs when WaNut starts,
-    /// and from the "Check the VPS again" button.
+    /// and from the button on the VPS banner (<paramref name="userAsked"/>); only the button brings back a folder the
+    /// user keeps on the VPS.
     /// </summary>
-    public async Task ReconnectAsync(ServerViewModel server)
+    public async Task ReconnectAsync(ServerViewModel server, bool userAsked = false)
     {
         if (!server.Metadata.VpsCopyIsNewer || server.IsRunning || server.IsPreparing || _syncingBack.ContainsKey(server))
         {
@@ -323,16 +334,24 @@ public sealed class ServerController(
             return;
         }
 
+        if (server.Metadata.KeepFilesOnVps && !userAsked)
+        {
+            return;
+        }
+
         var back = SyncBackAsync(server, vps);
         _syncingBack[server] = back;
         await back;
     }
 
-    /// <summary>Once the run on the VPS ended, brings the server's folder back here. A failure keeps it on the VPS until the next try.</summary>
+    /// <summary>
+    /// Once the run on the VPS ended, brings the server's folder back here, unless the user keeps it there. A failure
+    /// keeps it on the VPS until the next try.
+    /// </summary>
     private async Task SyncBackAfterExitAsync(ServerViewModel server, IRunningServer process, VpsProfile vps)
     {
         await process.Exited;
-        if (process is RemoteServer { ConnectionLost: true } or RemoteServer { Detached: true })
+        if (process is RemoteServer { ConnectionLost: true } or RemoteServer { Detached: true } || server.Metadata.KeepFilesOnVps)
         {
             _syncingBack.Remove(server);
             return;
