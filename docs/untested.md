@@ -211,3 +211,11 @@
 - 按「把檔案拿回來」：下載完成、建立 VPS 備份、分頁解鎖；之後可以改在哪裡執行。
 - 檔案留在 VPS 時取消勾選：下次啟動先把檔案拿回來再上傳（和以前一樣）。
 - 伺服器執行中切換勾選：以停止那一刻的設定為準。
+
+## .mrpack 不帶入權限檔（fix-mrpack-overrides）
+
+`.mrpack` 的 overrides 不再複製 `ops.json`、`whitelist.json`、ban 清單、`usercache.json`；`server.properties` 改成合併，保留 WaNut 管的鍵（白名單、`online-mode`、連接埠、RCON、query），和 CurseForge server pack 一樣。有單元測試，沒有用真的模組包在 Windows 上試過。
+
+還沒確認：
+
+- 用一個 overrides 裡帶 `server.properties` 的真實 `.mrpack` 建立伺服器：難度、motd 等遊戲設定有套用，連接埠與正版驗證維持 WaNut 的設定。

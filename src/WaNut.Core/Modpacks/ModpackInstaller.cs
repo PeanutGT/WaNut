@@ -18,19 +18,21 @@ public sealed class ModpackInstaller(FileDownloader downloader)
     private const string OverridesFolder = "overrides/";
     private const string ServerOverridesFolder = "server-overrides/";
 
-    // Files WaNut writes itself: a pack must not replace the server's settings record or its EULA answer.
+    // Files WaNut writes itself: a pack must not replace the server's settings record or its EULA answer. A pack's
+    // server.properties is never copied either, only merged (see KeptPropertyPrefixes).
     private static readonly string[] ProtectedFiles = [InstanceMetadata.FileName, ModLibrary.RecordsFileName, EulaFile.FileName];
 
     // Top-level folders of a server pack that the loader's installer (run by WaNut) or the server itself makes.
     private static readonly string[] ServerPackSkippedFolders = ["libraries", "versions", ".fabric", "logs", "crash-reports", "java", "jre", "jdk", "runtime"];
 
-    // Top-level files of a server pack that belong to the author's own way of starting it, or that would hand out
-    // operator rights or change who may join.
+    // Top-level files no pack of either kind may bring: they would hand out operator rights or change who may join.
+    private static readonly string[] PlayerAccessFiles = ["ops.json", "whitelist.json", "banned-players.json", "banned-ips.json", "usercache.json"];
+
+    // Top-level files of a server pack that belong to the author's own way of starting it.
     private static readonly string[] ServerPackSkippedFiles =
     [
         "user_jvm_args.txt", "variables.txt", "server-setup-config.yaml", ServerPackReader.ManifestFileName, "modlist.html",
-        "install.properties", "fabric-server-launcher.properties", "ops.json", "whitelist.json", "banned-players.json",
-        "banned-ips.json", "usercache.json",
+        "install.properties", "fabric-server-launcher.properties",
     ];
 
     private static readonly string[] ServerPackSkippedExtensions = [".jar", ".bat", ".cmd", ".sh", ".ps1", ".command", ".exe"];
@@ -57,7 +59,7 @@ public sealed class ModpackInstaller(FileDownloader downloader)
         }
 
         // Every path is checked before anything is downloaded.
-        var targets = pack.Files.Where(f => !IsProtected(f.Path)).Select(f => (File: f, Target: Target(instanceDir, f.Path))).ToList();
+        var targets = pack.Files.Where(f => !IsProtected(f.Path) && !IsServerProperties(f.Path)).Select(f => (File: f, Target: Target(instanceDir, f.Path))).ToList();
 
         // The overrides count as one more step, so the bar does not sit at 100% while they are copied.
         var steps = targets.Count + 1;
@@ -86,7 +88,11 @@ public sealed class ModpackInstaller(FileDownloader downloader)
     }
 
     private static bool IsProtected(string relative) =>
-        !relative.Contains('/') && !relative.Contains('\\') && ProtectedFiles.Contains(relative, StringComparer.OrdinalIgnoreCase);
+        !relative.Contains('/') && !relative.Contains('\\')
+        && (ProtectedFiles.Contains(relative, StringComparer.OrdinalIgnoreCase) || PlayerAccessFiles.Contains(relative, StringComparer.OrdinalIgnoreCase));
+
+    private static bool IsServerProperties(string relative) =>
+        relative.Equals(GameSettingsStore.PropertiesFileName, StringComparison.OrdinalIgnoreCase);
 
     private static void CopyOverrides(string instanceDir, string mrpackPath, CancellationToken cancellationToken)
     {
@@ -110,7 +116,14 @@ public sealed class ModpackInstaller(FileDownloader downloader)
 
                 var target = Target(instanceDir, relative);
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-                entry.ExtractToFile(target, overwrite: true);
+                if (IsServerProperties(relative))
+                {
+                    MergeProperties(entry, target);
+                }
+                else
+                {
+                    entry.ExtractToFile(target, overwrite: true);
+                }
             }
         }
     }
@@ -133,7 +146,7 @@ public sealed class ModpackInstaller(FileDownloader downloader)
         {
             cancellationToken.ThrowIfCancellationRequested();
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            if (relative.Equals(GameSettingsStore.PropertiesFileName, StringComparison.OrdinalIgnoreCase))
+            if (IsServerProperties(relative))
             {
                 MergeProperties(entry, target);
             }
