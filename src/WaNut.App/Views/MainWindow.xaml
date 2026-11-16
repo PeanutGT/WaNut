@@ -475,27 +475,27 @@
           </TabItem>
 
           <TabItem Header="{Binding PlayersHeader}">
-            <views:PlayersView IsEnabled="{Binding CanEditPlayers}" />
+            <views:PlayersView behaviors:ContentLock.IsUnlocked="{Binding CanEditPlayers}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabGame}">
-            <views:GameSettingsView DataContext="{Binding GameSettings}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:GameSettingsView DataContext="{Binding GameSettings}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabServer}">
-            <views:ServerSettingsView DataContext="{Binding ServerSettings}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:ServerSettingsView DataContext="{Binding ServerSettings}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabBackups}">
-            <views:BackupsView DataContext="{Binding Backups}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:BackupsView DataContext="{Binding Backups}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{Binding Mods.Header}">
-            <views:ModsView DataContext="{Binding Mods}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:ModsView DataContext="{Binding Mods}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabPacks}">
-            <views:PacksView DataContext="{Binding Packs}" IsEnabled="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:PacksView DataContext="{Binding Packs}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabConnect}">

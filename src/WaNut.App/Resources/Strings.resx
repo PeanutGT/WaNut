@@ -2663,19 +2663,22 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
     <value>This server runs on your VPS, so this PC's firewall, router and playit.gg aren't used. Your host keeps charging while the VPS is on.</value>
   </data>
   <data name="Server_VpsBannerRunning" xml:space="preserve">
-    <value>This server runs on your VPS, so its files are there. Settings, mods and backups unlock after it stops and its files come back here.</value>
+    <value>This server runs on your VPS, so its files are there. Game settings, mods, backups and the settings that change server files unlock after it stops and its files come back here.</value>
   </data>
   <data name="Server_VpsBannerAway" xml:space="preserve">
-    <value>The newest files of this server are still on your VPS. Settings, mods and backups unlock once they are back here.</value>
+    <value>The newest files of this server are still on your VPS. Game settings, mods, backups and the settings that change server files unlock once they are back here.</value>
   </data>
   <data name="Server_KeepFilesOnVps" xml:space="preserve">
     <value>Leave the files on the VPS when the server stops</value>
   </data>
   <data name="Server_KeepFilesOnVpsHint" xml:space="preserve">
-    <value>Stopping is faster, and the next start uses the files already on the VPS. Until you bring them back, this PC has an older copy: settings, mods and backups stay locked, and no backup of the newest world is made here. Bring them back any time with the button at the top of the server page.</value>
+    <value>Stopping is faster, and the next start uses the files already on the VPS. Until you bring them back, this PC has an older copy: game settings, mods, backups and the settings that change server files stay locked, and no backup of the newest world is made here. Bring them back any time with the button at the top of the server page. Turning this off works any time: the files then come back after the next stop, or before the next start.</value>
+  </data>
+  <data name="Server_FilesOnVpsSettingsNote" xml:space="preserve">
+    <value>The newest files are still on your VPS, so the icon, port, account checks and changes to the server folder wait until they are back. Memory, auto restart and stop, Java arguments and leaving the files on the VPS can still change.</value>
   </data>
   <data name="Server_VpsBannerKept" xml:space="preserve">
-    <value>This server’s files stay on your VPS. Settings, mods and backups unlock once you bring them back here.</value>
+    <value>This server’s files stay on your VPS. Game settings, mods, backups and the settings that change server files unlock once you bring them back here.</value>
   </data>
   <data name="Server_VpsBringBack" xml:space="preserve">
     <value>Bring the files back</value>

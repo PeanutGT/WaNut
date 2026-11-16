@@ -21,7 +21,7 @@ public partial class ModsView : UserControl
     /// <summary>Files from Explorer can be dropped while the server is stopped and nothing else is changing.</summary>
     private void OnDragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) && DataContext is ModsViewModel { CanDrop: true }
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) && DataContext is ModsViewModel { CanDrop: true } && IsUnlocked(sender)
             ? DragDropEffects.Copy
             : DragDropEffects.None;
         e.Handled = true;
@@ -29,10 +29,13 @@ public partial class ModsView : UserControl
 
     private void OnDrop(object sender, DragEventArgs e)
     {
-        if (e.Data.GetData(DataFormats.FileDrop) is string[] files && DataContext is ModsViewModel mods)
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] files && DataContext is ModsViewModel mods && IsUnlocked(sender))
         {
             e.Handled = true;
             _ = mods.AddJarsAsync(files);
         }
     }
+
+    // The scroll viewer stays enabled while the tab is locked (Behaviors.ContentLock), so drops check its content.
+    private static bool IsUnlocked(object sender) => sender is ScrollViewer { Content: UIElement { IsEnabled: true } };
 }

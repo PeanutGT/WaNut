@@ -129,7 +129,18 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     public string PortHint => string.Format(Text.Get("Server_PortHint"), Port, ServerSettings.DefaultPort);
 
-    public bool CanEditProperties => _server.Status == ServerStatus.Stopped;
+    /// <summary>server.properties and the server's own files: while stopped, and only once its newest files are here.</summary>
+    public bool CanEditProperties => _server.Status == ServerStatus.Stopped && CanEditFiles;
+
+    /// <summary>
+    /// False while the newest files are on the VPS: a change here would be lost when they come back. What lives in
+    /// instance.json (memory, Java arguments, auto restart and stop, keeping the files there) never syncs, so it stays
+    /// editable; that is how the user can stop keeping the files on the VPS without bringing them back first.
+    /// </summary>
+    public bool CanEditFiles => _server.CanEditFiles;
+
+    /// <summary>Says why the icon, port and the rest are locked while the server is stopped with its files away.</summary>
+    public bool ShowFilesOnVpsNote => !CanEditFiles && !_server.IsRunning;
 
     /// <summary>RAM and JVM arguments can change any time, but only take effect at the next start.</summary>
     public bool ShowNextStartHint => _server.IsRunning;
@@ -194,7 +205,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     }
 
     /// <summary>Lets the user pick a picture and turns it into the server's 64x64 icon.</summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanEditFiles))]
     private void ChooseIcon()
     {
         IconError = null;
@@ -233,7 +244,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         RemoveIconCommand.NotifyCanExecuteChanged();
     }
 
-    private bool HasIcon() => _server.HasIcon;
+    private bool HasIcon() => CanEditFiles && _server.HasIcon;
 
     /// <summary>Opens the "Change type or version" window. Only while stopped, since server files are replaced.</summary>
     [RelayCommand(CanExecute = nameof(CanEditProperties))]
@@ -281,12 +292,29 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(CanEditPaperTweaks));
         OnPropertyChanged(nameof(ShowNextStartHint));
+        OnPropertyChanged(nameof(ShowFilesOnVpsNote));
         OnPropertyChanged(nameof(CanChangeRunLocation));
         OnPropertyChanged(nameof(ShowVpsCopyNote));
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();
         }
+    }
+
+    /// <summary>The server's newest files left for the VPS or came back.</summary>
+    internal void OnVpsStateChanged()
+    {
+        OnPropertyChanged(nameof(CanEditFiles));
+        OnPropertyChanged(nameof(CanEditProperties));
+        OnPropertyChanged(nameof(CanEditPaperTweaks));
+        OnPropertyChanged(nameof(ShowFilesOnVpsNote));
+        OnPropertyChanged(nameof(CanChangeRunLocation));
+        OnPropertyChanged(nameof(ShowVpsCopyNote));
+        ChooseIconCommand.NotifyCanExecuteChanged();
+        RemoveIconCommand.NotifyCanExecuteChanged();
+        ChangeTypeOrVersionCommand.NotifyCanExecuteChanged();
+        DeleteServerCommand.NotifyCanExecuteChanged();
+        DuplicateServerCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>A backup, start or mod install began or ended: deleting and duplicating wait for it.</summary>
