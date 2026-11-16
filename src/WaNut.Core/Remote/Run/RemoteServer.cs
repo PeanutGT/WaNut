@@ -129,6 +129,12 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
 
         public long Consumed { get; set; }
 
+        /// <summary>
+        /// Forgets the line read so far without its end. A new read starts at <see cref="Consumed"/>, so those bytes
+        /// arrive again; keeping them would glue the line's start onto itself.
+        /// </summary>
+        public void DropPartialLine() => _pending.SetLength(0);
+
         public IEnumerable<string> Push(ReadOnlySpan<byte> bytes)
         {
             var lines = new List<string>();
@@ -173,8 +179,9 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
         {
             // Detached or disposed while running: whatever the cut connection threw, the server is not ours to judge.
         }
-        catch (Exception e) when (e is SshException or IOException or InvalidOperationException or VpsUnreachableException or VpsLoginException or HostKeyException or System.Net.Sockets.SocketException)
+        catch (Exception e)
         {
+            // Whatever went wrong, the run has to end: a task that faults here would leave the server "starting" forever.
             OnLine($"[WaNut] {e.Message}");
         }
 
@@ -208,8 +215,7 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
         {
             try
             {
-                var client = _client!;
-                if (!client.IsConnected)
+                if (_client is not { IsConnected: true } client)
                 {
                     _client = client = await connect(cancellationToken).ConfigureAwait(false);
                 }
@@ -234,7 +240,10 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
                     return -1;
                 }
 
-                _client?.Dispose();
+                // Null, not just disposed: a disposed client throws when asked whether it is connected.
+                var broken = _client;
+                _client = null;
+                broken?.Dispose();
                 await Task.Delay(ReconnectDelay, cancellationToken).ConfigureAwait(false);
             }
         }
@@ -242,6 +251,7 @@ public sealed class RemoteServer(ServerLaunch launch, Func<CancellationToken, Ta
 
     private async Task TailAsync(SshClient client, LineSplitter splitter, CancellationToken cancellationToken)
     {
+        splitter.DropPartialLine();
         using var tail = client.CreateCommand(RunnerScript.TailCommand(Root, _runnerPid, splitter.Consumed));
         var running = tail.ExecuteAsync(cancellationToken);
         var buffer = new byte[16 * 1024];

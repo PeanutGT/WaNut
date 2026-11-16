@@ -58,6 +58,7 @@ public sealed class LocalFolderSyncTests : IDisposable
     [Fact]
     public async Task RunAsync_Download_DeletesRemovedFilesButKeepsBackupsAndOldLogs()
     {
+        Write(Source, "server.properties", "motd=hi");
         Write(Source, "world/level.dat", "new");
         Write(Source, "logs/latest.log", "vps log");
         Write(Target, "world/level.dat", "old", DateTime.UtcNow.AddHours(-1));
@@ -74,6 +75,45 @@ public sealed class LocalFolderSyncTests : IDisposable
         Assert.True(File.Exists(Path.Combine(Target, "logs/old.log.gz")));
         Assert.Equal("vps log", File.ReadAllText(Path.Combine(Target, "logs/latest.log")));
         Assert.True(File.Exists(Path.Combine(Target, "instance.json")));
+    }
+
+    [Fact]
+    public async Task RunAsync_DownloadFromMissingFolder_ThrowsAndKeepsEverythingHere()
+    {
+        Write(Target, "server.properties", "motd=hi");
+        Write(Target, "world/level.dat", "world");
+        Write(Target, "mods/a.jar", "mod");
+
+        await Assert.ThrowsAsync<VpsFolderMissingException>(() =>
+            FolderSync.RunAsync(new LocalSyncTree(Source), new LocalSyncTree(Target), SyncDirection.Download));
+
+        Assert.Equal("world", File.ReadAllText(Path.Combine(Target, "world/level.dat")));
+        Assert.True(File.Exists(Path.Combine(Target, "mods/a.jar")));
+        Assert.True(File.Exists(Path.Combine(Target, "server.properties")));
+    }
+
+    [Fact]
+    public async Task RunAsync_DownloadFromFolderWithoutServerProperties_ThrowsAndKeepsEverythingHere()
+    {
+        Write(Source, "logs/latest.log", "left behind");
+        Directory.CreateDirectory(Path.Combine(Source, "server.properties"));
+        Write(Target, "world/level.dat", "world");
+
+        await Assert.ThrowsAsync<VpsFolderMissingException>(() =>
+            FolderSync.RunAsync(new LocalSyncTree(Source), new LocalSyncTree(Target), SyncDirection.Download));
+
+        Assert.Equal("world", File.ReadAllText(Path.Combine(Target, "world/level.dat")));
+        Assert.False(File.Exists(Path.Combine(Target, "logs/latest.log")));
+    }
+
+    [Fact]
+    public async Task RunAsync_UploadToMissingFolder_StillCopies()
+    {
+        Write(Source, "world/level.dat", "world");
+
+        var result = await FolderSync.RunAsync(new LocalSyncTree(Source), new LocalSyncTree(Target), SyncDirection.Upload);
+
+        Assert.Equal(1, result.Copied);
     }
 
     [Fact]
