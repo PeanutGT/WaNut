@@ -8,6 +8,7 @@ using WaNut.App.Services;
 using WaNut.Core.Backups;
 using WaNut.Core.Collections;
 using WaNut.Core.Hosting;
+using WaNut.Core.Steps;
 using WaNut.Core.Worlds;
 
 namespace WaNut.App.ViewModels;
@@ -307,9 +308,22 @@ public sealed partial class BackupsViewModel : ObservableObject
         WorkFraction = 0;
         Working = reason;
         _server.OnBackupWorkChanged();
+
+        // A backup shows its steps in the loading strip; restoring and resetting the world do not.
+        var showsSteps = reason is BackupReason.Manual or BackupReason.Scheduled;
+        if (showsSteps)
+        {
+            _server.Steps.Begin(StepLists.ForBackup(_server.IsRunning));
+        }
+
         try
         {
-            DoneText = await work(new Progress<double>(f => WorkFraction = f));
+            DoneText = await work(new Progress<double>(f =>
+            {
+                WorkFraction = f;
+                _server.Steps.MoveTo(StepLists.Backup, "Pack");
+            }));
+            _server.Steps.Finish(StepLists.Backup);
         }
         catch (BackupException e)
         {
@@ -321,6 +335,11 @@ public sealed partial class BackupsViewModel : ObservableObject
         }
         finally
         {
+            if (showsSteps && !_server.Steps.IsFinished)
+            {
+                _server.Steps.Hide(StepLists.Backup);
+            }
+
             Working = null;
             _server.OnBackupWorkChanged();
             Reload();

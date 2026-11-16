@@ -2937,4 +2937,211 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Performance_IdleCpuHigh" xml:space="preserve">
     <value>Nobody has played for {0:0} minutes, yet the server keeps the CPU busy. A mod or plugin may be stuck, or a farm keeps running. Restart the server, or, for modded and Paper servers, run a spark profile below to see what is busy.</value>
   </data>
+  <data name="Steps_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Steps_Version_Title" xml:space="preserve">
+    <value>Checking the version</value>
+  </data>
+  <data name="Steps_Version_Help" xml:space="preserve">
+    <value>Finding out which server files and Java this Minecraft version needs.</value>
+  </data>
+  <data name="Steps_Java" xml:space="preserve">
+    <value>Java</value>
+  </data>
+  <data name="Steps_Java_Title" xml:space="preserve">
+    <value>Getting Java ready</value>
+  </data>
+  <data name="Steps_Java_Help" xml:space="preserve">
+    <value>Minecraft servers run on Java. WaNut downloads the right one once and reuses it.</value>
+  </data>
+  <data name="Steps_ServerFiles" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Steps_ServerFiles_Title" xml:space="preserve">
+    <value>Downloading the server</value>
+  </data>
+  <data name="Steps_ServerFiles_Help" xml:space="preserve">
+    <value>Fetching the official server files for this version.</value>
+  </data>
+  <data name="Steps_Loader" xml:space="preserve">
+    <value>Loader</value>
+  </data>
+  <data name="Steps_Loader_Title" xml:space="preserve">
+    <value>Installing the mod loader</value>
+  </data>
+  <data name="Steps_Loader_Help" xml:space="preserve">
+    <value>The loader's own installer sets up the server and its libraries.</value>
+  </data>
+  <data name="Steps_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Steps_Settings_Title" xml:space="preserve">
+    <value>Writing the settings</value>
+  </data>
+  <data name="Steps_Settings_Help" xml:space="preserve">
+    <value>Saving the server's settings, the world options and the EULA.</value>
+  </data>
+  <data name="Steps_CopyWorld" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="Steps_CopyWorld_Title" xml:space="preserve">
+    <value>Copying your world</value>
+  </data>
+  <data name="Steps_CopyWorld_Help" xml:space="preserve">
+    <value>Bringing your world into the new server's folder.</value>
+  </data>
+  <data name="Steps_WorldMods" xml:space="preserve">
+    <value>Mods</value>
+  </data>
+  <data name="Steps_WorldMods_Title" xml:space="preserve">
+    <value>Installing the world's mods</value>
+  </data>
+  <data name="Steps_WorldMods_Help" xml:space="preserve">
+    <value>Finding the server versions of the mods your world uses.</value>
+  </data>
+  <data name="Steps_Modpack" xml:space="preserve">
+    <value>Pack</value>
+  </data>
+  <data name="Steps_Modpack_Title" xml:space="preserve">
+    <value>Installing the modpack</value>
+  </data>
+  <data name="Steps_Modpack_Help" xml:space="preserve">
+    <value>Putting the pack's mods and settings into the server.</value>
+  </data>
+  <data name="Steps_Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="Steps_Ready_Title" xml:space="preserve">
+    <value>Your server is ready</value>
+  </data>
+  <data name="Steps_Ready_Help" xml:space="preserve">
+    <value>Everything is in place. Press Start whenever you like.</value>
+  </data>
+  <data name="Steps_Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Steps_Backup_Title" xml:space="preserve">
+    <value>Backing up the world</value>
+  </data>
+  <data name="Steps_Backup_Help" xml:space="preserve">
+    <value>A copy of the world is saved before every start, just in case.</value>
+  </data>
+  <data name="Steps_Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="Steps_Connect_Title" xml:space="preserve">
+    <value>Connecting to the VPS</value>
+  </data>
+  <data name="Steps_Connect_Help" xml:space="preserve">
+    <value>Signing in to your VPS and checking that friends can reach it.</value>
+  </data>
+  <data name="Steps_Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Steps_Upload_Title" xml:space="preserve">
+    <value>Sending the server</value>
+  </data>
+  <data name="Steps_Upload_Help" xml:space="preserve">
+    <value>Copying the files that changed up to your VPS.</value>
+  </data>
+  <data name="Steps_Launch" xml:space="preserve">
+    <value>Launch</value>
+  </data>
+  <data name="Steps_Launch_Title" xml:space="preserve">
+    <value>Launching the server</value>
+  </data>
+  <data name="Steps_Launch_Help" xml:space="preserve">
+    <value>Java is starting up and loading the server and its mods.</value>
+  </data>
+  <data name="Steps_LoadWorld" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="Steps_LoadWorld_Title" xml:space="preserve">
+    <value>Loading the world</value>
+  </data>
+  <data name="Steps_LoadWorld_Help" xml:space="preserve">
+    <value>The server is preparing the area around spawn.</value>
+  </data>
+  <data name="Steps_Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Steps_Online_Title" xml:space="preserve">
+    <value>The server is online</value>
+  </data>
+  <data name="Steps_Online_Help" xml:space="preserve">
+    <value>Friends can join now.</value>
+  </data>
+  <data name="Steps_Players" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="Steps_Players_Title" xml:space="preserve">
+    <value>Saving the players</value>
+  </data>
+  <data name="Steps_Players_Help" xml:space="preserve">
+    <value>Everyone online is saved and signed out.</value>
+  </data>
+  <data name="Steps_SaveWorld" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Steps_SaveWorld_Title" xml:space="preserve">
+    <value>Saving the world</value>
+  </data>
+  <data name="Steps_SaveWorld_Help" xml:space="preserve">
+    <value>Writing every changed part of the world to disk.</value>
+  </data>
+  <data name="Steps_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Steps_Close_Title" xml:space="preserve">
+    <value>Closing the server</value>
+  </data>
+  <data name="Steps_Close_Help" xml:space="preserve">
+    <value>The world is saved. Java is shutting down.</value>
+  </data>
+  <data name="Steps_BringBack" xml:space="preserve">
+    <value>Bring back</value>
+  </data>
+  <data name="Steps_BringBack_Title" xml:space="preserve">
+    <value>Bringing the server back</value>
+  </data>
+  <data name="Steps_BringBack_Help" xml:space="preserve">
+    <value>Copying the newest files from your VPS back to this PC.</value>
+  </data>
+  <data name="Steps_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Steps_Stopped_Title" xml:space="preserve">
+    <value>The server has stopped</value>
+  </data>
+  <data name="Steps_Stopped_Help" xml:space="preserve">
+    <value>Everything is saved.</value>
+  </data>
+  <data name="Steps_Flush" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Steps_Flush_Title" xml:space="preserve">
+    <value>Saving the world first</value>
+  </data>
+  <data name="Steps_Flush_Help" xml:space="preserve">
+    <value>The running server writes the world to disk and pauses saving while it is copied.</value>
+  </data>
+  <data name="Steps_Pack" xml:space="preserve">
+    <value>Pack</value>
+  </data>
+  <data name="Steps_Pack_Title" xml:space="preserve">
+    <value>Packing the backup</value>
+  </data>
+  <data name="Steps_Pack_Help" xml:space="preserve">
+    <value>Zipping the world into the backups folder.</value>
+  </data>
+  <data name="Steps_Saved" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Steps_Saved_Title" xml:space="preserve">
+    <value>Backup saved</value>
+  </data>
+  <data name="Steps_Saved_Help" xml:space="preserve">
+    <value>You can restore it from the Backups tab any time.</value>
+  </data>
 </root>

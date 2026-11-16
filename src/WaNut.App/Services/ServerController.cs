@@ -12,6 +12,7 @@ using WaNut.Core.Network;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Run;
 using WaNut.Core.Settings;
+using WaNut.Core.Steps;
 
 namespace WaNut.App.Services;
 
@@ -96,6 +97,7 @@ public sealed class ServerController(
                 return;
             }
 
+            server.Steps.MoveTo(StepLists.Start, "Java");
             var progress = new Progress<DownloadProgress>(server.ReportJavaDownload);
             var launch = await planner.PrepareAsync(server.Metadata, progress);
             if (server.DownloadedJava)
@@ -185,8 +187,21 @@ public sealed class ServerController(
 
         await OpenVpsFirewallAsync(server, vps, automatic);
 
-        var steps = new Progress<VpsStep>(step => server.VpsText = Text.Get($"Status_Vps{step}"));
-        var upload = new Progress<DownloadProgress>(p => server.VpsText = string.Format(Text.Get("Status_VpsUploadingPercent"), p.Fraction * 100));
+        var steps = new Progress<VpsStep>(step =>
+        {
+            server.VpsText = Text.Get($"Status_Vps{step}");
+            server.Steps.MoveTo(StepLists.Start, step switch
+            {
+                VpsStep.PreparingJava => "Java",
+                VpsStep.Uploading => "Upload",
+                _ => "Connect",
+            });
+        });
+        var upload = new Progress<DownloadProgress>(p =>
+        {
+            server.VpsText = string.Format(Text.Get("Status_VpsUploadingPercent"), p.Fraction * 100);
+            server.Steps.MoveTo(StepLists.Start, "Upload");
+        });
         var memoryRead = new Progress<long>(mb => app.RememberVpsMemory(vps.Id, mb));
         var launch = await vpsPlanner.PrepareAsync(server.Metadata, vps, steps, upload, memoryRead);
         server.VpsText = null;
@@ -205,6 +220,7 @@ public sealed class ServerController(
     {
         server.Connect.VpsFirewallCommands = null;
         server.VpsText = Text.Get("Status_VpsConnecting");
+        server.Steps.MoveTo(StepLists.Start, "Connect");
         var port = ServerSettingsStore.Load(server.InstanceDir).Port;
         var (info, firewall) = await vpsPlanner.CheckFirewallAsync(vps);
         app.UpdateVps(vps.Id, v => v with { MemoryMb = info.MemoryMb, Provider = info.Provider });
@@ -338,6 +354,7 @@ public sealed class ServerController(
         }
         catch (Exception e) when (IsVpsProblem(e))
         {
+            server.Steps.Hide(StepLists.Stop);
             server.ShowError(string.Format(Text.Get("Server_VpsSyncBackFailed"), VpsMessage(e)));
         }
         finally

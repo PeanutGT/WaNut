@@ -36,9 +36,20 @@
     <!-- Progress and errors sit outside the scrolling form so they show however far down it is scrolled. -->
     <StackPanel DockPanel.Dock="Bottom" Margin="0,18,0,0"
                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
-      <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
-      </StackPanel>
+      <!-- The loading strip while the server is made; before that (loading versions) the plain status line. -->
+      <views:StepsBar DataContext="{Binding Steps}" Margin="0,0,0,12"
+                      Visibility="{Binding IsShown, Converter={StaticResource BoolToVisibility}}" />
+      <TextBlock Text="{Binding StatusText}" Margin="0,0,0,6">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Steps.IsShown}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
       <ProgressBar
                    Value="{Binding ProgressPercent, Mode=OneWay}"
                    IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}" />

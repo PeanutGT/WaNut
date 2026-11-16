@@ -2917,4 +2917,211 @@
   <data name="Performance_IdleCpuHigh" xml:space="preserve">
     <value>已經 {0:0} 分鐘沒人在玩，伺服器卻一直讓 CPU 很忙。可能有模組或外掛卡住，或是有農場一直在跑。可以重新啟動伺服器；模組或 Paper 伺服器也能用下面的 spark 剖析看是什麼在忙。</value>
   </data>
+  <data name="Steps_Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="Steps_Version_Title" xml:space="preserve">
+    <value>確認版本</value>
+  </data>
+  <data name="Steps_Version_Help" xml:space="preserve">
+    <value>查出這個 Minecraft 版本需要哪些伺服器檔案和哪一版 Java。</value>
+  </data>
+  <data name="Steps_Java" xml:space="preserve">
+    <value>Java</value>
+  </data>
+  <data name="Steps_Java_Title" xml:space="preserve">
+    <value>準備 Java</value>
+  </data>
+  <data name="Steps_Java_Help" xml:space="preserve">
+    <value>Minecraft 伺服器靠 Java 執行。WaNut 只下載一次，之後重複使用。</value>
+  </data>
+  <data name="Steps_ServerFiles" xml:space="preserve">
+    <value>伺服器</value>
+  </data>
+  <data name="Steps_ServerFiles_Title" xml:space="preserve">
+    <value>下載伺服器</value>
+  </data>
+  <data name="Steps_ServerFiles_Help" xml:space="preserve">
+    <value>下載這個版本的官方伺服器檔案。</value>
+  </data>
+  <data name="Steps_Loader" xml:space="preserve">
+    <value>載入器</value>
+  </data>
+  <data name="Steps_Loader_Title" xml:space="preserve">
+    <value>安裝模組載入器</value>
+  </data>
+  <data name="Steps_Loader_Help" xml:space="preserve">
+    <value>由載入器自己的安裝程式設定伺服器和它的函式庫。</value>
+  </data>
+  <data name="Steps_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Steps_Settings_Title" xml:space="preserve">
+    <value>寫入設定</value>
+  </data>
+  <data name="Steps_Settings_Help" xml:space="preserve">
+    <value>儲存伺服器設定、世界選項和 EULA。</value>
+  </data>
+  <data name="Steps_CopyWorld" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="Steps_CopyWorld_Title" xml:space="preserve">
+    <value>複製你的世界</value>
+  </data>
+  <data name="Steps_CopyWorld_Help" xml:space="preserve">
+    <value>把你的世界放進新伺服器的資料夾。</value>
+  </data>
+  <data name="Steps_WorldMods" xml:space="preserve">
+    <value>模組</value>
+  </data>
+  <data name="Steps_WorldMods_Title" xml:space="preserve">
+    <value>安裝世界的模組</value>
+  </data>
+  <data name="Steps_WorldMods_Help" xml:space="preserve">
+    <value>找出這個世界用到的模組的伺服器版本。</value>
+  </data>
+  <data name="Steps_Modpack" xml:space="preserve">
+    <value>模組包</value>
+  </data>
+  <data name="Steps_Modpack_Title" xml:space="preserve">
+    <value>安裝模組包</value>
+  </data>
+  <data name="Steps_Modpack_Help" xml:space="preserve">
+    <value>把模組包的模組和設定放進伺服器。</value>
+  </data>
+  <data name="Steps_Ready" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="Steps_Ready_Title" xml:space="preserve">
+    <value>伺服器準備好了</value>
+  </data>
+  <data name="Steps_Ready_Help" xml:space="preserve">
+    <value>一切就緒，隨時可以按「啟動」。</value>
+  </data>
+  <data name="Steps_Backup" xml:space="preserve">
+    <value>備份</value>
+  </data>
+  <data name="Steps_Backup_Title" xml:space="preserve">
+    <value>備份世界</value>
+  </data>
+  <data name="Steps_Backup_Help" xml:space="preserve">
+    <value>每次啟動前都會先存一份世界，以防萬一。</value>
+  </data>
+  <data name="Steps_Connect" xml:space="preserve">
+    <value>連線</value>
+  </data>
+  <data name="Steps_Connect_Title" xml:space="preserve">
+    <value>連線到 VPS</value>
+  </data>
+  <data name="Steps_Connect_Help" xml:space="preserve">
+    <value>登入你的 VPS，並確認朋友連得到。</value>
+  </data>
+  <data name="Steps_Upload" xml:space="preserve">
+    <value>上傳</value>
+  </data>
+  <data name="Steps_Upload_Title" xml:space="preserve">
+    <value>傳送伺服器</value>
+  </data>
+  <data name="Steps_Upload_Help" xml:space="preserve">
+    <value>把有變動的檔案複製到你的 VPS。</value>
+  </data>
+  <data name="Steps_Launch" xml:space="preserve">
+    <value>啟動</value>
+  </data>
+  <data name="Steps_Launch_Title" xml:space="preserve">
+    <value>啟動伺服器</value>
+  </data>
+  <data name="Steps_Launch_Help" xml:space="preserve">
+    <value>Java 正在啟動，載入伺服器和模組。</value>
+  </data>
+  <data name="Steps_LoadWorld" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="Steps_LoadWorld_Title" xml:space="preserve">
+    <value>載入世界</value>
+  </data>
+  <data name="Steps_LoadWorld_Help" xml:space="preserve">
+    <value>伺服器正在準備出生點附近的區域。</value>
+  </data>
+  <data name="Steps_Online" xml:space="preserve">
+    <value>上線</value>
+  </data>
+  <data name="Steps_Online_Title" xml:space="preserve">
+    <value>伺服器上線了</value>
+  </data>
+  <data name="Steps_Online_Help" xml:space="preserve">
+    <value>朋友現在可以加入了。</value>
+  </data>
+  <data name="Steps_Players" xml:space="preserve">
+    <value>玩家</value>
+  </data>
+  <data name="Steps_Players_Title" xml:space="preserve">
+    <value>儲存玩家</value>
+  </data>
+  <data name="Steps_Players_Help" xml:space="preserve">
+    <value>儲存所有線上玩家並讓他們登出。</value>
+  </data>
+  <data name="Steps_SaveWorld" xml:space="preserve">
+    <value>存檔</value>
+  </data>
+  <data name="Steps_SaveWorld_Title" xml:space="preserve">
+    <value>儲存世界</value>
+  </data>
+  <data name="Steps_SaveWorld_Help" xml:space="preserve">
+    <value>把世界所有變動過的部分寫入硬碟。</value>
+  </data>
+  <data name="Steps_Close" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Steps_Close_Title" xml:space="preserve">
+    <value>關閉伺服器</value>
+  </data>
+  <data name="Steps_Close_Help" xml:space="preserve">
+    <value>世界已儲存，Java 正在結束。</value>
+  </data>
+  <data name="Steps_BringBack" xml:space="preserve">
+    <value>取回</value>
+  </data>
+  <data name="Steps_BringBack_Title" xml:space="preserve">
+    <value>取回伺服器</value>
+  </data>
+  <data name="Steps_BringBack_Help" xml:space="preserve">
+    <value>把最新的檔案從 VPS 複製回這台電腦。</value>
+  </data>
+  <data name="Steps_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Steps_Stopped_Title" xml:space="preserve">
+    <value>伺服器已停止</value>
+  </data>
+  <data name="Steps_Stopped_Help" xml:space="preserve">
+    <value>所有東西都存好了。</value>
+  </data>
+  <data name="Steps_Flush" xml:space="preserve">
+    <value>存檔</value>
+  </data>
+  <data name="Steps_Flush_Title" xml:space="preserve">
+    <value>先儲存世界</value>
+  </data>
+  <data name="Steps_Flush_Help" xml:space="preserve">
+    <value>執行中的伺服器先把世界寫入硬碟，複製期間暫停自動存檔。</value>
+  </data>
+  <data name="Steps_Pack" xml:space="preserve">
+    <value>打包</value>
+  </data>
+  <data name="Steps_Pack_Title" xml:space="preserve">
+    <value>打包備份</value>
+  </data>
+  <data name="Steps_Pack_Help" xml:space="preserve">
+    <value>把世界壓縮進備份資料夾。</value>
+  </data>
+  <data name="Steps_Saved" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="Steps_Saved_Title" xml:space="preserve">
+    <value>備份完成</value>
+  </data>
+  <data name="Steps_Saved_Help" xml:space="preserve">
+    <value>隨時可以在「備份」分頁還原。</value>
+  </data>
 </root>

@@ -344,6 +344,13 @@
           <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
         </Border>
 
+        <!-- While the server starts, stops or is backed up: the loading strip, moved by real progress only. -->
+        <Border DockPanel.Dock="Top" Margin="0,0,0,18" Style="{StaticResource NoticeBanner}" Padding="18,12"
+                TextElement.Foreground="{DynamicResource TextBrush}"
+                Visibility="{Binding Steps.IsShown, Converter={StaticResource BoolToVisibility}}">
+          <views:StepsBar DataContext="{Binding Steps}" />
+        </Border>
+
         <!-- After a crash or failed start: the cause in plain words and, when WaNut can, a button that fixes it. -->
         <Border DockPanel.Dock="Top" Margin="0,0,0,18" DataContext="{Binding CrashHelp}"
                 Style="{StaticResource ErrorBanner}" Padding="12,12"
