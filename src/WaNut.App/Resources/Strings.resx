@@ -933,6 +933,19 @@ Stop the servers and update?</value>
   <data name="ServersFolder_Hint" xml:space="preserve">
     <value>Moving takes every server and world along. WaNut restarts when it's done.</value>
   </data>
+  <data name="ServersFolder_BusyFirst" xml:space="preserve">
+    <value>WaNut is still getting a server ready or bringing its files back from the VPS. Wait until that is done, then move the servers folder.</value>
+  </data>
+  <data name="Shell_OpenFailed" xml:space="preserve">
+    <value>Windows couldn't open {0}.</value>
+  </data>
+  <data name="App_UnexpectedError" xml:space="preserve">
+    <value>Something went wrong inside WaNut: {0}
+
+WaNut is still open and your servers keep running. If something looks off, stop your servers and start WaNut again.
+
+The details were saved to {1}</value>
+  </data>
   <data name="ServersFolder_StopFirst" xml:space="preserve">
     <value>Stop the running server first, then move the servers folder.</value>
   </data>

@@ -359,6 +359,10 @@ public sealed partial class ModsViewModel : ObservableObject
             {
                 backup = await _backups.CreateAsync(_server.InstanceDir, BackupReason.ModUpdate, new Progress<double>(f => progress.Report(f * 0.3)));
             }
+            catch (BackupException e)
+            {
+                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), Text.Get($"Backups_Problem_{e.Problem}")));
+            }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
             {
                 throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), e.Message));

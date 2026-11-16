@@ -435,7 +435,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             ServerSettingsStore.Save(_server.InstanceDir, _loaded, edited);
             _loaded = edited;
         }
-        catch (IOException e)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
         }
@@ -447,7 +447,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         {
             _server.UpdateMetadata(metadata);
         }
-        catch (IOException e)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
         }

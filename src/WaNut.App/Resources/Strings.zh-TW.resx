@@ -915,6 +915,19 @@
   <data name="ServersFolder_Hint" xml:space="preserve">
     <value>移動時會把所有伺服器和世界一起帶走。完成後 WaNut 會重新啟動。</value>
   </data>
+  <data name="ServersFolder_BusyFirst" xml:space="preserve">
+    <value>WaNut 還在準備伺服器，或正在把檔案從 VPS 拿回來。請等它完成後再移動伺服器資料夾。</value>
+  </data>
+  <data name="Shell_OpenFailed" xml:space="preserve">
+    <value>Windows 無法開啟 {0}。</value>
+  </data>
+  <data name="App_UnexpectedError" xml:space="preserve">
+    <value>WaNut 內部發生問題：{0}
+
+WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不對，請先停止伺服器，再重新開啟 WaNut。
+
+詳細內容已存到 {1}</value>
+  </data>
   <data name="ServersFolder_StopFirst" xml:space="preserve">
     <value>請先停止正在執行的伺服器，再移動伺服器資料夾。</value>
   </data>

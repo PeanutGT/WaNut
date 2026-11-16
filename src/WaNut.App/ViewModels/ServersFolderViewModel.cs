@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -31,9 +32,28 @@ public sealed partial class ServersFolderViewModel(LauncherPaths paths, AppSetti
     [RelayCommand]
     private void OpenFolder()
     {
-        Directory.CreateDirectory(paths.InstancesDir);
-        Process.Start(new ProcessStartInfo(paths.InstancesDir) { UseShellExecute = true });
+        ErrorText = null;
+        try
+        {
+            Directory.CreateDirectory(paths.InstancesDir);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            ErrorText = string.Format(Text.Get("ServersFolder_Failed"), e.Message);
+            return;
+        }
+
+        if (!ShellOpener.TryOpen(paths.InstancesDir))
+        {
+            ErrorText = string.Format(Text.Get("Shell_OpenFailed"), paths.InstancesDir);
+        }
     }
+
+    /// <summary>Why the folder can't move right now: every server's files must be at rest first.</summary>
+    private string? Blocker() =>
+        controller.HasRunningServer ? Text.Get("ServersFolder_StopFirst")
+        : controller.IsAnyPreparing || controller.IsSyncingBack ? Text.Get("ServersFolder_BusyFirst")
+        : null;
 
     private bool CanMove() => !IsMoving;
 
@@ -41,9 +61,9 @@ public sealed partial class ServersFolderViewModel(LauncherPaths paths, AppSetti
     private async Task MoveAsync()
     {
         ErrorText = null;
-        if (controller.HasRunningServer)
+        if (Blocker() is { } blocker)
         {
-            ErrorText = Text.Get("ServersFolder_StopFirst");
+            ErrorText = blocker;
             return;
         }
 
@@ -66,6 +86,13 @@ public sealed partial class ServersFolderViewModel(LauncherPaths paths, AppSetti
             return;
         }
 
+        // The folder picker and the question take a while; a server may have been started from the tray meanwhile.
+        if (Blocker() is { } blockerNow)
+        {
+            ErrorText = blockerNow;
+            return;
+        }
+
         IsMoving = true;
         try
         {
@@ -81,7 +108,7 @@ public sealed partial class ServersFolderViewModel(LauncherPaths paths, AppSetti
             Process.Start(Environment.ProcessPath ?? throw new InvalidOperationException("WaNut.exe path is unknown."));
             Application.Current.Shutdown();
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException or Win32Exception)
         {
             StatusText = null;
             ErrorText = string.Format(Text.Get("ServersFolder_Failed"), e.Message);
