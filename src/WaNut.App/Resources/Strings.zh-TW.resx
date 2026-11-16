@@ -2666,6 +2666,14 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Server_VpsCheckFailed" xml:space="preserve">
     <value>連不上你的 VPS：{0} 伺服器和檔案都安全地留在那裡。按「再檢查一次 VPS」重試。</value>
   </data>
+  <data name="Server_VpsFolderMissing" xml:space="preserve">
+    <value>VPS 上沒有這台伺服器的檔案，所以沒有拿回任何東西，這台電腦上的檔案也沒有被更動。VPS 重灌過，或 WaNut 改用另一個使用者登入時會這樣。按「啟動」可以用這台電腦上的檔案繼續。</value>
+  </data>
+  <data name="Server_VpsFolderMissingAsk" xml:space="preserve">
+    <value>VPS 上沒有這台伺服器的檔案。VPS 可能重灌過，或 WaNut 現在改用另一個使用者登入。
+
+要改用這台電腦上的檔案啟動嗎？上次啟動之後在 VPS 上玩的進度不在裡面。</value>
+  </data>
   <data name="Status_VpsChecking" xml:space="preserve">
     <value>正在檢查你的 VPS…</value>
   </data>

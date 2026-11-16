@@ -1,4 +1,5 @@
 using System.Text;
+using WaNut.Core.Hosting;
 using WaNut.Core.Java;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Run;
@@ -80,6 +81,36 @@ public sealed class RemoteRunTests
         Assert.Equal(["héllo"], first);
         Assert.Equal(["world"], second);
         Assert.Equal(bytes.Length + 3, splitter.Consumed);
+    }
+
+    [Fact]
+    public void LineSplitter_DropPartialLine_ReadsTheLineAgainFromConsumed()
+    {
+        var splitter = new RemoteServer.LineSplitter();
+        _ = splitter.Push("one\nSteve joi"u8);
+
+        // The connection dropped; the next read starts again at Consumed, right after the first line.
+        splitter.DropPartialLine();
+        var again = splitter.Push("Steve joined the game\n"u8).ToList();
+
+        Assert.Equal(["Steve joined the game"], again);
+        Assert.Equal("one\nSteve joined the game\n".Length, splitter.Consumed);
+    }
+
+    [Fact]
+    public async Task Start_ConnectThrowsSomethingUnexpected_StillEndsTheRun()
+    {
+        using var server = new RemoteServer(
+            new ServerLaunch("java", [], "wanut/servers/x"),
+            _ => throw new NotSupportedException("boom"));
+        var lines = new List<string>();
+        server.OutputReceived += lines.Add;
+
+        server.Start();
+        var exitCode = await server.Exited.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal(-1, exitCode);
+        Assert.Contains(lines, l => l.Contains("boom", StringComparison.Ordinal));
     }
 
     [Fact]

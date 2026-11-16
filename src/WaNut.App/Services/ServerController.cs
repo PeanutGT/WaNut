@@ -11,6 +11,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Network;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Run;
+using WaNut.Core.Remote.Sync;
 using WaNut.Core.Settings;
 using WaNut.Core.Steps;
 
@@ -124,6 +125,10 @@ public sealed class ServerController(
         {
             server.ShowError(Text.Get($"Server_Error_{e.Problem}"));
         }
+        catch (VpsFolderMissingException)
+        {
+            server.ShowError(Text.Get("Server_VpsFolderMissing"));
+        }
         catch (Exception e) when (e is HttpRequestException or IOException or UnauthorizedAccessException or DownloadVerificationException or Win32Exception or InvalidDataException)
         {
             server.ShowError(string.Format(Text.Get("Server_StartFailed"), e.Message));
@@ -183,7 +188,15 @@ public sealed class ServerController(
             else
             {
                 server.VpsText = Text.Get("Status_VpsDownloading");
-                await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
+                try
+                {
+                    await vpsPlanner.DownloadAsync(server.Metadata, vps, DownloadProgress(server));
+                }
+                catch (VpsFolderMissingException) when (!automatic && dialogs.Confirm(Text.Get("Server_VpsFolderMissingAsk")))
+                {
+                    // The VPS lost its copy and the user chose to carry on with the one here, which is uploaded below.
+                }
+
                 server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = false });
                 server.VpsText = null;
             }
@@ -371,8 +384,15 @@ public sealed class ServerController(
             server.VpsText = null;
             await BackUpAfterVpsAsync(server);
         }
-        catch (Exception e) when (IsVpsProblem(e))
+        catch (VpsFolderMissingException)
         {
+            server.Steps.Hide(StepLists.Stop);
+            server.ShowError(Text.Get("Server_VpsFolderMissing"));
+        }
+        catch (Exception e)
+        {
+            // Everything is caught: this task is kept and awaited when WaNut closes, where a fault would break the
+            // shutdown. Whatever failed, the files stay on the VPS until the next try.
             server.Steps.Hide(StepLists.Stop);
             server.ShowError(string.Format(Text.Get("Server_VpsSyncBackFailed"), VpsMessage(e)));
         }

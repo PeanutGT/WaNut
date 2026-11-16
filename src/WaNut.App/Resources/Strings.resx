@@ -2686,6 +2686,14 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Server_VpsCheckFailed" xml:space="preserve">
     <value>Couldn't reach your VPS: {0} The server and its files stay safe there. Press "Check the VPS again" to try again.</value>
   </data>
+  <data name="Server_VpsFolderMissing" xml:space="preserve">
+    <value>The VPS has no files for this server, so nothing was brought back and nothing on this PC was changed. This happens when the VPS was reinstalled or WaNut signs in as another user. Press Start to carry on with the copy on this PC.</value>
+  </data>
+  <data name="Server_VpsFolderMissingAsk" xml:space="preserve">
+    <value>The VPS has no files for this server. It may have been reinstalled, or WaNut signs in as another user now.
+
+Start with the copy on this PC instead? Anything played on the VPS since the last start is not in it.</value>
+  </data>
   <data name="Status_VpsChecking" xml:space="preserve">
     <value>Checking your VPS…</value>
   </data>
