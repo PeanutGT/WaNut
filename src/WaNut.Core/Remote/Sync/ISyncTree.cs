@@ -1,6 +1,9 @@
 namespace WaNut.Core.Remote.Sync;
 
-/// <summary>A folder that <see cref="FolderSync"/> can read and write: a server folder on this PC or on the VPS.</summary>
+/// <summary>
+/// A folder that <see cref="FolderSync"/> can read and write: a server folder on this PC or on the VPS. FolderSync
+/// copies several files at once, so reads and writes of different paths must be safe to run at the same time.
+/// </summary>
 public interface ISyncTree
 {
     /// <summary>Every file and folder under the root, symbolic links left out. An empty list when the root doesn't exist yet.</summary>

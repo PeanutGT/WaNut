@@ -12,6 +12,9 @@ public static class FolderSync
     /// <summary>SFTP keeps whole seconds and FAT keeps two, so times this close count as the same.</summary>
     public static readonly TimeSpan TimeTolerance = TimeSpan.FromSeconds(2);
 
+    /// <summary>Files copied, deleted or folders made at the same time. OpenSSH serves them all on one SFTP channel.</summary>
+    public const int MaxParallel = 8;
+
     public static SyncPlan Plan(IReadOnlyList<SyncEntry> source, IReadOnlyList<SyncEntry> target, SyncDirection direction)
     {
         bool Takes(SyncEntry e) => !SyncRules.IsIgnored(e.Path) && !(direction == SyncDirection.Upload && SyncRules.IsKept(e.Path));
@@ -55,7 +58,7 @@ public static class FolderSync
 
         return new SyncPlan(
             deleteFiles.OrderBy(e => e.Path, StringComparer.Ordinal).ToList(),
-            deleteDirectories.OrderByDescending(e => e.Path.Count(c => c == '/')).ThenBy(e => e.Path, StringComparer.Ordinal).ToList(),
+            deleteDirectories.OrderByDescending(Depth).ThenBy(e => e.Path, StringComparer.Ordinal).ToList(),
             createDirectories,
             copyFiles);
     }
@@ -82,31 +85,59 @@ public static class FolderSync
 
         var plan = Plan(sourceEntries, await target.ListAsync(cancellationToken).ConfigureAwait(false), direction);
 
-        foreach (var file in plan.DeleteFiles)
-        {
-            await target.DeleteFileAsync(file.Path, cancellationToken).ConfigureAwait(false);
-        }
+        // Every SFTP call waits a full round trip to the VPS, so one call at a time spends most of the sync waiting;
+        // several in flight keep the line busy.
+        var options = new ParallelOptions { MaxDegreeOfParallelism = MaxParallel, CancellationToken = cancellationToken };
 
+        await Parallel.ForEachAsync(plan.DeleteFiles, options, (file, token) => new ValueTask(target.DeleteFileAsync(file.Path, token)))
+            .ConfigureAwait(false);
+
+        // Deepest first, as planned, since a folder must be empty to go.
         foreach (var directory in plan.DeleteDirectories)
         {
             await target.DeleteDirectoryAsync(directory.Path, cancellationToken).ConfigureAwait(false);
         }
 
-        foreach (var directory in plan.CreateDirectories)
+        // A folder's parent is one level up, so each level can be made side by side once the one above exists.
+        foreach (var level in plan.CreateDirectories.GroupBy(Depth).OrderBy(g => g.Key))
         {
-            await target.CreateDirectoryAsync(directory.Path, cancellationToken).ConfigureAwait(false);
+            await Parallel.ForEachAsync(level, options, (directory, token) => new ValueTask(target.CreateDirectoryAsync(directory.Path, token)))
+                .ConfigureAwait(false);
         }
 
         var total = plan.CopyBytes;
         long done = 0;
+        var reportLock = new object();
         progress?.Report(new DownloadProgress(0, total));
-        foreach (var file in plan.CopyFiles)
+
+        // Names that differ only in case are one file on Windows, so those go one after another.
+        var groups = plan.CopyFiles.GroupBy(f => f.Path, StringComparer.OrdinalIgnoreCase);
+        await Parallel.ForEachAsync(groups, options, async (group, token) =>
         {
-            var start = done;
-            await using var read = await source.OpenReadAsync(file.Path, cancellationToken).ConfigureAwait(false);
-            await using var counted = new CountingStream(read, bytes => progress?.Report(new DownloadProgress(start + bytes, total)));
-            await target.WriteAsync(file.Path, counted, file.ModifiedUtc, cancellationToken).ConfigureAwait(false);
-            done = start + file.Size;
+            foreach (var file in group)
+            {
+                await CopyAsync(file, token).ConfigureAwait(false);
+            }
+        }).ConfigureAwait(false);
+
+        async Task CopyAsync(SyncEntry file, CancellationToken token)
+        {
+            long counted = 0;
+            void Count(long bytes)
+            {
+                // Under the lock so the reports reach the window in order and the bar never steps back.
+                lock (reportLock)
+                {
+                    done += bytes - counted;
+                    counted = bytes;
+                    progress?.Report(new DownloadProgress(done, total));
+                }
+            }
+
+            // Each file still lands under a temporary name first, so one cut short never replaces the real one.
+            await using var read = await source.OpenReadAsync(file.Path, token).ConfigureAwait(false);
+            await using var stream = new CountingStream(read, Count);
+            await target.WriteAsync(file.Path, stream, file.ModifiedUtc, token).ConfigureAwait(false);
         }
 
         progress?.Report(new DownloadProgress(total, total));
@@ -119,6 +150,8 @@ public static class FolderSync
 
     private static bool Same(SyncEntry a, SyncEntry b) =>
         !b.IsDirectory && a.Size == b.Size && (a.ModifiedUtc - b.ModifiedUtc).Duration() <= TimeTolerance;
+
+    private static int Depth(SyncEntry e) => e.Path.Count(c => c == '/');
 
     private static bool IsInside(string path, string folder) => path.StartsWith(folder + "/", StringComparison.Ordinal);
 }
