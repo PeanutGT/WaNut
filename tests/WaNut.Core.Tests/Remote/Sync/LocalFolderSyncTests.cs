@@ -131,6 +131,25 @@ public sealed class LocalFolderSyncTests : IDisposable
     }
 
     [Fact]
+    public async Task RunAsync_ManyFilesInManyFolders_AllArriveAndProgressNeverStepsBack()
+    {
+        for (var i = 0; i < 60; i++)
+        {
+            Write(Source, $"libraries/g{i % 7}/a{i}/f.jar", new string('z', 100 + i));
+        }
+
+        Write(Source, "server.properties", "motd=x");
+        var reports = new List<DownloadProgress>();
+
+        var result = await FolderSync.RunAsync(new LocalSyncTree(Source), new LocalSyncTree(Target), SyncDirection.Upload, new ListProgress(reports));
+
+        Assert.Equal(61, result.Copied);
+        Assert.Equal(Directory.GetFiles(Source, "*", SearchOption.AllDirectories).Length, Directory.GetFiles(Target, "*", SearchOption.AllDirectories).Length);
+        Assert.Equal(reports.Select(r => r.BytesReceived).Order(), reports.Select(r => r.BytesReceived));
+        Assert.Equal(result.Bytes, reports[^1].BytesReceived);
+    }
+
+    [Fact]
     public async Task WriteAsync_PathOutsideRoot_IsRefused()
     {
         var tree = new LocalSyncTree(Target);

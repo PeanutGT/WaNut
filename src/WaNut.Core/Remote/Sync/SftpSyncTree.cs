@@ -1,11 +1,21 @@
+using System.Collections.Concurrent;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 
 namespace WaNut.Core.Remote.Sync;
 
-/// <summary>A server folder on the VPS, reached over SFTP. <paramref name="root"/> is relative to the user's home.</summary>
+/// <summary>
+/// A server folder on the VPS, reached over SFTP. <paramref name="root"/> is relative to the user's home. Calls for
+/// different paths may run at the same time: SSH.NET matches each SFTP reply to its request.
+/// </summary>
 public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
 {
+    /// <summary>Folders listed at a time; each listing is a few round trips to the VPS.</summary>
+    private const int MaxParallelListings = 8;
+
+    /// <summary>Folders known to exist on the VPS, so writing a file doesn't ask about each of its parents again.</summary>
+    private readonly ConcurrentDictionary<string, byte> _knownDirectories = new(StringComparer.Ordinal);
+
     /// <summary>Where WaNut keeps its servers on the VPS, relative to the SSH user's home.</summary>
     public const string ServersFolder = "wanut/servers";
 
@@ -24,13 +34,47 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
 
     public async Task<IReadOnlyList<SyncEntry>> ListAsync(CancellationToken cancellationToken = default)
     {
-        var entries = new List<SyncEntry>();
+        var entries = new ConcurrentBag<SyncEntry>();
         if (await sftp.ExistsAsync(Root, cancellationToken).ConfigureAwait(false))
         {
-            await WalkAsync(Root, string.Empty, entries, cancellationToken).ConfigureAwait(false);
+            _knownDirectories.TryAdd(Root, 0);
+
+            // One folder level at a time, the folders of a level side by side: a server has hundreds of folders
+            // (libraries alone nest deep), and listing them one by one waits on the VPS for each.
+            List<(string Full, string Relative)> level = [(Root, string.Empty)];
+            while (level.Count > 0)
+            {
+                var next = new ConcurrentBag<(string Full, string Relative)>();
+                var options = new ParallelOptions { MaxDegreeOfParallelism = MaxParallelListings, CancellationToken = cancellationToken };
+                await Parallel.ForEachAsync(level, options, async (directory, token) =>
+                {
+                    await foreach (var file in sftp.ListDirectoryAsync(directory.Full, token).ConfigureAwait(false))
+                    {
+                        // Names Windows can't hold as one path part are left on the VPS.
+                        if (file.Name is "." or ".." || file.Name.Contains('\\'))
+                        {
+                            continue;
+                        }
+
+                        var path = directory.Relative + file.Name;
+                        if (file.IsDirectory)
+                        {
+                            var full = $"{directory.Full}/{file.Name}";
+                            entries.Add(new SyncEntry(path, true, 0, file.LastWriteTimeUtc));
+                            _knownDirectories.TryAdd(full, 0);
+                            next.Add((full, path + "/"));
+                        }
+                        else if (file.IsRegularFile)
+                        {
+                            entries.Add(new SyncEntry(path, false, file.Length, file.LastWriteTimeUtc));
+                        }
+                    }
+                }).ConfigureAwait(false);
+                level = [.. next];
+            }
         }
 
-        return entries;
+        return [.. entries];
     }
 
     public async Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default) =>
@@ -47,12 +91,15 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
             await sftp.UploadFileAsync(new CountingStream(content, n => sent = n), temp, cancellationToken).ConfigureAwait(false);
 
             // A full disk or a dropped channel can leave a short file that looks fine; never let it replace the real one.
-            if (sftp.GetAttributes(temp).Size != sent)
+            var attributes = await sftp.GetAttributesAsync(temp, cancellationToken).ConfigureAwait(false);
+            if (attributes.Size != sent)
             {
                 throw new IOException($"The VPS kept fewer bytes of {path} than were sent. Is its disk full?");
             }
 
-            sftp.SetLastWriteTimeUtc(temp, modifiedUtc);
+            // Only the changed time is sent back; SetLastWriteTimeUtc would read the attributes once more first.
+            attributes.LastWriteTimeUtc = modifiedUtc;
+            sftp.SetAttributes(temp, attributes);
             await ReplaceAsync(temp, full, cancellationToken).ConfigureAwait(false);
         }
         catch
@@ -74,17 +121,36 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
     {
         var full = FullPath(path);
         await CreateParentsAsync(full, cancellationToken).ConfigureAwait(false);
-        if (!await sftp.ExistsAsync(full, cancellationToken).ConfigureAwait(false))
+        if (_knownDirectories.ContainsKey(full))
+        {
+            return;
+        }
+
+        // FolderSync only asks for folders its listing didn't have, so try making it before asking whether it exists.
+        try
         {
             await sftp.CreateDirectoryAsync(full, cancellationToken).ConfigureAwait(false);
         }
+        catch (SshException)
+        {
+            if (!await sftp.ExistsAsync(full, cancellationToken).ConfigureAwait(false))
+            {
+                throw;
+            }
+        }
+
+        _knownDirectories.TryAdd(full, 0);
     }
 
     public Task DeleteFileAsync(string path, CancellationToken cancellationToken = default) =>
         sftp.DeleteFileAsync(FullPath(path), cancellationToken);
 
-    public Task DeleteDirectoryAsync(string path, CancellationToken cancellationToken = default) =>
-        sftp.DeleteDirectoryAsync(FullPath(path), cancellationToken);
+    public async Task DeleteDirectoryAsync(string path, CancellationToken cancellationToken = default)
+    {
+        var full = FullPath(path);
+        await sftp.DeleteDirectoryAsync(full, cancellationToken).ConfigureAwait(false);
+        _knownDirectories.TryRemove(full, out _);
+    }
 
     private string FullPath(string path)
     {
@@ -126,39 +192,33 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
             }
 
             current = current is null ? parts[i] : $"{current}/{parts[i]}";
-            if (!await sftp.ExistsAsync(current, cancellationToken).ConfigureAwait(false))
-            {
-                await sftp.CreateDirectoryAsync(current, cancellationToken).ConfigureAwait(false);
-            }
+            await EnsureDirectoryAsync(current, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private async Task WalkAsync(string directory, string prefix, List<SyncEntry> entries, CancellationToken cancellationToken)
+    private async Task EnsureDirectoryAsync(string full, CancellationToken cancellationToken)
     {
-        var subdirectories = new List<(string Full, string Relative)>();
-        await foreach (var file in sftp.ListDirectoryAsync(directory, cancellationToken).ConfigureAwait(false))
+        if (_knownDirectories.ContainsKey(full))
         {
-            // Names Windows can't hold as one path part are left on the VPS.
-            if (file.Name is "." or ".." || file.Name.Contains('\\'))
-            {
-                continue;
-            }
+            return;
+        }
 
-            var path = prefix + file.Name;
-            if (file.IsDirectory)
+        if (!await sftp.ExistsAsync(full, cancellationToken).ConfigureAwait(false))
+        {
+            try
             {
-                entries.Add(new SyncEntry(path, true, 0, file.LastWriteTimeUtc));
-                subdirectories.Add(($"{directory}/{file.Name}", path));
+                await sftp.CreateDirectoryAsync(full, cancellationToken).ConfigureAwait(false);
             }
-            else if (file.IsRegularFile)
+            catch (SshException)
             {
-                entries.Add(new SyncEntry(path, false, file.Length, file.LastWriteTimeUtc));
+                // Another file in the same new folder may have made it first.
+                if (!await sftp.ExistsAsync(full, cancellationToken).ConfigureAwait(false))
+                {
+                    throw;
+                }
             }
         }
 
-        foreach (var (full, relative) in subdirectories)
-        {
-            await WalkAsync(full, relative + "/", entries, cancellationToken).ConfigureAwait(false);
-        }
+        _knownDirectories.TryAdd(full, 0);
     }
 }
