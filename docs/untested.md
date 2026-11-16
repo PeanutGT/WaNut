@@ -236,3 +236,11 @@ VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`�
 - App 設定的「開啟資料夾」、建立伺服器的 EULA 連結、連線分頁的工具網站與 playit 頁面仍能正常開啟。
 - 關閉 WaNut：正常情況和以前一樣；伺服器全在 VPS 時取回失敗也能關閉。
 - 伺服器停止時加白名單 / OP，啟動後變更有送出且佇列清空。
+
+## .mrpack 不帶入權限檔（fix-mrpack-overrides）
+
+`.mrpack` 的 overrides 不再複製 `ops.json`、`whitelist.json`、ban 清單、`usercache.json`；`server.properties` 改成合併，保留 WaNut 管的鍵（白名單、`online-mode`、連接埠、RCON、query），和 CurseForge server pack 一樣。有單元測試，沒有用真的模組包在 Windows 上試過。
+
+還沒確認：
+
+- 用一個 overrides 裡帶 `server.properties` 的真實 `.mrpack` 建立伺服器：難度、motd 等遊戲設定有套用，連接埠與正版驗證維持 WaNut 的設定。

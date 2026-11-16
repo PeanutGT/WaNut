@@ -84,6 +84,68 @@ public sealed class ModpackInstallerTests : IDisposable
         Assert.Equal("eula=true", Read(EulaFile.FileName));
     }
 
+    [Theory]
+    [InlineData("ops.json")]
+    [InlineData("whitelist.json")]
+    [InlineData("banned-players.json")]
+    [InlineData("banned-ips.json")]
+    [InlineData("usercache.json")]
+    [InlineData("OPS.JSON")]
+    public async Task InstallAsync_OverrideForPlayerAccessFile_IsSkipped(string name)
+    {
+        var path = WritePack("[]", ($"overrides/{name}", "[{\"name\":\"author\"}]"), ($"server-overrides/{name}", "[{\"name\":\"author\"}]"));
+
+        await _installer.InstallAsync(ServerDir, path, ModpackReader.Read(path));
+
+        Assert.Empty(Directory.GetFiles(ServerDir));
+    }
+
+    [Fact]
+    public async Task InstallAsync_OverrideForExistingOps_KeepsTheServersOwn()
+    {
+        File.WriteAllText(Path.Combine(ServerDir, "ops.json"), "mine");
+        var path = WritePack("[]", ("overrides/ops.json", "theirs"), ("overrides/config/ops.json", "a mod's own file"));
+
+        await _installer.InstallAsync(ServerDir, path, ModpackReader.Read(path));
+
+        Assert.Equal("mine", Read("ops.json"));
+        Assert.Equal("a mod's own file", Read("config/ops.json"));
+    }
+
+    [Fact]
+    public async Task InstallAsync_OverrideServerProperties_MergesGameSettingsButKeepsAccessAndPorts()
+    {
+        File.WriteAllText(Path.Combine(ServerDir, "server.properties"), "online-mode=true\nserver-port=25570\nwhite-list=true\ndifficulty=easy\nmotd=mine\n");
+        var path = WritePack(
+            "[]",
+            ("overrides/server.properties", "online-mode=false\nserver-port=1\nwhite-list=false\nenable-rcon=true\nrcon.password=x\ndifficulty=hard\nallow-flight=true\n"),
+            ("server-overrides/server.properties", "online-mode=false\nmax-players=40\n"));
+
+        await _installer.InstallAsync(ServerDir, path, ModpackReader.Read(path));
+
+        var properties = WaNut.Core.Properties.PropertiesFile.Load(Path.Combine(ServerDir, "server.properties"));
+        Assert.Equal("true", properties.Get("online-mode"));
+        Assert.Equal("25570", properties.Get("server-port"));
+        Assert.Equal("true", properties.Get("white-list"));
+        Assert.Null(properties.Get("enable-rcon"));
+        Assert.Null(properties.Get("rcon.password"));
+        Assert.Equal("hard", properties.Get("difficulty"));
+        Assert.Equal("true", properties.Get("allow-flight"));
+        Assert.Equal("40", properties.Get("max-players"));
+        Assert.Equal("mine", properties.Get("motd"));
+    }
+
+    [Fact]
+    public async Task InstallAsync_DownloadedFileNamedLikeAProtectedOne_IsSkipped()
+    {
+        var path = WritePack(
+            $"[{ModpackReaderTests.File(path: "ops.json", url: JarUrl.AbsoluteUri, sha512: Sha512(Jar))},{ModpackReaderTests.File(path: "server.properties", url: JarUrl.AbsoluteUri, sha512: Sha512(Jar))}]");
+
+        await _installer.InstallAsync(ServerDir, path, ModpackReader.Read(path));
+
+        Assert.Empty(Directory.GetFiles(ServerDir));
+    }
+
     [Fact]
     public async Task InstallAsync_OverrideOutsideServer_ThrowsUnsafeFile()
     {
