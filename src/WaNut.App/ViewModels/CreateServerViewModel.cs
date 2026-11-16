@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -615,7 +614,10 @@ public sealed partial class CreateServerViewModel : ObservableObject
     [RelayCommand]
     private void OpenEula()
     {
-        Process.Start(new ProcessStartInfo(EulaFile.EulaUrl.AbsoluteUri) { UseShellExecute = true });
+        if (!ShellOpener.TryOpen(EulaFile.EulaUrl))
+        {
+            ErrorText = string.Format(Text.Get("Shell_OpenFailed"), EulaFile.EulaUrl.AbsoluteUri);
+        }
     }
 
     private void ShowProgress(CreateServerProgress progress)

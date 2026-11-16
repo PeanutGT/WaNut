@@ -483,21 +483,24 @@ public sealed partial class ServerViewModel : ObservableObject
     }
 
     /// <summary>Sends a command WaNut made on the user's behalf, shown in the console like a typed one.</summary>
-    internal async Task SendCommandAsync(string command)
+    /// <summary>False when the command did not reach the server; the error is shown.</summary>
+    internal async Task<bool> SendCommandAsync(string command)
     {
         if (Process is not { IsRunning: true } process)
         {
-            return;
+            return false;
         }
 
         AddConsoleLine("> " + command);
         try
         {
             await process.SendCommandAsync(command);
+            return true;
         }
         catch (Exception e) when (e is IOException or InvalidOperationException)
         {
             ErrorText = string.Format(Text.Get("Server_CommandFailed"), e.Message);
+            return false;
         }
     }
 
@@ -582,18 +585,29 @@ public sealed partial class ServerViewModel : ObservableObject
     private async Task ApplyOnOnlineAsync()
     {
         var pending = Metadata.PendingCommands;
-        foreach (var command in Core.Settings.GameSettingsStore.RuleCommands(Metadata).Concat(pending))
+        foreach (var command in Core.Settings.GameSettingsStore.RuleCommands(Metadata))
         {
             await SendCommandAsync(command);
+        }
+
+        // Game rules are sent again on every start; a whitelist or OP change is only kept here, so one that did not
+        // get through stays queued for the next time the server is online.
+        var unsent = new List<string>();
+        foreach (var command in pending)
+        {
+            if (!await SendCommandAsync(command))
+            {
+                unsent.Add(command);
+            }
         }
 
         if (pending.Count > 0)
         {
             try
             {
-                UpdateMetadata(Metadata with { PendingCommands = [] });
+                UpdateMetadata(Metadata with { PendingCommands = unsent });
             }
-            catch (IOException e)
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {
                 ErrorText = string.Format(Text.Get("Settings_SaveFailed"), e.Message);
             }

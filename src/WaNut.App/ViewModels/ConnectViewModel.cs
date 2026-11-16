@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -308,7 +307,22 @@ public sealed partial class ConnectViewModel : ObservableObject
     {
         if (tool is not null && ToolSites.TryGetValue(tool, out var site))
         {
-            Process.Start(new ProcessStartInfo(site.AbsoluteUri) { UseShellExecute = true });
+            ShellOpener.TryOpen(site);
+        }
+    }
+
+    /// <summary>False when the choice could not be saved; the error is shown, since WPF swallows what a setter throws.</summary>
+    private bool SaveMetadata(Core.Instances.InstanceMetadata metadata)
+    {
+        try
+        {
+            _server.UpdateMetadata(metadata);
+            return true;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
+            return false;
         }
     }
 
@@ -319,7 +333,11 @@ public sealed partial class ConnectViewModel : ObservableObject
             return;
         }
 
-        _server.UpdateMetadata(_server.Metadata with { OpenRouterPort = value });
+        if (!SaveMetadata(_server.Metadata with { OpenRouterPort = value }))
+        {
+            return;
+        }
+
         if (value && _server.IsRunning)
         {
             _ = OpenRouterPortNowAsync();
@@ -377,7 +395,11 @@ public sealed partial class ConnectViewModel : ObservableObject
             return;
         }
 
-        _server.UpdateMetadata(_server.Metadata with { UsePlayitTunnel = value });
+        if (!SaveMetadata(_server.Metadata with { UsePlayitTunnel = value }))
+        {
+            return;
+        }
+
         if (!value)
         {
             _tunnelSetup?.Cancel();
