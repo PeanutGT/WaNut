@@ -13,16 +13,18 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private readonly TrayIcon _tray;
+    private readonly CrashGuard _crashGuard;
     private bool _readyToClose;
 
     // Set by "Exit WaNut" in the tray menu: stop the server and close, without asking about the tray again.
     private bool _exitRequested;
 
-    public MainWindow(MainViewModel viewModel, TrayIcon tray)
+    public MainWindow(MainViewModel viewModel, TrayIcon tray, CrashGuard crashGuard)
     {
         InitializeComponent();
         DataContext = _viewModel = viewModel;
         _tray = tray;
+        _crashGuard = crashGuard;
         GuideLayer.FindTarget = FindGuideTarget;
         viewModel.TabRequested += (_, tab) => ServerTabs.SelectedIndex = (int)tab;
         Loaded += (_, _) =>
@@ -53,9 +55,7 @@ public partial class MainWindow : Window
             e.Cancel = true;
             if (!_viewModel.IsShuttingDown)
             {
-                await _viewModel.ShutdownAsync();
-                _readyToClose = true;
-                Close();
+                await ShutDownAndCloseAsync();
             }
 
             return;
@@ -79,7 +79,24 @@ public partial class MainWindow : Window
             return;
         }
 
-        await _viewModel.ShutdownAsync();
+        await ShutDownAndCloseAsync();
+    }
+
+    /// <summary>
+    /// A failed shutdown must not leave a window that can never be closed. Once no server runs on this PC there is
+    /// nothing left to protect, so WaNut closes anyway; while one still runs the error is shown and the window stays.
+    /// </summary>
+    private async Task ShutDownAndCloseAsync()
+    {
+        try
+        {
+            await _viewModel.ShutdownAsync();
+        }
+        catch (Exception e) when (!_viewModel.HasRunningServer)
+        {
+            _crashGuard.Note("shutdown", e);
+        }
+
         _readyToClose = true;
         Close();
     }

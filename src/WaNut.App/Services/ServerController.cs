@@ -608,10 +608,23 @@ public sealed class ServerController(
             }
         }
 
-        await Task.WhenAll(LocalRunningServers.Select(StopAsync));
-        await Task.WhenAll(_syncingBack.Values.ToList());
-        await portForwards.CloseAnyAsync();
-        tunnels.StopAny();
+        // The router rules and the playit agent must go even when a stop or a download failed.
+        try
+        {
+            await Task.WhenAll(LocalRunningServers.Select(StopAsync));
+            await Task.WhenAll(_syncingBack.Values.ToList());
+        }
+        finally
+        {
+            try
+            {
+                await portForwards.CloseAnyAsync();
+            }
+            finally
+            {
+                tunnels.StopAny();
+            }
+        }
     }
 
     /// <summary>A deleted server must not be kept as one that ran.</summary>

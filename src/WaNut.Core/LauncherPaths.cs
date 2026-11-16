@@ -21,6 +21,7 @@ public sealed class LauncherPaths
         InstancesDir = string.IsNullOrWhiteSpace(instancesDir) ? Path.Combine(root, "instances") : Path.GetFullPath(instancesDir);
         ConfigFile = Path.Combine(root, "config.json");
         DeletedServersDir = Path.Combine(root, "deleted-servers");
+        ErrorLogFile = Path.Combine(root, "logs", "errors.log");
     }
 
     public string Root { get; }
@@ -35,6 +36,9 @@ public sealed class LauncherPaths
 
     /// <summary>The world zips kept when a server is deleted.</summary>
     public string DeletedServersDir { get; }
+
+    /// <summary>Where WaNut writes errors it did not expect.</summary>
+    public string ErrorLogFile { get; }
 
     public static LauncherPaths CreateDefault() => CreateDefault(Environment.GetEnvironmentVariable(DataDirVariable));
 

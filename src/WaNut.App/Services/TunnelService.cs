@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using WaNut.Core.Downloads;
 using WaNut.Core.Tunnels;
@@ -85,7 +84,7 @@ public sealed class TunnelService(PlayitFiles files, PlayitAgentDownloader downl
         files.ForgetSecret();
     }
 
-    public static void OpenInBrowser(Uri url) => Process.Start(new ProcessStartInfo(url.AbsoluteUri) { UseShellExecute = true });
+    public static void OpenInBrowser(Uri url) => ShellOpener.TryOpen(url);
 
     public void Dispose() => _agent.Dispose();
 }

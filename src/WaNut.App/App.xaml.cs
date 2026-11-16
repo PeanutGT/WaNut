@@ -7,6 +7,7 @@ using WaNut.App.ViewModels;
 using WaNut.App.Views;
 using WaNut.Core;
 using WaNut.Core.Backups;
+using WaNut.Core.Diagnostics;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Http;
@@ -32,6 +33,7 @@ public partial class App : Application
 {
     private readonly ThemeService _theme;
     private ServiceProvider? _services;
+    private CrashGuard? _crashGuard;
 
     public App()
     {
@@ -43,6 +45,8 @@ public partial class App : Application
         base.OnStartup(e);
         MotionSettings.Apply(this, SystemParameters.ClientAreaAnimation);
         var paths = LauncherPaths.CreateDefault();
+        _crashGuard = new CrashGuard(new ErrorLog(paths.ErrorLogFile));
+        _crashGuard.Install(this);
         var store = new AppSettingsStore(paths);
         var settings = store.Load();
         WaNut.App.Resources.UiLanguage.Apply(settings.Language);
@@ -58,12 +62,13 @@ public partial class App : Application
             settings = store.Load();
         }
 
-        _services = ConfigureServices(paths.WithInstancesDir(settings.InstancesDir), _theme);
+        _services = ConfigureServices(paths.WithInstancesDir(settings.InstancesDir), _theme, _crashGuard);
         _services.GetRequiredService<LauncherPaths>().EnsureCreated();
 
         var mainWindow = _services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
+        _crashGuard.KeepRunning(_services.GetRequiredService<IDialogService>().Inform);
 
         if (_services.GetRequiredService<AppSettingsViewModel>().CheckForUpdates)
         {
@@ -77,13 +82,14 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private static ServiceProvider ConfigureServices(LauncherPaths paths, ThemeService theme)
+    private static ServiceProvider ConfigureServices(LauncherPaths paths, ThemeService theme, CrashGuard crashGuard)
     {
         var services = new ServiceCollection();
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
 
         services.AddSingleton(paths);
         services.AddSingleton(theme);
+        services.AddSingleton(crashGuard);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(_ => WaNutHttp.CreateClient(version));
         services.AddSingleton<FileDownloader>();
