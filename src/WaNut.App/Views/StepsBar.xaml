@@ -1,6 +1,7 @@
 <UserControl x:Class="WaNut.App.Views.StepsBar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:res="clr-namespace:WaNut.App.Resources"
              Focusable="False">
   <!--
     The loading strip of a long job (StepsViewModel): "02 / 05" and the step's title, one line on what happens now,
@@ -8,10 +9,17 @@
     ones behind it are outlined dark, the ones ahead stay grey. Colors fade between states as layers (design.md 6).
   -->
   <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
     <FontFamily x:Key="StepGlyphFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
   </UserControl.Resources>
 
   <StackPanel AutomationProperties.LiveSetting="Polite">
+    <DockPanel>
+    <!-- Folds the strip to this one line; the choice is kept for every server. -->
+    <ToggleButton DockPanel.Dock="Right" Style="{StaticResource ExpanderHeader}" IsChecked="{Binding IsExpanded}"
+                  VerticalAlignment="Center" Margin="12,0,0,0"
+                  ToolTip="{res:Text Steps_Fold}" AutomationProperties.Name="{res:Text Steps_Fold}"
+                  Visibility="{Binding CanFold, Converter={StaticResource Visible}}" />
     <StackPanel Orientation="Horizontal">
       <TextBlock Text="{Binding Number}" FontFamily="Consolas" FontWeight="Bold" FontSize="{StaticResource FontTitle}"
                  VerticalAlignment="Center" />
@@ -23,6 +31,8 @@
                  VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                  AutomationProperties.Name="{Binding Title}" />
     </StackPanel>
+    </DockPanel>
+    <StackPanel Visibility="{Binding IsExpanded, Converter={StaticResource Visible}}">
     <TextBlock Text="{Binding Help}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,6,0,0" />
 
     <ItemsControl ItemsSource="{Binding Items}" Margin="0,12,0,0" Focusable="False" IsTabStop="False">
@@ -147,5 +157,6 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+    </StackPanel>
   </StackPanel>
 </UserControl>

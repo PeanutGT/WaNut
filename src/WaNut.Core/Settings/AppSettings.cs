@@ -12,6 +12,9 @@ public sealed record AppSettings
     /// <summary>Shows the advanced-only items, such as custom JVM arguments.</summary>
     public bool AdvancedMode { get; init; }
 
+    /// <summary>The loading strip of a start, stop or backup shows only its title line; the user folded it.</summary>
+    public bool FoldSteps { get; init; }
+
     /// <summary>Backup cleanup rules, shared by every server.</summary>
     public BackupRules Backups { get; init; } = new();
 
