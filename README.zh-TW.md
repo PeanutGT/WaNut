@@ -63,10 +63,6 @@ WaNut 是一個 Windows 應用程式，點幾下就能開好自己的 Minecraft:
 伺服器在跑的時候，有一顆小小的像素花生陪著你。
 
 <p align="center">
-  <img src="docs/images/peanut-faces.png" alt="花生：平靜、開心、緊張、想睡、過熱" width="528">
-</p>
-
-<p align="center">
   <img src="docs/images/guide-hello.gif" alt="花生揮手打招呼" width="96">
   <img src="docs/images/starting.gif" alt="伺服器啟動中" width="96">
   <img src="docs/images/online.gif" alt="伺服器上線" width="96">

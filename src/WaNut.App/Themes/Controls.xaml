@@ -9,8 +9,8 @@
 
   <CornerRadius x:Key="ControlRadius">6</CornerRadius>
 
-  <!-- 24x24, drawn by design/art/peanut.py; always shown at 72px. -->
-  <BitmapImage x:Key="PeanutBitmap" UriSource="pack://application:,,,/Assets/peanut-24.png" />
+  <!-- 16x16, always shown at 48px (3x). -->
+  <BitmapImage x:Key="PeanutBitmap" UriSource="pack://application:,,,/Assets/peanut-16.png" />
 
   <!-- The mark next to "done" and "all good" messages; it pops in when it appears. -->
   <Style x:Key="SuccessMark" TargetType="Path">

@@ -62,7 +62,7 @@
             BorderThickness="0,0,1,0">
       <DockPanel Margin="12,18,12,12">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="6,0,0,18">
-          <Image Style="{StaticResource Peanut}" Width="72" Height="72" />
+          <Image Style="{StaticResource Peanut}" Width="48" Height="48" />
           <TextBlock Text="{res:Text App_Title}" FontSize="{StaticResource FontTitle}" FontFamily="{StaticResource HeadingFont}" FontWeight="Bold"
                      VerticalAlignment="Center" Margin="12,0,0,0" />
         </StackPanel>
@@ -518,7 +518,7 @@
         </Style>
       </Grid.Style>
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Image Style="{StaticResource BusyPeanut}" Width="72" Height="72" Margin="0,0,0,18" />
+        <Image Style="{StaticResource BusyPeanut}" Width="48" Height="48" Margin="0,0,0,18" />
         <ProgressBar IsIndeterminate="True" Width="220" Margin="0,0,0,12" />
         <TextBlock Text="{res:Text Main_SavingWorld}" FontSize="{StaticResource FontSubheading}" HorizontalAlignment="Center"
                    AutomationProperties.LiveSetting="Assertive" />
