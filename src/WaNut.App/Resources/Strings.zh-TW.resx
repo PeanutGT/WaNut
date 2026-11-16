@@ -2574,7 +2574,7 @@
     <value>在 VPS 上執行時，WaNut 每次啟動前上傳伺服器，停止後再拿回來。VPS 開著就會持續計費，費用由你和主機商自行處理。VPS 請在 App 設定 &gt; 我的 VPS 新增。</value>
   </data>
   <data name="Server_VpsCopyNote" xml:space="preserve">
-    <value>這個世界最新的版本還在 VPS 上。請先啟動一次伺服器，讓 WaNut 把它拿回來，再更改在哪裡執行。</value>
+    <value>這個世界最新的版本還在 VPS 上。請先用伺服器頁面上方的按鈕把它拿回來，再更改在哪裡執行。</value>
   </data>
   <data name="Connect_Kind_Vps" xml:space="preserve">
     <value>你的 VPS</value>
@@ -2634,6 +2634,18 @@
   </data>
   <data name="Server_VpsBannerAway" xml:space="preserve">
     <value>這台伺服器最新的檔案還在你的 VPS 上。拿回這台電腦後，設定、模組和備份才能改。</value>
+  </data>
+  <data name="Server_KeepFilesOnVps" xml:space="preserve">
+    <value>伺服器停止時，把檔案留在 VPS 上</value>
+  </data>
+  <data name="Server_KeepFilesOnVpsHint" xml:space="preserve">
+    <value>停止會比較快，下次啟動直接用 VPS 上的檔案。在你拿回來之前，這台電腦上的是舊版本：設定、模組和備份都不能改，也不會在這裡備份最新的世界。隨時可以用伺服器頁面上方的按鈕拿回來。</value>
+  </data>
+  <data name="Server_VpsBannerKept" xml:space="preserve">
+    <value>這台伺服器的檔案留在你的 VPS 上。拿回這台電腦後，設定、模組和備份才能改。</value>
+  </data>
+  <data name="Server_VpsBringBack" xml:space="preserve">
+    <value>把檔案拿回來</value>
   </data>
   <data name="Server_VpsReconnect" xml:space="preserve">
     <value>再檢查一次 VPS</value>

@@ -388,7 +388,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Text="{Binding VpsBannerText}" TextWrapping="Wrap" VerticalAlignment="Center" />
-            <Button Grid.Column="1" Content="{res:Text Server_VpsReconnect}" Command="{Binding ReconnectCommand}"
+            <Button Grid.Column="1" Content="{Binding ReconnectText}" Command="{Binding ReconnectCommand}"
                     Margin="12,0,0,0" VerticalAlignment="Center"
                     Visibility="{Binding CanReconnect, Converter={StaticResource BoolToVisibility}}" />
           </Grid>

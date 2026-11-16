@@ -67,4 +67,10 @@ public sealed record InstanceMetadata
     /// an older copy here never overwrites the world on the VPS.
     /// </summary>
     public bool VpsCopyIsNewer { get; init; }
+
+    /// <summary>
+    /// A VPS server's folder stays on the VPS when it stops, for a faster stop: <see cref="VpsCopyIsNewer"/> stays set,
+    /// the next start uses that copy as it is, and the folder only comes back when the user asks. Off unless turned on.
+    /// </summary>
+    public bool KeepFilesOnVps { get; init; }
 }
