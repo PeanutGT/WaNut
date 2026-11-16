@@ -24,6 +24,13 @@ public sealed partial class StepsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isShown;
 
+    /// <summary>The strip offers a button that folds it to its title line (main window only).</summary>
+    public bool CanFold { get; init; }
+
+    /// <summary>False once the user folded the strip: only the "02 / 05" line and the title show.</summary>
+    [ObservableProperty]
+    private bool _isExpanded = true;
+
     [ObservableProperty]
     private string _number = string.Empty;
 

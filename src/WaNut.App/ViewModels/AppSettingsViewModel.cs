@@ -32,6 +32,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         _saved = settings;
         _loading = true;
         AdvancedMode = settings.AdvancedMode;
+        FoldSteps = settings.FoldSteps;
         BackupKeepCount = settings.Backups.KeepCount;
         BackupMaxAgeDays = settings.Backups.MaxAgeDays;
         BackupScheduleMinutes = settings.Backups.ScheduleMinutes;
@@ -53,6 +54,10 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _advancedMode;
+
+    /// <summary>The loading strip in the main window is folded to its title line (<see cref="AppSettings.FoldSteps"/>).</summary>
+    [ObservableProperty]
+    private bool _foldSteps;
 
     [ObservableProperty]
     private int _backupKeepCount;
@@ -280,6 +285,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
 
     partial void OnAdvancedModeChanged(bool value) => Save();
 
+    partial void OnFoldStepsChanged(bool value) => Save();
+
     partial void OnCheckForUpdatesChanged(bool value) => Save();
 
     partial void OnBackupScheduleMinutesChanged(int value) => Save();
@@ -335,6 +342,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
             _saved = _saved with
             {
                 AdvancedMode = AdvancedMode,
+                FoldSteps = FoldSteps,
                 Backups = BackupRules,
                 CheckForUpdates = CheckForUpdates,
                 Language = Language,

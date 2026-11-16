@@ -93,6 +93,17 @@ public sealed partial class ServerViewModel : ObservableObject
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
+
+        // Folding the loading strip is one choice for every server, kept in config.json.
+        Steps.IsExpanded = !app.FoldSteps;
+        Steps.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(StepsViewModel.IsExpanded))
+            {
+                app.FoldSteps = !Steps.IsExpanded;
+            }
+        };
+        PropertyChangedEventManager.AddHandler(app, OnFoldStepsChanged, nameof(AppSettingsViewModel.FoldSteps));
         ReloadIcon();
     }
 
@@ -129,7 +140,7 @@ public sealed partial class ServerViewModel : ObservableObject
     public CrashHelpViewModel CrashHelp { get; }
 
     /// <summary>The loading strip above the tabs while the server starts, stops or is backed up.</summary>
-    public StepsViewModel Steps { get; } = new();
+    public StepsViewModel Steps { get; } = new() { CanFold = true };
 
     public string Id => Metadata.Id;
 
@@ -286,6 +297,8 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void OnDuplicated(InstanceMetadata copy) => Duplicated?.Invoke(this, copy);
 
     private void OnAdvancedModeChanged(object? sender, PropertyChangedEventArgs e) => ServerSettings.OnAdvancedModeChanged();
+
+    private void OnFoldStepsChanged(object? sender, PropertyChangedEventArgs e) => Steps.IsExpanded = !((AppSettingsViewModel)sender!).FoldSteps;
 
     [RelayCommand(CanExecute = nameof(CanStop))]
     private Task StopAsync() => _controller.StopAsync(this);

@@ -3094,6 +3094,9 @@
   <data name="Steps_Stopped_Title" xml:space="preserve">
     <value>伺服器已停止</value>
   </data>
+  <data name="Steps_Fold" xml:space="preserve">
+    <value>顯示或收合步驟</value>
+  </data>
   <data name="Steps_Stopped_Help" xml:space="preserve">
     <value>所有東西都存好了。</value>
   </data>

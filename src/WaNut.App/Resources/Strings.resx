@@ -3114,6 +3114,9 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   <data name="Steps_Stopped_Title" xml:space="preserve">
     <value>The server has stopped</value>
   </data>
+  <data name="Steps_Fold" xml:space="preserve">
+    <value>Show or hide the steps</value>
+  </data>
   <data name="Steps_Stopped_Help" xml:space="preserve">
     <value>Everything is saved.</value>
   </data>
