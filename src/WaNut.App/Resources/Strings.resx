@@ -2594,7 +2594,7 @@ That is expected only if you reinstalled the VPS. Otherwise someone may be liste
     <value>On a VPS, WaNut uploads the server before each start and brings it back after it stops. Your host keeps charging while the VPS is on; that bill is between you and them. Add a VPS in App settings &gt; My VPS.</value>
   </data>
   <data name="Server_VpsCopyNote" xml:space="preserve">
-    <value>The newest copy of this world is still on the VPS. Start the server once so WaNut can bring it back before you change where it runs.</value>
+    <value>The newest copy of this world is still on the VPS. Bring it back with the button at the top of the server page before you change where it runs.</value>
   </data>
   <data name="Connect_Kind_Vps" xml:space="preserve">
     <value>Your VPS</value>
@@ -2654,6 +2654,18 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
   </data>
   <data name="Server_VpsBannerAway" xml:space="preserve">
     <value>The newest files of this server are still on your VPS. Settings, mods and backups unlock once they are back here.</value>
+  </data>
+  <data name="Server_KeepFilesOnVps" xml:space="preserve">
+    <value>Leave the files on the VPS when the server stops</value>
+  </data>
+  <data name="Server_KeepFilesOnVpsHint" xml:space="preserve">
+    <value>Stopping is faster, and the next start uses the files already on the VPS. Until you bring them back, this PC has an older copy: settings, mods and backups stay locked, and no backup of the newest world is made here. Bring them back any time with the button at the top of the server page.</value>
+  </data>
+  <data name="Server_VpsBannerKept" xml:space="preserve">
+    <value>This server’s files stay on your VPS. Settings, mods and backups unlock once you bring them back here.</value>
+  </data>
+  <data name="Server_VpsBringBack" xml:space="preserve">
+    <value>Bring the files back</value>
   </data>
   <data name="Server_VpsReconnect" xml:space="preserve">
     <value>Check the VPS again</value>

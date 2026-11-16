@@ -102,10 +102,16 @@ public sealed class StepFlowTests
     }
 
     [Fact]
-    public void ForStop_OnVps_BringsTheFolderBack()
+    public void ForStart_FolderKeptOnVps_SkipsBackupAndUpload()
     {
-        Assert.DoesNotContain("BringBack", StepLists.ForStop(onVps: false).Steps);
-        Assert.Contains("BringBack", StepLists.ForStop(onVps: true).Steps);
+        Assert.Equal(["Connect", "Java", "Launch", "LoadWorld", "Online"], StepLists.ForStart(onVps: true, usesVpsCopy: true).Steps);
+    }
+
+    [Fact]
+    public void ForStop_BringsTheFolderBackOnlyWhenAsked()
+    {
+        Assert.DoesNotContain("BringBack", StepLists.ForStop(bringsFolderBack: false).Steps);
+        Assert.Contains("BringBack", StepLists.ForStop(bringsFolderBack: true).Steps);
     }
 
     [Fact]

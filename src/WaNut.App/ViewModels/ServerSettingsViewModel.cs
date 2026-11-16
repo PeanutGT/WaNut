@@ -43,6 +43,10 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     public bool RunsOnVps => RunLocation?.VpsId is not null;
 
+    /// <summary>Leave the folder on the VPS when the server stops there (<see cref="Core.Instances.InstanceMetadata.KeepFilesOnVps"/>).</summary>
+    [ObservableProperty]
+    private bool _keepFilesOnVps;
+
     /// <summary>
     /// Only while stopped, and not while the newest world is still on the VPS: switching then would leave it there.
     /// </summary>
@@ -143,6 +147,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             MemoryMb = _server.Metadata.MemoryMb;
             CustomJvmArguments = _server.Metadata.CustomJvmArguments;
             AutoRestart = _server.Metadata.AutoRestart;
+            KeepFilesOnVps = _server.Metadata.KeepFilesOnVps;
             AutoStop = _server.Metadata.AutoStopMinutes > 0;
             AutoStopMinutes = AutoStop ? _server.Metadata.AutoStopMinutes : DefaultAutoStopMinutes;
             LoadRunLocations();
@@ -314,6 +319,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
                 break;
             case nameof(AutoRestart):
                 SaveMetadata(_server.Metadata with { AutoRestart = AutoRestart });
+                break;
+            case nameof(KeepFilesOnVps):
+                SaveMetadata(_server.Metadata with { KeepFilesOnVps = KeepFilesOnVps });
                 break;
             case nameof(AutoStop) or nameof(AutoStopMinutes):
                 SaveAutoStop();
