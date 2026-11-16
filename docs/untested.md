@@ -212,6 +212,18 @@
 - 檔案留在 VPS 時取消勾選：下次啟動先把檔案拿回來再上傳（和以前一樣）。
 - 伺服器執行中切換勾選：以停止那一刻的設定為準。
 
+## VPS 同步安全（fix-vps-sync-safety）
+
+VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`）時，WaNut 不再下載，這台電腦的世界、模組、設定不會被清掉；斷線重連後不會出現重複拼接的 console 行；重連改用新的連線。只在 Linux 上建置與跑 Core 測試，沒有在 Windows 或真的 VPS 上試過。
+
+還沒確認：
+
+- 伺服器在 VPS 停止後，把 VPS 上的 `~/wanut/servers/<id>` 改名或刪掉，再按「再檢查一次 VPS」：顯示「VPS 上沒有這台伺服器的檔案」，這台電腦的資料夾完全沒變。
+- 同樣情況按「啟動」：跳出詢問；選「是」會備份、上傳這台電腦的檔案並在 VPS 啟動；選「否」顯示錯誤、不啟動。
+- 當機後自動重啟遇到同樣情況：不詢問，只顯示錯誤。
+- 伺服器在 VPS 執行時拔掉網路幾秒再接回：console 接續，沒有重複或黏在一起的行，玩家清單正確，仍能送指令。
+- 取回檔案時這台電腦有檔案被別的程式鎖住：顯示錯誤，關閉 WaNut 時不會跳出例外。
+
 ## .mrpack 不帶入權限檔（fix-mrpack-overrides）
 
 `.mrpack` 的 overrides 不再複製 `ops.json`、`whitelist.json`、ban 清單、`usercache.json`；`server.properties` 改成合併，保留 WaNut 管的鍵（白名單、`online-mode`、連接埠、RCON、query），和 CurseForge server pack 一樣。有單元測試，沒有用真的模組包在 Windows 上試過。

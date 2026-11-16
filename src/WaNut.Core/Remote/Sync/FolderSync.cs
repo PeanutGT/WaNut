@@ -60,7 +60,10 @@ public static class FolderSync
             copyFiles);
     }
 
-    /// <summary>Lists both sides, plans and copies. Progress counts copied bytes out of all bytes to copy.</summary>
+    /// <summary>
+    /// Lists both sides, plans and copies. Progress counts copied bytes out of all bytes to copy.
+    /// </summary>
+    /// <exception cref="VpsFolderMissingException">A download whose source isn't a server folder; nothing was changed.</exception>
     public static async Task<SyncResult> RunAsync(
         ISyncTree source,
         ISyncTree target,
@@ -68,10 +71,16 @@ public static class FolderSync
         IProgress<DownloadProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        var plan = Plan(
-            await source.ListAsync(cancellationToken).ConfigureAwait(false),
-            await target.ListAsync(cancellationToken).ConfigureAwait(false),
-            direction);
+        var sourceEntries = await source.ListAsync(cancellationToken).ConfigureAwait(false);
+
+        // A missing or emptied folder on the VPS (reinstalled, another sign-in user) lists as nothing, and making this
+        // PC match "nothing" would delete the world, mods and settings here.
+        if (direction == SyncDirection.Download && !IsServerFolder(sourceEntries))
+        {
+            throw new VpsFolderMissingException();
+        }
+
+        var plan = Plan(sourceEntries, await target.ListAsync(cancellationToken).ConfigureAwait(false), direction);
 
         foreach (var file in plan.DeleteFiles)
         {
@@ -103,6 +112,10 @@ public static class FolderSync
         progress?.Report(new DownloadProgress(total, total));
         return new SyncResult(plan.CopyFiles.Count, plan.DeleteFiles.Count + plan.DeleteDirectories.Count, total);
     }
+
+    /// <summary>Every server folder WaNut uploads, and every server that has run, has a server.properties file.</summary>
+    public static bool IsServerFolder(IReadOnlyList<SyncEntry> entries) =>
+        entries.Any(e => !e.IsDirectory && e.Path == Settings.GameSettingsStore.PropertiesFileName);
 
     private static bool Same(SyncEntry a, SyncEntry b) =>
         !b.IsDirectory && a.Size == b.Size && (a.ModifiedUtc - b.ModifiedUtc).Duration() <= TimeTolerance;
