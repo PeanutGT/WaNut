@@ -17,6 +17,7 @@ using WaNut.Core.Notifications;
 using WaNut.Core.Packs;
 using WaNut.Core.Profiling;
 using WaNut.Core.Remote.Run;
+using WaNut.Core.Steps;
 
 namespace WaNut.App.ViewModels;
 
@@ -126,6 +127,9 @@ public sealed partial class ServerViewModel : ObservableObject
     public PacksViewModel Packs { get; }
 
     public CrashHelpViewModel CrashHelp { get; }
+
+    /// <summary>The loading strip above the tabs while the server starts, stops or is backed up.</summary>
+    public StepsViewModel Steps { get; } = new();
 
     public string Id => Metadata.Id;
 
@@ -323,6 +327,7 @@ public sealed partial class ServerViewModel : ObservableObject
         DownloadedJava = false;
         _javaEta.Reset();
         IsPreparing = true;
+        Steps.Begin(StepLists.ForStart(RunsOnVps));
     }
 
     /// <summary>
@@ -339,10 +344,17 @@ public sealed partial class ServerViewModel : ObservableObject
     {
         VpsText = null;
         IsPreparing = false;
+        Steps.Finish(StepLists.Stop);
     }
 
     internal void EndPreparing()
     {
+        // Nothing started (cancelled, failed, or left the line): the start strip goes. A started one keeps it until online.
+        if (Process is not { IsRunning: true })
+        {
+            Steps.Hide(StepLists.Start);
+        }
+
         IsPreparing = false;
         VpsText = null;
         JavaDownloadFraction = null;
@@ -479,11 +491,66 @@ public sealed partial class ServerViewModel : ObservableObject
         Packs.OnServerStatusChanged();
         Connect.OnServerStatusChanged(value);
         Performance.OnServerStatusChanged();
+        UpdateSteps(value);
         if (value == ServerStatus.Online)
         {
             _wasOnline = true;
             Notify(DiscordEvent.Online, "Discord_Online");
             _ = ApplyOnOnlineAsync();
+        }
+    }
+
+    /// <summary>Moves the loading strip with the server: launching, online, stopping, and the end of a run.</summary>
+    private void UpdateSteps(ServerStatus value)
+    {
+        switch (value)
+        {
+            case ServerStatus.Starting:
+                // A run WaNut follows without getting it ready first, e.g. one still going on the VPS.
+                if (Steps.Job != StepLists.Start)
+                {
+                    Steps.Begin(StepLists.ForStart(RunsOnVps));
+                }
+
+                Steps.MoveTo(StepLists.Start, "Launch");
+                break;
+            case ServerStatus.Online:
+                Steps.Finish(StepLists.Start);
+                break;
+            case ServerStatus.Stopping:
+                Steps.Begin(StepLists.ForStop(RunsOnVps));
+                break;
+            case ServerStatus.Stopped:
+                // Ended while starting: the crash card or error says why.
+                Steps.Hide(StepLists.Start);
+
+                // A VPS run's folder comes back next (EndSyncBack finishes the strip), unless WaNut let go of it.
+                if (Process is RemoteServer { ConnectionLost: false, Detached: false })
+                {
+                    Steps.MoveTo(StepLists.Stop, "BringBack");
+                }
+                else
+                {
+                    Steps.Finish(StepLists.Stop);
+                }
+
+                break;
+        }
+    }
+
+    private void OnPhase(ServerPhase phase)
+    {
+        switch (phase)
+        {
+            case ServerPhase.LoadingWorld:
+                Steps.MoveTo(StepLists.Start, "LoadWorld");
+                break;
+            case ServerPhase.SavingWorld:
+                Steps.MoveTo(StepLists.Stop, "SaveWorld");
+                break;
+            case ServerPhase.WorldSaved:
+                Steps.MoveTo(StepLists.Stop, "Close");
+                break;
         }
     }
 
@@ -537,6 +604,13 @@ public sealed partial class ServerViewModel : ObservableObject
         process.OutputReceived += AddConsoleLine;
         process.OutputReceived += KeepRunLine;
         process.StatusChanged += status => _ui.Post(_ => Status = status, null);
+        process.OutputReceived += line =>
+        {
+            if (ServerLogParser.Phase(line) is { } phase)
+            {
+                _ui.Post(_ => OnPhase(phase), null);
+            }
+        };
         process.PlayersChanged += () => _ui.Post(_ => SyncPlayers(process), null);
         _wasOnline = false;
         _ = WatchRunningAsync(process);

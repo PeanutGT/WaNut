@@ -13,6 +13,19 @@ public enum LogEventKind
     Saved,
 }
 
+/// <summary>Where a starting or stopping server is, for the loading steps. Not every server type prints every line.</summary>
+public enum ServerPhase
+{
+    /// <summary>"Preparing level", "Preparing start region", "Preparing spawn area: 40%".</summary>
+    LoadingWorld,
+
+    /// <summary>"Saving worlds", "Saving chunks for level ...".</summary>
+    SavingWorld,
+
+    /// <summary>"All dimensions are saved", "All chunks are saved": only closing is left.</summary>
+    WorldSaved,
+}
+
 public sealed record LogEvent(LogEventKind Kind, string? PlayerName = null);
 
 public enum LogLineLevel
@@ -67,6 +80,36 @@ public static partial class ServerLogParser
 
         var kind = match.Groups["action"].Value == "joined" ? LogEventKind.PlayerJoined : LogEventKind.PlayerLeft;
         return new LogEvent(kind, match.Groups["name"].Value);
+    }
+
+    /// <summary>The start or stop phase a console line shows, or null for any other line.</summary>
+    public static ServerPhase? Phase(string line)
+    {
+        var start = line.IndexOf(MessageMarker, StringComparison.Ordinal);
+        if (start < 0)
+        {
+            return null;
+        }
+
+        var message = line[(start + MessageMarker.Length)..].TrimEnd();
+        if (message.StartsWith("Preparing level", StringComparison.Ordinal)
+            || message.StartsWith("Preparing start region", StringComparison.Ordinal)
+            || message.StartsWith("Preparing spawn area", StringComparison.Ordinal))
+        {
+            return ServerPhase.LoadingWorld;
+        }
+
+        if (message == "Saving worlds" || message.StartsWith("Saving chunks for level", StringComparison.Ordinal))
+        {
+            return ServerPhase.SavingWorld;
+        }
+
+        if (message.EndsWith("All dimensions are saved", StringComparison.Ordinal) || message.EndsWith("All chunks are saved", StringComparison.Ordinal))
+        {
+            return ServerPhase.WorldSaved;
+        }
+
+        return null;
     }
 
     /// <summary>The level in a line's prefix ("Server thread/WARN" or "12:00:00 ERROR"). Lines without one count as Info.</summary>

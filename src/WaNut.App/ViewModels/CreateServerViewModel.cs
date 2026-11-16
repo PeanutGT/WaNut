@@ -12,6 +12,7 @@ using WaNut.Core.Modpacks;
 using WaNut.Core.Mods;
 using WaNut.Core.Players;
 using WaNut.Core.Settings;
+using WaNut.Core.Steps;
 using WaNut.Core.Versions;
 using WaNut.Core.Worlds;
 
@@ -260,6 +261,12 @@ public sealed partial class CreateServerViewModel : ObservableObject
 
     public ProgressEta Eta { get; } = new();
 
+    /// <summary>The loading strip while the server is made: downloads, files, then the world or pack.</summary>
+    public StepsViewModel Steps { get; } = new();
+
+    /// <summary>A finished strip stays this long, every step done, before the wizard closes.</summary>
+    private static readonly TimeSpan DoneShownFor = TimeSpan.FromMilliseconds(700);
+
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
     partial void OnSelectedWorldChoiceChanged(WorldChoice value)
@@ -434,6 +441,11 @@ public sealed partial class CreateServerViewModel : ObservableObject
         _cancellation = new CancellationTokenSource();
         var progress = new Progress<CreateServerProgress>(ShowProgress);
         var notes = string.Empty;
+        Steps.Begin(StepLists.ForCreate(
+            installsLoader: SelectedType!.Type is ServerType.Forge or ServerType.NeoForge,
+            importsWorld: IsImport,
+            installsWorldMods: IsImport && Picker.WillInstallMods,
+            installsModpack: IsModpack));
         try
         {
             Created = await _creator.CreateAsync(
@@ -448,6 +460,10 @@ public sealed partial class CreateServerViewModel : ObservableObject
             {
                 await InstallModpackAsync(Created, _cancellation.Token);
             }
+
+            // Every step done for a moment before the wizard closes.
+            Steps.Finish(StepLists.Create);
+            await Task.Delay(DoneShownFor);
         }
         catch (ModpackException e)
         {
@@ -476,6 +492,11 @@ public sealed partial class CreateServerViewModel : ObservableObject
             _cancellation = null;
             _stage = null;
             Eta.Reset();
+            if (Created is null)
+            {
+                Steps.Hide(StepLists.Create);
+            }
+
             IsBusy = false;
         }
 
@@ -491,6 +512,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         // Only after IsCreating is false, so the window does not treat this close as "stop the download".
         if (Created is not null)
         {
+
             if (notes.Length > 0)
             {
                 _dialogs.Inform(notes);
@@ -508,6 +530,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private async Task<string> ImportWorldAsync(InstanceMetadata created, CancellationToken cancellationToken)
     {
         StatusText = Text.Get("World_Copying");
+        Steps.MoveTo(StepLists.Create, "CopyWorld");
         StartPart();
         var instanceDir = _store.InstanceDir(created.Id);
         WorldImportResult result;
@@ -535,6 +558,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         if (Picker.WillInstallMods)
         {
             StatusText = Text.Get("World_InstallingMods");
+            Steps.MoveTo(StepLists.Create, "WorldMods");
             StartPart();
             mods = await WorldMessages.InstallModsAsync(
                 _mods, instanceDir, created.MinecraftVersion, Picker.Source!, new Progress<double>(ShowFraction), cancellationToken);
@@ -550,6 +574,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
     private async Task InstallModpackAsync(InstanceMetadata created, CancellationToken cancellationToken)
     {
         StatusText = Text.Get("Modpack_Installing");
+        Steps.MoveTo(StepLists.Create, "Modpack");
         StartPart();
         var instanceDir = _store.InstanceDir(created.Id);
         try
@@ -602,6 +627,7 @@ public sealed partial class CreateServerViewModel : ObservableObject
         }
 
         StatusText = Text.Get($"CreateServer_Stage_{progress.Stage}");
+        Steps.MoveTo(StepLists.Create, StepLists.ForStage(progress.Stage));
         ProgressFraction = progress.Fraction;
         Eta.Report(progress.Fraction, progress.BytesReceived);
     }
