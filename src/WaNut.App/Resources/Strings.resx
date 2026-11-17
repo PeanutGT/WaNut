@@ -2675,7 +2675,7 @@ Should WaNut open the ports of your servers in this VPS's firewall at each start
     <value>Stopping is faster, and the next start uses the files already on the VPS. Until you bring them back, this PC has an older copy: game settings, mods, backups and the settings that change server files stay locked, and no backup of the newest world is made here. Bring them back any time with the button at the top of the server page. Turning this off works any time: the files then come back after the next stop, or before the next start.</value>
   </data>
   <data name="Server_FilesOnVpsSettingsNote" xml:space="preserve">
-    <value>The newest files are still on your VPS, so the icon, port, account checks and changes to the server folder wait until they are back. Memory, auto restart and stop, Java arguments and leaving the files on the VPS can still change.</value>
+    <value>The newest files are still on your VPS, so the icon, port and changes to the server folder wait until they are back. The account check can change while the server is stopped; it is saved on the VPS. Memory, auto restart and stop, Java arguments and leaving the files on the VPS can still change.</value>
   </data>
   <data name="Server_VpsBannerKept" xml:space="preserve">
     <value>This server’s files stay on your VPS. Game settings, mods, backups and the settings that change server files unlock once you bring them back here.</value>
@@ -3182,5 +3182,20 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   </data>
   <data name="Steps_Saved_Help" xml:space="preserve">
     <value>You can restore it from the Backups tab any time.</value>
+  </data>
+  <data name="Game_VpsSettingsNote" xml:space="preserve">
+    <value>The files are on your VPS. Changes here are saved there and apply the next time the server starts. The world stays on the VPS.</value>
+  </data>
+  <data name="Game_VpsSettingsLoading" xml:space="preserve">
+    <value>Loading the settings from your VPS…</value>
+  </data>
+  <data name="Server_VpsSettingsLoadFailed" xml:space="preserve">
+    <value>Couldn't read the settings from the VPS: {0}</value>
+  </data>
+  <data name="Server_VpsSettingsSaveFailed" xml:space="preserve">
+    <value>Couldn't save the change on the VPS: {0}</value>
+  </data>
+  <data name="Server_VpsSettingsMissing" xml:space="preserve">
+    <value>The VPS has no settings file for this server, so nothing was changed there.</value>
   </data>
 </root>

@@ -267,3 +267,16 @@ VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`�
 - 關服後取回：時間明顯變短，世界、模組、設定都與 VPS 上一致，沒有留下 `.wanut-part` 檔。
 - 免費小 VPS（1 核）上同步時 SSH 連線沒有被斷開（若 `MaxSessions` 或頻寬太緊，把 `FolderSync.MaxParallel` 調小）。
 
+## VPS 同步改用壓縮串流＋檔案留 VPS 時改設定（faster-vps-sync-and-remote-settings）
+
+上傳與取回改成：用一條 `find` 指令列出 VPS 資料夾，變動的檔案打成一個 gzip tar 串流走單一 SSH 通道。上傳先解到 VPS 的 `.wanut-incoming` 暫存資料夾，核對每個檔案大小無誤才逐檔改名到位；取回時每個檔案仍先寫暫存檔、核對大小再改名。VPS 沒有 GNU tar、gzip 或 find 時，或串流中途失敗時，自動退回原本一個檔案一個檔案的 SFTP 複製。另外：檔案留在 VPS 且伺服器停止時，遊戲設定分頁和伺服器分頁的「帳號驗證」可以改，只會把 VPS 上的 `server.properties` 抓下來、改完寫回，世界不動；連接埠、圖示等仍鎖住。在 Linux 用本機 sshd 加 50ms 延遲、100 Mbit/s 測過 1.1 GB、1677 個檔案的世界（Minecraft Party 2）：上傳 279 秒變 110 秒，取回 163 秒變 50 秒，沒有變動時再同步 3 秒變 0.2 秒。沒有在 Windows 或真的 Oracle VPS 上試過。
+
+要在真的 VPS 和 Windows 上看的：
+- 啟動一台有世界、模組的伺服器：上傳比 PR #105 版本明顯快，進度條前進，VPS 上沒有留下 `.wanut-incoming`。
+- 上傳到一半拔網路，再啟動一次：只補沒傳完的檔案，沒有半個檔案。
+- 關服取回：世界、模組、設定與 VPS 一致，沒有 `.wanut-part` 檔。
+- 檔案留在 VPS、伺服器停止：打開遊戲設定分頁，先顯示「正在從 VPS 讀取設定」，讀完後可以改；改完開 VPS 上的 `~/wanut/servers/<id>/server.properties` 看值已更新，再啟動確認設定生效。
+- 同樣情況到伺服器分頁取消「帳號驗證」：VPS 上 `online-mode=false`，連接埠仍是灰的。
+- 伺服器在 VPS 執行中：這兩個分頁仍然鎖住（伺服器自己會改寫 server.properties）。
+- 拔掉網路時改設定：跳出「沒辦法把更改存到 VPS」，分頁回到 VPS 上的值。
+- 沒有 GNU tar 的 VPS（例如 Alpine/busybox）：同步仍然成功，只是比較慢。

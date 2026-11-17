@@ -27,7 +27,8 @@ public sealed class ServerController(
     TunnelService tunnels,
     DesktopNotifier notifier,
     VpsLaunchPlanner vpsPlanner,
-    VpsConnector vpsConnector)
+    VpsConnector vpsConnector,
+    VpsSettingsSync vpsSettings)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -427,6 +428,42 @@ public sealed class ServerController(
 
     private static Progress<DownloadProgress> DownloadProgress(ServerViewModel server) =>
         new(p => server.VpsText = string.Format(Text.Get("Status_VpsDownloadingPercent"), p.Fraction * 100));
+
+    /// <summary>
+    /// Copies the settings file from the VPS while the server's newest files stay there, so settings can be edited
+    /// without bringing the world back. False (with the reason shown) when the VPS couldn't be reached.
+    /// </summary>
+    public async Task<bool> PullSettingsAsync(ServerViewModel server) =>
+        await SyncSettingsAsync(server, (vps, token) => vpsSettings.PullAsync(server.Id, vps, token), "Server_VpsSettingsLoadFailed");
+
+    /// <summary>Sends the settings file edited here to the VPS; applied the next time the server starts there.</summary>
+    public async Task<bool> PushSettingsAsync(ServerViewModel server) =>
+        await SyncSettingsAsync(server, (vps, token) => vpsSettings.PushAsync(server.Id, vps, token), "Server_VpsSettingsSaveFailed");
+
+    private async Task<bool> SyncSettingsAsync(ServerViewModel server, Func<VpsProfile, CancellationToken, Task> run, string failedKey)
+    {
+        if (app.VpsList.FirstOrDefault(v => v.Id == server.Metadata.VpsId) is not { } vps)
+        {
+            server.ShowError(Text.Get("Server_VpsMissing"));
+            return false;
+        }
+
+        try
+        {
+            await run(vps, CancellationToken.None);
+            return true;
+        }
+        catch (VpsFolderMissingException)
+        {
+            server.ShowError(Text.Get("Server_VpsSettingsMissing"));
+            return false;
+        }
+        catch (Exception e) when (IsVpsProblem(e))
+        {
+            server.ShowError(string.Format(Text.Get(failedKey), VpsMessage(e)));
+            return false;
+        }
+    }
 
     private static bool IsVpsProblem(Exception e) =>
         e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException;

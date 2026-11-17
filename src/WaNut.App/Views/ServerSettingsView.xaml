@@ -134,7 +134,7 @@
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">
-            <CheckBox Content="{res:Text Server_OnlineMode}" IsChecked="{Binding OnlineMode}" IsEnabled="{Binding CanEditProperties}" />
+            <CheckBox Content="{res:Text Server_OnlineMode}" IsChecked="{Binding OnlineMode}" IsEnabled="{Binding CanEditOnlineMode}" />
             <TextBlock Text="{res:Text Server_OnlineModeHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
             <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0"
                     Visibility="{Binding ShowOnlineModeWarning, Converter={StaticResource Visible}}">
