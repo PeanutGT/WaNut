@@ -72,13 +72,21 @@ public sealed class RconLink(
         await DropAsync().ConfigureAwait(false);
     }
 
-    /// <summary>Tries to connect now instead of after the current wait.</summary>
+    /// <summary>
+    /// Tries to connect now instead of after the current wait. Called when the log shows the server has just started:
+    /// a connection that is still open then belongs to the server that died, so it is dropped and made again rather
+    /// than losing the first command to it.
+    /// </summary>
     public void Wake()
     {
         lock (_gate)
         {
             _backoff.Reset();
             _wait.Cancel();
+            if (_client is not null)
+            {
+                _broken.TrySetResult();
+            }
         }
     }
 

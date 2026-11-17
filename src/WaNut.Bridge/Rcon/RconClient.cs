@@ -11,6 +11,7 @@ public sealed class RconClient : IAsyncDisposable
     private readonly TcpClient _tcp;
     private readonly NetworkStream _stream;
     private readonly SemaphoreSlim _lock = new(1, 1);
+    private volatile bool _disposed;
     private int _nextId;
 
     private RconClient(TcpClient tcp)
@@ -52,6 +53,8 @@ public sealed class RconClient : IAsyncDisposable
         await _lock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
+            // Disposed while this command waited for its turn.
+            ObjectDisposedException.ThrowIf(_disposed, this);
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(Timeout);
             var id = NextId();
@@ -73,9 +76,12 @@ public sealed class RconClient : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _disposed = true;
         await _stream.DisposeAsync().ConfigureAwait(false);
         _tcp.Dispose();
-        _lock.Dispose();
+
+        // The lock is not disposed: commands still waiting for it would never be woken, and each one finds
+        // the client closed as soon as it gets its turn.
     }
 
     private async Task LoginAsync(string password, CancellationToken cancellationToken)
