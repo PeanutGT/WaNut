@@ -178,6 +178,26 @@ public sealed class SshVpsBridgeDeployer(
         }
     }
 
+    public async Task<IReadOnlyList<string>> GetRecentLogAsync(DeploymentTarget target, string serverId, int lines = 40, CancellationToken cancellationToken = default)
+    {
+        if (!IsUsableId(serverId) || target.VpsId is null || findVps(target.VpsId) is not { } vps)
+        {
+            return [];
+        }
+
+        try
+        {
+            using var ssh = await connector.ConnectAsync(vps, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var home = await HomeAsync(ssh, cancellationToken).ConfigureAwait(false);
+            var output = await RunAsync(ssh, VpsBridgeScripts.RecentLog(home, serverId, lines), cancellationToken).ConfigureAwait(false);
+            return [.. output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+        }
+        catch (Exception ex) when (ex is VpsUnreachableException or VpsLoginException or HostKeyException or SshException or InvalidOperationException)
+        {
+            return [];
+        }
+    }
+
     public async Task StopAsync(DeploymentTarget target, string serverId, CancellationToken cancellationToken = default)
     {
         if (IsUsableId(serverId) && target.VpsId is not null && findVps(target.VpsId) is { } vps)

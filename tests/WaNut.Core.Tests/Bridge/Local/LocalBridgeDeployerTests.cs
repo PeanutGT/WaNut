@@ -28,6 +28,19 @@ public sealed class LocalBridgeDeployerTests : IDisposable
     public void Dispose() => _temp.Dispose();
 
     [Fact]
+    public async Task GetRecentLogAsync_ReturnsTheLastLinesOldestFirst_AndEmptyWithoutAFile()
+    {
+        Assert.Empty(await Deployer().GetRecentLogAsync(DeploymentTarget.Local, "srv", 2));
+        var folder = Path.Combine(_paths.Root, "Bridge", "srv");
+        Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, "bridge.log"), "one\ntwo\nthree\n");
+
+        var lines = await Deployer().GetRecentLogAsync(DeploymentTarget.Local, "srv", 2);
+
+        Assert.Equal(["two", "three"], lines);
+    }
+
+    [Fact]
     public async Task DeployAsync_Fresh_PatchesWritesEncryptedConfigAndStartsDetached()
     {
         var result = await Deployer().DeployAsync(Request());

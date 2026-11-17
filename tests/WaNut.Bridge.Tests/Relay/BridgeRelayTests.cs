@@ -23,6 +23,21 @@ public sealed class BridgeRelayTests
     }
 
     [Fact]
+    public void OnLogLine_Forwarded_IsLoggedWithWhoButNeverTheMessageText()
+    {
+        var writer = new StringWriter();
+        var relay = new BridgeRelay(new BridgeConfig(), new FakeRcon(_ => null), _posted.Add, new BridgeLog(writer));
+
+        relay.OnLogLine(Prefix + "<Steve> my secret plan");
+        relay.OnLogLine(Prefix + "Steve joined the game");
+
+        var text = writer.ToString();
+        Assert.Contains("Minecraft to Discord: Chat Steve.", text, StringComparison.Ordinal);
+        Assert.Contains("Minecraft to Discord: Joined Steve.", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("secret", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void OnLogLine_FilterOff_DropsThatKind()
     {
         var relay = NewRelay(new BridgeConfig { Filters = new BridgeFilters { JoinLeave = false, ServerState = false } });
