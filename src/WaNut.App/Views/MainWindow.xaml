@@ -505,6 +505,10 @@
           <TabItem Header="{res:Text Server_TabPerformance}">
             <views:PerformanceView DataContext="{Binding Performance}" />
           </TabItem>
+
+          <TabItem Header="{res:Text Server_TabDiscord}">
+            <views:DiscordView DataContext="{Binding Discord}" />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Grid>

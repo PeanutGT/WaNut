@@ -3198,4 +3198,319 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Server_VpsSettingsMissing" xml:space="preserve">
     <value>The VPS has no settings file for this server, so nothing was changed there.</value>
   </data>
+  <data name="Server_TabDiscord" xml:space="preserve">
+    <value>Discord</value>
+  </data>
+  <data name="Discord_BridgeIntro" xml:space="preserve">
+    <value>Chat between this server and a Discord channel, both ways. A small helper program does it and keeps working when WaNut is closed.</value>
+  </data>
+  <data name="Discord_LocationVps" xml:space="preserve">
+    <value>The helper will run on your VPS "{0}", next to this server.</value>
+  </data>
+  <data name="Discord_LocationLocal" xml:space="preserve">
+    <value>The helper will run on this PC, next to this server.</value>
+  </data>
+  <data name="Discord_FilesOnVpsNote" xml:space="preserve">
+    <value>The server runs on your VPS and its newest files are there. To turn on RCON (how Discord talks to the game), the server has to be stopped first. Stop it, then press Apply.</value>
+  </data>
+  <data name="Discord_RestartNote" xml:space="preserve">
+    <value>Restart the Minecraft server once. This turns on RCON, which Discord to Minecraft chat needs. Until then, only Minecraft to Discord works.</value>
+  </data>
+  <data name="Discord_ErrorDetail" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Discord_StatusTitle" xml:space="preserve">
+    <value>How it is doing</value>
+  </data>
+  <data name="Discord_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Discord_StatusBridge" xml:space="preserve">
+    <value>Helper</value>
+  </data>
+  <data name="Discord_StatusRcon" xml:space="preserve">
+    <value>Game link (RCON)</value>
+  </data>
+  <data name="Discord_StatusDiscord" xml:space="preserve">
+    <value>Discord</value>
+  </data>
+  <data name="Discord_ActivityTitle" xml:space="preserve">
+    <value>Recent activity</value>
+  </data>
+  <data name="Discord_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Discord_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Discord_State_NotInstalled" xml:space="preserve">
+    <value>Not set up</value>
+  </data>
+  <data name="Discord_State_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Discord_State_Starting" xml:space="preserve">
+    <value>Starting</value>
+  </data>
+  <data name="Discord_State_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Discord_State_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Discord_State_Unknown" xml:space="preserve">
+    <value>Can't tell right now</value>
+  </data>
+  <data name="Discord_RconOn" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Discord_RconOff" xml:space="preserve">
+    <value>Not connected (the server may be off)</value>
+  </data>
+  <data name="Discord_DiscordOn" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Discord_DiscordOnMs" xml:space="preserve">
+    <value>Connected, {0} ms</value>
+  </data>
+  <data name="Discord_DiscordOff" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="Discord_ModeLabel" xml:space="preserve">
+    <value>How messages look in Discord</value>
+  </data>
+  <data name="Discord_ModeHint" xml:space="preserve">
+    <value>Players' names and heads need a webhook. The other two are posted by the bot.</value>
+  </data>
+  <data name="Discord_ModeWebhook" xml:space="preserve">
+    <value>As the player (webhook)</value>
+  </data>
+  <data name="Discord_ModeEmbed" xml:space="preserve">
+    <value>Colored cards (bot)</value>
+  </data>
+  <data name="Discord_ModePlain" xml:space="preserve">
+    <value>Plain text (bot)</value>
+  </data>
+  <data name="Discord_TokenLabel" xml:space="preserve">
+    <value>Bot token</value>
+  </data>
+  <data name="Discord_TokenHint" xml:space="preserve">
+    <value>Needed to read Discord messages and to post as the bot. Nobody sees it again after you save.</value>
+  </data>
+  <data name="Discord_TokenSaved" xml:space="preserve">
+    <value>A token is saved. Leave this empty to keep it.</value>
+  </data>
+  <data name="Discord_ChannelLabel" xml:space="preserve">
+    <value>Channel ID</value>
+  </data>
+  <data name="Discord_ChannelHint" xml:space="preserve">
+    <value>In Discord, turn on Developer Mode, then right-click the channel and choose Copy Channel ID.</value>
+  </data>
+  <data name="Discord_WebhookLabel" xml:space="preserve">
+    <value>Webhook URL</value>
+  </data>
+  <data name="Discord_WebhookHint" xml:space="preserve">
+    <value>Channel settings, Integrations, Webhooks, New Webhook, Copy Webhook URL.</value>
+  </data>
+  <data name="Discord_WebhookSaved" xml:space="preserve">
+    <value>A webhook is saved. Leave this empty to keep it.</value>
+  </data>
+  <data name="Discord_TestConnection" xml:space="preserve">
+    <value>Test connection</value>
+  </data>
+  <data name="Discord_Apply" xml:space="preserve">
+    <value>Apply and start</value>
+  </data>
+  <data name="Discord_Reapply" xml:space="preserve">
+    <value>Apply again</value>
+  </data>
+  <data name="Discord_TestOk" xml:space="preserve">
+    <value>Discord accepts these settings. Nothing was changed yet.</value>
+  </data>
+  <data name="Discord_DeployOk" xml:space="preserve">
+    <value>The helper is set up and running.</value>
+  </data>
+  <data name="Discord_StoppedOk" xml:space="preserve">
+    <value>The helper was stopped. Its settings are kept.</value>
+  </data>
+  <data name="Discord_RemovedOk" xml:space="preserve">
+    <value>The helper was removed. Your settings here are kept, so you can set it up again.</value>
+  </data>
+  <data name="Discord_RemoveConfirm" xml:space="preserve">
+    <value>Remove the Discord helper? Chat stops crossing between Minecraft and Discord. Your server is not touched.</value>
+  </data>
+  <data name="Discord_ActionFailed" xml:space="preserve">
+    <value>That did not work: {0}</value>
+  </data>
+  <data name="Discord_OpenFailed" xml:space="preserve">
+    <value>Could not open the page: {0}</value>
+  </data>
+  <data name="Discord_Step_Validate" xml:space="preserve">
+    <value>Checking the Discord settings...</value>
+  </data>
+  <data name="Discord_Step_Probe" xml:space="preserve">
+    <value>Looking at where it will run...</value>
+  </data>
+  <data name="Discord_Step_PatchServerProperties" xml:space="preserve">
+    <value>Turning on RCON for the server...</value>
+  </data>
+  <data name="Discord_Step_CopyFiles" xml:space="preserve">
+    <value>Copying the helper and its settings...</value>
+  </data>
+  <data name="Discord_Step_Register" xml:space="preserve">
+    <value>Starting the helper...</value>
+  </data>
+  <data name="Discord_Step_HealthCheck" xml:space="preserve">
+    <value>Checking that it answers...</value>
+  </data>
+  <data name="Discord_NeedWebhook" xml:space="preserve">
+    <value>Paste the webhook URL first, or pick a bot display mode.</value>
+  </data>
+  <data name="Discord_NeedToken" xml:space="preserve">
+    <value>Paste the bot token first.</value>
+  </data>
+  <data name="Discord_NeedChannel" xml:space="preserve">
+    <value>The channel ID is the long number you get from Copy Channel ID.</value>
+  </data>
+  <data name="Discord_NeedRole" xml:space="preserve">
+    <value>Remote console needs the bot token and the ID of the Discord role that may use it.</value>
+  </data>
+  <data name="Discord_Error_InvalidRequest" xml:space="preserve">
+    <value>Something in the settings can't work. Check the token, channel and webhook.</value>
+  </data>
+  <data name="Discord_Error_BotTokenRejected" xml:space="preserve">
+    <value>Discord says the bot token is wrong. Copy it again from the Bot page, using Reset Token if needed.</value>
+  </data>
+  <data name="Discord_Error_ChannelNotFound" xml:space="preserve">
+    <value>No channel has that ID, or the bot is not in that Discord server. Invite the bot first.</value>
+  </data>
+  <data name="Discord_Error_ChannelNoAccess" xml:space="preserve">
+    <value>The bot can't see that channel. Give it access in the channel's permissions.</value>
+  </data>
+  <data name="Discord_Error_MissingPermissions" xml:space="preserve">
+    <value>The bot is missing permissions in that channel.</value>
+  </data>
+  <data name="Discord_Error_WebhookInvalid" xml:space="preserve">
+    <value>That webhook doesn't work any more. Make a new one and paste its URL.</value>
+  </data>
+  <data name="Discord_Error_DiscordUnreachable" xml:space="preserve">
+    <value>Could not reach Discord from this PC. Check the internet connection and try again.</value>
+  </data>
+  <data name="Discord_Error_ServerPropertiesMissing" xml:space="preserve">
+    <value>This server has no server.properties yet. Start it once so Minecraft makes it, then try again.</value>
+  </data>
+  <data name="Discord_Error_ServerRunning" xml:space="preserve">
+    <value>RCON has to be turned on in server.properties, and the server's files are on the VPS while it runs. Stop the server, then try again.</value>
+  </data>
+  <data name="Discord_Error_BinaryUnavailable" xml:space="preserve">
+    <value>This copy of WaNut has no helper program for that computer. Install WaNut again from the installer.</value>
+  </data>
+  <data name="Discord_Error_UnsupportedHost" xml:space="preserve">
+    <value>The helper runs on Linux (x86_64 or ARM64) VPS hosts only.</value>
+  </data>
+  <data name="Discord_Error_VpsUnreachable" xml:space="preserve">
+    <value>Could not reach the VPS. Use Test connection in the VPS window, then try again.</value>
+  </data>
+  <data name="Discord_Error_CopyFailed" xml:space="preserve">
+    <value>Could not write the files. Nothing was changed.</value>
+  </data>
+  <data name="Discord_Error_RegisterFailed" xml:space="preserve">
+    <value>Could not start the helper in the background. Nothing was changed.</value>
+  </data>
+  <data name="Discord_Error_BridgeExited" xml:space="preserve">
+    <value>The helper started and stopped at once. Its last lines are below.</value>
+  </data>
+  <data name="Discord_Error_NoAnswer" xml:space="preserve">
+    <value>The helper is running but did not answer in time. Press Refresh in a moment.</value>
+  </data>
+  <data name="Discord_Warning_RconPortOpen" xml:space="preserve">
+    <value>The VPS firewall lets the RCON port in from the internet. Only the password protects it. Close that port in the VPS firewall.</value>
+  </data>
+  <data name="Discord_Warning_RconPortUnchecked" xml:space="preserve">
+    <value>WaNut could not read the VPS firewall. Make sure the RCON port is not open to the internet.</value>
+  </data>
+  <data name="Discord_Warning_NoStartOnBoot" xml:space="preserve">
+    <value>The helper will not come back after the PC restarts. Turn on Start when Windows starts in More settings, then apply again.</value>
+  </data>
+  <data name="Discord_Warning_MessageContentIntentOff" xml:space="preserve">
+    <value>The bot can't read message text yet. In the Discord developer portal, open the Bot page and turn on Message Content Intent.</value>
+  </data>
+  <data name="Discord_FiltersLabel" xml:space="preserve">
+    <value>What crosses over</value>
+  </data>
+  <data name="Discord_FilterChat" xml:space="preserve">
+    <value>Player chat, both ways (private messages never cross)</value>
+  </data>
+  <data name="Discord_FilterJoinLeave" xml:space="preserve">
+    <value>Players joining and leaving</value>
+  </data>
+  <data name="Discord_FilterDeaths" xml:space="preserve">
+    <value>Deaths and advancements</value>
+  </data>
+  <data name="Discord_FilterServerState" xml:space="preserve">
+    <value>Server started and stopped</value>
+  </data>
+  <data name="Discord_FilterOnlineCount" xml:space="preserve">
+    <value>Show who is online in the bot's Discord status</value>
+  </data>
+  <data name="Discord_FilterListCommand" xml:space="preserve">
+    <value>Let Discord use /list to see who is online</value>
+  </data>
+  <data name="Discord_FilterPrefixes" xml:space="preserve">
+    <value>Do not pass on messages that start with...</value>
+  </data>
+  <data name="Discord_PrefixesHint" xml:space="preserve">
+    <value>For example ! or #. Separate several with spaces.</value>
+  </data>
+  <data name="Discord_RemoteConsole" xml:space="preserve">
+    <value>Let admins run server commands from Discord (/cmd)</value>
+  </data>
+  <data name="Discord_RemoteConsoleHint" xml:space="preserve">
+    <value>Off by default. Only people with the role below can use it.</value>
+  </data>
+  <data name="Discord_RoleLabel" xml:space="preserve">
+    <value>Admin role ID</value>
+  </data>
+  <data name="Discord_RoleHint" xml:space="preserve">
+    <value>Right-click the role in Discord's server settings and choose Copy Role ID.</value>
+  </data>
+  <data name="Discord_LanguageLabel" xml:space="preserve">
+    <value>Language of the helper's messages</value>
+  </data>
+  <data name="Discord_LanguageHint" xml:space="preserve">
+    <value>Player chat, deaths and advancements are passed on as the game wrote them.</value>
+  </data>
+  <data name="Discord_StartOnBoot" xml:space="preserve">
+    <value>Start when Windows starts</value>
+  </data>
+  <data name="Discord_StartOnBootHint" xml:space="preserve">
+    <value>Uses a sign-in task. No administrator rights needed.</value>
+  </data>
+  <data name="Discord_VpsBootNote" xml:space="preserve">
+    <value>On the VPS the helper starts again after a restart when the VPS allows it, and otherwise runs until the VPS restarts.</value>
+  </data>
+  <data name="Discord_HelpTitle" xml:space="preserve">
+    <value>How do I make the Discord bot?</value>
+  </data>
+  <data name="Discord_Help1" xml:space="preserve">
+    <value>1. Open the Discord developer portal (button below), press New Application and give it a name.</value>
+  </data>
+  <data name="Discord_Help2" xml:space="preserve">
+    <value>2. Open the Bot page. Press Reset Token and copy the token into the box above.</value>
+  </data>
+  <data name="Discord_Help3" xml:space="preserve">
+    <value>3. On the same page, turn on Message Content Intent under Privileged Gateway Intents. Without it the bot can't read chat.</value>
+  </data>
+  <data name="Discord_Help4" xml:space="preserve">
+    <value>4. Open OAuth2, URL Generator. Tick the scopes bot and applications.commands. Under Bot Permissions tick View Channels, Send Messages, Embed Links and Manage Webhooks (Manage Webhooks only for the player-style mode).</value>
+  </data>
+  <data name="Discord_Help5" xml:space="preserve">
+    <value>5. Open the generated link, pick your Discord server and press Authorize.</value>
+  </data>
+  <data name="Discord_Help6" xml:space="preserve">
+    <value>6. In Discord, turn on Developer Mode (User Settings, Advanced), right-click your chat channel and choose Copy Channel ID.</value>
+  </data>
+  <data name="Discord_OpenPortal" xml:space="preserve">
+    <value>Open the Discord developer portal</value>
+  </data>
 </root>

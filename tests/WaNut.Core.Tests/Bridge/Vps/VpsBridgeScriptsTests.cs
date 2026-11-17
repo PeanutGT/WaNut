@@ -52,4 +52,14 @@ public sealed class VpsBridgeScriptsTests
     {
         Assert.Equal(expected, SshVpsBridgeDeployer.ParseStatus(output + "\n").State);
     }
+
+    [Fact]
+    public void RecentLog_ReadsTheJournalForAServiceElseBridgeLog_FromEitherFolder()
+    {
+        var script = VpsBridgeScripts.RecentLog("/home/u", "srv", 30);
+
+        Assert.Contains("journalctl -u wanut-bridge-srv.service -n 30", script, StringComparison.Ordinal);
+        Assert.Contains("tail -n 30 \"$b\"/'srv'/bridge.log", script, StringComparison.Ordinal);
+        Assert.Contains("'/opt/wanut-bridge' '/home/u/wanut/bridge'", script, StringComparison.Ordinal);
+    }
 }

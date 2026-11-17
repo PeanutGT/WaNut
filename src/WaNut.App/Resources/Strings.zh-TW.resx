@@ -3178,4 +3178,319 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Server_VpsSettingsMissing" xml:space="preserve">
     <value>VPS 上找不到這台伺服器的設定檔，所以沒有更改任何東西。</value>
   </data>
+  <data name="Server_TabDiscord" xml:space="preserve">
+    <value>Discord</value>
+  </data>
+  <data name="Discord_BridgeIntro" xml:space="preserve">
+    <value>讓這個伺服器和 Discord 頻道雙向聊天。由一個小幫手程式負責，關掉 WaNut 之後也會繼續運作。</value>
+  </data>
+  <data name="Discord_LocationVps" xml:space="preserve">
+    <value>幫手會跑在你的 VPS「{0}」上，和這個伺服器在一起。</value>
+  </data>
+  <data name="Discord_LocationLocal" xml:space="preserve">
+    <value>幫手會跑在這台電腦上，和這個伺服器在一起。</value>
+  </data>
+  <data name="Discord_FilesOnVpsNote" xml:space="preserve">
+    <value>伺服器正在 VPS 上執行，最新的檔案也在那裡。要開啟 RCON（Discord 和遊戲溝通的方式）必須先停止伺服器。請先停止，再按「套用」。</value>
+  </data>
+  <data name="Discord_RestartNote" xml:space="preserve">
+    <value>請重新啟動一次 Minecraft 伺服器。這樣才會開啟 RCON，Discord 傳到遊戲的聊天需要它。在那之前只有遊戲傳到 Discord 能用。</value>
+  </data>
+  <data name="Discord_ErrorDetail" xml:space="preserve">
+    <value>詳細資料</value>
+  </data>
+  <data name="Discord_StatusTitle" xml:space="preserve">
+    <value>目前狀況</value>
+  </data>
+  <data name="Discord_Refresh" xml:space="preserve">
+    <value>重新整理</value>
+  </data>
+  <data name="Discord_StatusBridge" xml:space="preserve">
+    <value>幫手</value>
+  </data>
+  <data name="Discord_StatusRcon" xml:space="preserve">
+    <value>遊戲連線（RCON）</value>
+  </data>
+  <data name="Discord_StatusDiscord" xml:space="preserve">
+    <value>Discord</value>
+  </data>
+  <data name="Discord_ActivityTitle" xml:space="preserve">
+    <value>最近動態</value>
+  </data>
+  <data name="Discord_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="Discord_Remove" xml:space="preserve">
+    <value>移除</value>
+  </data>
+  <data name="Discord_State_NotInstalled" xml:space="preserve">
+    <value>尚未設定</value>
+  </data>
+  <data name="Discord_State_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Discord_State_Starting" xml:space="preserve">
+    <value>啟動中</value>
+  </data>
+  <data name="Discord_State_Running" xml:space="preserve">
+    <value>運作中</value>
+  </data>
+  <data name="Discord_State_Failed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="Discord_State_Unknown" xml:space="preserve">
+    <value>暫時無法確認</value>
+  </data>
+  <data name="Discord_RconOn" xml:space="preserve">
+    <value>已連線</value>
+  </data>
+  <data name="Discord_RconOff" xml:space="preserve">
+    <value>未連線（伺服器可能沒開）</value>
+  </data>
+  <data name="Discord_DiscordOn" xml:space="preserve">
+    <value>已連線</value>
+  </data>
+  <data name="Discord_DiscordOnMs" xml:space="preserve">
+    <value>已連線，{0} 毫秒</value>
+  </data>
+  <data name="Discord_DiscordOff" xml:space="preserve">
+    <value>未連線</value>
+  </data>
+  <data name="Discord_ModeLabel" xml:space="preserve">
+    <value>訊息在 Discord 裡的樣子</value>
+  </data>
+  <data name="Discord_ModeHint" xml:space="preserve">
+    <value>要顯示玩家的名字和頭像需要 Webhook。另外兩種由機器人發送。</value>
+  </data>
+  <data name="Discord_ModeWebhook" xml:space="preserve">
+    <value>像玩家本人（Webhook）</value>
+  </data>
+  <data name="Discord_ModeEmbed" xml:space="preserve">
+    <value>彩色卡片（機器人）</value>
+  </data>
+  <data name="Discord_ModePlain" xml:space="preserve">
+    <value>純文字（機器人）</value>
+  </data>
+  <data name="Discord_TokenLabel" xml:space="preserve">
+    <value>機器人 Token</value>
+  </data>
+  <data name="Discord_TokenHint" xml:space="preserve">
+    <value>讀取 Discord 訊息和用機器人發言都需要它。儲存後不會再顯示給任何人看。</value>
+  </data>
+  <data name="Discord_TokenSaved" xml:space="preserve">
+    <value>已經儲存一組 Token。這裡留空就會繼續使用它。</value>
+  </data>
+  <data name="Discord_ChannelLabel" xml:space="preserve">
+    <value>頻道 ID</value>
+  </data>
+  <data name="Discord_ChannelHint" xml:space="preserve">
+    <value>在 Discord 開啟開發者模式，對頻道按右鍵，選「複製頻道 ID」。</value>
+  </data>
+  <data name="Discord_WebhookLabel" xml:space="preserve">
+    <value>Webhook 網址</value>
+  </data>
+  <data name="Discord_WebhookHint" xml:space="preserve">
+    <value>頻道設定、整合、Webhook、新增 Webhook、複製 Webhook 網址。</value>
+  </data>
+  <data name="Discord_WebhookSaved" xml:space="preserve">
+    <value>已經儲存一個 Webhook。這裡留空就會繼續使用它。</value>
+  </data>
+  <data name="Discord_TestConnection" xml:space="preserve">
+    <value>測試連線</value>
+  </data>
+  <data name="Discord_Apply" xml:space="preserve">
+    <value>套用並啟動</value>
+  </data>
+  <data name="Discord_Reapply" xml:space="preserve">
+    <value>重新套用</value>
+  </data>
+  <data name="Discord_TestOk" xml:space="preserve">
+    <value>Discord 接受這些設定。目前還沒有改動任何東西。</value>
+  </data>
+  <data name="Discord_DeployOk" xml:space="preserve">
+    <value>幫手已設定好並開始運作。</value>
+  </data>
+  <data name="Discord_StoppedOk" xml:space="preserve">
+    <value>幫手已停止，設定都還在。</value>
+  </data>
+  <data name="Discord_RemovedOk" xml:space="preserve">
+    <value>幫手已移除。這裡的設定還在，之後可以重新設定。</value>
+  </data>
+  <data name="Discord_RemoveConfirm" xml:space="preserve">
+    <value>要移除 Discord 幫手嗎？Minecraft 和 Discord 之間就不再互傳聊天。你的伺服器不會受影響。</value>
+  </data>
+  <data name="Discord_ActionFailed" xml:space="preserve">
+    <value>沒有成功：{0}</value>
+  </data>
+  <data name="Discord_OpenFailed" xml:space="preserve">
+    <value>無法開啟網頁：{0}</value>
+  </data>
+  <data name="Discord_Step_Validate" xml:space="preserve">
+    <value>正在檢查 Discord 設定…</value>
+  </data>
+  <data name="Discord_Step_Probe" xml:space="preserve">
+    <value>正在確認要執行的地方…</value>
+  </data>
+  <data name="Discord_Step_PatchServerProperties" xml:space="preserve">
+    <value>正在為伺服器開啟 RCON…</value>
+  </data>
+  <data name="Discord_Step_CopyFiles" xml:space="preserve">
+    <value>正在複製幫手和它的設定…</value>
+  </data>
+  <data name="Discord_Step_Register" xml:space="preserve">
+    <value>正在啟動幫手…</value>
+  </data>
+  <data name="Discord_Step_HealthCheck" xml:space="preserve">
+    <value>正在確認它有回應…</value>
+  </data>
+  <data name="Discord_NeedWebhook" xml:space="preserve">
+    <value>請先貼上 Webhook 網址，或改選機器人顯示方式。</value>
+  </data>
+  <data name="Discord_NeedToken" xml:space="preserve">
+    <value>請先貼上機器人 Token。</value>
+  </data>
+  <data name="Discord_NeedChannel" xml:space="preserve">
+    <value>頻道 ID 是「複製頻道 ID」得到的那一長串數字。</value>
+  </data>
+  <data name="Discord_NeedRole" xml:space="preserve">
+    <value>遠端控制台需要機器人 Token，以及可以使用它的 Discord 身分組 ID。</value>
+  </data>
+  <data name="Discord_Error_InvalidRequest" xml:space="preserve">
+    <value>設定裡有地方行不通。請檢查 Token、頻道和 Webhook。</value>
+  </data>
+  <data name="Discord_Error_BotTokenRejected" xml:space="preserve">
+    <value>Discord 說機器人 Token 不對。請回到機器人頁面重新複製，必要時按「重設 Token」。</value>
+  </data>
+  <data name="Discord_Error_ChannelNotFound" xml:space="preserve">
+    <value>找不到這個 ID 的頻道，或機器人不在那個 Discord 伺服器裡。請先邀請機器人。</value>
+  </data>
+  <data name="Discord_Error_ChannelNoAccess" xml:space="preserve">
+    <value>機器人看不到那個頻道。請在頻道權限裡給它存取權。</value>
+  </data>
+  <data name="Discord_Error_MissingPermissions" xml:space="preserve">
+    <value>機器人在那個頻道缺少權限。</value>
+  </data>
+  <data name="Discord_Error_WebhookInvalid" xml:space="preserve">
+    <value>那個 Webhook 已經失效。請重新建立一個並貼上新網址。</value>
+  </data>
+  <data name="Discord_Error_DiscordUnreachable" xml:space="preserve">
+    <value>這台電腦連不到 Discord。請檢查網路後再試一次。</value>
+  </data>
+  <data name="Discord_Error_ServerPropertiesMissing" xml:space="preserve">
+    <value>這個伺服器還沒有 server.properties。請先啟動一次讓 Minecraft 產生它，再試一次。</value>
+  </data>
+  <data name="Discord_Error_ServerRunning" xml:space="preserve">
+    <value>需要在 server.properties 開啟 RCON，但伺服器執行時檔案在 VPS 上。請先停止伺服器，再試一次。</value>
+  </data>
+  <data name="Discord_Error_BinaryUnavailable" xml:space="preserve">
+    <value>這份 WaNut 沒有那種電腦用的幫手程式。請用安裝程式重新安裝 WaNut。</value>
+  </data>
+  <data name="Discord_Error_UnsupportedHost" xml:space="preserve">
+    <value>幫手只能跑在 Linux（x86_64 或 ARM64）的 VPS 上。</value>
+  </data>
+  <data name="Discord_Error_VpsUnreachable" xml:space="preserve">
+    <value>連不到 VPS。請先在 VPS 視窗按「測試連線」，再試一次。</value>
+  </data>
+  <data name="Discord_Error_CopyFailed" xml:space="preserve">
+    <value>無法寫入檔案，沒有改動任何東西。</value>
+  </data>
+  <data name="Discord_Error_RegisterFailed" xml:space="preserve">
+    <value>無法在背景啟動幫手，沒有改動任何東西。</value>
+  </data>
+  <data name="Discord_Error_BridgeExited" xml:space="preserve">
+    <value>幫手一啟動就停了。下面是它最後的紀錄。</value>
+  </data>
+  <data name="Discord_Error_NoAnswer" xml:space="preserve">
+    <value>幫手在執行，但沒有及時回應。請稍後按「重新整理」。</value>
+  </data>
+  <data name="Discord_Warning_RconPortOpen" xml:space="preserve">
+    <value>VPS 防火牆讓 RCON 連接埠對網際網路開放，只剩密碼在保護。請在 VPS 防火牆關閉那個連接埠。</value>
+  </data>
+  <data name="Discord_Warning_RconPortUnchecked" xml:space="preserve">
+    <value>WaNut 讀不到 VPS 的防火牆。請確認 RCON 連接埠沒有對網際網路開放。</value>
+  </data>
+  <data name="Discord_Warning_NoStartOnBoot" xml:space="preserve">
+    <value>電腦重新開機後幫手不會自己回來。請在「更多設定」開啟「Windows 啟動時一起啟動」，再套用一次。</value>
+  </data>
+  <data name="Discord_Warning_MessageContentIntentOff" xml:space="preserve">
+    <value>機器人還讀不到訊息內容。請到 Discord 開發者入口網站的機器人頁面，開啟 Message Content Intent。</value>
+  </data>
+  <data name="Discord_FiltersLabel" xml:space="preserve">
+    <value>哪些內容會互傳</value>
+  </data>
+  <data name="Discord_FilterChat" xml:space="preserve">
+    <value>玩家聊天，雙向（私訊永遠不會互傳）</value>
+  </data>
+  <data name="Discord_FilterJoinLeave" xml:space="preserve">
+    <value>玩家加入和離開</value>
+  </data>
+  <data name="Discord_FilterDeaths" xml:space="preserve">
+    <value>死亡和成就</value>
+  </data>
+  <data name="Discord_FilterServerState" xml:space="preserve">
+    <value>伺服器啟動和關閉</value>
+  </data>
+  <data name="Discord_FilterOnlineCount" xml:space="preserve">
+    <value>在機器人的 Discord 狀態顯示線上人數</value>
+  </data>
+  <data name="Discord_FilterListCommand" xml:space="preserve">
+    <value>讓 Discord 用 /list 查詢誰在線上</value>
+  </data>
+  <data name="Discord_FilterPrefixes" xml:space="preserve">
+    <value>不轉發以下開頭的訊息…</value>
+  </data>
+  <data name="Discord_PrefixesHint" xml:space="preserve">
+    <value>例如 ! 或 #。有多個時用空格分開。</value>
+  </data>
+  <data name="Discord_RemoteConsole" xml:space="preserve">
+    <value>讓管理員從 Discord 執行伺服器指令（/cmd）</value>
+  </data>
+  <data name="Discord_RemoteConsoleHint" xml:space="preserve">
+    <value>預設關閉。只有下方身分組的成員可以使用。</value>
+  </data>
+  <data name="Discord_RoleLabel" xml:space="preserve">
+    <value>管理員身分組 ID</value>
+  </data>
+  <data name="Discord_RoleHint" xml:space="preserve">
+    <value>在 Discord 伺服器設定對身分組按右鍵，選「複製身分組 ID」。</value>
+  </data>
+  <data name="Discord_LanguageLabel" xml:space="preserve">
+    <value>幫手訊息的語言</value>
+  </data>
+  <data name="Discord_LanguageHint" xml:space="preserve">
+    <value>玩家聊天、死亡和成就訊息會照遊戲原文轉發。</value>
+  </data>
+  <data name="Discord_StartOnBoot" xml:space="preserve">
+    <value>Windows 啟動時一起啟動</value>
+  </data>
+  <data name="Discord_StartOnBootHint" xml:space="preserve">
+    <value>使用登入工作排程，不需要系統管理員權限。</value>
+  </data>
+  <data name="Discord_VpsBootNote" xml:space="preserve">
+    <value>在 VPS 上，VPS 允許時幫手會在重新開機後自己啟動，否則會一直跑到 VPS 重新開機為止。</value>
+  </data>
+  <data name="Discord_HelpTitle" xml:space="preserve">
+    <value>怎麼建立 Discord 機器人？</value>
+  </data>
+  <data name="Discord_Help1" xml:space="preserve">
+    <value>1. 開啟 Discord 開發者入口網站（下方按鈕），按「New Application」並取個名字。</value>
+  </data>
+  <data name="Discord_Help2" xml:space="preserve">
+    <value>2. 開啟 Bot 頁面，按「Reset Token」，把 Token 複製到上面的欄位。</value>
+  </data>
+  <data name="Discord_Help3" xml:space="preserve">
+    <value>3. 在同一頁的 Privileged Gateway Intents 開啟 Message Content Intent。沒有它機器人讀不到聊天內容。</value>
+  </data>
+  <data name="Discord_Help4" xml:space="preserve">
+    <value>4. 開啟 OAuth2 的 URL Generator，勾選 bot 和 applications.commands 兩個範圍。Bot Permissions 勾選 View Channels、Send Messages、Embed Links 和 Manage Webhooks（Manage Webhooks 只有「像玩家本人」模式需要）。</value>
+  </data>
+  <data name="Discord_Help5" xml:space="preserve">
+    <value>5. 開啟產生的連結，選你的 Discord 伺服器並按「授權」。</value>
+  </data>
+  <data name="Discord_Help6" xml:space="preserve">
+    <value>6. 在 Discord 開啟開發者模式（使用者設定、進階），對聊天頻道按右鍵，選「複製頻道 ID」。</value>
+  </data>
+  <data name="Discord_OpenPortal" xml:space="preserve">
+    <value>開啟 Discord 開發者入口網站</value>
+  </data>
 </root>

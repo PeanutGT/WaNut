@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Bridge;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
 using WaNut.Core.Network;
@@ -29,6 +30,7 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly Spark _spark;
     private readonly DiscordNotifier _discord;
     private readonly PlayerFaces _faces;
+    private readonly BridgeManager _bridge;
 
     public MainViewModel(
         InstanceStore store,
@@ -47,9 +49,11 @@ public sealed partial class MainViewModel : ObservableObject
         DiscordNotifier discord,
         BackupCopyService backupCopies,
         GuideViewModel guide,
-        PlayerFaces faces)
+        PlayerFaces faces,
+        BridgeManager bridge)
     {
         _faces = faces;
+        _bridge = bridge;
         Guide = guide;
         appSettings.GuideRequested += (_, _) => StartGuide(GuideViewModel.Everything(Servers.Count > 0));
         backupCopies.CopyFailed += OnBackupCopyFailed;
@@ -191,7 +195,7 @@ public sealed partial class MainViewModel : ObservableObject
 
     private ServerViewModel NewServer(InstanceMetadata metadata)
     {
-        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _packs, _spark, _discord, _faces);
+        var server = new ServerViewModel(metadata, _controller, _store, AppSettings, _backups, _dialogs, _firewall, _portForwards, _tunnels, _clipboard, _mods, _packs, _spark, _discord, _faces, _bridge);
         server.Deleted += OnServerDeleted;
         server.Duplicated += OnServerDuplicated;
         server.TabRequested += OnTabRequested;
@@ -231,6 +235,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         server.Deleted -= OnServerDeleted;
+        _ = _bridge.ForgetAsync(server.Metadata);
         server.Duplicated -= OnServerDuplicated;
         var index = Servers.IndexOf(server);
         Servers.Remove(server);

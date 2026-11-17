@@ -295,18 +295,36 @@ public sealed class LocalBridgeDeployer : IBridgeDeployer
                 .ToList();
     }
 
+    public Task<IReadOnlyList<string>> GetRecentLogAsync(DeploymentTarget target, string serverId, int lines = 40, CancellationToken cancellationToken = default) =>
+        Task.FromResult(TailLog(serverId, lines));
+
     /// <summary>The end of bridge.log, for a failure message. The bridge never logs secrets.</summary>
     private string? LastLogLines(string serverId, int count = 15)
     {
-        var path = Path.Combine(FolderOf(serverId), "bridge.log");
-        if (!File.Exists(path))
-        {
-            return null;
-        }
+        var lines = TailLog(serverId, count);
+        return lines.Count == 0 ? null : string.Join('\n', lines);
+    }
 
-        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        using var reader = new StreamReader(stream);
-        var lines = reader.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        return string.Join('\n', lines.TakeLast(count));
+    /// <summary>Reads only the last part of the file, since the log keeps growing while the bridge runs.</summary>
+    private IReadOnlyList<string> TailLog(string serverId, int count)
+    {
+        var path = Path.Combine(FolderOf(serverId), "bridge.log");
+        try
+        {
+            if (!File.Exists(path))
+            {
+                return [];
+            }
+
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            const int Window = 64 * 1024;
+            stream.Seek(Math.Max(0, stream.Length - Window), SeekOrigin.Begin);
+            using var reader = new StreamReader(stream);
+            return [.. reader.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).TakeLast(count)];
+        }
+        catch (IOException)
+        {
+            return [];
+        }
     }
 }

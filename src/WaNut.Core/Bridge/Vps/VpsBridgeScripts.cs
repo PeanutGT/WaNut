@@ -165,6 +165,19 @@ public static class VpsBridgeScripts
             ? $"sudo -n journalctl -u {UnitName(serverId)} -n {lines.ToString(CultureInfo.InvariantCulture)} --no-pager -o cat 2>/dev/null; true"
             : $"tail -n {lines.ToString(CultureInfo.InvariantCulture)} {RemoteShell.Quote(ServerFolder(basePath, serverId) + "/bridge.log")} {RemoteShell.Quote(ServerFolder(basePath, serverId) + "/runner.log")} 2>/dev/null; true";
 
+    /// <summary>The bridge's recent log wherever it runs: the journal when it is a service, else bridge.log. Prints nothing when there is none.</summary>
+    public static string RecentLog(string home, string serverId, int lines)
+    {
+        var id = RemoteShell.Quote(serverId);
+        var unit = UnitName(serverId);
+        var count = lines.ToString(CultureInfo.InvariantCulture);
+        return string.Join('\n',
+            $"if [ -f /etc/systemd/system/{unit} ]; then sudo -n journalctl -u {unit} -n {count} --no-pager -o cat 2>/dev/null; exit 0; fi",
+            $"for b in {RemoteShell.Quote(SystemBase)} {RemoteShell.Quote(BaseFor(false, home))}; do",
+            $"  if [ -f \"$b\"/{id}/bridge.log ]; then tail -n {count} \"$b\"/{id}/bridge.log; break; fi",
+            "done; true");
+    }
+
     /// <summary>Removes the service and the server's folder; the shared executable too once no server uses it.</summary>
     public static string Remove(string home, string serverId)
     {

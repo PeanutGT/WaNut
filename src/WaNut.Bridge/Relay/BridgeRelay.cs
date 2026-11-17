@@ -42,6 +42,8 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
 
         if (ShouldForward(e))
         {
+            // Who and what kind, never the message text: the Discord tab shows this log to the host.
+            log.Info($"Minecraft to Discord: {e.Kind}{(e.Player is null ? string.Empty : " " + e.Player)}.");
             post(MessageFormatter.Format(e, config.Presentation, Texts));
         }
     }
@@ -54,6 +56,7 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
         if (action.Kind == InboundActionKind.Chat)
         {
             // Lost while the server is off; a Discord-only chat is fine then.
+            log.Info($"Discord to Minecraft: Chat {action.Author}.");
             await rcon.TryExecuteAsync(Tellraw.Build(action.Author!, action.Text!), cancellationToken).ConfigureAwait(false);
         }
     }

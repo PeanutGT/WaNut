@@ -12,4 +12,5 @@ public enum ServerTab
     Packs,
     Connect,
     Performance,
+    Discord,
 }

@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.App.Services;
 using WaNut.Core.Backups;
+using WaNut.Core.Bridge;
 using WaNut.Core.Collections;
 using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
@@ -75,7 +76,8 @@ public sealed partial class ServerViewModel : ObservableObject
         PackLibrary packs,
         Spark spark,
         DiscordNotifier discord,
-        PlayerFaces faces)
+        PlayerFaces faces,
+        BridgeManager bridge)
     {
         _discord = discord;
         Metadata = metadata;
@@ -90,6 +92,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Mods = new ModsViewModel(this, mods, dialogs, backups);
         Packs = new PacksViewModel(this, packs, dialogs);
         Performance = new PerformanceViewModel(this, spark);
+        Discord = new DiscordViewModel(this, bridge, app, dialogs);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
@@ -132,6 +135,8 @@ public sealed partial class ServerViewModel : ObservableObject
     public ConnectViewModel Connect { get; }
 
     public PerformanceViewModel Performance { get; }
+
+    public DiscordViewModel Discord { get; }
 
     public ModsViewModel Mods { get; }
 
@@ -592,6 +597,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Packs.OnServerStatusChanged();
         Connect.OnServerStatusChanged(value);
         Performance.OnServerStatusChanged();
+        Discord.OnServerStatusChanged();
         UpdateSteps(value);
         if (value == ServerStatus.Online)
         {

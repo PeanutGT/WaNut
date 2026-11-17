@@ -133,6 +133,8 @@ public partial class App : Application
             sp.GetRequiredService<IBridgeBinarySource>(),
             sp.GetRequiredService<DiscordCheck>()));
         services.AddSingleton<BridgeDeployerFactory>();
+        services.AddSingleton(sp => new BridgeSettingsStore(sp.GetRequiredService<LauncherPaths>(), new DpapiProtector(BridgeSecrets.Entropy)));
+        services.AddSingleton<BridgeManager>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
