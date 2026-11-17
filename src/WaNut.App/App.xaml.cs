@@ -9,6 +9,7 @@ using WaNut.Core;
 using WaNut.Core.Backups;
 using WaNut.Core.Bridge;
 using WaNut.Core.Bridge.Local;
+using WaNut.Core.Bridge.Vps;
 using WaNut.Core.Diagnostics;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
@@ -124,6 +125,13 @@ public partial class App : Application
             sp.GetRequiredService<DiscordCheck>(),
             sp.GetRequiredService<ILocalBridgeHost>(),
             new DpapiProtector(BridgeSecrets.Entropy)));
+        services.AddSingleton<IBridgeDeployer>(sp => new SshVpsBridgeDeployer(
+            sp.GetRequiredService<VpsConnector>(),
+            id => sp.GetRequiredService<AppSettingsStore>().Load().Vps.FirstOrDefault(v => v.Id == id),
+            sp.GetRequiredService<InstanceStore>(),
+            sp.GetRequiredService<VpsSettingsSync>(),
+            sp.GetRequiredService<IBridgeBinarySource>(),
+            sp.GetRequiredService<DiscordCheck>()));
         services.AddSingleton<BridgeDeployerFactory>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();

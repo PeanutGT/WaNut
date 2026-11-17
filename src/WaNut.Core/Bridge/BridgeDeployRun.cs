@@ -42,7 +42,8 @@ public sealed class BridgeDeployRun
     /// <summary>Registers how to take back a change that was just made. Undo steps never get the cancelled token.</summary>
     public void OnFailure(Func<Task> undo) => _undo.Push(undo);
 
-    public void OnFailure(Action undo) => _undo.Push(() =>
+    /// <summary>The same for an undo that needs no waiting. Its own name, so a lambda that returns a Task never lands here unawaited.</summary>
+    public void OnFailureSync(Action undo) => _undo.Push(() =>
     {
         undo();
         return Task.CompletedTask;
