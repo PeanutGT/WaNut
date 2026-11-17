@@ -1,5 +1,5 @@
 using WaNut.Bridge.Discord;
-using WaNut.Bridge.Logs;
+using WaNut.Bridge.GameLog;
 using WaNut.Core.Bridge;
 using WaNut.Core.Notifications;
 

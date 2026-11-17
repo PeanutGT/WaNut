@@ -1,6 +1,6 @@
 using System.Globalization;
 using WaNut.Bridge.Discord;
-using WaNut.Bridge.Logs;
+using WaNut.Bridge.GameLog;
 using WaNut.Bridge.Rcon;
 using WaNut.Bridge.Relay;
 using WaNut.Core.Bridge;
