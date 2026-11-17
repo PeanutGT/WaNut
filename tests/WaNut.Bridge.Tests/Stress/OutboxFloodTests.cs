@@ -7,7 +7,8 @@ public sealed class OutboxFloodTests
 {
     private static string Line(int i) => $"line-{i:D6}";
 
-    private static int Number(string line) => int.Parse(line[5..], System.Globalization.CultureInfo.InvariantCulture);
+    // A line may arrive as "line-000123" or, in a flood of different players, as "**Player3**: line-000123".
+    private static int Number(string line) => int.Parse(line[(line.IndexOf("line-", StringComparison.Ordinal) + 5)..], System.Globalization.CultureInfo.InvariantCulture);
 
     private static IEnumerable<int> Numbers(FakeDiscordWebhook webhook) =>
         webhook.Accepted.SelectMany(post => post.Split('\n')).Select(Number);
@@ -26,7 +27,7 @@ public sealed class OutboxFloodTests
     [InlineData(false)]
     public async Task Flood_WavesBelowTheQueueSize_LoseNothingAndKeepOrder(bool bucketHeaders)
     {
-        // 40 waves of 400 lines, each from a different player, so no two lines can share a post: the worst case for the limit.
+        // 40 waves of 400 lines from seven players taking turns: no two neighbours share a sender, the worst case for merging.
         var (outbox, webhook, _) = Create(bucketHeaders);
         var run = outbox.RunAsync(CancellationToken.None);
         var sent = 0;
@@ -37,21 +38,21 @@ public sealed class OutboxFloodTests
                 outbox.Enqueue(new OutgoingMessage(Line(sent), $"Player{sent % 7}"));
             }
 
-            await WaitUntilAsync(() => webhook.Accepted.Count >= sent);
+            await WaitUntilAsync(() => Numbers(webhook).Count() >= sent);
         }
 
         outbox.Complete();
         await run.WaitAsync(TimeSpan.FromSeconds(30));
 
-        Assert.Equal(Enumerable.Range(0, sent), webhook.Accepted.Select(Number).ToList());
+        Assert.Equal(Enumerable.Range(0, sent), Numbers(webhook).ToList());
         Assert.True(webhook.LongestContent <= DiscordBatcher.MaxContentLength);
         if (bucketHeaders)
         {
             Assert.Equal(0, webhook.TooManyRequests);
         }
 
-        // 16000 posts at 5 per 2 seconds: the virtual clock shows the limit was kept, not just survived.
-        Assert.True(webhook.Now >= TimeSpan.FromSeconds(16000 / 5 * 2 - 2), $"finished after only {webhook.Now}");
+        // Far fewer requests than lines: a flood is merged across players instead of waiting for one request each.
+        Assert.True(webhook.Requests < sent / 5, $"{webhook.Requests} requests for {sent} lines");
     }
 
     [Fact]
@@ -79,7 +80,7 @@ public sealed class OutboxFloodTests
     }
 
     [Fact]
-    public async Task Flood_FarBeyondTheQueueSize_DropsOldestKeepsOrderAndNewestLineArrives()
+    public async Task Flood_FarBeyondTheQueueSize_KeepsOrderAndTheNewestLineArrives()
     {
         var (outbox, webhook, log) = Create();
         var run = outbox.RunAsync(CancellationToken.None);
@@ -100,7 +101,8 @@ public sealed class OutboxFloodTests
         Assert.Equal(total - 1, numbers[^1]);
         Assert.Equal(numbers.OrderBy(n => n), numbers);
         Assert.Equal(numbers.Count, numbers.Distinct().Count());
-        Assert.Contains("old messages were dropped", log.ToString(), StringComparison.Ordinal);
+        Assert.True(numbers.Count >= DiscordOutbox.Capacity, $"only {numbers.Count} of {total} lines arrived");
+        Assert.Equal(numbers.Count < total, log.ToString().Contains("old messages were dropped", StringComparison.Ordinal));
     }
 
     [Fact]

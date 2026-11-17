@@ -94,8 +94,25 @@ public sealed class DiscordOutboxTests
 
         await outbox.RunAsync(CancellationToken.None);
 
-        Assert.Equal(DiscordOutbox.Capacity, poster.Posts.Count);
-        Assert.Equal("line 5", poster.Posts[0].Content);
+        // Every round is a flood of different players, so the lines are merged across them: nothing is sent per line.
+        var lines = poster.Posts.SelectMany(post => post.Content!.Split('\n')).ToList();
+        Assert.Equal(DiscordOutbox.Capacity, lines.Count);
+        Assert.Equal("**p5**: line 5", lines[0]);
+        Assert.True(poster.Posts.Count <= DiscordOutbox.Capacity / DiscordOutbox.MaxMessagesPerRound * DiscordOutbox.MaxPostsPerRound);
+    }
+
+    [Fact]
+    public async Task RunAsync_FewPlayersTalking_KeepsEachUnderTheirOwnNameAndPicture()
+    {
+        var poster = new FakePoster();
+        var outbox = NewOutbox(poster);
+        outbox.Enqueue(new("hi", "Steve", "https://mc-heads.net/avatar/Steve/64"));
+        outbox.Enqueue(new("hello", "Alex", "https://mc-heads.net/avatar/Alex/64"));
+        outbox.Complete();
+
+        await outbox.RunAsync(CancellationToken.None);
+
+        Assert.Equal(["Steve", "Alex"], poster.Posts.Select(p => p.Username));
     }
 
     private DiscordOutbox NewOutbox(IDiscordPoster poster) => new(poster, new BridgeLog(TextWriter.Null), RecordWait);

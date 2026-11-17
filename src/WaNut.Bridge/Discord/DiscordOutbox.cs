@@ -15,6 +15,12 @@ public sealed class DiscordOutbox
 
     public const int MaxMessagesPerRound = 100;
 
+    /// <summary>
+    /// More posts than this in one round is a flood (about what a rate-limit window allows, 5 per 2 seconds, over
+    /// the 300 ms batch window); the round is then merged across players so no line has to wait for its own request.
+    /// </summary>
+    public const int MaxPostsPerRound = 5;
+
     public static readonly TimeSpan BatchWindow = TimeSpan.FromMilliseconds(300);
 
     private static readonly TimeSpan FailureWait = TimeSpan.FromSeconds(2);
@@ -53,7 +59,13 @@ public sealed class DiscordOutbox
                 batch.Add(message);
             }
 
-            foreach (var post in DiscordBatcher.Merge(batch))
+            var posts = DiscordBatcher.Merge(batch);
+            if (posts.Count > MaxPostsPerRound)
+            {
+                posts = DiscordBatcher.Merge(batch, collapseSenders: true);
+            }
+
+            foreach (var post in posts)
             {
                 await SendAsync(post, cancellationToken).ConfigureAwait(false);
             }
