@@ -18,7 +18,8 @@ public sealed class StatusPipeServerTests
         Assert.Equal(BridgeState.Running, status?.State);
         Assert.True(status?.RconConnected);
         Assert.Equal(BridgeState.Stopped, stopped?.State);
-        Assert.True(stop.IsCancellationRequested);
+        // The answer goes out before the bridge acts on it.
+        Assert.True(SpinWait.SpinUntil(() => stop.IsCancellationRequested, TimeSpan.FromSeconds(5)));
         var ended = await Record.ExceptionAsync(() => running.WaitAsync(TimeSpan.FromSeconds(5)));
         Assert.True(ended is null or OperationCanceledException);
     }
