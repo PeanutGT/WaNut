@@ -88,11 +88,20 @@ public sealed class RconRecoveryTests
     [Fact]
     public async Task ServerDownForALongTime_BackoffGrowsToTheCapAndStaysThere()
     {
-        await using var server = new FlakyRconServer("pw");
-        server.Start();
-        server.Stop();
+        // The refusal is thrown by hand: a real refused connection takes about a second on Windows, which would only slow the test.
         var waits = new List<TimeSpan>();
-        var link = NewLink(server, "pw", waits);
+        var link = new RconLink(
+            _ => throw new System.Net.Sockets.SocketException((int)System.Net.Sockets.SocketError.ConnectionRefused),
+            new BridgeLog(TextWriter.Null),
+            async (wait, token) =>
+            {
+                lock (waits)
+                {
+                    waits.Add(wait);
+                }
+
+                await Task.Delay(2, token);
+            });
         using var stop = new CancellationTokenSource();
         var run = link.RunAsync(stop.Token);
 
