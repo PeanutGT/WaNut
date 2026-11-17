@@ -17,6 +17,12 @@ public sealed class LogTailReader(string path)
     /// <summary>The most one poll reads, so a huge file never fills memory at once; the rest comes next poll.</summary>
     public const int MaxBytesPerPoll = 4 * 1024 * 1024;
 
+    /// <summary>
+    /// The longest line kept, in bytes; the rest of a longer one is dropped. Chat and server messages are far shorter,
+    /// so only a runaway line (a mod dumping a huge object without line breaks) is cut, and it cannot fill memory.
+    /// </summary>
+    public const int MaxLineLength = 16 * 1024;
+
     public static readonly TimeSpan DefaultPollInterval = TimeSpan.FromSeconds(1);
 
     private readonly List<byte> _partialLine = [];
@@ -120,24 +126,33 @@ public sealed class LogTailReader(string path)
             var newline = bytes.IndexOf((byte)'\n');
             if (newline < 0)
             {
-                _partialLine.AddRange(bytes);
+                AppendPartial(bytes);
                 return lines;
             }
 
             string line;
             if (_partialLine.Count > 0)
             {
-                _partialLine.AddRange(bytes[..newline]);
+                AppendPartial(bytes[..newline]);
                 line = Encoding.UTF8.GetString([.. _partialLine]);
                 _partialLine.Clear();
             }
             else
             {
-                line = Encoding.UTF8.GetString(bytes[..newline]);
+                line = Encoding.UTF8.GetString(bytes[..Math.Min(newline, MaxLineLength)]);
             }
 
             lines.Add(line.TrimEnd('\r'));
             bytes = bytes[(newline + 1)..];
+        }
+    }
+
+    private void AppendPartial(ReadOnlySpan<byte> bytes)
+    {
+        var room = MaxLineLength - _partialLine.Count;
+        if (room > 0)
+        {
+            _partialLine.AddRange(bytes[..Math.Min(room, bytes.Length)]);
         }
     }
 
