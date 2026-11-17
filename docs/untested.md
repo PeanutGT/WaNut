@@ -289,3 +289,24 @@ VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`�
 - 對一份真的 Vanilla／Paper `server.properties` 套用 `RconSetup.Apply`：除了 RCON 四個鍵，其餘註解與順序完全不變。
 - 重啟伺服器後 RCON 真的有在 `rcon.port` 監聽（用 `mcrcon` 之類的工具連 127.0.0.1 測）。
 - Vanilla 沒有 `rcon.ip` 這個鍵（RCON 綁在 `server-ip`），所以實際上會綁在所有網卡；確認防火牆沒有對外開 RCON 連接埠。
+
+## Discord 橋接引擎（add-bridge-engine）
+
+新增 `src/WaNut.Bridge`：獨立的背景程式（Windows 與 Linux 都能跑），讀 `bridge.config.json` 後持續運作。追蹤 `logs/latest.log`（伺服器重開換新檔時會自動從新檔開頭讀），把聊天、上下線、死亡、進度、開關機轉到 Discord（Webhook 擬真玩家、Embed 卡片、純文字三種樣式，300 毫秒內的多行合併成一則，遇到 429 依 Discord 指定時間等待後重送）；用 NetCord 連 Discord Gateway，把頻道訊息用 RCON `tellraw` 送進遊戲（自己、其他機器人與 Webhook 的訊息一律不轉，避免迴圈），支援 `/list` 與管理員限定的 `/cmd`，機器人狀態顯示「5 / 20 online」。RCON 斷線後 1、2、4…最多 60 秒重試，看到伺服器 Done 立刻重連。只有單元測試（132 個）和 Linux 上用假 RCON 伺服器的冒煙測試（RCON 連線、`list` 有跑，假 Webhook 回 404 時有記錄錯誤），沒有連過真的 Discord 或真的 Minecraft 伺服器。還沒有部署器和畫面（Phase 3、4），要手動寫設定檔、手動執行。
+
+發佈大小（`dotnet publish src/WaNut.Bridge -c Release -r <平台>`）：win-x64 12.8 MB、linux-x64 14.9 MB、linux-arm64 14.2 MB。Linux 上沒接 Discord Gateway 時 RSS 約 39 MB，其中約 17 MB 是共用的程式檔頁面，私有記憶體約 22 MB。
+
+要在真的伺服器和 Discord 上看的：
+- 手動測法：在伺服器資料夾旁放 `bridge.config.json`（`logFile`、`rconPort`、`rconPassword`、`webhookUrl` 或 `botToken`＋`channelId`），伺服器 `server.properties` 先用 `RconSetup` 打開 RCON，執行 `WaNut.Bridge --config <路徑>`。
+- Vanilla、Paper、Fabric、Forge、NeoForge 各開一台：聊天、上下線、死亡、進度、伺服器開關機都會出現在 Discord；`/msg`、`/tell` 私訊不會出現。
+- Webhook 模式：聊天以玩家名字和頭像顯示；名字含 "discord" 的玩家改成「**名字**: 訊息」。
+- Embed 與純文字模式（需要 bot token）：顏色與格式正確。
+- 很多人同時上線或洗版：Discord 不會一則一則刷，會合併；被限速時日誌有等待、最後都送到。
+- Discord 頻道打字：遊戲內顯示 `[DC] 名字: 訊息`，中文、表情符號、引號、反斜線都正常，沒有變成指令；機器人自己的訊息不會被轉回遊戲。
+- `/list` 回覆線上玩家；`/cmd` 只有 `adminRoleId` 身分組的人能用，其他人收到拒絕訊息。
+- 機器人狀態列顯示「x / y online」，伺服器關掉後變「Server offline」。
+- 伺服器重開（`latest.log` 被改名、建新檔）：橋接不用重開，新檔的訊息照常轉。
+- 關掉伺服器再開：RCON 自動重連，不用重開橋接。
+- 拔網路幾分鐘再接上：Discord 自動重連，期間的遊戲訊息之後補送（佇列最多 500 行）。
+- Discord 開發者後台沒開 Message Content Intent 時：日誌有清楚錯誤，遊戲到 Discord 仍正常。
+- 接上 Gateway 後在 Linux VPS 上量 RSS（目標 30 MB 以內）。
