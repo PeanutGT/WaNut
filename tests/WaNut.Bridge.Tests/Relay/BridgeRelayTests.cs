@@ -68,34 +68,29 @@ public sealed class BridgeRelayTests
     }
 
     [Fact]
-    public async Task OnDiscordMessageAsync_List_RepliesWithPlayers()
+    public async Task RunCommandAsync_List_AnswersWithPlayers()
     {
-        var relay = NewRelay(new BridgeConfig { ChannelId = "100" }, new FakeRcon(_ => "There are 2 of a max of 20 players online: Steve, Alex"));
+        var relay = NewRelay(new BridgeConfig(), new FakeRcon(_ => "There are 2 of a max of 20 players online: Steve, Alex"));
 
-        await relay.OnDiscordMessageAsync(new InboundMessage(100, 1, "Amy", false, false, [], "/list"), 999, CancellationToken.None);
-
-        Assert.Equal("Online (2/20): Steve, Alex", Assert.Single(_posted).Text);
+        Assert.Equal("Online (2/20): Steve, Alex", await relay.RunCommandAsync(new InboundAction(InboundActionKind.ListPlayers), CancellationToken.None));
     }
 
     [Fact]
-    public async Task OnDiscordMessageAsync_ListWhileServerOff_SaysOffline()
+    public async Task RunCommandAsync_ListWhileServerOffInChinese_SaysOffline()
     {
-        var relay = NewRelay(new BridgeConfig { ChannelId = "100" }, new FakeRcon(_ => null));
+        var relay = NewRelay(new BridgeConfig { Language = "zh-TW" }, new FakeRcon(_ => null));
 
-        await relay.OnDiscordMessageAsync(new InboundMessage(100, 1, "Amy", false, false, [], "/list"), 999, CancellationToken.None);
-
-        Assert.Equal(BridgeTexts.ServerOffline, Assert.Single(_posted).Text);
+        Assert.Equal("伺服器目前沒有開。", await relay.RunCommandAsync(new InboundAction(InboundActionKind.ListPlayers), CancellationToken.None));
     }
 
     [Fact]
-    public async Task OnDiscordMessageAsync_ConsoleOutput_IsACodeBlockThatCannotBeClosedEarly()
+    public async Task RunCommandAsync_ConsoleOutput_IsACodeBlockThatCannotBeClosedEarly()
     {
-        var config = new BridgeConfig { ChannelId = "100", AdminRoleId = "5", Filters = new BridgeFilters { RemoteConsole = true } };
-        var relay = NewRelay(config, new FakeRcon(_ => "§aDone ``` sneaky"));
+        var relay = NewRelay(new BridgeConfig(), new FakeRcon(_ => "§aDone ``` sneaky"));
 
-        await relay.OnDiscordMessageAsync(new InboundMessage(100, 1, "Amy", false, false, [5], "/cmd say hi"), 999, CancellationToken.None);
+        var answer = await relay.RunCommandAsync(new InboundAction(InboundActionKind.Console, "Amy", "say hi"), CancellationToken.None);
 
-        Assert.Equal("```\nDone `​`` sneaky\n```", Assert.Single(_posted).Text);
+        Assert.Equal("```\nDone `\u200B`` sneaky\n```", answer);
     }
 
     private BridgeRelay NewRelay(BridgeConfig config, FakeRcon? rcon = null) =>

@@ -23,7 +23,7 @@ public static class MessageFormatter
     /// <summary>The player's head; names are checked to be plain letters, digits and underscores before they get here.</summary>
     public static string AvatarUrl(string player) => $"https://mc-heads.net/avatar/{player}/64";
 
-    public static OutgoingMessage Format(GameEvent e, DiscordPresentation presentation)
+    public static OutgoingMessage Format(GameEvent e, DiscordPresentation presentation, BridgeTexts texts)
     {
         var player = DiscordWebhook.Escape(e.Player ?? string.Empty);
         if (e.Kind == GameEventKind.Chat)
@@ -40,12 +40,12 @@ public static class MessageFormatter
 
         var (line, color) = e.Kind switch
         {
-            GameEventKind.Joined => (BridgeTexts.Joined(e.Player!), JoinColor),
-            GameEventKind.Left => (BridgeTexts.Left(e.Player!), LeaveColor),
+            GameEventKind.Joined => (texts.Joined(e.Player!), JoinColor),
+            GameEventKind.Left => (texts.Left(e.Player!), LeaveColor),
             GameEventKind.Death => (e.Text!, DeathColor),
             GameEventKind.Advancement => (e.Text!, AdvancementColor),
-            GameEventKind.ServerStarted => (BridgeTexts.ServerStarted, ServerColor),
-            _ => (BridgeTexts.ServerStopping, ServerColor),
+            GameEventKind.ServerStarted => (texts.ServerStarted, ServerColor),
+            _ => (texts.ServerStopping, ServerColor),
         };
         var escaped = DiscordWebhook.Escape(line);
         return presentation switch

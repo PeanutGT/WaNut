@@ -54,50 +54,57 @@ public sealed class InboundRouterTests
         Assert.Equal(InboundActionKind.Ignore, InboundRouter.Route(Message("hello"), config, Bot).Kind);
     }
 
-    [Theory]
-    [InlineData("/list")]
-    [InlineData("/LIST ")]
-    public void Route_List_AsksForPlayers(string text)
+    [Fact]
+    public void RouteCommand_List_AsksForPlayers()
     {
-        Assert.Equal(InboundActionKind.ListPlayers, InboundRouter.Route(Message(text), Config, Bot).Kind);
+        Assert.Equal(InboundActionKind.ListPlayers, InboundRouter.Route(Command("list"), Config).Kind);
     }
 
     [Fact]
-    public void Route_ListOff_IsIgnored()
+    public void RouteCommand_ListOff_IsIgnored()
     {
         var config = Config with { Filters = new BridgeFilters { ListCommand = false } };
 
-        Assert.Equal(InboundActionKind.Ignore, InboundRouter.Route(Message("/list"), config, Bot).Kind);
+        Assert.Equal(InboundActionKind.Ignore, InboundRouter.Route(Command("list"), config).Kind);
     }
 
     [Fact]
-    public void Route_WordStartingWithList_IsChat()
+    public void RouteCommand_OtherChannel_SaysWhereToUseIt()
     {
-        Assert.Equal(InboundActionKind.Chat, InboundRouter.Route(Message("/listen to this"), Config, Bot).Kind);
+        Assert.Equal(InboundActionKind.WrongChannel, InboundRouter.Route(Command("list") with { ChannelId = 101 }, Config).Kind);
     }
 
     [Fact]
-    public void Route_CmdFromAdmin_RunsTheCommandWithoutSlash()
+    public void RouteCommand_CmdFromAdmin_RunsTheCommandWithoutSlash()
     {
-        var message = Message("/cmd /time set day") with { RoleIds = [1, AdminRole] };
+        var command = Command("cmd", "/time set day") with { RoleIds = [1, AdminRole] };
 
-        Assert.Equal(new InboundAction(InboundActionKind.Console, "Amy", "time set day"), InboundRouter.Route(message, Config, Bot));
+        Assert.Equal(new InboundAction(InboundActionKind.Console, "Amy", "time set day"), InboundRouter.Route(command, Config));
     }
 
     [Fact]
-    public void Route_CmdFromMember_IsDenied()
+    public void RouteCommand_CmdFromMember_IsDenied()
     {
-        Assert.Equal(InboundActionKind.ConsoleDenied, InboundRouter.Route(Message("/cmd op Amy"), Config, Bot).Kind);
+        Assert.Equal(InboundActionKind.ConsoleDenied, InboundRouter.Route(Command("cmd", "op Amy"), Config).Kind);
     }
 
     [Fact]
-    public void Route_CmdWhenConsoleOff_IsIgnoredEvenForAdmins()
+    public void RouteCommand_CmdWhenConsoleOff_IsIgnoredEvenForAdmins()
     {
         var config = Config with { Filters = new BridgeFilters() };
-        var message = Message("/cmd op Amy") with { RoleIds = [AdminRole] };
+        var command = Command("cmd", "op Amy") with { RoleIds = [AdminRole] };
 
-        Assert.Equal(InboundActionKind.Ignore, InboundRouter.Route(message, config, Bot).Kind);
+        Assert.Equal(InboundActionKind.Ignore, InboundRouter.Route(command, config).Kind);
     }
+
+    [Fact]
+    public void Route_TextThatLooksLikeACommand_IsJustChat()
+    {
+        Assert.Equal(InboundActionKind.Chat, InboundRouter.Route(Message("/list"), Config, Bot).Kind);
+    }
+
+    private static SlashCommand Command(string name, string? line = null) =>
+        new("1", "tok", "app", Channel, 1, "Amy", [], name, line is null ? new Dictionary<string, string>() : new Dictionary<string, string> { ["command"] = line });
 
     private static InboundMessage Message(string content) => new(Channel, 1, "Amy", false, false, [], content);
 }

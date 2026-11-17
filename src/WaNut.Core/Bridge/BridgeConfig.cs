@@ -33,6 +33,12 @@ public sealed record BridgeConfig
 
     public DiscordPresentation Presentation { get; set; } = DiscordPresentation.Webhook;
 
+    /// <summary>
+    /// The language of the bridge's own words in Discord ("en" or "zh-TW"). Chat and the server's death and advancement
+    /// lines are passed on as written.
+    /// </summary>
+    public string Language { get; set; } = "en";
+
     /// <summary>The Discord role allowed to use the remote console when <see cref="BridgeFilters.RemoteConsole"/> is on.</summary>
     public string? AdminRoleId { get; set; }
 

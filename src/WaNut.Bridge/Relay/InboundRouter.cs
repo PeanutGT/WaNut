@@ -4,19 +4,14 @@ using WaNut.Core.Bridge;
 
 namespace WaNut.Bridge.Relay;
 
-/// <summary>Decides what a Discord message in the bridge channel should do in game.</summary>
+/// <summary>Decides what a Discord message or slash command should do in game.</summary>
 public static class InboundRouter
 {
-    public const string ListCommand = "/list";
-
-    public const string ConsoleCommand = "/cmd";
-
     /// <param name="botUserId">The bridge bot's own id.</param>
     public static InboundAction Route(InboundMessage message, BridgeConfig config, ulong botUserId)
     {
         // Loop guard: the bridge's own posts (bot or webhook) and every other bot or webhook never go back into the game.
-        if (!ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var channelId)
-            || message.ChannelId != channelId
+        if (!IsBridgeChannel(message.ChannelId, config)
             || message.IsBot
             || message.IsWebhook
             || message.AuthorId == botUserId)
@@ -25,30 +20,7 @@ public static class InboundRouter
         }
 
         var text = message.Content.Trim();
-        if (text.Length == 0)
-        {
-            return InboundAction.Ignore;
-        }
-
-        if (IsCommand(text, ListCommand))
-        {
-            return config.Filters.ListCommand ? new InboundAction(InboundActionKind.ListPlayers) : InboundAction.Ignore;
-        }
-
-        if (IsCommand(text, ConsoleCommand))
-        {
-            var command = text[ConsoleCommand.Length..].Trim().TrimStart('/');
-            if (!config.Filters.RemoteConsole || command.Length == 0)
-            {
-                return InboundAction.Ignore;
-            }
-
-            return IsAdmin(message, config)
-                ? new InboundAction(InboundActionKind.Console, message.AuthorName, command)
-                : new InboundAction(InboundActionKind.ConsoleDenied);
-        }
-
-        if (!config.Filters.Chat || HasIgnoredPrefix(text, config.Filters))
+        if (text.Length == 0 || !config.Filters.Chat || HasIgnoredPrefix(text, config.Filters))
         {
             return InboundAction.Ignore;
         }
@@ -56,13 +28,47 @@ public static class InboundRouter
         return new InboundAction(InboundActionKind.Chat, message.AuthorName, text);
     }
 
+    public static InboundAction Route(SlashCommand command, BridgeConfig config)
+    {
+        var kind = command.Name switch
+        {
+            SlashCommandDefinitions.List when config.Filters.ListCommand => InboundActionKind.ListPlayers,
+            SlashCommandDefinitions.Console when config.Filters.RemoteConsole => InboundActionKind.Console,
+            _ => InboundActionKind.Ignore,
+        };
+        if (kind == InboundActionKind.Ignore)
+        {
+            return InboundAction.Ignore;
+        }
+
+        if (!IsBridgeChannel(command.ChannelId, config))
+        {
+            return new InboundAction(InboundActionKind.WrongChannel);
+        }
+
+        if (kind == InboundActionKind.ListPlayers)
+        {
+            return new InboundAction(kind);
+        }
+
+        var line = command.Options.GetValueOrDefault(SlashCommandDefinitions.ConsoleOption, string.Empty).Trim().TrimStart('/');
+        if (line.Length == 0)
+        {
+            return InboundAction.Ignore;
+        }
+
+        return IsAdmin(command.RoleIds, config)
+            ? new InboundAction(InboundActionKind.Console, command.UserName, line)
+            : new InboundAction(InboundActionKind.ConsoleDenied);
+    }
+
     /// <summary>True when the text starts with one of the prefixes the user chose to keep on one side.</summary>
     public static bool HasIgnoredPrefix(string text, BridgeFilters filters) =>
         filters.IgnoredPrefixes.Any(prefix => prefix.Length > 0 && text.StartsWith(prefix, StringComparison.Ordinal));
 
-    private static bool IsCommand(string text, string command) =>
-        text.StartsWith(command, StringComparison.OrdinalIgnoreCase) && (text.Length == command.Length || char.IsWhiteSpace(text[command.Length]));
+    private static bool IsBridgeChannel(ulong channelId, BridgeConfig config) =>
+        ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var id) && channelId == id;
 
-    private static bool IsAdmin(InboundMessage message, BridgeConfig config) =>
-        ulong.TryParse(config.AdminRoleId, NumberStyles.None, CultureInfo.InvariantCulture, out var roleId) && message.RoleIds.Contains(roleId);
+    private static bool IsAdmin(IReadOnlyList<ulong> roleIds, BridgeConfig config) =>
+        ulong.TryParse(config.AdminRoleId, NumberStyles.None, CultureInfo.InvariantCulture, out var roleId) && roleIds.Contains(roleId);
 }

@@ -7,12 +7,15 @@ public enum InboundActionKind
     /// <summary>Show the message in game.</summary>
     Chat,
 
-    /// <summary>"/list": answer with who is online.</summary>
+    /// <summary>/list: answer with who is online.</summary>
     ListPlayers,
 
-    /// <summary>"/cmd ...": run a server command for an admin.</summary>
+    /// <summary>/cmd: run a server command for an admin.</summary>
     Console,
 
-    /// <summary>"/cmd ..." from someone without the admin role.</summary>
+    /// <summary>/cmd from someone without the admin role.</summary>
     ConsoleDenied,
+
+    /// <summary>A bridge command used outside the bridge channel.</summary>
+    WrongChannel,
 }

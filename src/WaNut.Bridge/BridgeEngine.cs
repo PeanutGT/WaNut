@@ -1,5 +1,6 @@
 using System.Globalization;
 using WaNut.Bridge.Discord;
+using WaNut.Bridge.Discord.Gateway;
 using WaNut.Bridge.GameLog;
 using WaNut.Bridge.Rcon;
 using WaNut.Bridge.Relay;
@@ -44,7 +45,8 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
         rcon.ConnectionChanged += _ => Kick();
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        await using var gateway = string.IsNullOrWhiteSpace(config.BotToken) ? null : new DiscordGateway(config.BotToken, log);
+        var gateway = string.IsNullOrWhiteSpace(config.BotToken) ? null : new DiscordGateway(config.BotToken, log);
+        var gatewayRun = Task.CompletedTask;
         var tasks = new List<Task>
         {
             outbox.RunAsync(stop.Token),
@@ -55,16 +57,28 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
         if (gateway is not null)
         {
+            var rest = new DiscordRest(http, config.BotToken!);
+            var commandsRegistered = false;
             gateway.MessageReceived += message => relay.OnDiscordMessageAsync(message, gateway.BotUserId, stop.Token);
-            try
+            // REST calls and RCON can be slow; off the Gateway's read loop so heartbeats keep being answered.
+            gateway.CommandReceived += command =>
             {
-                await gateway.StartAsync(stop.Token).ConfigureAwait(false);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+                _ = Task.Run(() => AnswerCommandAsync(relay, rest, command, stop.Token), stop.Token);
+                return Task.CompletedTask;
+            };
+            gateway.Ready += applicationId =>
             {
-                // Game to Discord still works through the webhook; only Discord to game is lost.
-                log.Error($"Could not sign in to Discord with the bot token: {ex.Message}");
-            }
+                if (!commandsRegistered)
+                {
+                    commandsRegistered = true;
+                    _ = Task.Run(async () => commandsRegistered = await RegisterCommandsAsync(rest, applicationId, stop.Token).ConfigureAwait(false), stop.Token);
+                }
+
+                return Task.CompletedTask;
+            };
+
+            // Not in the list WhenAny watches: a refused token ends only Discord to game, not the whole bridge.
+            gatewayRun = gateway.RunAsync(stop.Token);
         }
         else
         {
@@ -81,12 +95,57 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
             await stop.CancelAsync().ConfigureAwait(false);
             try
             {
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                await Task.WhenAll([.. tasks, gatewayRun]).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 // Stopping.
             }
+        }
+    }
+
+    private async Task<bool> RegisterCommandsAsync(DiscordRest rest, string applicationId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var guildId = await rest.GetGuildIdAsync(ulong.Parse(config.ChannelId!, CultureInfo.InvariantCulture), cancellationToken).ConfigureAwait(false);
+            await rest.RegisterCommandsAsync(
+                applicationId,
+                guildId,
+                SlashCommandDefinitions.Build(config.Filters.ListCommand, config.Filters.RemoteConsole),
+                cancellationToken).ConfigureAwait(false);
+            log.Info("Slash commands registered.");
+            return true;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or System.Text.Json.JsonException or KeyNotFoundException
+            || (ex is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+        {
+            log.Error($"Could not register slash commands: {ex.Message} Invite the bot with the applications.commands scope.");
+            return false;
+        }
+    }
+
+    private async Task AnswerCommandAsync(BridgeRelay relay, DiscordRest rest, SlashCommand command, CancellationToken cancellationToken)
+    {
+        var action = InboundRouter.Route(command, config);
+        if (action.Kind == InboundActionKind.Ignore)
+        {
+            return;
+        }
+
+        try
+        {
+            // Everyone may see who is online; console output and refusals are for the asker only.
+            await rest.DeferReplyAsync(command, ephemeral: action.Kind != InboundActionKind.ListPlayers, cancellationToken).ConfigureAwait(false);
+            var answer = await relay.RunCommandAsync(action, cancellationToken).ConfigureAwait(false);
+            if (answer is not null)
+            {
+                await rest.EditReplyAsync(command, answer, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
+        {
+            log.Warn($"Could not answer /{command.Name}: {ex.Message}");
         }
     }
 
@@ -120,9 +179,9 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         while (!cancellationToken.IsCancellationRequested)
         {
             var list = rcon.IsConnected ? await relay.RefreshPlayersAsync(cancellationToken).ConfigureAwait(false) : null;
-            var presence = list is not null ? BridgeTexts.Presence(list)
-                : rcon.IsConnected ? BridgeTexts.PresenceOnline
-                : BridgeTexts.PresenceOffline;
+            var presence = list is not null ? relay.Texts.Presence(list)
+                : rcon.IsConnected ? relay.Texts.PresenceOnline
+                : relay.Texts.PresenceOffline;
 
             if (gateway is { IsConnected: true } && config.Filters.OnlineCountStatus && presence != shown)
             {

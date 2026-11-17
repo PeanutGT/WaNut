@@ -42,33 +42,42 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
 
         if (ShouldForward(e))
         {
-            post(MessageFormatter.Format(e, config.Presentation));
+            post(MessageFormatter.Format(e, config.Presentation, Texts));
         }
     }
+
+    public BridgeTexts Texts { get; } = BridgeTexts.For(config.Language);
 
     public async Task OnDiscordMessageAsync(InboundMessage message, ulong botUserId, CancellationToken cancellationToken)
     {
         var action = InboundRouter.Route(message, config, botUserId);
+        if (action.Kind == InboundActionKind.Chat)
+        {
+            // Lost while the server is off; a Discord-only chat is fine then.
+            await rcon.TryExecuteAsync(Tellraw.Build(action.Author!, action.Text!), cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>Runs a slash command and returns the answer for the person who used it; null when there is nothing to answer.</summary>
+    public async Task<string?> RunCommandAsync(InboundAction action, CancellationToken cancellationToken)
+    {
         switch (action.Kind)
         {
-            case InboundActionKind.Chat:
-                // Lost while the server is off; a Discord-only chat is fine then.
-                await rcon.TryExecuteAsync(Tellraw.Build(action.Author!, action.Text!), cancellationToken).ConfigureAwait(false);
-                break;
             case InboundActionKind.ListPlayers:
                 var output = await rcon.TryExecuteAsync("list", cancellationToken).ConfigureAwait(false);
-                Reply(output is null ? BridgeTexts.ServerOffline
-                    : PlayerList.TryParse(output) is { } list ? BridgeTexts.Online(list)
-                    : DiscordWebhook.Escape(PlainOutput(output)));
-                break;
+                return output is null ? Texts.ServerOffline
+                    : PlayerList.TryParse(output) is { } list ? Texts.Online(list)
+                    : DiscordWebhook.Escape(PlainOutput(output));
             case InboundActionKind.Console:
                 log.Info($"Remote console: {action.Author} ran \"{action.Text}\".");
                 var result = await rcon.TryExecuteAsync(action.Text!, cancellationToken).ConfigureAwait(false);
-                Reply(result is null ? BridgeTexts.ServerOffline : CodeBlock(result));
-                break;
+                return result is null ? Texts.ServerOffline : CodeBlock(result);
             case InboundActionKind.ConsoleDenied:
-                Reply(BridgeTexts.ConsoleDenied);
-                break;
+                return Texts.ConsoleDenied;
+            case InboundActionKind.WrongChannel:
+                return Texts.WrongChannel;
+            default:
+                return null;
         }
     }
 
@@ -95,14 +104,12 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
         _ => config.Filters.ServerState,
     };
 
-    private void Reply(string text) => post(new OutgoingMessage(text));
-
-    private static string CodeBlock(string output)
+    private string CodeBlock(string output)
     {
         var text = PlainOutput(output);
         if (text.Length == 0)
         {
-            return BridgeTexts.ConsoleNoOutput;
+            return Texts.ConsoleNoOutput;
         }
 
         if (text.Length > MaxConsoleOutputLength)
