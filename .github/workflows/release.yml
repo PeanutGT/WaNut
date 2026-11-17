@@ -38,8 +38,20 @@ jobs:
           dotnet build -c Release
           dotnet test -c Release --no-build --filter "Category!=Network&Category!=Ssh"
 
+      # Before the app, so its publish copies them into the app folder (bridge\<rid>\) and the installer carries them.
+      - name: Publish bridge
+        shell: pwsh
+        run: scripts/publish-bridge.ps1 -Version ${{ steps.version.outputs.version }}
+
       - name: Publish
         run: dotnet publish src/WaNut.App/WaNut.App.csproj -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true -p:Version=${{ steps.version.outputs.version }} -o publish
+
+      - name: Check bridge builds are in the app
+        shell: pwsh
+        run: |
+          foreach ($file in 'bridge/win-x64/WaNut.Bridge.exe', 'bridge/linux-x64/WaNut.Bridge', 'bridge/linux-arm64/WaNut.Bridge') {
+            if (-not (Test-Path (Join-Path publish $file))) { throw "publish/$file is missing." }
+          }
 
       - name: Install Velopack CLI
         run: dotnet tool install -g vpk --version 1.2.161

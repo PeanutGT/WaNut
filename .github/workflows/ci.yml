@@ -24,8 +24,17 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build --filter "Category!=Network&Category!=Ssh"
 
-      - name: Publish bridge (trim check)
-        run: dotnet publish src/WaNut.Bridge -c Release -r linux-x64 -o artifacts/bridge-linux-x64
+      # All three platforms, so a trim warning on any of them fails here and not at release time.
+      - name: Publish bridge
+        shell: pwsh
+        run: scripts/publish-bridge.ps1
+
+      - name: Upload bridge builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: wanut-bridge
+          path: artifacts/bridge/
+          retention-days: 14
 
       - name: Check formatting
         run: dotnet format --verify-no-changes --no-restore
