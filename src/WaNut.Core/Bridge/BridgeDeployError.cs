@@ -9,6 +9,18 @@ public enum BridgeDeployError
     /// <summary>Discord answered 401 to the bot token.</summary>
     BotTokenRejected,
 
+    /// <summary>The "token" is the Application ID (digits only), so nothing was sent to Discord.</summary>
+    BotTokenIsApplicationId,
+
+    /// <summary>The "token" is the Public Key (64 hex characters), so nothing was sent to Discord.</summary>
+    BotTokenIsPublicKey,
+
+    /// <summary>The "token" is the Client Secret (no dots), so nothing was sent to Discord.</summary>
+    BotTokenIsClientSecret,
+
+    /// <summary>The "token" doesn't have a bot token's shape (three parts, plain letters and digits), so nothing was sent to Discord.</summary>
+    BotTokenMalformed,
+
     /// <summary>No channel has that id, or the bot is not in its server.</summary>
     ChannelNotFound,
 

@@ -3359,7 +3359,19 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
     <value>設定裡有地方行不通。請檢查 Token、頻道和 Webhook。</value>
   </data>
   <data name="Discord_Error_BotTokenRejected" xml:space="preserve">
-    <value>Discord 說機器人 Token 不對。請回到機器人頁面重新複製，必要時按「重設 Token」。</value>
+    <value>Discord 說這個機器人 Token 不對，或已經被重設過。請到開發者入口網站的 Bot 頁面按「Reset Token」，馬上複製新的貼上來。</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsApplicationId" xml:space="preserve">
+    <value>這是應用程式 ID（只有數字），不是機器人 Token。請到 Bot 頁面按「Reset Token」取得 Token。</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsPublicKey" xml:space="preserve">
+    <value>這是 Public Key，不是機器人 Token。請到 Bot 頁面按「Reset Token」取得 Token。</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsClientSecret" xml:space="preserve">
+    <value>這看起來是 OAuth2 頁面的 Client Secret，不是機器人 Token。Token 在 Bot 頁面，按「Reset Token」。</value>
+  </data>
+  <data name="Discord_Error_BotTokenMalformed" xml:space="preserve">
+    <value>這不像機器人 Token。Token 是一長串、中間有兩個點，沒有空格或奇怪的字元。請回到 Bot 頁面重新複製。</value>
   </data>
   <data name="Discord_Error_ChannelNotFound" xml:space="preserve">
     <value>找不到這個 ID 的頻道，或機器人不在那個 Discord 伺服器裡。請先邀請機器人。</value>

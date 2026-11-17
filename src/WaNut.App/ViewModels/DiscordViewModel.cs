@@ -239,7 +239,7 @@ public sealed partial class DiscordViewModel : ObservableObject
     {
         if (token is not null)
         {
-            BotToken = token.Trim();
+            BotToken = DiscordTokenFormat.Normalize(token);
         }
 
         if (webhook is not null)
@@ -528,8 +528,7 @@ public sealed partial class DiscordViewModel : ObservableObject
     private void ShowError(BridgeDeployException ex)
     {
         ErrorText = Text.Get("Discord_Error_" + ex.Error);
-        // The network error text of a failed Discord call could carry the webhook address, so it stays out of sight.
-        var detail = ex.Error == BridgeDeployError.DiscordUnreachable ? null : ex.Detail?.Trim();
+        var detail = ex.Detail?.Trim();
         ErrorDetail = string.IsNullOrEmpty(detail) ? null : detail;
     }
 

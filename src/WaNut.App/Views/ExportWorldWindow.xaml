@@ -57,7 +57,7 @@
 
         <StackPanel Visibility="{Binding IsSaves, Converter={StaticResource BoolToVisibility}}">
           <TextBlock Text="{res:Text Export_LocationLabel}" Style="{StaticResource FieldLabel}" />
-          <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" DisplayMemberPath="Title"
+          <ComboBox ItemsSource="{Binding Locations}" DisplayMemberPath="Title" SelectedItem="{Binding SelectedLocation}"
                     IsEnabled="{Binding IsIdle}" AutomationProperties.Name="{res:Text Export_LocationLabel}" />
           <TextBlock Text="{res:Text Export_NoLocations}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,3,0,0"
                      Visibility="{Binding NoLocations, Converter={StaticResource BoolToVisibility}}" />
@@ -66,7 +66,7 @@
         <CheckBox IsChecked="{Binding BringInventory}" IsEnabled="{Binding HasPlayers}" Margin="0,18,0,0">
           <TextBlock Text="{res:Text Export_BringInventory}" TextWrapping="Wrap" />
         </CheckBox>
-        <ComboBox ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" DisplayMemberPath="Name"
+        <ComboBox ItemsSource="{Binding Players}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedPlayer}"
                   Margin="24,6,0,0" AutomationProperties.Name="{res:Text Export_BringInventory}"
                   IsEnabled="{Binding BringInventory}"
                   Visibility="{Binding HasPlayers, Converter={StaticResource BoolToVisibility}}" />

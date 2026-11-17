@@ -154,7 +154,7 @@
       <!-- Always visible -->
       <StackPanel Style="{StaticResource Item}">
         <TextBlock Text="{res:Text Discord_ModeLabel}" Style="{StaticResource Label}" />
-        <ComboBox ItemsSource="{Binding PresentationOptions}" SelectedItem="{Binding Presentation}" DisplayMemberPath="Name"
+        <ComboBox ItemsSource="{Binding PresentationOptions}" DisplayMemberPath="Name" SelectedItem="{Binding Presentation}"
                   HorizontalAlignment="Left" MinWidth="260" AutomationProperties.Name="{res:Text Discord_ModeLabel}" />
         <TextBlock Text="{res:Text Discord_ModeHint}" Style="{StaticResource Hint}" />
       </StackPanel>
@@ -211,7 +211,7 @@
           </StackPanel>
 
           <TextBlock Text="{res:Text Discord_LanguageLabel}" Style="{StaticResource Label}" Margin="0,6,0,6" />
-          <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding Language}" DisplayMemberPath="Name"
+          <ComboBox ItemsSource="{Binding LanguageOptions}" DisplayMemberPath="Name" SelectedItem="{Binding Language}"
                     HorizontalAlignment="Left" MinWidth="160" AutomationProperties.Name="{res:Text Discord_LanguageLabel}" />
           <TextBlock Text="{res:Text Discord_LanguageHint}" Style="{StaticResource Hint}" Margin="0,3,0,12" />
 

@@ -178,8 +178,8 @@
 
         <TextBlock Text="{res:Text CreateServer_VersionLabel}" Style="{StaticResource FieldLabel}" />
         <ComboBox ItemsSource="{Binding Versions}"
-                  SelectedItem="{Binding SelectedVersion}"
                   DisplayMemberPath="Id"
+                  SelectedItem="{Binding SelectedVersion}"
                   IsEnabled="{Binding CanPickTypeAndVersion}" />
 
         <!-- Going back to an older version than the world's: a plain warning and a second, deliberate tick. -->
