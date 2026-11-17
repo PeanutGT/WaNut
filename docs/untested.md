@@ -363,3 +363,29 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - VPS 伺服器：分頁上方寫「幫手會跑在你的 VPS …」，套用後狀態、最近動態（從 journal 或 bridge.log 拉）正常；檔案留在 VPS 且伺服器在跑時顯示提示，套用在需要改 RCON 時回報「請先停止伺服器」；停止伺服器後再套用成功。
 - 最近動態裡看得到 Minecraft 傳到 Discord、Discord 傳到 Minecraft 的記錄，而且不含聊天內容；沒有任何地方出現 Token、Webhook 網址或 RCON 密碼（日誌、錯誤訊息、狀態區）。
 - 「開啟 Discord 開發者入口網站」按鈕有開啟瀏覽器。
+
+## Discord 橋接壓力與恢復測試（add-bridge-stress-tests）
+
+只新增測試和修 bug，沒有新功能。測試在 Linux 雲端跑，沒有真的 Discord、Minecraft 或 Windows。
+
+已測（`tests/WaNut.Bridge.Tests/Stress/`，約 100 個測試，加上用發佈檔跑的浸泡）：
+
+- Discord 洪水：假 Webhook 用虛擬時鐘模擬「每 2 秒 5 次，超過回 429 附 `retry_after`」。每次 400 行、輪流 7 個玩家，共 16000 行，一行都沒少、順序不變、有 Bucket 標頭時一次 429 都沒有；沒有標頭時靠 429 重送也全部送達。一次塞 20000 行（超過佇列 500）時保留最新的行、順序不亂。斷網 8 秒內全部補送；斷網超過重試時間（約 30 秒），正在送的那幾則會放棄，之後的訊息照常送出。
+- RCON：用真的 TCP 假伺服器反覆停止、重啟五次，連線每次都自己回來；伺服器長時間關著時重試間隔 1、2、4、8、16、32、60、60…；密碼錯只記一次；8 個傳送端同時送指令時伺服器重啟，沒有例外也沒有卡住。
+- latest.log：寫入端一邊分兩段寫 10 萬行、讀取端一邊輪詢，一行不少不重複；伺服器重開 20 次（含中間完全沒有檔案的空檔）每個新檔都從第一行讀；copytruncate 式清空重寫；橋接重啟後不會重複轉發舊行；40 MB 沒有換行的超長行不會吃光記憶體；惡意長行解析在 3 秒內完成。
+- Gateway：連線失敗 1、2、4…最多 60 秒；中途斷線用最後的序號 Resume 並繼續收訊息；InvalidSession 後重新 Identify；30 次一連上就斷也撐得住；10 種壞封包（不是 JSON、缺欄位、數字溢位、網址壞掉）都不會讓 Gateway 結束；Token 被拒（4004）只停一次不狂連。
+- 惡意輸入：引號、反斜線、換行、`§` 色碼（含 `§` 後接 emoji）、單獨的代理字元、`@everyone`、選擇器、控制字元、雙向文字、2 MB 訊息，經過 tellraw 與 Discord 兩條路都是合法 JSON、只有一個 text 值、不會 ping 任何人、符合長度上限；玩家在聊天裡打假的「Alex joined the game」仍然是聊天。
+- 發佈檔浸泡（linux-x64，假 Discord 在 443、假 RCON）：每秒 40 行、4 個玩家輪流，持續 150 秒，6000 行全部送到、4 次 429 後自動重送；橋接被 `kill -9` 後重啟沒有重複轉發，但**關著的那段時間寫進 log 的行不會補送**；伺服器換 `latest.log` 後新檔從第一行讀。
+
+修掉的問題（各一個 commit）：RCON 指令排隊時連線關閉會永遠卡住；伺服器重啟後第一則 Discord 訊息會被舊連線吃掉；Discord 聊天進遊戲時等 RCON（最久 10 秒），這段時間 Gateway 讀不到心跳回應而被當成斷線；Gateway 遇到沒預料到的例外會讓整個 Discord 到遊戲方向永久停掉；一行超長的 log 沒有上限；洪水時每位玩家一次請求導致大量遺失，改成洪水時跨玩家合併；長時間洪水時常駐記憶體從 4 MB 一路漲到 40 MB（垃圾沒回收），改成每 15 秒收一次。
+
+實測記憶體（linux-x64 發佈檔，Release、非 NativeAOT）：閒置 RSS 27 MB（共用程式檔 12 MB、私有約 4 MB）；每秒 40 行持續洪水 120 秒，RSS 44 到 47 MB，私有約 12 到 15 MB，CPU 約 2 秒（120 秒內）。修之前同樣的 150 秒洪水 RSS 漲到 72 MB（私有 40 MB），不是洩漏（把 GC 堆上限設成 32 MB 照樣跑完），是垃圾沒收。託管堆沒有直接量，目標「託管記憶體 30 MB 以下」從私有記憶體與堆上限測試推斷成立，但沒有逐項量到。
+
+還沒測，需要真的環境：
+
+- 真的 Discord：Webhook 與 Bot 的真實 429 與 `X-RateLimit-*` 標頭行為、Webhook 名稱限制（含 `discord`、`clyde`、長度）、Gateway 的 Hello／Resume／4004／4014 真實行為，以及 Discord 側 10 分鐘 Resume 視窗過期後的 InvalidSession。
+- 真的 Minecraft：Paper、Fabric、Forge 的 `latest.log` 換檔方式（改名、壓縮成 gz）、RCON 對超長指令與非 ASCII 的實際反應、tellraw 在 1.16.5 到最新版對 `\uXXXX` 的處理。
+- Windows：浸泡只在 Linux 跑過；Windows 的檔案共用與改名行為、DPAPI、工作排程啟動後的記憶體沒有量。
+- VPS：真的網路瞬斷（SSH 斷線與橋接本身無關，但 VPS 對 Discord 的出口斷線只用假的模擬過）；systemd 下被 OOM 殺掉後的重啟。
+- 橋接重啟時關著那段時間的 log 不補送，是目前的設計（啟動時從檔尾開始）。要補送得記住讀到哪裡，需要 Peanut 決定。
+- Gateway 在洪水下的記憶體沒量（浸泡只用 Webhook 模式，沒有 Bot）。

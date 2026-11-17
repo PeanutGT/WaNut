@@ -1,4 +1,5 @@
 using System.Text;
+using WaNut.Core.Notifications;
 
 namespace WaNut.Bridge.Discord;
 
@@ -17,7 +18,11 @@ public static class DiscordBatcher
 
     public const int MaxEmbedTextPerPost = 6000;
 
-    public static IReadOnlyList<DiscordPost> Merge(IEnumerable<OutgoingMessage> messages)
+    /// <param name="collapseSenders">
+    /// Webhook lines from different players become "**name**: text" lines under the webhook's own name, so they can
+    /// share one post. Used when a flood would otherwise need one request per line, more than Discord allows.
+    /// </param>
+    public static IReadOnlyList<DiscordPost> Merge(IEnumerable<OutgoingMessage> messages, bool collapseSenders = false)
     {
         var posts = new List<DiscordPost>();
         StringBuilder? content = null;
@@ -42,8 +47,11 @@ public static class DiscordBatcher
             }
         }
 
-        foreach (var message in messages)
+        foreach (var original in messages)
         {
+            var message = collapseSenders && original.Username is not null
+                ? new OutgoingMessage($"**{DiscordWebhook.Escape(original.Username)}**: {original.Text}")
+                : original;
             if (message.EmbedColor is { } color)
             {
                 var description = Truncate(message.Text, MaxEmbedDescriptionLength);

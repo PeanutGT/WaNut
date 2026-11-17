@@ -64,4 +64,17 @@ public sealed class DiscordBatcherTests
     {
         Assert.Empty(DiscordBatcher.Merge([]));
     }
+
+    [Fact]
+    public void Merge_CollapseSenders_PutsDifferentPlayersInOnePostAndEscapesTheirNames()
+    {
+        var posts = DiscordBatcher.Merge(
+            [new("hi", "Steve", "https://a"), new("yo", "__Alex__", "https://b"), new("(system) Bob joined")],
+            collapseSenders: true);
+
+        var post = Assert.Single(posts);
+        Assert.Equal("**Steve**: hi\n**\\_\\_Alex\\_\\_**: yo\n(system) Bob joined", post.Content);
+        Assert.Null(post.Username);
+        Assert.Null(post.AvatarUrl);
+    }
 }
