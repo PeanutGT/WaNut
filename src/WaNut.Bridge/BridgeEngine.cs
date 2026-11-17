@@ -201,6 +201,7 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
     private async Task StatusLoopAsync(BridgeRelay relay, RconLink rcon, DiscordGateway? gateway, SemaphoreSlim kick, CancellationToken cancellationToken)
     {
         string? shown = null;
+        var lastTrim = Environment.TickCount64;
         while (!cancellationToken.IsCancellationRequested)
         {
             var list = rcon.IsConnected ? await relay.RefreshPlayersAsync(cancellationToken).ConfigureAwait(false) : null;
@@ -223,6 +224,19 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
             }
 
             await kick.WaitAsync(StatusInterval, cancellationToken).ConfigureAwait(false);
+            if (Environment.TickCount64 - lastTrim >= StatusInterval.TotalMilliseconds)
+            {
+                TrimMemory();
+                lastTrim = Environment.TickCount64;
+            }
         }
     }
+
+    /// <summary>
+    /// Posts that wait out a rate limit live longer than a young-generation collection, so under a long flood the
+    /// runtime lets the old generation grow for minutes before it looks (about 4 MB to 40 MB in 150 seconds at 40
+    /// chat lines a second). A full collection of this small heap takes a few milliseconds, so it is done at the pace
+    /// of the status loop, keeping the resident size flat instead of waiting for the runtime's own budget.
+    /// </summary>
+    private static void TrimMemory() => GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
 }
