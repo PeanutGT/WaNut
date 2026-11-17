@@ -38,7 +38,8 @@ public sealed class DiscordCheck(HttpClient http, Func<TimeSpan, CancellationTok
         catch (Exception ex) when (ex is HttpRequestException or JsonException or KeyNotFoundException or InvalidOperationException
             || (ex is TaskCanceledException && !cancellationToken.IsCancellationRequested))
         {
-            throw Fail(BridgeDeployError.DiscordUnreachable, ex.Message, ex);
+            // Only the HTTP status goes into the detail: a network error's own text can carry the webhook address.
+            throw Fail(BridgeDeployError.DiscordUnreachable, ex is HttpRequestException { StatusCode: { } code } ? $"HTTP {(int)code}" : null, ex);
         }
 
         return warnings;
@@ -62,7 +63,20 @@ public sealed class DiscordCheck(HttpClient http, Func<TimeSpan, CancellationTok
 
     private async Task CheckBotAsync(BridgeConfig config, List<BridgeDeployWarning> warnings, CancellationToken cancellationToken)
     {
-        var token = config.BotToken!.Trim();
+        var token = DiscordTokenFormat.Normalize(config.BotToken);
+        var mistake = DiscordTokenFormat.Classify(token) switch
+        {
+            DiscordTokenShape.ApplicationId => BridgeDeployError.BotTokenIsApplicationId,
+            DiscordTokenShape.PublicKey => BridgeDeployError.BotTokenIsPublicKey,
+            DiscordTokenShape.ClientSecret => BridgeDeployError.BotTokenIsClientSecret,
+            DiscordTokenShape.Malformed => BridgeDeployError.BotTokenMalformed,
+            _ => (BridgeDeployError?)null,
+        };
+        if (mistake is { } wrong)
+        {
+            throw Fail(wrong);
+        }
+
         using var me = await GetJsonAsync("users/@me", token, _ => BridgeDeployError.BotTokenRejected, cancellationToken).ConfigureAwait(false);
         var botId = me!.RootElement.GetProperty("id").GetString()!;
 
@@ -133,7 +147,7 @@ public sealed class DiscordCheck(HttpClient http, Func<TimeSpan, CancellationTok
         {
             // A token Discord refuses gets 401 everywhere, whatever was asked.
             var error = response.StatusCode == HttpStatusCode.Unauthorized ? BridgeDeployError.BotTokenRejected : refused(response.StatusCode);
-            return error is { } e ? throw Fail(e) : null;
+            return error is { } e ? throw Fail(e, $"HTTP {(int)response.StatusCode}") : null;
         }
 
         response.EnsureSuccessStatusCode();

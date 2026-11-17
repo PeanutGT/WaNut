@@ -59,7 +59,7 @@
         </ListBox>
 
         <TextBlock Text="{res:Text CreateServer_VersionLabel}" Style="{StaticResource FieldLabel}" />
-        <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}" DisplayMemberPath="Id"
+        <ComboBox ItemsSource="{Binding Versions}" DisplayMemberPath="Id" SelectedItem="{Binding SelectedVersion}"
                   IsEnabled="{Binding IsIdle}" AutomationProperties.Name="{res:Text CreateServer_VersionLabel}" />
 
         <TextBlock Text="{res:Text Change_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />

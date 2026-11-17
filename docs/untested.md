@@ -389,3 +389,16 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - VPS：真的網路瞬斷（SSH 斷線與橋接本身無關，但 VPS 對 Discord 的出口斷線只用假的模擬過）；systemd 下被 OOM 殺掉後的重啟。
 - 橋接重啟時關著那段時間的 log 不補送，是目前的設計（啟動時從檔尾開始）。要補送得記住讀到哪裡，需要 Peanut 決定。
 - Gateway 在洪水下的記憶體沒量（浸泡只用 Webhook 模式，沒有 Bot）。
+
+## Discord 分頁修正：Token 檢查與下拉選單（fix-discord-tab-token-and-dropdowns）
+
+修了 v0.5.0 在 Windows 上看到的兩個問題。單元測試用假 Discord 跑過，沒有在 Windows 或真的 Discord 上試。
+
+- 顯示方式與語言的下拉選單顯示成 `PresentationOption { Value = ... }`：原因是 XAML 裡 `SelectedItem` 寫在 `DisplayMemberPath` 前面，一開始就有選項時選取框沒套到顯示名稱。已調換順序，其他有同樣寫法的下拉（建立伺服器的版本、更換版本、匯出世界的位置與玩家）也一併調整。
+- Token：送出前先清理貼上的文字（頭尾與中間的空白換行、引號、開頭的 `Bot `），再用長相判斷是不是貼錯東西：只有數字（Application ID）、64 個十六進位字（Public Key）、沒有點的一串（Client Secret）、不是三段（含全形字元），各自有專屬說明，而且不會送去 Discord。Token 沒問題但 Discord 回 401 時，錯誤下方的「詳細資料」會寫 `HTTP 401`；Discord 回其他錯誤時寫 `HTTP 502` 之類，不含任何網址或 Token。
+
+還沒確認（Windows）：
+
+- 兩個下拉選單（顯示方式、更多設定裡的語言）一打開分頁就顯示「像玩家本人（Webhook）」、「繁體中文」這類名稱；改選項後存檔再開還是對的；建立伺服器、更換版本、匯出世界的下拉也都正常。
+- 用真的 bot token 按「測試連線」會過。依序貼 Application ID、Public Key、Client Secret、少一段的字串，各自出現對應說明。Token 前面多一個空格、換行、`Bot ` 都能過。
+- 如果真的 token 還是被說錯誤：看錯誤下方「詳細資料」寫什麼。`HTTP 401` 代表 Discord 真的不認這個 token（多半是 Reset Token 後貼了舊的）；若寫別的狀態碼，請把它回報。

@@ -3379,7 +3379,19 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
     <value>Something in the settings can't work. Check the token, channel and webhook.</value>
   </data>
   <data name="Discord_Error_BotTokenRejected" xml:space="preserve">
-    <value>Discord says the bot token is wrong. Copy it again from the Bot page, using Reset Token if needed.</value>
+    <value>Discord says the bot token is wrong or was reset. On the Developer Portal's Bot page, press Reset Token, copy the new one right away, and paste it here.</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsApplicationId" xml:space="preserve">
+    <value>That is the Application ID (numbers only), not the bot token. Open the Bot page and press Reset Token to get the token.</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsPublicKey" xml:space="preserve">
+    <value>That is the Public Key, not the bot token. Open the Bot page and press Reset Token to get the token.</value>
+  </data>
+  <data name="Discord_Error_BotTokenIsClientSecret" xml:space="preserve">
+    <value>That looks like the Client Secret from the OAuth2 page, not the bot token. The token is on the Bot page: press Reset Token.</value>
+  </data>
+  <data name="Discord_Error_BotTokenMalformed" xml:space="preserve">
+    <value>That doesn't look like a bot token. A token is one long line with two dots in it, with no spaces or odd characters. Copy it again from the Bot page.</value>
   </data>
   <data name="Discord_Error_ChannelNotFound" xml:space="preserve">
     <value>No channel has that ID, or the bot is not in that Discord server. Invite the bot first.</value>
