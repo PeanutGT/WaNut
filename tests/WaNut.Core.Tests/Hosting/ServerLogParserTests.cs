@@ -16,14 +16,25 @@ public sealed class ServerLogParserTests
     }
 
     [Theory]
-    [InlineData("[12:35:00] [Server thread/INFO]: Steve joined the game", LogEventKind.PlayerJoined)]
-    [InlineData("[12:35:00 INFO]: Steve joined the game", LogEventKind.PlayerJoined)]
-    [InlineData("[12:40:00] [Server thread/INFO]: Steve left the game", LogEventKind.PlayerLeft)]
-    [InlineData("[12:35:00] [Server thread/INFO] [minecraft/MinecraftServer]: Steve joined the game", LogEventKind.PlayerJoined)]
-    [InlineData("[16Oct2026 12:40:00.123] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Steve left the game", LogEventKind.PlayerLeft)]
-    public void Parse_PlayerLine_ReturnsPlayerEvent(string line, LogEventKind expected)
+    [InlineData("[12:35:00] [Server thread/INFO]: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00 INFO]: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00 INFO]: Steve joined the game.", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00 INFO]: §eSteve joined the game", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00 INFO]: .Steve joined the game", LogEventKind.PlayerJoined, ".Steve")]
+    [InlineData("[12:35:00 INFO]: Steve 加入了遊戲", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00 INFO]: Steve[/127.0.0.1:54321] logged in with entity id 42 at ([world]0.0, 64.0, 0.0)", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:40:00] [Server thread/INFO]: Steve left the game", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:40:00 INFO]: Steve left the game.", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:40:00 INFO]: §eSteve left the game.", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:40:00 INFO]: *Steve left the game", LogEventKind.PlayerLeft, "*Steve")]
+    [InlineData("[12:40:00 INFO]: Steve 離開了伺服器", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:40:00 INFO]: Steve lost connection: Disconnected", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:40:00 INFO]: Steve lost connection: Timed out", LogEventKind.PlayerLeft, "Steve")]
+    [InlineData("[12:35:00] [Server thread/INFO] [minecraft/MinecraftServer]: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[16Oct2026 12:40:00.123] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Steve left the game", LogEventKind.PlayerLeft, "Steve")]
+    public void Parse_PlayerLine_ReturnsPlayerEvent(string line, LogEventKind expected, string expectedName)
     {
-        Assert.Equal(new LogEvent(expected, "Steve"), ServerLogParser.Parse(line));
+        Assert.Equal(new LogEvent(expected, expectedName), ServerLogParser.Parse(line));
     }
 
     [Theory]
@@ -62,6 +73,12 @@ public sealed class ServerLogParserTests
     public void Clean_AnsiColors_AreRemoved()
     {
         Assert.Equal("[12:00:00 INFO]: Hello", ServerLogParser.Clean("\u001b[32m[12:00:00 INFO]: Hello\u001b[0m"));
+    }
+
+    [Fact]
+    public void Clean_SectionColorCodes_AreRemoved()
+    {
+        Assert.Equal("[12:00:00 INFO]: Steve joined the game", ServerLogParser.Clean("[12:00:00 INFO]: §eSteve §rjoined the game"));
     }
 
     [Theory]

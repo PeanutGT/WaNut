@@ -30,10 +30,16 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
         switch (e.Kind)
         {
             case GameEventKind.Joined:
-                Roster.Add(e.Player!);
+                if (!Roster.Add(e.Player!))
+                {
+                    return;
+                }
                 break;
             case GameEventKind.Left:
-                Roster.Remove(e.Player!);
+                if (!Roster.Remove(e.Player!))
+                {
+                    return;
+                }
                 break;
             case GameEventKind.ServerStarted or GameEventKind.ServerStopping:
                 Roster.Clear();

@@ -11,19 +11,25 @@ public sealed class PlayerRoster
     private readonly object _gate = new();
     private bool _known;
 
-    public void Add(string name)
+    public bool Add(string name)
     {
         lock (_gate)
         {
-            _names.Add(name);
+            return _names.Add(name);
         }
     }
 
-    public void Remove(string name)
+    public bool Remove(string name)
     {
         lock (_gate)
         {
-            _names.Remove(name);
+            var removed = _names.Remove(name);
+            if (!_known)
+            {
+                return true;
+            }
+
+            return removed;
         }
     }
 
