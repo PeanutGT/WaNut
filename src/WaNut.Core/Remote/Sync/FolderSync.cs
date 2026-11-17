@@ -66,13 +66,18 @@ public static class FolderSync
     /// <summary>
     /// Lists both sides, plans and copies. Progress counts copied bytes out of all bytes to copy.
     /// </summary>
+    /// <param name="bulk">
+    /// Copies the files through one archive stream when given; if the VPS can't do that after all, the files are
+    /// copied one by one instead.
+    /// </param>
     /// <exception cref="VpsFolderMissingException">A download whose source isn't a server folder; nothing was changed.</exception>
     public static async Task<SyncResult> RunAsync(
         ISyncTree source,
         ISyncTree target,
         SyncDirection direction,
         IProgress<DownloadProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IBulkCopy? bulk = null)
     {
         var sourceEntries = await source.ListAsync(cancellationToken).ConfigureAwait(false);
 
@@ -105,13 +110,37 @@ public static class FolderSync
                 .ConfigureAwait(false);
         }
 
-        var total = plan.CopyBytes;
+        var total = plan.CopyBytes;  // grows only if the archive copy falls back
         long done = 0;
         var reportLock = new object();
         progress?.Report(new DownloadProgress(0, total));
 
+        var copyFiles = plan.CopyFiles;
+        if (bulk is not null && copyFiles.Count > 0)
+        {
+            try
+            {
+                await bulk.CopyAsync(copyFiles, bytes =>
+                {
+                    lock (reportLock)
+                    {
+                        done = Math.Max(done, bytes);
+                        progress?.Report(new DownloadProgress(done, total));
+                    }
+                }, cancellationToken).ConfigureAwait(false);
+                copyFiles = [];
+            }
+            catch (BulkTransferException)
+            {
+                // Whatever arrived is whole; plan again and copy what is still different the slower way.
+                var again = Plan(sourceEntries, await target.ListAsync(cancellationToken).ConfigureAwait(false), direction);
+                copyFiles = again.CopyFiles;
+                total = done + again.CopyBytes;
+            }
+        }
+
         // Names that differ only in case are one file on Windows, so those go one after another.
-        var groups = plan.CopyFiles.GroupBy(f => f.Path, StringComparer.OrdinalIgnoreCase);
+        var groups = copyFiles.GroupBy(f => f.Path, StringComparer.OrdinalIgnoreCase);
         await Parallel.ForEachAsync(groups, options, async (group, token) =>
         {
             foreach (var file in group)

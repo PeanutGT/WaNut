@@ -31,6 +31,11 @@
         <TextBlock Text="{res:Text Game_StopToChange}" TextWrapping="Wrap" />
       </Border>
 
+      <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
+              Visibility="{Binding ShowVpsSettingsNote, Converter={StaticResource Visible}}">
+        <TextBlock Text="{Binding VpsSettingsNote}" TextWrapping="Wrap" />
+      </Border>
+
       <!-- Always visible -->
       <StackPanel Style="{StaticResource Item}">
         <TextBlock Text="{res:Text Game_Mode}" Style="{StaticResource Label}" />

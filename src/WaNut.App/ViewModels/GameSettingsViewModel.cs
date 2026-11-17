@@ -107,9 +107,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     public bool CanEditSpawnMonsters => CanEditProperties || _features.IsGameRule(RuleSetting.SpawnMonsters);
 
     /// <summary>The seed only matters before the world is generated.</summary>
-    public bool CanEditSeed => CanEditProperties && !_worldExists;
+    public bool CanEditSeed => CanEditProperties && !_worldExists && !_server.FilesOnVps;
 
-    public bool ShowSeedLocked => _worldExists;
+    public bool ShowSeedLocked => _worldExists || _server.FilesOnVps;
 
     /// <summary>Reads the settings again, e.g. after the server stopped and may have rewritten server.properties.</summary>
     public void Reload()
@@ -133,6 +133,22 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(CanEditSeed));
         OnPropertyChanged(nameof(ShowSeedLocked));
     }
+
+    /// <summary>Says where changes go while the files are on the VPS; null otherwise.</summary>
+    public bool ShowVpsSettingsNote => _server.ConfigOnVps;
+
+    public string VpsSettingsNote => Text.Get(_server.VpsSettingsReady ? "Game_VpsSettingsNote" : "Game_VpsSettingsLoading");
+
+    internal void OnVpsStateChanged()
+    {
+        OnPropertyChanged(nameof(ShowVpsSettingsNote));
+        OnPropertyChanged(nameof(VpsSettingsNote));
+        OnPropertyChanged(nameof(CanEditSeed));
+        OnPropertyChanged(nameof(ShowSeedLocked));
+    }
+
+    /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
+    public void OnShown() => _ = _server.EnsureVpsSettingsAsync();
 
     internal void OnServerStatusChanged()
     {
@@ -203,6 +219,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
                 await _server.SendCommandAsync(command);
             }
         }
+
+        // Last, so a failed send (which puts the tab back to what the VPS has) isn't overwritten by the lines above.
+        await _server.PushVpsSettingsAsync();
     }
 
     private void Show(GameSettings settings)

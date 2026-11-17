@@ -6,9 +6,10 @@ namespace WaNut.Core.Remote.Sync;
 
 /// <summary>
 /// A server folder on the VPS, reached over SFTP. <paramref name="root"/> is relative to the user's home. Calls for
-/// different paths may run at the same time: SSH.NET matches each SFTP reply to its request.
+/// different paths may run at the same time: SSH.NET matches each SFTP reply to its request. With <paramref name="shell"/>
+/// the folder is listed by one <c>find</c> command instead of folder by folder over SFTP.
 /// </summary>
-public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
+public sealed class SftpSyncTree(SftpClient sftp, string root, SshClient? shell = null) : ISyncTree
 {
     /// <summary>Folders listed at a time; each listing is a few round trips to the VPS.</summary>
     private const int MaxParallelListings = 8;
@@ -34,6 +35,29 @@ public sealed class SftpSyncTree(SftpClient sftp, string root) : ISyncTree
 
     public async Task<IReadOnlyList<SyncEntry>> ListAsync(CancellationToken cancellationToken = default)
     {
+        if (shell is not null)
+        {
+            try
+            {
+                var listed = await RemoteListing.ListAsync(shell, Root, cancellationToken).ConfigureAwait(false);
+                foreach (var directory in listed.Where(e => e.IsDirectory))
+                {
+                    _knownDirectories.TryAdd($"{Root}/{directory.Path}", 0);
+                }
+
+                if (listed.Count > 0)
+                {
+                    _knownDirectories.TryAdd(Root, 0);
+                }
+
+                return listed;
+            }
+            catch (Exception e) when (e is InvalidOperationException or FormatException or SshException)
+            {
+                // No GNU find on this VPS: the slower SFTP walk below gives the same answer.
+            }
+        }
+
         var entries = new ConcurrentBag<SyncEntry>();
         if (await sftp.ExistsAsync(Root, cancellationToken).ConfigureAwait(false))
         {

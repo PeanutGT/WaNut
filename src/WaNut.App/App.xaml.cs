@@ -110,6 +110,7 @@ public partial class App : Application
         services.AddSingleton<ISecretProtector, DpapiProtector>();
         services.AddSingleton<SecretStore>();
         services.AddSingleton<VpsConnector>();
+        services.AddSingleton<VpsSettingsSync>();
         services.AddSingleton<VpsTester>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();

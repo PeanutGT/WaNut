@@ -139,6 +139,15 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     /// </summary>
     public bool CanEditFiles => _server.CanEditFiles;
 
+    /// <summary>
+    /// The account check is a line in the settings file, which can change on the VPS (see <see cref="ServerViewModel.CanEditSettings"/>)
+    /// while the world stays there.
+    /// </summary>
+    public bool CanEditOnlineMode => _server.Status == ServerStatus.Stopped && _server.CanEditSettings;
+
+    /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
+    public void OnShown() => _ = _server.EnsureVpsSettingsAsync();
+
     /// <summary>Says why the icon, port and the rest are locked while the server is stopped with its files away.</summary>
     public bool ShowFilesOnVpsNote => !CanEditFiles && !_server.IsRunning;
 
@@ -290,6 +299,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         DeleteServerCommand.NotifyCanExecuteChanged();
         DuplicateServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
+        OnPropertyChanged(nameof(CanEditOnlineMode));
         OnPropertyChanged(nameof(CanEditPaperTweaks));
         OnPropertyChanged(nameof(ShowNextStartHint));
         OnPropertyChanged(nameof(ShowFilesOnVpsNote));
@@ -304,6 +314,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     /// <summary>The server's newest files left for the VPS or came back.</summary>
     internal void OnVpsStateChanged()
     {
+        OnPropertyChanged(nameof(CanEditOnlineMode));
         OnPropertyChanged(nameof(CanEditFiles));
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(CanEditPaperTweaks));
@@ -462,6 +473,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         {
             ServerSettingsStore.Save(_server.InstanceDir, _loaded, edited);
             _loaded = edited;
+            _ = _server.PushVpsSettingsAsync();
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {

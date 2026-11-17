@@ -247,6 +247,69 @@ public sealed partial class ServerViewModel : ObservableObject
     /// <summary>Game settings, mods, backups and the Server tab's file settings can change the files here.</summary>
     public bool CanEditFiles => !FilesOnVps;
 
+    /// <summary>
+    /// Stopped with its newest files on the VPS: the settings file can still be edited there (<see cref="CanEditSettings"/>)
+    /// without bringing the world back. While it runs, it rewrites that file itself.
+    /// </summary>
+    public bool ConfigOnVps => FilesOnVps && RunsOnVps && !IsRunning && !IsPreparing;
+
+    /// <summary>The settings file was copied from the VPS and can change; it is sent back after each change.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditSettings))]
+    private bool _vpsSettingsReady;
+
+    /// <summary>Game settings and the account check: with the files here, or once the VPS's settings file is here.</summary>
+    public bool CanEditSettings => CanEditFiles || (ConfigOnVps && VpsSettingsReady);
+
+    partial void OnVpsSettingsReadyChanged(bool value)
+    {
+        ServerSettings.OnVpsStateChanged();
+        GameSettings.OnVpsStateChanged();
+    }
+
+    private bool _settingsShown;
+    private Task? _pullingSettings;
+
+    /// <summary>
+    /// Called when a settings tab is shown (and when the server stops): copies the settings file from the VPS once,
+    /// so the tab shows what the VPS really has.
+    /// </summary>
+    public Task EnsureVpsSettingsAsync()
+    {
+        _settingsShown = true;
+        if (!ConfigOnVps || VpsSettingsReady)
+        {
+            return Task.CompletedTask;
+        }
+
+        return _pullingSettings is { IsCompleted: false } running ? running : _pullingSettings = PullVpsSettingsAsync();
+    }
+
+    private async Task PullVpsSettingsAsync()
+    {
+        if (await _controller.PullSettingsAsync(this) && ConfigOnVps)
+        {
+            VpsSettingsReady = true;
+            GameSettings.Reload();
+            ServerSettings.Reload();
+        }
+    }
+
+    /// <summary>Sends a settings change to the VPS. When that fails the tab goes back to what the VPS has.</summary>
+    internal async Task PushVpsSettingsAsync()
+    {
+        if (!ConfigOnVps)
+        {
+            return;
+        }
+
+        if (!await _controller.PushSettingsAsync(this))
+        {
+            VpsSettingsReady = false;
+            await EnsureVpsSettingsAsync();
+        }
+    }
+
     /// <summary>Players can change while a VPS server runs (through its console), not while its files are away.</summary>
     public bool CanEditPlayers => !FilesOnVps || IsRunning;
 
@@ -270,11 +333,24 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(FilesOnVps));
         OnPropertyChanged(nameof(CanEditFiles));
         OnPropertyChanged(nameof(CanEditPlayers));
+        OnPropertyChanged(nameof(ConfigOnVps));
+        OnPropertyChanged(nameof(CanEditSettings));
         OnPropertyChanged(nameof(VpsBannerText));
         OnPropertyChanged(nameof(ReconnectText));
         OnPropertyChanged(nameof(CanReconnect));
         ReconnectCommand.NotifyCanExecuteChanged();
         ServerSettings.OnVpsStateChanged();
+        GameSettings.OnVpsStateChanged();
+
+        // A run (or a change of where the files are) may have changed the settings file, so copy it again next time.
+        if (!ConfigOnVps)
+        {
+            VpsSettingsReady = false;
+        }
+        else if (_settingsShown && !VpsSettingsReady)
+        {
+            _ = EnsureVpsSettingsAsync();
+        }
     }
 
     public string StatusText => IsQueued ? Text.Get("Status_Queued") : VpsText is { } vps && BackupFraction is null ? vps : IsPreparing

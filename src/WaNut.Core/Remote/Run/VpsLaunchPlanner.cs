@@ -114,16 +114,34 @@ public sealed class VpsLaunchPlanner(InstanceStore store, VpsConnector connector
 
     private async Task SyncAsync(string id, VpsProfile vps, SyncDirection direction, IProgress<DownloadProgress>? progress, CancellationToken cancellationToken)
     {
+        using var ssh = await connector.ConnectAsync(vps, null, cancellationToken).ConfigureAwait(false);
         using var sftp = await connector.ConnectSftpAsync(vps, cancellationToken).ConfigureAwait(false);
         var local = new LocalSyncTree(store.InstanceDir(id));
-        var remote = new SftpSyncTree(sftp, SftpSyncTree.ServerRoot(id));
+        var root = SftpSyncTree.ServerRoot(id);
+
+        // One archive stream and one listing command are much faster than a request per file; a VPS without GNU tar
+        // and find keeps the file by file copy.
+        var archives = await HasArchiveToolsAsync(ssh, cancellationToken).ConfigureAwait(false);
+        var remote = new SftpSyncTree(sftp, root, archives ? ssh : null);
         if (direction == SyncDirection.Upload)
         {
-            await FolderSync.RunAsync(local, remote, direction, progress, cancellationToken).ConfigureAwait(false);
+            await FolderSync.RunAsync(local, remote, direction, progress, cancellationToken, archives ? new SshUploadCopy(ssh, local, root) : null).ConfigureAwait(false);
         }
         else
         {
-            await FolderSync.RunAsync(remote, local, direction, progress, cancellationToken).ConfigureAwait(false);
+            await FolderSync.RunAsync(remote, local, direction, progress, cancellationToken, archives ? new SshDownloadCopy(ssh, root, local) : null).ConfigureAwait(false);
+        }
+    }
+
+    private static async Task<bool> HasArchiveToolsAsync(SshClient ssh, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return (await VpsConnector.RunAsync(ssh, TarCommands.ProbeCommand, cancellationToken).ConfigureAwait(false)).Trim() == "yes";
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
         }
     }
 }

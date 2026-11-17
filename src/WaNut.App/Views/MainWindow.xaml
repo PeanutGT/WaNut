@@ -479,7 +479,7 @@
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabGame}">
-            <views:GameSettingsView DataContext="{Binding GameSettings}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:GameSettingsView DataContext="{Binding GameSettings}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditSettings, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabServer}">
