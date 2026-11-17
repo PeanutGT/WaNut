@@ -318,3 +318,17 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - 拔網路幾分鐘再接上：Discord 自動重連（Resume），期間的遊戲訊息之後補送（佇列最多 500 行）。
 - Discord 開發者後台沒開 Message Content Intent 時：日誌寫出要去哪裡打開，遊戲到 Discord 仍正常。
 - 接上真的 bot 後在 Linux VPS 上量 RSS（目標 30 MB 以內）。
+
+## Discord 橋接本機部署與打包（add-bridge-local-deployer）
+
+已確認（Linux 雲端環境）：單元測試涵蓋 DPAPI 欄位加密格式、Discord 權限計算與前置驗證、部署失敗時回復 server.properties 與設定、`LocalBridgeRun`、工作排程 XML、Windows 參數引號；`WaNut.Bridge --status` / `--stop` 經由 pipe 在 Linux 上實際測過（查狀態、要求停止、沒有橋接時回 3）。還沒有畫面（Phase 4），以下都要寫一小段程式或在 Phase 4 畫面上測：
+
+- `scripts/publish-bridge.ps1` 在 Windows 上跑完，`artifacts/bridge/` 有三個檔；再 build App，`bin\...\bridge\<rid>\` 裡有它們。release 流程的 `Check bridge builds are in the app` 步驟通過，Setup.exe 安裝後 App 資料夾有 `bridge\`。
+- 本機部署（背景進程）：`%APPDATA%\WaNut\Bridge\<伺服器 id>\bridge.config.json` 裡三個密碼欄位是 `dpapi:` 開頭；橋接正常啟動、`bridge.log` 有內容；關掉 WaNut 後橋接仍在跑（工作管理員看得到 WaNut.Bridge.exe）。
+- 從 Visual Studio 或其他會把子程序放進 Job Object 的地方啟動 WaNut，關掉後橋接仍在（CREATE_BREAKAWAY_FROM_JOB）。
+- 「開機自動啟動」（ScheduledTask）：工作排程器的「WaNut」資料夾裡有工作、一般使用者不用 UAC 就能建立；登出再登入後橋接自己起來；橋接當掉一分鐘內被重新啟動。改回背景進程時這個工作會被刪掉。
+- 第二次部署：舊橋接先被停掉（經由 pipe），換成新的；部署失敗時舊的橋接用舊設定重新跑起來。
+- 換版本後 `%APPDATA%\WaNut\Bridge\bin\` 只留下還在用的那一份。
+- Discord 前置驗證用真的 bot：token 打錯、頻道 id 打錯、bot 不在那個伺服器、頻道對 bot 隱藏、缺 Embed Links、沒開 Message Content Intent，各自得到對的錯誤或警告。
+- 同一台電腦兩個伺服器各部署一個橋接：RCON port 不同（25575、25576…），互不干擾。
+- Windows 服務（A3）這次沒有做：需要以服務方式執行的橋接，而且 DPAPI 目前綁使用者帳號，服務帳號解不開。

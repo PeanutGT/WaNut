@@ -7,6 +7,8 @@ using WaNut.App.ViewModels;
 using WaNut.App.Views;
 using WaNut.Core;
 using WaNut.Core.Backups;
+using WaNut.Core.Bridge;
+using WaNut.Core.Bridge.Local;
 using WaNut.Core.Diagnostics;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
@@ -107,11 +109,22 @@ public partial class App : Application
         services.AddSingleton<ServerLaunchPlanner>();
         services.AddSingleton<VpsLaunchPlanner>();
         services.AddSingleton<IServerRuntime, LocalServerRuntime>();
-        services.AddSingleton<ISecretProtector, DpapiProtector>();
+        services.AddSingleton<ISecretProtector>(_ => new DpapiProtector());
         services.AddSingleton<SecretStore>();
         services.AddSingleton<VpsConnector>();
         services.AddSingleton<VpsSettingsSync>();
         services.AddSingleton<VpsTester>();
+        services.AddSingleton(sp => new DiscordCheck(sp.GetRequiredService<HttpClient>()));
+        services.AddSingleton<IBridgeBinarySource>(sp => new BridgeBinarySource(sp.GetRequiredService<LauncherPaths>()));
+        services.AddSingleton<ILocalBridgeHost, WindowsBridgeHost>();
+        services.AddSingleton<IBridgeDeployer>(sp => new LocalBridgeDeployer(
+            sp.GetRequiredService<LauncherPaths>(),
+            sp.GetRequiredService<InstanceStore>(),
+            sp.GetRequiredService<IBridgeBinarySource>(),
+            sp.GetRequiredService<DiscordCheck>(),
+            sp.GetRequiredService<ILocalBridgeHost>(),
+            new DpapiProtector(BridgeSecrets.Entropy)));
+        services.AddSingleton<BridgeDeployerFactory>();
         services.AddSingleton<ServerHost>();
         services.AddSingleton<AppSettingsStore>();
         services.AddSingleton<BackupStore>();
