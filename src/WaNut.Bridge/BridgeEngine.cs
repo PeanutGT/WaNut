@@ -77,7 +77,14 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         {
             var rest = new DiscordRest(http, config.BotToken!);
             var commandsRegistered = false;
-            gateway.MessageReceived += message => relay.OnDiscordMessageAsync(message, gateway.BotUserId, stop.Token);
+            // Handed to a queue: waiting for RCON here would stop the Gateway's read loop from answering heartbeats.
+            var chat = new InboundChatQueue((message, token) => relay.OnDiscordMessageAsync(message, gateway.BotUserId, token), log);
+            tasks.Add(chat.RunAsync(stop.Token));
+            gateway.MessageReceived += message =>
+            {
+                chat.Enqueue(message);
+                return Task.CompletedTask;
+            };
             // REST calls and RCON can be slow; off the Gateway's read loop so heartbeats keep being answered.
             gateway.CommandReceived += command =>
             {
