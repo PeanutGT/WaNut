@@ -43,11 +43,12 @@ public static partial class ServerLogParser
 {
     private const string MessageMarker = "]: ";
 
-    /// <summary>Removes ANSI color codes, which some servers print even when the output is not a terminal.</summary>
-    public static string Clean(string line) => AnsiEscape().Replace(line, string.Empty);
+    /// <summary>Removes ANSI color codes and Minecraft formatting codes (§.), which some servers print even when the output is not a terminal.</summary>
+    public static string Clean(string line) => SectionEscape().Replace(AnsiEscape().Replace(line, string.Empty), string.Empty);
 
     public static LogEvent? Parse(string line)
     {
+        line = Clean(line);
         // Only the text after the first "]: " is the message. Anything later in the line, such as chat,
         // can never pass for a server message: a player typing "]: Steve joined the game" does not add Steve.
         var start = line.IndexOf(MessageMarker, StringComparison.Ordinal);
@@ -73,13 +74,26 @@ public static partial class ServerLogParser
         }
 
         var match = PlayerMessage().Match(message);
-        if (!match.Success)
+        if (match.Success)
         {
-            return null;
+            var action = match.Groups["action"].Value;
+            var kind = action is "joined" or "加入了" ? LogEventKind.PlayerJoined : LogEventKind.PlayerLeft;
+            return new LogEvent(kind, match.Groups["name"].Value);
         }
 
-        var kind = match.Groups["action"].Value == "joined" ? LogEventKind.PlayerJoined : LogEventKind.PlayerLeft;
-        return new LogEvent(kind, match.Groups["name"].Value);
+        var loginMatch = PlayerLoginMessage().Match(message);
+        if (loginMatch.Success)
+        {
+            return new LogEvent(LogEventKind.PlayerJoined, loginMatch.Groups["name"].Value);
+        }
+
+        var disconnectMatch = PlayerDisconnectMessage().Match(message);
+        if (disconnectMatch.Success)
+        {
+            return new LogEvent(LogEventKind.PlayerLeft, disconnectMatch.Groups["name"].Value);
+        }
+
+        return null;
     }
 
     /// <summary>The start or stop phase a console line shows, or null for any other line.</summary>
@@ -138,7 +152,21 @@ public static partial class ServerLogParser
     [GeneratedRegex(@"^Done \([\d.,]+s\)! For help, type ""help""")]
     private static partial Regex DoneMessage();
 
-    // Java Edition names are 3-16 letters, digits or underscores; offline-mode names can be shorter.
-    [GeneratedRegex(@"^(?<name>[A-Za-z0-9_]{1,16}) (?<action>joined|left) the game$")]
+    [GeneratedRegex(@"§.")]
+    private static partial Regex SectionEscape();
+
+    // Java Edition names are 3-16 letters, digits or underscores; offline-mode names can be shorter;
+    // Bedrock players via Geyser/Floodgate may have prefixes like "." or "*".
+    // Covers standard messages, localized join/leave, and optional trailing punctuation.
+    [GeneratedRegex(@"^(?<name>[A-Za-z0-9_.+*][A-Za-z0-9_.+* -]{0,31}) (?:(?<action>joined|left) the game|(?<action>加入了|離開了)(?:遊戲|伺服器))[.!~]?$")]
     private static partial Regex PlayerMessage();
+
+    // Fallback when a server or plugin suppresses the public "joined the game" announcement,
+    // e.g. "Steve[/127.0.0.1:12345] logged in with entity id 123 at ([world]0.0, 64.0, 0.0)".
+    [GeneratedRegex(@"^(?<name>[A-Za-z0-9_.+*][A-Za-z0-9_.+* -]{0,31})\[(?:/[0-9a-fA-F.:]+|local.*)\] logged in with entity id")]
+    private static partial Regex PlayerLoginMessage();
+
+    // Covers disconnects, timeouts and kicks (e.g. "Steve lost connection: Disconnected", "Steve lost connection: Timed out").
+    [GeneratedRegex(@"^(?<name>[A-Za-z0-9_.+*][A-Za-z0-9_.+* -]{0,31}) lost connection:")]
+    private static partial Regex PlayerDisconnectMessage();
 }
