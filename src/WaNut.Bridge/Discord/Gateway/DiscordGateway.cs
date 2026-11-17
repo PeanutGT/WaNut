@@ -59,9 +59,15 @@ public sealed class DiscordGateway(
             {
                 break;
             }
-            catch (Exception ex) when (ex is WebSocketException or IOException or JsonException or InvalidOperationException or KeyNotFoundException or OperationCanceledException)
+            catch (Exception ex)
             {
-                // A network drop or a garbled message: reconnect below.
+                // A network drop, a garbled message or anything else unforeseen: reconnect below. Letting it
+                // escape would end this task for good and leave Discord to game chat dead until the bridge restarts.
+                // Only the type is logged, never the message, which could quote what Discord sent.
+                if (ex is not (WebSocketException or IOException or OperationCanceledException))
+                {
+                    log.Warn($"Discord connection problem ({ex.GetType().Name}); reconnecting.");
+                }
             }
             finally
             {
