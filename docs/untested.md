@@ -332,3 +332,17 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - Discord 前置驗證用真的 bot：token 打錯、頻道 id 打錯、bot 不在那個伺服器、頻道對 bot 隱藏、缺 Embed Links、沒開 Message Content Intent，各自得到對的錯誤或警告。
 - 同一台電腦兩個伺服器各部署一個橋接：RCON port 不同（25575、25576…），互不干擾。
 - Windows 服務（A3）這次沒有做：需要以服務方式執行的橋接，而且 DPAPI 目前綁使用者帳號，服務帳號解不開。
+
+## Discord 橋接 VPS 部署（add-bridge-vps-deployer）
+
+已確認（Linux 雲端環境，本機 sshd、沒有 sudo 的帳號）：`SshVpsBridgeDeployerSshTests` 實際部署 linux-x64 橋接：背景迴圈模式跑起來、設定檔權限 600、狀態查詢、第二次部署（同一個執行檔不重傳）、停止、移除；設定不能用時（exit 2）回報 `BridgeExited` 附上日誌最後幾行，server.properties 與 VPS 上的設定都回復原狀。手動確認背景迴圈在橋接被 kill -9 後 5 秒內重新啟動，送 TERM 給整個 process group 後全部結束。
+
+還沒確認：
+
+- 有 systemd 和免密碼 sudo 的 VPS（Ubuntu、Oracle）：`/opt/wanut-bridge/` 擁有者是 SSH 帳號、`wanut-bridge-<id>.service` 已 enable、`systemctl status` 正常、重開 VPS 後橋接自己起來、kill -9 後 5 秒內被拉起、設定錯誤（exit 2）時不會無限重啟。
+- ARM VPS（Oracle Ampere）用到 linux-arm64 版本。
+- 防火牆檢查：Oracle iptables、ufw、firewalld 各自在 RCON port 沒開時沒有警告、開了時有 `RconPortOpen`；沒有免密碼 sudo 時是 `RconPortUnchecked`。
+- 檔案留在 VPS（`VpsCopyIsNewer`）時：伺服器停止狀態下部署會把 VPS 的 server.properties 拉回、改好、送回；伺服器在跑而且需要改 RCON 時回報 `ServerRunning`，什麼都不改。
+- 從 systemd 改成背景迴圈（或反過來）時舊的那一個被停掉、unit 被刪掉。
+- `--status` 走 `/tmp` 下的 socket：VPS 若設了特別的 `TMPDIR`，查不到狀態時要看這裡。
+- Docker（B3）這次沒有做。

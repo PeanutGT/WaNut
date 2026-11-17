@@ -12,9 +12,9 @@ public sealed class BridgeDeployRunTests
         var error = await Assert.ThrowsAsync<BridgeDeployException>(() => BridgeDeployRun.RunAsync<int>(null, run =>
         {
             run.Enter(BridgeDeployStep.PatchServerProperties);
-            run.OnFailure(() => undone.Add(1));
+            run.OnFailureSync(() => undone.Add(1));
             run.Enter(BridgeDeployStep.Register);
-            run.OnFailure(() => undone.Add(2));
+            run.OnFailureSync(() => undone.Add(2));
             throw new IOException("disk full");
         }));
 
@@ -31,8 +31,8 @@ public sealed class BridgeDeployRunTests
 
         await Assert.ThrowsAsync<BridgeDeployException>(() => BridgeDeployRun.RunAsync<int>(null, run =>
         {
-            run.OnFailure(() => undone = true);
-            run.OnFailure(() => throw new IOException());
+            run.OnFailureSync(() => undone = true);
+            run.OnFailureSync(() => throw new IOException());
             throw run.Fail(BridgeDeployError.InvalidRequest);
         }));
 
@@ -48,7 +48,7 @@ public sealed class BridgeDeployRunTests
         var result = await BridgeDeployRun.RunAsync(new SyncProgress(steps.Add), run =>
         {
             run.Enter(BridgeDeployStep.Validate);
-            run.OnFailure(() => undone = true);
+            run.OnFailureSync(() => undone = true);
             run.Enter(BridgeDeployStep.HealthCheck);
             return Task.FromResult(7);
         });

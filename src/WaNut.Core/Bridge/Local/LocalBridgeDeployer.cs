@@ -1,6 +1,5 @@
 using System.Net.NetworkInformation;
 using WaNut.Core.Instances;
-using WaNut.Core.Network;
 using WaNut.Core.Properties;
 using WaNut.Core.Remote;
 using WaNut.Core.Settings;
@@ -93,7 +92,7 @@ public sealed class LocalBridgeDeployer : IBridgeDeployer
             if (rcon.RestartNeeded)
             {
                 properties.Save(propertiesPath);
-                run.OnFailure(() => File.WriteAllBytes(propertiesPath, original));
+                run.OnFailureSync(() => File.WriteAllBytes(propertiesPath, original));
             }
 
             // Step 4: the executable and the encrypted config. The bridge running now stops first, so its config can change.
@@ -127,7 +126,7 @@ public sealed class LocalBridgeDeployer : IBridgeDeployer
                 RconPassword = rcon.Password,
             };
             AtomicFile.WriteAllText(configPath, BridgeConfigJson.Serialize(BridgeSecrets.Protect(config, _protector)));
-            run.OnFailure(() =>
+            run.OnFailureSync(() =>
             {
                 if (oldConfig is null)
                 {
@@ -204,30 +203,11 @@ public sealed class LocalBridgeDeployer : IBridgeDeployer
         _binaries.DeleteOthers(ExecutablesInUse());
     }
 
-    /// <summary>A port no other server here uses for its game or RCON, and that nothing listens on now.</summary>
+    /// <summary>A port no other server on this PC uses, and that nothing listens on now.</summary>
     private int PickRconPort(string serverId)
     {
-        var taken = new HashSet<int>();
-        foreach (var instance in _store.LoadAll().Where(i => i.Id != serverId))
-        {
-            var path = Path.Combine(_store.InstanceDir(instance.Id), GameSettingsStore.PropertiesFileName);
-            if (!File.Exists(path))
-            {
-                continue;
-            }
-
-            var other = PropertiesFile.Load(path);
-            foreach (var key in new[] { "rcon.port", "server-port" })
-            {
-                if (int.TryParse(other.Get(key), out var port))
-                {
-                    taken.Add(port);
-                }
-            }
-        }
-
         var listening = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Select(e => e.Port).ToHashSet();
-        return ServerPorts.Pick(RconSetup.DefaultPort, taken, port => !listening.Contains(port)) ?? RconSetup.DefaultPort;
+        return BridgePorts.Pick(_store, serverId, i => i.VpsId is null, port => !listening.Contains(port));
     }
 
     private async Task<LocalBridgeRun> StartRunAsync(string serverId, BridgeRunMode mode, string executable, CancellationToken cancellationToken)
