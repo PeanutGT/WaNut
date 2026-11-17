@@ -1,13 +1,16 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using WaNut.Bridge;
 using WaNut.Core.Bridge;
 using WaNut.Core.Http;
+using WaNut.Core.Remote;
 
-// Usage: WaNut.Bridge [--config <path>]. The config defaults to bridge.config.json next to the executable.
-// Exit codes: 0 stopped, 1 crashed (systemd or the launcher restarts it), 2 the config is unusable.
-var log = new BridgeLog();
+// Usage: WaNut.Bridge [--config <path>] [--log <path>], or WaNut.Bridge --status|--stop <server id>.
+// The config defaults to bridge.config.json next to the executable; the log to standard output.
+// Exit codes: 0 stopped, 1 crashed (systemd or the launcher restarts it), 2 the config is unusable,
+// 3 no bridge answered --status or --stop.
 var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "0.0.0";
 if (args is ["--version"])
 {
@@ -15,7 +18,22 @@ if (args is ["--version"])
     return 0;
 }
 
-var configPath = args is ["--config", var path] ? path : Path.Combine(AppContext.BaseDirectory, BridgeConfigJson.FileName);
+if (args is [("--status" or "--stop") and var ask, var askedId])
+{
+    var answer = await BridgeStatusPipe.AskAsync(askedId, ask == "--stop" ? BridgeStatusPipe.StopRequest : BridgeStatusPipe.StatusRequest);
+    if (answer is null)
+    {
+        return 3;
+    }
+
+    Console.WriteLine(BridgeStatusPipe.Serialize(answer));
+    return 0;
+}
+
+var options = BridgeArguments.Parse(args);
+using var logFile = options.LogFile is null ? null : BridgeLogFile.Open(options.LogFile);
+var log = new BridgeLog(logFile);
+var configPath = options.ConfigFile ?? Path.Combine(AppContext.BaseDirectory, BridgeConfigJson.FileName);
 BridgeConfig config;
 try
 {
@@ -25,6 +43,21 @@ catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or J
 {
     log.Error($"Cannot read {configPath}: {ex.Message}");
     return 2;
+}
+
+if (BridgeSecrets.IsProtected(config))
+{
+    try
+    {
+        config = OperatingSystem.IsWindows()
+            ? BridgeSecrets.Unprotect(config, new DpapiProtector(BridgeSecrets.Entropy))
+            : throw new CryptographicException("Encrypted secrets only work on the Windows account that wrote them.");
+    }
+    catch (CryptographicException ex)
+    {
+        log.Error($"Cannot decrypt the secrets in {configPath}: {ex.Message} Deploy the bridge again from WaNut.");
+        return 2;
+    }
 }
 
 var problems = BridgeConfigCheck.Problems(config);
@@ -51,9 +84,12 @@ using var http = WaNutHttp.CreateClient(version);
 http.Timeout = TimeSpan.FromSeconds(30);
 
 log.Info($"WaNut bridge {version} starting for server {config.ServerId}.");
+var engine = new BridgeEngine(config, http, log);
+var pipe = new StatusPipeServer(config.ServerId, engine.Snapshot, stop.Cancel, log);
+var pipeRun = Task.Run(() => pipe.RunAsync(stop.Token));
 try
 {
-    await new BridgeEngine(config, http, log).RunAsync(stop.Token);
+    await engine.RunAsync(stop.Token);
 }
 catch (OperationCanceledException) when (stop.IsCancellationRequested)
 {
@@ -63,6 +99,18 @@ catch (Exception ex)
 {
     log.Error($"The bridge stopped after an error: {ex}");
     return 1;
+}
+finally
+{
+    await stop.CancelAsync();
+    try
+    {
+        await pipeRun;
+    }
+    catch (OperationCanceledException)
+    {
+        // Stopping.
+    }
 }
 
 log.Info("Bridge stopped.");

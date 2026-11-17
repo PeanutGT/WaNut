@@ -22,10 +22,28 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
     /// <summary>Discord limits status changes; a burst of joins becomes one change.</summary>
     public static readonly TimeSpan MinPresenceGap = TimeSpan.FromSeconds(5);
 
+    private RconLink? _rcon;
+    private DiscordGateway? _gateway;
+
+    /// <summary>What the status pipe answers: how the connections are right now.</summary>
+    public BridgeStatus Snapshot()
+    {
+        var gateway = _gateway;
+        return new BridgeStatus
+        {
+            State = BridgeState.Running,
+            ProcessId = Environment.ProcessId,
+            RconConnected = _rcon?.IsConnected == true,
+            DiscordConnected = gateway?.IsConnected == true,
+            DiscordLatencyMs = gateway is { IsConnected: true, Latency.Ticks: > 0 } ? (int)gateway.Latency.TotalMilliseconds : null,
+            ReportedAt = DateTimeOffset.UtcNow,
+        };
+    }
+
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         var outbox = new DiscordOutbox(CreatePoster(), log);
-        var rcon = new RconLink(token => RconClient.ConnectAsync(RconHost, config.RconPort, config.RconPassword, token), log);
+        var rcon = _rcon = new RconLink(token => RconClient.ConnectAsync(RconHost, config.RconPort, config.RconPassword, token), log);
         var relay = new BridgeRelay(config, rcon, outbox.Enqueue, log);
         using var statusKick = new SemaphoreSlim(0, 1);
         void Kick()
@@ -45,7 +63,7 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
         rcon.ConnectionChanged += _ => Kick();
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var gateway = string.IsNullOrWhiteSpace(config.BotToken) ? null : new DiscordGateway(config.BotToken, log);
+        var gateway = _gateway = string.IsNullOrWhiteSpace(config.BotToken) ? null : new DiscordGateway(config.BotToken, log);
         var gatewayRun = Task.CompletedTask;
         var tasks = new List<Task>
         {

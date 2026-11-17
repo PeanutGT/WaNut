@@ -36,4 +36,9 @@
     <ProjectReference Include="..\WaNut.Core\WaNut.Core.csproj" />
   </ItemGroup>
 
+  <!-- The Discord bridge builds (scripts/publish-bridge.ps1) ship in the app folder as bridge\<rid>\. -->
+  <ItemGroup>
+    <Content Include="..\..\artifacts\bridge\**\*" LinkBase="bridge" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
