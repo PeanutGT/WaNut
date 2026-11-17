@@ -289,3 +289,32 @@ VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`�
 - 對一份真的 Vanilla／Paper `server.properties` 套用 `RconSetup.Apply`：除了 RCON 四個鍵，其餘註解與順序完全不變。
 - 重啟伺服器後 RCON 真的有在 `rcon.port` 監聽（用 `mcrcon` 之類的工具連 127.0.0.1 測）。
 - Vanilla 沒有 `rcon.ip` 這個鍵（RCON 綁在 `server-ip`），所以實際上會綁在所有網卡；確認防火牆沒有對外開 RCON 連接埠。
+
+## Discord 橋接引擎（add-bridge-engine）
+
+新增 `src/WaNut.Bridge`：獨立的背景程式（Windows 與 Linux 都能跑），讀 `bridge.config.json` 後持續運作。追蹤 `logs/latest.log`（伺服器重開換新檔時會自動從新檔開頭讀），把聊天、上下線、死亡、進度、開關機轉到 Discord（Webhook 擬真玩家、Embed 卡片、純文字三種樣式，300 毫秒內的多行合併成一則，遇到 429 依 Discord 指定時間等待後重送）。Discord Gateway 用自己寫的用戶端（Hello、Identify、心跳、斷線 Resume、心跳沒回應視為斷線），頻道訊息用 RCON `tellraw` 送進遊戲（自己、其他機器人與 Webhook 的訊息一律不轉，避免迴圈）。`/list` 與 `/cmd` 是 Discord 正式斜線指令，橋接啟動連上 Discord 時自動註冊到頻道所在的伺服器；`/cmd` 預設只有管理員看得到，橋接也會再檢查 `adminRoleId` 身分組，回覆只有使用者本人看得到。設定檔新增 `language`（`en` 或 `zh-TW`），決定橋接自己說的話（上下線、開關機、狀態列、指令回覆）；聊天和伺服器的死亡、進度訊息照原文轉。RCON 斷線後 1、2、4…最多 60 秒重試，看到伺服器 Done 立刻重連。
+
+已測：147 個單元測試；Linux 上用假 RCON 伺服器跑發佈檔，RCON 連線、`list` 有跑；用假 token 連真的 Discord Gateway，有收到 Hello、送出 Identify，Discord 以 4004 拒絕時日誌寫「Discord refused the bot token.」並停止重試。沒有用真的 bot 連過，也沒接過真的 Minecraft 伺服器。還沒有部署器和畫面（Phase 3、4），要手動寫設定檔、手動執行。
+
+發佈大小（`dotnet publish src/WaNut.Bridge -c Release -r <平台>`）：win-x64 12.0 MB、linux-x64 14.1 MB、linux-arm64 13.4 MB。Linux 上 RSS 約 39 MB，其中約 17 MB 是共用的程式檔頁面，私有記憶體約 22 MB（Peanut 選 A1：先不改 NativeAOT）。
+
+Bot 設定（之後 Phase 4 畫面要帶使用者做）：
+1. Discord Developer Portal 建立 Application，Bot 頁面拿 token，打開 Privileged Gateway Intents 裡的 Message Content Intent。
+2. 邀請連結要有 `bot` 和 `applications.commands` 兩個 scope，權限至少 View Channel、Send Messages、Embed Links。
+3. 頻道 id（開發者模式右鍵複製）填 `channelId`；要用 `/cmd` 再填 `adminRoleId`，並在伺服器設定 > 整合 > 這個 bot 把 `/cmd` 開給那個身分組。
+
+要在真的伺服器和 Discord 上看的：
+- 手動測法：在伺服器資料夾旁放 `bridge.config.json`（`logFile`、`rconPort`、`rconPassword`、`webhookUrl` 或 `botToken`＋`channelId`、`language`），伺服器 `server.properties` 先用 `RconSetup` 打開 RCON，執行 `WaNut.Bridge --config <路徑>`。
+- Vanilla、Paper、Fabric、Forge、NeoForge 各開一台：聊天、上下線、死亡、進度、伺服器開關機都會出現在 Discord；`/msg`、`/tell` 私訊不會出現。
+- Webhook 模式：聊天以玩家名字和頭像顯示；名字含 "discord" 的玩家改成「**名字**: 訊息」。
+- Embed 與純文字模式（需要 bot token）：顏色與格式正確。
+- `language` 設 `zh-TW`：上下線、開關機、狀態列、指令回覆都是中文。
+- 很多人同時上線或洗版：Discord 不會一則一則刷，會合併；被限速時日誌有等待、最後都送到。
+- Discord 頻道打字：遊戲內顯示 `[DC] 名字: 訊息`，中文、表情符號、引號、反斜線都正常，沒有變成指令；機器人自己的訊息不會被轉回遊戲。
+- 斜線指令：bot 上線幾秒內輸入 `/` 看得到 `/list`（中文 Discord 顯示中文說明）；`/list` 所有人看得到回覆；`/cmd` 一般成員看不到，管理員用了只有自己看得到輸出；在別的頻道用會被告知只能在橋接頻道用。
+- 機器人狀態列顯示「x / y online」，伺服器關掉後變「Server offline」。
+- 伺服器重開（`latest.log` 被改名、建新檔）：橋接不用重開，新檔的訊息照常轉。
+- 關掉伺服器再開：RCON 自動重連，不用重開橋接。
+- 拔網路幾分鐘再接上：Discord 自動重連（Resume），期間的遊戲訊息之後補送（佇列最多 500 行）。
+- Discord 開發者後台沒開 Message Content Intent 時：日誌寫出要去哪裡打開，遊戲到 Discord 仍正常。
+- 接上真的 bot 後在 Linux VPS 上量 RSS（目標 30 MB 以內）。

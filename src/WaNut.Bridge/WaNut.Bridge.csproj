@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The headless Minecraft <-> Discord bridge. Runs on Windows and Linux, apart from the WaNut window. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!-- A VPS may have no ICU library, and the bridge never formats culture-specific text. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- One small heap instead of one per core keeps the resident size near 20-30 MB. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>false</TieredPGO>
+    <EventSourceSupport>false</EventSourceSupport>
+  </PropertyGroup>
+
+  <!-- dotnet publish -r win-x64 | linux-x64 | linux-arm64: one self-contained, trimmed file per platform. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <AllowedReferenceRelatedFileExtensions>-</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WaNut.Core\WaNut.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WaNut.Bridge.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,10 +1,12 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/WaNut.App/WaNut.App.csproj" />
+    <Project Path="src/WaNut.Bridge/WaNut.Bridge.csproj" />
     <Project Path="src/WaNut.Core/WaNut.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FakeMinecraftServer/FakeMinecraftServer.csproj" />
+    <Project Path="tests/WaNut.Bridge.Tests/WaNut.Bridge.Tests.csproj" />
     <Project Path="tests/WaNut.Core.Tests/WaNut.Core.Tests.csproj" />
   </Folder>
 </Solution>

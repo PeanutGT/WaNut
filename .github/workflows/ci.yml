@@ -24,5 +24,8 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build --filter "Category!=Network&Category!=Ssh"
 
+      - name: Publish bridge (trim check)
+        run: dotnet publish src/WaNut.Bridge -c Release -r linux-x64 -o artifacts/bridge-linux-x64
+
       - name: Check formatting
         run: dotnet format --verify-no-changes --no-restore
