@@ -280,3 +280,12 @@ VPS 上沒有這台伺服器的資料夾（或裡面沒有 `server.properties`�
 - 伺服器在 VPS 執行中：這兩個分頁仍然鎖住（伺服器自己會改寫 server.properties）。
 - 拔掉網路時改設定：跳出「沒辦法把更改存到 VPS」，分頁回到 VPS 上的值。
 - 沒有 GNU tar 的 VPS（例如 Alpine/busybox）：同步仍然成功，只是比較慢。
+
+## Discord 橋接共用核心（add-bridge-core-models）
+
+新增 `WaNut.Core/Bridge`：`BridgeConfig`、`DeploymentTarget`、`BridgeStatus` 模型、`IBridgeDeployer` 介面（尚無實作），以及 `RconSetup`（用既有的 `PropertiesFile` 無損打開 RCON：`enable-rcon=true`、`rcon.ip=127.0.0.1`、密碼為空時產生 24 字元隨機密碼）。只有單元測試，還沒接到任何畫面或真的伺服器。
+
+要在真的伺服器上看的：
+- 對一份真的 Vanilla／Paper `server.properties` 套用 `RconSetup.Apply`：除了 RCON 四個鍵，其餘註解與順序完全不變。
+- 重啟伺服器後 RCON 真的有在 `rcon.port` 監聽（用 `mcrcon` 之類的工具連 127.0.0.1 測）。
+- Vanilla 沒有 `rcon.ip` 這個鍵（RCON 綁在 `server-ip`），所以實際上會綁在所有網卡；確認防火牆沒有對外開 RCON 連接埠。
