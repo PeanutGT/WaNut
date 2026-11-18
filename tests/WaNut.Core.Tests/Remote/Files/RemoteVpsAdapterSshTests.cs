@@ -209,6 +209,32 @@ public sealed class RemoteVpsAdapterSshTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task FileOrganizer_OverSsh_DeletesAndPacksButKeepsTheWorld()
+    {
+        await using var files = await RemoteVpsAdapter.OpenAsync(_session, _root);
+        await files.WriteAllTextAsync("server.properties", "level-name=world\n");
+        await files.WriteAllTextAsync("world/region/r.0.0.mca", "live");
+        await files.WriteAllTextAsync("logs/2026-01-01-1.log.gz", "old");
+        await files.WriteAllTextAsync("logs/latest.log", "now");
+        await files.WriteAllTextAsync("mods/a.jar.disabled", "mod");
+        await files.WriteAllTextAsync("world_backup/region/r.0.0.mca", "copy");
+        await _session.RunAsync($"touch -d '2026-01-01' {RemoteShell.Home(_root + "/logs/2026-01-01-1.log.gz")} {RemoteShell.Home(_root + "/logs/latest.log")}");
+        var organizer = new Core.Workspace.FileOrganizer(files, TimeProvider.System);
+
+        var plan = await organizer.EvaluateAsync(new Core.Workspace.CleanupRules());
+        var result = await organizer.ExecutePlanAsync(plan.Items);
+
+        Assert.Equal(["logs/2026-01-01-1.log.gz", "mods/a.jar.disabled", "world_backup"], plan.Items.Select(i => i.Path).Order(StringComparer.Ordinal));
+        Assert.Equal((2, 1), (result.Deleted, result.Archived));
+        var left = (await files.ListDirectoryAsync(string.Empty, true)).Select(n => n.Path).ToList();
+        Assert.Contains("world/region/r.0.0.mca", left);
+        Assert.Contains("logs/latest.log", left);
+        Assert.Contains("backups/world_backup.tar.gz", left);
+        Assert.DoesNotContain("world_backup", left);
+        Assert.DoesNotContain("mods/a.jar.disabled", left);
+    }
+
+    [Fact]
     public async Task RunAsync_AfterConnectionDrops_ReconnectsOnce()
     {
         // Kills this connection's own sshd process, as a dropped network would.

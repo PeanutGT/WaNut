@@ -3636,4 +3636,67 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Files_DiscardAsk" xml:space="preserve">
     <value>Discard your unsaved changes to {0}?</value>
   </data>
+  <data name="Files_Cleanup" xml:space="preserve">
+    <value>Clean up…</value>
+  </data>
+  <data name="Files_CleanupTitle" xml:space="preserve">
+    <value>Clean up</value>
+  </data>
+  <data name="Files_CleanupHint" xml:space="preserve">
+    <value>Nothing changes until you press Clean up selected. The world is never deleted.</value>
+  </data>
+  <data name="Files_CleanupScanning" xml:space="preserve">
+    <value>Looking for files to clean up…</value>
+  </data>
+  <data name="Files_CleanupEmpty" xml:space="preserve">
+    <value>Nothing to clean up. Nice and tidy!</value>
+  </data>
+  <data name="Files_CleanupLocked" xml:space="preserve">
+    <value>To clean up, stop the server and make sure its newest files are on the VPS. You can still look at the list.</value>
+  </data>
+  <data name="Files_CleanupSummary" xml:space="preserve">
+    <value>{0} of {1} selected · frees {2}</value>
+  </data>
+  <data name="Files_CleanupRun" xml:space="preserve">
+    <value>Clean up selected</value>
+  </data>
+  <data name="Files_CleanupClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Files_CleanupRiskBanner" xml:space="preserve">
+    <value>A checked item holds world data (region files). It is packed into backups/ before it is removed, but make sure it really is an old copy.</value>
+  </data>
+  <data name="Files_CleanupRiskItem" xml:space="preserve">
+    <value>Holds world data</value>
+  </data>
+  <data name="Files_CleanupReason_OldLog" xml:space="preserve">
+    <value>Old log or crash report</value>
+  </data>
+  <data name="Files_CleanupReason_DisabledMod" xml:space="preserve">
+    <value>Disabled mod</value>
+  </data>
+  <data name="Files_CleanupReason_OldBackup" xml:space="preserve">
+    <value>Old backup (beyond your backup settings)</value>
+  </data>
+  <data name="Files_CleanupReason_LooseWorldCopy" xml:space="preserve">
+    <value>Loose world copy, packed into backups/</value>
+  </data>
+  <data name="Files_CleanupConfirm" xml:space="preserve">
+    <value>Delete or pack {0} items? About {1} is freed. Deleted files can't be brought back.</value>
+  </data>
+  <data name="Files_CleanupConfirmRisky" xml:space="preserve">
+    <value>Delete or pack {0} items, including world data? Loose world copies are packed into backups/ first. About {1} is freed.</value>
+  </data>
+  <data name="Files_CleanupDone" xml:space="preserve">
+    <value>Done: {0} deleted, {1} packed, {2} freed.</value>
+  </data>
+  <data name="Files_CleanupSkipped" xml:space="preserve">
+    <value>{0} changed after the list was made and were left alone.</value>
+  </data>
+  <data name="Files_CleanupFailed" xml:space="preserve">
+    <value>Couldn't clean up: {0}</value>
+  </data>
+  <data name="Files_CleanupWorldRefused" xml:space="preserve">
+    <value>{0} is part of the world, so nothing was cleaned up.</value>
+  </data>
 </root>

@@ -146,20 +146,34 @@ public sealed partial class BackupStore(TimeProvider clock)
 
     private List<BackupInfo> CleanupFolder(string dir, BackupRules rules)
     {
-        rules = rules.Normalized();
-        var oldest = clock.GetUtcNow() - TimeSpan.FromDays(rules.MaxAgeDays);
-        var deleted = new List<BackupInfo>();
-        var backups = ListFolder(dir);
-        var counted = 0;
-        for (var i = 0; i < backups.Count; i++)
+        var deleted = Expired(ListFolder(dir), rules, clock.GetUtcNow());
+        foreach (var backup in deleted)
         {
-            var backup = backups[i];
+            File.Delete(backup.FilePath);
+        }
+
+        return deleted;
+    }
+
+    /// <summary>
+    /// The backups <see cref="Cleanup"/> would delete, without deleting anything: the same rules for any list, so the
+    /// Files tab's clean-up can apply them to a backups folder on a VPS.
+    /// </summary>
+    /// <param name="newestFirst">Backups named by WaNut, newest first, as <see cref="List"/> returns them.</param>
+    public static List<BackupInfo> Expired(IReadOnlyList<BackupInfo> newestFirst, BackupRules rules, DateTimeOffset now)
+    {
+        rules = rules.Normalized();
+        var oldest = now - TimeSpan.FromDays(rules.MaxAgeDays);
+        var expired = new List<BackupInfo>();
+        var counted = 0;
+        for (var i = 0; i < newestFirst.Count; i++)
+        {
+            var backup = newestFirst[i];
             var isSafetyCopy = backup.Reason is BackupReason.Restore or BackupReason.Change or BackupReason.Import or BackupReason.Reset or BackupReason.ModUpdate;
             var tooMany = !isSafetyCopy && counted >= rules.KeepCount;
             if (i > 0 && (tooMany || backup.CreatedAt < oldest))
             {
-                File.Delete(backup.FilePath);
-                deleted.Add(backup);
+                expired.Add(backup);
             }
             else if (!isSafetyCopy)
             {
@@ -167,7 +181,7 @@ public sealed partial class BackupStore(TimeProvider clock)
             }
         }
 
-        return deleted;
+        return expired;
     }
 
     /// <summary>The parts of the world a backup holds, in Overworld, Nether, End order.</summary>
@@ -610,7 +624,8 @@ public sealed partial class BackupStore(TimeProvider clock)
         }
     }
 
-    private bool TryParseName(string fileName, out DateTimeOffset createdAt, out BackupReason reason)
+    /// <summary>Reads the time and reason from a backup's file name; false for a zip WaNut did not name.</summary>
+    public bool TryParseName(string fileName, out DateTimeOffset createdAt, out BackupReason reason)
     {
         createdAt = default;
         reason = default;

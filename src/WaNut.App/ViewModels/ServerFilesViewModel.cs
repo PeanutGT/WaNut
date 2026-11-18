@@ -13,12 +13,14 @@ namespace WaNut.App.ViewModels;
 /// <summary>
 /// The Files tab of a server that runs on a VPS: its folder as a tree that opens one folder at a time, how much
 /// space each kind of file takes, and a text editor for small settings files. Reading works any time; editing only
-/// while the server is stopped and its newest files are on the VPS, like the settings tabs.
+/// while the server is stopped and its newest files are on the VPS, like the settings tabs. The clean-up panel
+/// lists old logs, disabled mods, old backups and loose world copies (a dry run), then removes only what stays checked.
 /// </summary>
 public sealed partial class ServerFilesViewModel : ObservableObject
 {
     private readonly ServerViewModel _server;
     private readonly ServerController _controller;
+    private readonly AppSettingsViewModel _app;
     private readonly IDialogService _dialogs;
     private readonly SynchronizationContext _ui = SynchronizationContext.Current ?? new SynchronizationContext();
 
@@ -31,16 +33,19 @@ public sealed partial class ServerFilesViewModel : ObservableObject
     private bool _undoingSelection;
     private (bool Running, bool Preparing, bool FilesOnVps)? _lastState;
 
-    public ServerFilesViewModel(ServerViewModel server, ServerController controller, IDialogService dialogs)
+    public ServerFilesViewModel(ServerViewModel server, ServerController controller, AppSettingsViewModel app, IDialogService dialogs)
     {
         _server = server;
         _controller = controller;
+        _app = app;
         _dialogs = dialogs;
     }
 
     public ObservableCollection<FileRowViewModel> Rows { get; } = [];
 
     public ObservableCollection<UsageRowViewModel> Usage { get; } = [];
+
+    public ObservableCollection<CleanupItemViewModel> CleanupItems { get; } = [];
 
     /// <summary>The tab only exists for a server set to run on a VPS.</summary>
     public bool IsAvailable => _server.RunsOnVps;
@@ -83,11 +88,38 @@ public sealed partial class ServerFilesViewModel : ObservableObject
 
     public bool ShowEmpty => !IsLoading && Rows.Count == 0 && ErrorText is null;
 
-    public bool ShowEditor => HasDocument;
+    public bool ShowEditor => HasDocument && !IsCleanupOpen;
 
-    public bool ShowInfo => InfoText is not null && !HasDocument;
+    public bool ShowInfo => InfoText is not null && !HasDocument && !IsCleanupOpen;
 
-    public bool ShowPlaceholder => !HasDocument && InfoText is null;
+    public bool ShowPlaceholder => !HasDocument && InfoText is null && !IsCleanupOpen;
+
+    /// <summary>The clean-up panel takes the editor's place; an unsaved edit stays and comes back when it closes.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEditor), nameof(ShowInfo), nameof(ShowPlaceholder))]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    private bool _isCleanupOpen;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowCleanupList), nameof(ShowCleanupEmpty))]
+    [NotifyCanExecuteChangedFor(nameof(OpenCleanupCommand), nameof(RunCleanupCommand))]
+    private bool _isCleaning;
+
+    [ObservableProperty]
+    private string? _cleanupStatus;
+
+    [ObservableProperty]
+    private string _cleanupSummary = string.Empty;
+
+    [ObservableProperty]
+    private bool _cleanupHasRisk;
+
+    public bool ShowCleanupList => CleanupItems.Count > 0;
+
+    public bool ShowCleanupEmpty => !IsCleaning && CleanupItems.Count == 0;
+
+    /// <summary>Deleting needs the same as editing: the server stopped and its newest files on the VPS.</summary>
+    public bool ShowCleanupLocked => !CanEditNow;
 
     public string EditorTitle => _document?.Path ?? string.Empty;
 
@@ -129,7 +161,9 @@ public sealed partial class ServerFilesViewModel : ObservableObject
         OnPropertyChanged(nameof(EditorReadOnly));
         OnPropertyChanged(nameof(ReadOnlyNote));
         OnPropertyChanged(nameof(ShowReadOnlyNote));
+        OnPropertyChanged(nameof(ShowCleanupLocked));
         SaveCommand.NotifyCanExecuteChanged();
+        RunCleanupCommand.NotifyCanExecuteChanged();
 
         if (!IsAvailable)
         {
@@ -176,7 +210,11 @@ public sealed partial class ServerFilesViewModel : ObservableObject
         TotalText = string.Empty;
         ErrorText = null;
         StatusText = null;
+        CleanupItems.Clear();
+        IsCleanupOpen = false;
+        CleanupStatus = null;
         NotifyListChanged();
+        NotifyCleanupChanged();
     }
 
     [RelayCommand]
@@ -214,6 +252,7 @@ public sealed partial class ServerFilesViewModel : ObservableObject
             }
 
             _browser = browser;
+            OpenCleanupCommand.NotifyCanExecuteChanged();
             SyncRows();
             _ = MeasureAsync(browser, cts.Token);
         }
@@ -442,7 +481,7 @@ public sealed partial class ServerFilesViewModel : ObservableObject
         return $"{node.Name}{Environment.NewLine}{meta}{Environment.NewLine}{Environment.NewLine}{why}";
     }
 
-    private bool CanSave() => IsDirty && CanEditNow && !EditorReadOnly;
+    private bool CanSave() => IsDirty && CanEditNow && !EditorReadOnly && !IsCleanupOpen;
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync()
@@ -520,4 +559,132 @@ public sealed partial class ServerFilesViewModel : ObservableObject
     partial void OnEditorTextChanged(string value) => StatusText = null;
 
     private static string Unify(string text) => LineEndings.Apply(text, crlf: false);
+
+    private bool CanOpenCleanup() => _browser is not null && !IsCleaning;
+
+    /// <summary>The dry run: lists what could go without changing anything, so it works while the server runs too.</summary>
+    [RelayCommand(CanExecute = nameof(CanOpenCleanup))]
+    private async Task OpenCleanupAsync()
+    {
+        IsCleanupOpen = true;
+        CleanupStatus = null;
+        await EvaluateCleanupAsync();
+    }
+
+    [RelayCommand]
+    private void CloseCleanup()
+    {
+        IsCleanupOpen = false;
+        CleanupStatus = null;
+    }
+
+    private async Task EvaluateCleanupAsync()
+    {
+        if (_browser is not { } browser)
+        {
+            return;
+        }
+
+        IsCleaning = true;
+        ErrorText = null;
+        try
+        {
+            var plan = await Organizer(browser).EvaluateAsync(CleanupRulesNow(), _cts?.Token ?? CancellationToken.None);
+            if (!ReferenceEquals(browser, _browser))
+            {
+                return;
+            }
+
+            CleanupItems.Clear();
+            foreach (var item in plan.Items)
+            {
+                CleanupItems.Add(new CleanupItemViewModel(item, NotifyCleanupChanged));
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception e) when (_controller.DescribeVpsFilesProblem(e) is { } text)
+        {
+            ErrorText = string.Format(Text.Get("Files_CleanupFailed"), text);
+        }
+        finally
+        {
+            IsCleaning = false;
+            NotifyCleanupChanged();
+        }
+    }
+
+    private bool CanRunCleanup() => CanEditNow && !IsCleaning && CleanupItems.Any(i => i.IsChecked);
+
+    [RelayCommand(CanExecute = nameof(CanRunCleanup))]
+    private async Task RunCleanupAsync()
+    {
+        if (_browser is not { } browser)
+        {
+            return;
+        }
+
+        var selected = CleanupItems.Where(i => i.IsChecked).Select(i => i.Item).ToList();
+        var ask = selected.Any(i => i.Risky) ? "Files_CleanupConfirmRisky" : "Files_CleanupConfirm";
+        if (!_dialogs.Confirm(string.Format(Text.Get(ask), selected.Count, ByteSize.Format(CleanupPlan.FreedBytes(selected)))))
+        {
+            return;
+        }
+
+        IsCleaning = true;
+        ErrorText = null;
+        CleanupStatus = null;
+        var token = _cts?.Token ?? CancellationToken.None;
+        string? status = null;
+        try
+        {
+            // Checked again here: the server may have started while the dialog was open.
+            if (!CanEditNow)
+            {
+                return;
+            }
+
+            var result = await Organizer(browser).ExecutePlanAsync(selected, token);
+            status = string.Format(Text.Get("Files_CleanupDone"), result.Deleted, result.Archived, ByteSize.Format(result.FreedBytes));
+            if (result.Skipped.Count > 0)
+            {
+                status += " " + string.Format(Text.Get("Files_CleanupSkipped"), result.Skipped.Count);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (CleanupException e)
+        {
+            ErrorText = string.Format(Text.Get("Files_CleanupWorldRefused"), e.Path);
+        }
+        catch (Exception e) when (_controller.DescribeVpsFilesProblem(e) is { } text)
+        {
+            ErrorText = string.Format(Text.Get("Files_CleanupFailed"), text);
+        }
+        finally
+        {
+            IsCleaning = false;
+        }
+
+        // Whatever happened, the folder may have changed: list it again so the panel and the tree show what is left.
+        await EvaluateCleanupAsync();
+        CleanupStatus = status;
+        _ = RefreshQuietlyAsync(browser, token);
+    }
+
+    private CleanupRules CleanupRulesNow() => new() { Backups = _app.BackupRules };
+
+    private static FileOrganizer Organizer(WorkspaceBrowser browser) => new(browser.FileSystem, TimeProvider.System);
+
+    private void NotifyCleanupChanged()
+    {
+        var selected = CleanupItems.Where(i => i.IsChecked).Select(i => i.Item).ToList();
+        CleanupSummary = string.Format(Text.Get("Files_CleanupSummary"), selected.Count, CleanupItems.Count, ByteSize.Format(CleanupPlan.FreedBytes(selected)));
+        CleanupHasRisk = selected.Any(i => i.Risky);
+        OnPropertyChanged(nameof(ShowCleanupList));
+        OnPropertyChanged(nameof(ShowCleanupEmpty));
+        RunCleanupCommand.NotifyCanExecuteChanged();
+    }
 }
