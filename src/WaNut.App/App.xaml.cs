@@ -163,6 +163,7 @@ public partial class App : Application
         services.AddSingleton<ModpackInstaller>();
         services.AddSingleton<DiscordWebhook>();
         services.AddSingleton<DiscordNotifier>();
+        services.AddSingleton<PresenceService>();
         services.AddSingleton<BackupCopyService>();
         services.AddSingleton<TrayIcon>();
 

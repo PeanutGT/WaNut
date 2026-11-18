@@ -48,6 +48,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         DiscordCrashed = settings.Discord.Crashed;
         DiscordPlayerJoined = settings.Discord.PlayerJoined;
         DiscordPlayerLeft = settings.Discord.PlayerLeft;
+        DiscordShowPresence = settings.Discord.ShowPresence;
         VpsList = new ObservableCollection<VpsProfile>(settings.Vps);
         _loading = false;
     }
@@ -141,6 +142,9 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private bool _discordPlayerLeft;
 
     [ObservableProperty]
+    private bool _discordShowPresence;
+
+    [ObservableProperty]
     private string? _discordTestText;
 
     public bool DiscordUrlInvalid => DiscordWebhookUrl.Trim().Length > 0 && !DiscordWebhook.IsValidUrl(DiscordWebhookUrl);
@@ -153,6 +157,7 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         Crashed = DiscordCrashed,
         PlayerJoined = DiscordPlayerJoined,
         PlayerLeft = DiscordPlayerLeft,
+        ShowPresence = DiscordShowPresence,
     };
 
     partial void OnDiscordWebhookUrlChanged(string value) => Save();
@@ -166,6 +171,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     partial void OnDiscordPlayerJoinedChanged(bool value) => Save();
 
     partial void OnDiscordPlayerLeftChanged(bool value) => Save();
+
+    partial void OnDiscordShowPresenceChanged(bool value) => Save();
 
     [RelayCommand(CanExecute = nameof(CanSendDiscordTest))]
     private async Task SendDiscordTestAsync()

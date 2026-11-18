@@ -1594,6 +1594,18 @@ Install {0} anyway?</value>
   <data name="Discord_EventJoined" xml:space="preserve">
     <value>Someone joins</value>
   </data>
+  <data name="Discord_ShowPresence" xml:space="preserve">
+    <value>Show the running server on my Discord profile</value>
+  </data>
+  <data name="Discord_ShowPresenceHint" xml:space="preserve">
+    <value>Shows the server name, version and how many are online, with a link to WaNut. The address is never shown. Needs the Discord app open on this PC.</value>
+  </data>
+  <data name="Presence_State" xml:space="preserve">
+    <value>{0} · {1} online</value>
+  </data>
+  <data name="Presence_StateVps" xml:space="preserve">
+    <value>{0} · {1} online · on a VPS</value>
+  </data>
   <data name="Discord_EventLeft" xml:space="preserve">
     <value>Someone leaves</value>
   </data>
