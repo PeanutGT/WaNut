@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using WaNut.Core.Settings.Config;
 
 namespace WaNut.Core.Tests.Settings;
 
@@ -23,6 +24,21 @@ public partial class TranslationTests
 
         Assert.True(missing.Count == 0, $"Missing in {file}: {string.Join(", ", missing)}");
         Assert.True(extra.Count == 0, $"Not in Strings.resx: {string.Join(", ", extra)}");
+    }
+
+    [Theory]
+    [InlineData("Strings.resx")]
+    [InlineData("Strings.zh-TW.resx")]
+    public void CatalogBannerAndHintKeys_HaveText(string file)
+    {
+        var strings = Load(file);
+        var keys = ServerConfigCatalog.All
+            .SelectMany(m => new[] { m.WarningBannerKey, m.HintKey })
+            .Where(k => k is not null)
+            .ToList();
+
+        Assert.NotEmpty(keys);
+        Assert.All(keys, k => Assert.False(string.IsNullOrWhiteSpace(strings.GetValueOrDefault(k!)), k));
     }
 
     [Theory]

@@ -123,6 +123,39 @@ public sealed class ConfigItemTests
     }
 
     [Fact]
+    public void ShouldShowWarning_ChangesWithValue_RaisesChange()
+    {
+        var item = Item("online-mode");
+        var changed = new List<string?>();
+        item.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        item.BoolValue = false;
+
+        Assert.Contains(nameof(ConfigItem.ShouldShowWarning), changed);
+    }
+
+    [Theory]
+    [InlineData("view-distance", "12", false)]
+    [InlineData("view-distance", "13", true)]
+    [InlineData("view-distance", "32", true)]
+    [InlineData("simulation-distance", "12", false)]
+    [InlineData("simulation-distance", "13", true)]
+    [InlineData("gamemode", "creative", false)]
+    public void ShouldShowHint_OnlyAboveTheLimit(string key, string value, bool expected)
+    {
+        var item = Item(key);
+        item.RawValue = value;
+
+        Assert.Equal(expected, item.ShouldShowHint);
+    }
+
+    [Fact]
+    public void ShouldShowHint_DefaultValues_AreQuiet()
+    {
+        Assert.All(ServerConfigCatalog.All, m => Assert.False(new ConfigItem(m, new Dictionary<string, string>()).ShouldShowHint, m.Key));
+    }
+
+    [Fact]
     public void TwoItemsOnOneStore_ShareValue()
     {
         var store = new Dictionary<string, string>();

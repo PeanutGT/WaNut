@@ -412,24 +412,6 @@ Choose No to keep waiting.</value>
   <data name="Server_NextStartHint" xml:space="preserve">
     <value>Changes here take effect the next time the server starts.</value>
   </data>
-  <data name="Server_StopToChange" xml:space="preserve">
-    <value>Stop the server to change the port or account checks.</value>
-  </data>
-  <data name="Server_Port" xml:space="preserve">
-    <value>Port</value>
-  </data>
-  <data name="Server_PortHint" xml:space="preserve">
-    <value>Friends join with your address and this number, like 192.168.1.5:{0}. The default is {1}.</value>
-  </data>
-  <data name="Server_OnlineMode" xml:space="preserve">
-    <value>Check players' Minecraft accounts (online mode)</value>
-  </data>
-  <data name="Server_OnlineModeHint" xml:space="preserve">
-    <value>Keeps people from joining under someone else's name.</value>
-  </data>
-  <data name="Server_OnlineModeWarning" xml:space="preserve">
-    <value>Account checks are off. Anyone can join using any name, including yours or an operator's, and can take over that player's items and progress. Only turn this off if you know why you need it.</value>
-  </data>
   <data name="Settings_AdvancedSection" xml:space="preserve">
     <value>ADVANCED</value>
   </data>
@@ -3995,5 +3977,20 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   </data>
   <data name="Settings_ColumnValue" xml:space="preserve">
     <value>Value</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Warning" xml:space="preserve">
+    <value>Account checks are off. Anyone can join under any name, including yours or an operator's, and take over that player's items, permissions and progress. Only turn this off if you know why you need it, and consider a login plugin so players still prove who they are.</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Hint" xml:space="preserve">
+    <value>This is higher than most PCs need. Every extra chunk loads many more blocks, so a high number can make the server and your friends’ games lag. 8–10 is a good start.</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Hint" xml:space="preserve">
+    <value>This is higher than most servers need. Mobs and crops far from players use a lot of CPU. 4–6 is a good start.</value>
+  </data>
+  <data name="Settings_ResetToDefault" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="Settings_ChangedFromDefault" xml:space="preserve">
+    <value>Changed from the default</value>
   </data>
 </root>

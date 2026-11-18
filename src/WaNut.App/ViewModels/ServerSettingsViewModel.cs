@@ -13,16 +13,15 @@ using WaNut.Core.Settings;
 namespace WaNut.App.ViewModels;
 
 /// <summary>
-/// The Server tab: RAM, port, account checks and, in Advanced mode, custom JVM arguments. RAM and JVM arguments
-/// live in instance.json and apply at the next start; port and account checks are server.properties keys, so
-/// like the Game settings they are locked while the server runs.
+/// The Server tab: RAM, run location, icon and, in Advanced mode, custom JVM arguments. RAM and JVM arguments
+/// live in instance.json and apply at the next start. The port and the account check are server.properties keys
+/// and live on the Game settings tab only.
 /// </summary>
 public sealed partial class ServerSettingsViewModel : ObservableObject
 {
     private readonly ServerViewModel _server;
     private readonly IDialogService _dialogs;
     private readonly long _thisPcMb = MemoryLimits.TotalPhysicalMb();
-    private ServerSettings _loaded = new();
     private bool _loading;
 
     public ServerSettingsViewModel(ServerViewModel server, AppSettingsViewModel app, IDialogService dialogs)
@@ -88,14 +87,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     private int _memoryMb;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(PortHint))]
-    private int _port;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowOnlineModeWarning))]
-    private bool _onlineMode;
-
-    [ObservableProperty]
     private string _customJvmArguments = string.Empty;
 
     [ObservableProperty]
@@ -127,8 +118,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     public string MemoryText => string.Format(Text.Get("CreateServer_MemoryValue"), MemoryMb / 1024.0);
 
-    public string PortHint => string.Format(Text.Get("Server_PortHint"), Port, ServerSettings.DefaultPort);
-
     /// <summary>server.properties and the server's own files: while stopped, and only once its newest files are here.</summary>
     public bool CanEditProperties => _server.Status == ServerStatus.Stopped && CanEditFiles;
 
@@ -139,16 +128,10 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     /// </summary>
     public bool CanEditFiles => _server.CanEditFiles;
 
-    /// <summary>
-    /// The account check is a line in the settings file, which can change on the VPS (see <see cref="ServerViewModel.CanEditSettings"/>)
-    /// while the world stays there.
-    /// </summary>
-    public bool CanEditOnlineMode => _server.Status == ServerStatus.Stopped && _server.CanEditSettings;
-
     /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
     public void OnShown()
     {
-        // The Game settings tab also edits the port and the account check.
+        // The files may have changed while the tab was away (a stop, a sync from the VPS).
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();
@@ -162,8 +145,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
     /// <summary>RAM and JVM arguments can change any time, but only take effect at the next start.</summary>
     public bool ShowNextStartHint => _server.IsRunning;
-
-    public bool ShowOnlineModeWarning => !OnlineMode;
 
     /// <summary>Custom arguments still apply with Advanced mode off; this says so, since the box is hidden then.</summary>
     public bool ShowHiddenJvmArgumentsNote => !App.AdvancedMode && _server.Metadata.CustomJvmArguments.Trim().Length > 0;
@@ -180,9 +161,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
             AutoStop = _server.Metadata.AutoStopMinutes > 0;
             AutoStopMinutes = AutoStop ? _server.Metadata.AutoStopMinutes : DefaultAutoStopMinutes;
             LoadRunLocations();
-            _loaded = ServerSettingsStore.Load(_server.InstanceDir);
-            Port = _loaded.Port;
-            OnlineMode = _loaded.OnlineMode;
             LighterEntities = ShowPaperTweaks && PaperTweaks.IsOn(_server.InstanceDir);
         }
         catch (IOException e)
@@ -308,7 +286,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         DeleteServerCommand.NotifyCanExecuteChanged();
         DuplicateServerCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanEditProperties));
-        OnPropertyChanged(nameof(CanEditOnlineMode));
         OnPropertyChanged(nameof(CanEditPaperTweaks));
         OnPropertyChanged(nameof(ShowNextStartHint));
         OnPropertyChanged(nameof(ShowFilesOnVpsNote));
@@ -323,7 +300,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     /// <summary>The server's newest files left for the VPS or came back.</summary>
     internal void OnVpsStateChanged()
     {
-        OnPropertyChanged(nameof(CanEditOnlineMode));
         OnPropertyChanged(nameof(CanEditFiles));
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(CanEditPaperTweaks));
@@ -378,9 +354,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
                 SaveMetadata(_server.Metadata with { VpsId = RunLocation.VpsId });
                 _server.Connect.OnRunLocationChanged();
                 UpdateMemoryLimit();
-                break;
-            case nameof(Port) or nameof(OnlineMode):
-                SaveProperties();
                 break;
             case nameof(LighterEntities):
                 SavePaperTweaks();
@@ -465,29 +438,6 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         }
 
         SaveMetadata(_server.Metadata with { AutoStopMinutes = AutoStop ? AutoStopMinutes : 0 });
-    }
-
-    private void SaveProperties()
-    {
-        if (!ServerSettings.IsValidPort(Port))
-        {
-            _loading = true;
-            Port = _loaded.Port;
-            _loading = false;
-            return;
-        }
-
-        var edited = new ServerSettings { Port = Port, OnlineMode = OnlineMode };
-        try
-        {
-            ServerSettingsStore.Save(_server.InstanceDir, _loaded, edited);
-            _loaded = edited;
-            _ = _server.PushVpsSettingsAsync();
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
-            _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
-        }
     }
 
     private void SaveMetadata(Core.Instances.InstanceMetadata metadata)

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WaNut.App.Resources;
 using WaNut.Core.Settings.Config;
 
@@ -12,6 +13,8 @@ namespace WaNut.App.ViewModels;
 /// </summary>
 public sealed partial class SettingEntryViewModel : ObservableObject
 {
+    private static readonly HashSet<string> CatalogKeys = ServerConfigCatalog.All.Select(m => m.Key).ToHashSet();
+
     private static readonly CultureInfo English = CultureInfo.InvariantCulture;
     private static readonly CultureInfo Chinese = CultureInfo.GetCultureInfo("zh-TW");
 
@@ -22,6 +25,10 @@ public sealed partial class SettingEntryViewModel : ObservableObject
         Item = item;
         Title = Text.TryGet(item.Meta.TitleKey, CultureInfo.CurrentUICulture) ?? item.Meta.Key;
         Description = Text.TryGet(item.Meta.DescriptionKey, CultureInfo.CurrentUICulture) ?? string.Empty;
+        WarningText = item.Meta.WarningBannerKey is { } warning ? Text.TryGet(warning, CultureInfo.CurrentUICulture) ?? string.Empty : string.Empty;
+        HintText = item.Meta.HintKey is { } hint ? Text.TryGet(hint, CultureInfo.CurrentUICulture) ?? string.Empty : string.Empty;
+        // A key only a mod knows has no default of ours to go back to.
+        ShowResetTools = CatalogKeys.Contains(item.Meta.Key);
         Options = item.Meta.Options?.Select(o => new Option<string>(o.Value, Text.Get(o.LocalizationKey))).ToList() ?? [];
         _searchText = new Lazy<string[]>(() =>
         [
@@ -38,6 +45,7 @@ public sealed partial class SettingEntryViewModel : ObservableObject
             if (e.PropertyName == nameof(ConfigItem.RawValue))
             {
                 OnPropertyChanged(nameof(NumberText));
+                ResetCommand.NotifyCanExecuteChanged();
             }
         };
     }
@@ -50,6 +58,15 @@ public sealed partial class SettingEntryViewModel : ObservableObject
     public string Title { get; }
 
     public string Description { get; }
+
+    /// <summary>Says why the value is risky (the red banner); empty when the setting has no such banner.</summary>
+    public string WarningText { get; }
+
+    /// <summary>The gentle note for a very high number; empty when the setting has none.</summary>
+    public string HintText { get; }
+
+    /// <summary>False for a key only a mod knows: the dot and the reset button have nothing to go back to.</summary>
+    public bool ShowResetTools { get; }
 
     public bool HasDescription => Description.Length > 0;
 
@@ -64,6 +81,14 @@ public sealed partial class SettingEntryViewModel : ObservableObject
     /// <summary>False when the value cannot change now, such as a file key while the server runs.</summary>
     [ObservableProperty]
     private bool _isEnabled = true;
+
+    partial void OnIsEnabledChanged(bool value) => ResetCommand.NotifyCanExecuteChanged();
+
+    /// <summary>Puts the default back. Locked together with the setting itself.</summary>
+    [RelayCommand(CanExecute = nameof(CanReset))]
+    private void Reset() => Item.ResetToDefault();
+
+    private bool CanReset() => IsEnabled && Item.IsModified;
 
     /// <summary>False while a search is on and this setting does not match it.</summary>
     [ObservableProperty]

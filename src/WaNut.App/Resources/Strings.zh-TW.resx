@@ -408,24 +408,6 @@
   <data name="Server_NextStartHint" xml:space="preserve">
     <value>這裡的變更會在伺服器下次啟動時生效。</value>
   </data>
-  <data name="Server_StopToChange" xml:space="preserve">
-    <value>停止伺服器後才能更改連接埠或帳號驗證。</value>
-  </data>
-  <data name="Server_Port" xml:space="preserve">
-    <value>連接埠</value>
-  </data>
-  <data name="Server_PortHint" xml:space="preserve">
-    <value>朋友用你的位址加上這個數字加入，例如 192.168.1.5:{0}。預設是 {1}。</value>
-  </data>
-  <data name="Server_OnlineMode" xml:space="preserve">
-    <value>驗證玩家的 Minecraft 帳號（正版驗證）</value>
-  </data>
-  <data name="Server_OnlineModeHint" xml:space="preserve">
-    <value>防止別人冒用其他玩家的名字加入。</value>
-  </data>
-  <data name="Server_OnlineModeWarning" xml:space="preserve">
-    <value>帳號驗證已關閉。任何人都能用任何名字加入，包括你或管理員的名字，還能接管那位玩家的物品和進度。除非你清楚為什麼需要，否則請不要關閉。</value>
-  </data>
   <data name="Settings_AdvancedSection" xml:space="preserve">
     <value>進階</value>
   </data>
@@ -3975,5 +3957,20 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   </data>
   <data name="Settings_ColumnValue" xml:space="preserve">
     <value>值</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Warning" xml:space="preserve">
+    <value>帳號驗證已關閉。任何人都能用任何名字加入，包括你或管理員的名字，還能接管那位玩家的物品、權限和進度。除非你清楚為什麼需要，否則請不要關閉；也可以改裝登入外掛，讓玩家仍需證明自己的身分。</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Hint" xml:space="preserve">
+    <value>這個數字比多數電腦需要的高。每多一個區塊就要多載入很多方塊，數字太高可能讓伺服器和朋友的遊戲變卡。建議先用 8–10。</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Hint" xml:space="preserve">
+    <value>這個數字比多數伺服器需要的高。離玩家很遠的生物和作物也會吃掉大量 CPU。建議先用 4–6。</value>
+  </data>
+  <data name="Settings_ResetToDefault" xml:space="preserve">
+    <value>還原預設值</value>
+  </data>
+  <data name="Settings_ChangedFromDefault" xml:space="preserve">
+    <value>已和預設值不同</value>
   </data>
 </root>

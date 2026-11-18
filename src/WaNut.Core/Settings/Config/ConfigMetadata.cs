@@ -22,6 +22,12 @@ public sealed record ConfigMetadata(
     /// <summary>The key the texts are named after when it differs from <see cref="Key"/> (a game rule item keeps the text of the property it replaces).</summary>
     public string? TextKey { get; init; }
 
+    /// <summary>Resource key of a gentle inline hint shown while a number is above <see cref="HintAbove"/>; null for none.</summary>
+    public string? HintKey { get; init; }
+
+    /// <summary>The number above which <see cref="HintKey"/> shows.</summary>
+    public double HintAbove { get; init; }
+
     /// <summary>True for an item that is a game rule (saved in instance.json, sent as a "gamerule" command), not a server.properties key.</summary>
     public bool IsGameRuleItem { get; init; }
 
