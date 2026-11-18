@@ -146,7 +146,16 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
     public bool CanEditOnlineMode => _server.Status == ServerStatus.Stopped && _server.CanEditSettings;
 
     /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
-    public void OnShown() => _ = _server.EnsureVpsSettingsAsync();
+    public void OnShown()
+    {
+        // The Game settings tab also edits the port and the account check.
+        if (_server.Status == ServerStatus.Stopped)
+        {
+            Reload();
+        }
+
+        _ = _server.EnsureVpsSettingsAsync();
+    }
 
     /// <summary>Says why the icon, port and the rest are locked while the server is stopped with its files away.</summary>
     public bool ShowFilesOnVpsNote => !CanEditFiles && !_server.IsRunning;

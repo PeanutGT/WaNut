@@ -3694,4 +3694,286 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Files_CleanupWorldRefused" xml:space="preserve">
     <value>{0} 是世界存檔的一部分，所以沒有清理任何東西。</value>
   </data>
+  <data name="ServerConfig_Gamemode_Title" xml:space="preserve">
+    <value>遊戲模式</value>
+  </data>
+  <data name="ServerConfig_Gamemode_Description" xml:space="preserve">
+    <value>第一次加入的玩家會以這個模式開始。</value>
+  </data>
+  <data name="ServerConfig_Difficulty_Title" xml:space="preserve">
+    <value>難度</value>
+  </data>
+  <data name="ServerConfig_MaxPlayers_Title" xml:space="preserve">
+    <value>最多玩家數</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Title" xml:space="preserve">
+    <value>驗證玩家的 Minecraft 帳號（正版驗證）</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Description" xml:space="preserve">
+    <value>防止別人冒用其他玩家的名字加入。</value>
+  </data>
+  <data name="ServerConfig_Pvp_Title" xml:space="preserve">
+    <value>玩家可以互相攻擊（PvP）</value>
+  </data>
+  <data name="ServerConfig_KeepInventory_Title" xml:space="preserve">
+    <value>死亡不掉落物品</value>
+  </data>
+  <data name="ServerConfig_Motd_Title" xml:space="preserve">
+    <value>伺服器訊息</value>
+  </data>
+  <data name="ServerConfig_Motd_Description" xml:space="preserve">
+    <value>顯示在 Minecraft 伺服器列表中伺服器名稱的下方。</value>
+  </data>
+  <data name="ServerConfig_AllowFlight_Title" xml:space="preserve">
+    <value>允許飛行</value>
+  </data>
+  <data name="ServerConfig_AllowFlight_Description" xml:space="preserve">
+    <value>如果有模組或插件讓玩家飛行，請開啟，玩家才不會因此被踢出。</value>
+  </data>
+  <data name="ServerConfig_SpawnMonsters_Title" xml:space="preserve">
+    <value>生成怪物</value>
+  </data>
+  <data name="ServerConfig_SpawnAnimals_Title" xml:space="preserve">
+    <value>生成動物</value>
+  </data>
+  <data name="ServerConfig_SpawnNpcs_Title" xml:space="preserve">
+    <value>生成村民</value>
+  </data>
+  <data name="ServerConfig_EnableCommandBlock_Title" xml:space="preserve">
+    <value>啟用指令方塊</value>
+  </data>
+  <data name="ServerConfig_SpawnProtection_Title" xml:space="preserve">
+    <value>重生點保護</value>
+  </data>
+  <data name="ServerConfig_SpawnProtection_Description" xml:space="preserve">
+    <value>重生點周圍這麼多格內，只有管理員能建造。0 表示關閉。</value>
+  </data>
+  <data name="ServerConfig_Hardcore_Title" xml:space="preserve">
+    <value>極限模式</value>
+  </data>
+  <data name="ServerConfig_Hardcore_Description" xml:space="preserve">
+    <value>只有一條命：死亡的玩家會變成旁觀者。</value>
+  </data>
+  <data name="ServerConfig_ForceGamemode_Title" xml:space="preserve">
+    <value>加入時強制套用遊戲模式</value>
+  </data>
+  <data name="ServerConfig_ForceGamemode_Description" xml:space="preserve">
+    <value>玩家每次加入都會套用上面的遊戲模式，不只是第一次。</value>
+  </data>
+  <data name="ServerConfig_GenerateStructures_Title" xml:space="preserve">
+    <value>生成結構</value>
+  </data>
+  <data name="ServerConfig_GenerateStructures_Description" xml:space="preserve">
+    <value>在新區塊生成村莊、神殿等建築。</value>
+  </data>
+  <data name="ServerConfig_AllowNether_Title" xml:space="preserve">
+    <value>開放地獄</value>
+  </data>
+  <data name="ServerConfig_LevelSeed_Title" xml:space="preserve">
+    <value>世界種子碼</value>
+  </data>
+  <data name="ServerConfig_LevelSeed_Description" xml:space="preserve">
+    <value>留空就會產生隨機世界。世界建立之後種子碼就不能再更改。</value>
+  </data>
+  <data name="ServerConfig_ServerPort_Title" xml:space="preserve">
+    <value>連接埠</value>
+  </data>
+  <data name="ServerConfig_ServerPort_Description" xml:space="preserve">
+    <value>朋友用你的位址加上這個數字加入。預設是 25565。</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Title" xml:space="preserve">
+    <value>視野距離</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Description" xml:space="preserve">
+    <value>建議 8–10 個區塊。電腦較慢時，數字調低會比較順。</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Title" xml:space="preserve">
+    <value>模擬距離</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Description" xml:space="preserve">
+    <value>建議 4–6 個區塊。這是作物生長、生物活動的範圍，調低最能減輕 CPU 負擔。</value>
+  </data>
+  <data name="ServerConfig_WhiteList_Title" xml:space="preserve">
+    <value>白名單</value>
+  </data>
+  <data name="ServerConfig_WhiteList_Description" xml:space="preserve">
+    <value>只有在白名單上的玩家能加入。</value>
+  </data>
+  <data name="ServerConfig_EnforceWhitelist_Title" xml:space="preserve">
+    <value>踢出不在白名單的玩家</value>
+  </data>
+  <data name="ServerConfig_EnforceWhitelist_Description" xml:space="preserve">
+    <value>白名單變更時，已在線但不在名單上的玩家會被移出。</value>
+  </data>
+  <data name="ServerConfig_LevelName_Title" xml:space="preserve">
+    <value>世界資料夾名稱</value>
+  </data>
+  <data name="ServerConfig_LevelType_Title" xml:space="preserve">
+    <value>世界類型</value>
+  </data>
+  <data name="ServerConfig_GeneratorSettings_Title" xml:space="preserve">
+    <value>世界生成設定</value>
+  </data>
+  <data name="ServerConfig_ServerIp_Title" xml:space="preserve">
+    <value>綁定的 IP 位址</value>
+  </data>
+  <data name="ServerConfig_ServerIp_Description" xml:space="preserve">
+    <value>除非確定需要，否則請留空。</value>
+  </data>
+  <data name="ServerConfig_EnableStatus_Title" xml:space="preserve">
+    <value>顯示在伺服器列表</value>
+  </data>
+  <data name="ServerConfig_EnableStatus_Description" xml:space="preserve">
+    <value>關閉後，伺服器在 Minecraft 伺服器列表中會顯示為離線。</value>
+  </data>
+  <data name="ServerConfig_HideOnlinePlayers_Title" xml:space="preserve">
+    <value>隱藏在線玩家名單</value>
+  </data>
+  <data name="ServerConfig_PreventProxyConnections_Title" xml:space="preserve">
+    <value>封鎖代理與 VPN 連線</value>
+  </data>
+  <data name="ServerConfig_SyncChunkWrites_Title" xml:space="preserve">
+    <value>同步寫入區塊</value>
+  </data>
+  <data name="ServerConfig_NetworkCompressionThreshold_Title" xml:space="preserve">
+    <value>網路壓縮門檻</value>
+  </data>
+  <data name="ServerConfig_NetworkCompressionThreshold_Description" xml:space="preserve">
+    <value>-1 表示不壓縮。</value>
+  </data>
+  <data name="ServerConfig_RateLimit_Title" xml:space="preserve">
+    <value>封包速率限制</value>
+  </data>
+  <data name="ServerConfig_RateLimit_Description" xml:space="preserve">
+    <value>0 表示不限制。</value>
+  </data>
+  <data name="ServerConfig_MaxTickTime_Title" xml:space="preserve">
+    <value>看門狗逾時（毫秒）</value>
+  </data>
+  <data name="ServerConfig_MaxTickTime_Description" xml:space="preserve">
+    <value>單一 tick 超過這個時間，伺服器會自行關閉。-1 表示關閉。</value>
+  </data>
+  <data name="ServerConfig_MaxWorldSize_Title" xml:space="preserve">
+    <value>世界最大範圍</value>
+  </data>
+  <data name="ServerConfig_PlayerIdleTimeout_Title" xml:space="preserve">
+    <value>閒置踢出（分鐘）</value>
+  </data>
+  <data name="ServerConfig_PlayerIdleTimeout_Description" xml:space="preserve">
+    <value>0 表示不會踢出。</value>
+  </data>
+  <data name="ServerConfig_OpPermissionLevel_Title" xml:space="preserve">
+    <value>管理員權限等級</value>
+  </data>
+  <data name="ServerConfig_FunctionPermissionLevel_Title" xml:space="preserve">
+    <value>函式權限等級</value>
+  </data>
+  <data name="ServerConfig_EntityBroadcastRangePercentage_Title" xml:space="preserve">
+    <value>實體可見範圍（%）</value>
+  </data>
+  <data name="ServerConfig_RequireResourcePack_Title" xml:space="preserve">
+    <value>強制使用資源包</value>
+  </data>
+  <data name="ServerConfig_ResourcePack_Title" xml:space="preserve">
+    <value>資源包網址</value>
+  </data>
+  <data name="ServerConfig_ResourcePackPrompt_Title" xml:space="preserve">
+    <value>資源包提示訊息</value>
+  </data>
+  <data name="ServerConfig_ResourcePackSha1_Title" xml:space="preserve">
+    <value>資源包 SHA-1</value>
+  </data>
+  <data name="ServerConfig_EnableJmxMonitoring_Title" xml:space="preserve">
+    <value>JMX 監控</value>
+  </data>
+  <data name="ServerConfig_EnableQuery_Title" xml:space="preserve">
+    <value>Query 協定</value>
+  </data>
+  <data name="ServerConfig_QueryPort_Title" xml:space="preserve">
+    <value>Query 連接埠</value>
+  </data>
+  <data name="ServerConfig_EnableRcon_Title" xml:space="preserve">
+    <value>遠端主控台（RCON）</value>
+  </data>
+  <data name="ServerConfig_RconPort_Title" xml:space="preserve">
+    <value>RCON 連接埠</value>
+  </data>
+  <data name="ServerConfig_RconPassword_Title" xml:space="preserve">
+    <value>RCON 密碼</value>
+  </data>
+  <data name="ServerConfig_BroadcastConsoleToOps_Title" xml:space="preserve">
+    <value>向管理員顯示主控台指令</value>
+  </data>
+  <data name="ServerConfig_BroadcastRconToOps_Title" xml:space="preserve">
+    <value>向管理員顯示 RCON 指令</value>
+  </data>
+  <data name="ServerConfig_EnableCodeOfConduct_Title" xml:space="preserve">
+    <value>行為準則</value>
+  </data>
+  <data name="ServerConfig_TextFilteringConfig_Title" xml:space="preserve">
+    <value>文字過濾設定</value>
+  </data>
+  <data name="ServerConfig_UseNativeTransport_Title" xml:space="preserve">
+    <value>使用原生網路傳輸</value>
+  </data>
+  <data name="ServerConfig_LogIps_Title" xml:space="preserve">
+    <value>記錄玩家 IP 位址</value>
+  </data>
+  <data name="ServerConfig_AcceptsTransfers_Title" xml:space="preserve">
+    <value>接受其他伺服器的轉送</value>
+  </data>
+  <data name="ServerConfig_PauseWhenEmptySeconds_Title" xml:space="preserve">
+    <value>無人時暫停（秒）</value>
+  </data>
+  <data name="ServerConfig_PauseWhenEmptySeconds_Description" xml:space="preserve">
+    <value>-1 表示不暫停。</value>
+  </data>
+  <data name="ServerConfig_Option_Survival" xml:space="preserve">
+    <value>生存</value>
+  </data>
+  <data name="ServerConfig_Option_Creative" xml:space="preserve">
+    <value>創造</value>
+  </data>
+  <data name="ServerConfig_Option_Adventure" xml:space="preserve">
+    <value>冒險</value>
+  </data>
+  <data name="ServerConfig_Option_Spectator" xml:space="preserve">
+    <value>旁觀</value>
+  </data>
+  <data name="ServerConfig_Option_Peaceful" xml:space="preserve">
+    <value>和平</value>
+  </data>
+  <data name="ServerConfig_Option_Easy" xml:space="preserve">
+    <value>簡單</value>
+  </data>
+  <data name="ServerConfig_Option_Normal" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="ServerConfig_Option_Hard" xml:space="preserve">
+    <value>困難</value>
+  </data>
+  <data name="Settings_GroupWorldRules" xml:space="preserve">
+    <value>世界與規則</value>
+  </data>
+  <data name="Settings_GroupNetworkPerf" xml:space="preserve">
+    <value>連線與效能</value>
+  </data>
+  <data name="Settings_FullProperties" xml:space="preserve">
+    <value>全部設定項目</value>
+  </data>
+  <data name="Settings_FullPropertiesHint" xml:space="preserve">
+    <value>server.properties 的每一行，包含模組加入的項目。這裡和上面群組裡的設定是同一份。</value>
+  </data>
+  <data name="Settings_SearchPlaceholder" xml:space="preserve">
+    <value>搜尋設定</value>
+  </data>
+  <data name="Settings_SearchNoResults" xml:space="preserve">
+    <value>找不到符合的設定。</value>
+  </data>
+  <data name="Settings_ColumnKey" xml:space="preserve">
+    <value>項目</value>
+  </data>
+  <data name="Settings_ColumnValue" xml:space="preserve">
+    <value>值</value>
+  </data>
 </root>

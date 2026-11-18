@@ -58,6 +58,7 @@ public sealed partial class ServerViewModel : ObservableObject
     private bool _keepConsole;
 
     // This run's output only, for the crash analysis: the console may still show the run before an automatic restart.
+    private readonly AppSettingsViewModel _app;
     private readonly Queue<string> _runLines = new();
     private DateTime _startedUtc;
 
@@ -80,11 +81,12 @@ public sealed partial class ServerViewModel : ObservableObject
         BridgeManager bridge)
     {
         _discord = discord;
+        _app = app;
         Metadata = metadata;
         _controller = controller;
         _store = store;
         _ui = SynchronizationContext.Current ?? new SynchronizationContext();
-        GameSettings = new GameSettingsViewModel(this);
+        GameSettings = new GameSettingsViewModel(this, _app);
         PlayerLists = new PlayerListsViewModel(this, dialogs, faces);
         ServerSettings = new ServerSettingsViewModel(this, app, dialogs);
         Backups = new BackupsViewModel(this, backups, app, dialogs);
@@ -577,7 +579,7 @@ public sealed partial class ServerViewModel : ObservableObject
     internal void OnTypeOrVersionChanged(InstanceMetadata changed)
     {
         UpdateMetadata(changed);
-        GameSettings = new GameSettingsViewModel(this);
+        GameSettings = new GameSettingsViewModel(this, _app);
         OnPropertyChanged(nameof(GameSettings));
         PlayerLists.Reload();
         Backups.Reload();
