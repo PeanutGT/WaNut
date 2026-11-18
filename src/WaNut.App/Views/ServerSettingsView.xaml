@@ -80,11 +80,6 @@
       <!-- More settings -->
       <Expander Header="{res:Text Settings_MoreSettings}" Margin="-3,0,0,18">
         <StackPanel Margin="3,6,0,0">
-          <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,18"
-                  Visibility="{Binding ShowNextStartHint, Converter={StaticResource Visible}}">
-            <TextBlock Text="{res:Text Server_StopToChange}" TextWrapping="Wrap" />
-          </Border>
-
           <StackPanel Style="{StaticResource Item}">
             <TextBlock Text="{res:Text Change_Section}" Style="{StaticResource Label}" />
             <Button Content="{res:Text Change_Open}" Command="{Binding ChangeTypeOrVersionCommand}" HorizontalAlignment="Left" />
@@ -124,22 +119,6 @@
               <TextBlock Text="{res:Text Server_AutoStopMinutes}" VerticalAlignment="Center" />
             </StackPanel>
             <TextBlock Text="{res:Text Server_AutoStopHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
-          </StackPanel>
-
-          <StackPanel Style="{StaticResource Item}">
-            <TextBlock Text="{res:Text Server_Port}" Style="{StaticResource Label}" />
-            <TextBox Text="{Binding Port}" IsEnabled="{Binding CanEditProperties}" MaxLength="5"
-                     AutomationProperties.Name="{res:Text Server_Port}" Width="100" HorizontalAlignment="Left" />
-            <TextBlock Text="{Binding PortHint}" Style="{StaticResource Hint}" />
-          </StackPanel>
-
-          <StackPanel Style="{StaticResource Item}">
-            <CheckBox Content="{res:Text Server_OnlineMode}" IsChecked="{Binding OnlineMode}" IsEnabled="{Binding CanEditOnlineMode}" />
-            <TextBlock Text="{res:Text Server_OnlineModeHint}" Style="{StaticResource Hint}" Margin="24,3,0,0" />
-            <Border Style="{StaticResource WarningBanner}" Margin="0,12,0,0"
-                    Visibility="{Binding ShowOnlineModeWarning, Converter={StaticResource Visible}}">
-              <TextBlock Text="{res:Text Server_OnlineModeWarning}" TextWrapping="Wrap" />
-            </Border>
           </StackPanel>
 
           <StackPanel Style="{StaticResource Item}">

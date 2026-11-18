@@ -118,7 +118,7 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
     public void OnShown()
     {
-        // The Server tab may have changed the port or account check since this tab was built.
+        // The server may have rewritten server.properties since this tab was built.
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();

@@ -61,6 +61,9 @@ public sealed class ConfigItem : INotifyPropertyChanged
         !string.IsNullOrEmpty(Meta.WarningBannerKey)
         && string.Equals(RawValue.Trim(), Meta.WarningTriggerValue, StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>True while the gentle hint (for example a very high view distance) should be open.</summary>
+    public bool ShouldShowHint => !string.IsNullOrEmpty(Meta.HintKey) && NumericValue > Meta.HintAbove;
+
     public void ResetToDefault() => RawValue = Meta.DefaultValue;
 
     private static bool TryParse(string text, out double result) =>
@@ -68,7 +71,7 @@ public sealed class ConfigItem : INotifyPropertyChanged
 
     private void NotifyValueChanged()
     {
-        foreach (var name in new[] { nameof(RawValue), nameof(BoolValue), nameof(NumericValue), nameof(IsModified), nameof(ShouldShowWarning) })
+        foreach (var name in new[] { nameof(RawValue), nameof(BoolValue), nameof(NumericValue), nameof(IsModified), nameof(ShouldShowWarning), nameof(ShouldShowHint) })
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

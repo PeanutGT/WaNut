@@ -30,28 +30,109 @@
       </Style.Triggers>
     </Style>
 
+    <!-- The small dot says "changed from the default"; the button next to it puts the default back. Both keep their
+         room while hidden, so a slider does not change width under the pointer the moment it is first moved. -->
+    <Style x:Key="ResetButton" TargetType="Button">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+      <Setter Property="FontSize" Value="{StaticResource FontSmall}" />
+      <Setter Property="Foreground" Value="{DynamicResource MutedTextBrush}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bd" Background="Transparent" BorderBrush="Transparent" BorderThickness="1"
+                    CornerRadius="{StaticResource ControlRadius}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}" />
+              </Trigger>
+              <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.4" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <DataTemplate x:Key="RowTools">
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding ShowResetTools}" Value="False">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Item.IsModified}" Value="False">
+                <Setter Property="Visibility" Value="Hidden" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <Ellipse Width="8" Height="8" Margin="0,0,6,0" Fill="{DynamicResource WarningBorderBrush}"
+                 ToolTip="{res:Text Settings_ChangedFromDefault}" />
+        <Button Style="{StaticResource ResetButton}" Content="&#xE7A7;" Command="{Binding ResetCommand}"
+                ToolTip="{res:Text Settings_ResetToDefault}" AutomationProperties.Name="{res:Text Settings_ResetToDefault}" />
+      </StackPanel>
+    </DataTemplate>
+
+    <!-- Inline notes under a setting: a red banner for a risky value, a neutral one for a heavy number. They open
+         with the shared banner motion, which is off when Windows animation effects are off. -->
+    <DataTemplate x:Key="RowNotices">
+      <StackPanel>
+        <Border Style="{StaticResource ErrorBanner}" Margin="0,6,0,0"
+                Visibility="{Binding Item.ShouldShowWarning, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding WarningText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Assertive" />
+        </Border>
+        <Border Style="{StaticResource NoticeBanner}" Margin="0,6,0,0"
+                Visibility="{Binding Item.ShouldShowHint, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding HintText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+      </StackPanel>
+    </DataTemplate>
+
     <DataTemplate x:Key="ToggleTemplate">
       <StackPanel Style="{StaticResource Item}">
-        <CheckBox Content="{Binding Title}" IsChecked="{Binding Item.BoolValue}" IsEnabled="{Binding IsEnabled}" />
+        <DockPanel>
+          <ContentControl DockPanel.Dock="Right" Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
+          <CheckBox Content="{Binding Title}" IsChecked="{Binding Item.BoolValue}" IsEnabled="{Binding IsEnabled}" VerticalAlignment="Center" />
+        </DockPanel>
         <TextBlock Text="{Binding Description}" Style="{StaticResource CheckHint}"
                    Visibility="{Binding HasDescription, Converter={StaticResource Visible}}" />
+        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowNotices}" IsTabStop="False" />
       </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="DropdownTemplate">
       <StackPanel Style="{StaticResource Item}">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+          <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
+        </StackPanel>
         <ComboBox ItemsSource="{Binding Options}" DisplayMemberPath="Label" SelectedValuePath="Value"
                   SelectedValue="{Binding Item.RawValue}" IsEnabled="{Binding IsEnabled}"
                   AutomationProperties.Name="{Binding Title}" Width="220" HorizontalAlignment="Left" />
         <TextBlock Text="{Binding Description}" Style="{StaticResource Hint}"
                    Visibility="{Binding HasDescription, Converter={StaticResource Visible}}" />
+        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowNotices}" IsTabStop="False" />
       </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="SliderTemplate">
       <StackPanel Style="{StaticResource Item}">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+          <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
+        </StackPanel>
         <DockPanel IsEnabled="{Binding IsEnabled}">
           <TextBlock DockPanel.Dock="Right" Width="80" Margin="12,0,0,0" VerticalAlignment="Center"
                      Text="{Binding Item.NumericValue, StringFormat={res:Text Game_Chunks}}" />
@@ -62,28 +143,37 @@
         </DockPanel>
         <TextBlock Text="{Binding Description}" Style="{StaticResource Hint}"
                    Visibility="{Binding HasDescription, Converter={StaticResource Visible}}" />
+        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowNotices}" IsTabStop="False" />
       </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="NumberTemplate">
       <StackPanel Style="{StaticResource Item}">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+          <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
+        </StackPanel>
         <TextBox Text="{Binding NumberText}" IsEnabled="{Binding IsEnabled}"
                  AutomationProperties.Name="{Binding Title}" Width="100" HorizontalAlignment="Left" />
         <TextBlock Text="{Binding Description}" Style="{StaticResource Hint}"
                    Visibility="{Binding HasDescription, Converter={StaticResource Visible}}" />
+        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowNotices}" IsTabStop="False" />
       </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="TextTemplate">
       <StackPanel Style="{StaticResource Item}">
-        <TextBlock Text="{Binding Title}" Style="{StaticResource Label}" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+          <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
+        </StackPanel>
         <TextBox Text="{Binding Item.RawValue}" IsEnabled="{Binding IsEnabled}" IsReadOnly="{Binding HasNote}" MaxLength="200"
                  AutomationProperties.Name="{Binding Title}" />
         <TextBlock Text="{Binding Description}" Style="{StaticResource Hint}"
                    Visibility="{Binding HasDescription, Converter={StaticResource Visible}}" />
         <TextBlock Text="{Binding Note}" Style="{StaticResource Hint}"
                    Visibility="{Binding HasNote, Converter={StaticResource Visible}}" />
+        <ContentControl Content="{Binding}" ContentTemplate="{StaticResource RowNotices}" IsTabStop="False" />
       </StackPanel>
     </DataTemplate>
 
@@ -107,11 +197,13 @@
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="220" />
           <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <TextBlock Text="{Binding Key}" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                    ToolTip="{Binding Title}" />
         <TextBox Grid.Column="1" Text="{Binding Item.RawValue}" IsEnabled="{Binding IsEnabled}" FontFamily="Consolas"
                  AutomationProperties.Name="{Binding Key}" />
+        <ContentControl Grid.Column="2" Content="{Binding}" ContentTemplate="{StaticResource RowTools}" IsTabStop="False" />
       </Grid>
     </DataTemplate>
   </UserControl.Resources>

@@ -38,8 +38,17 @@ public static class ServerConfigCatalog
 
         // Connection and performance
         new("server-port", ConfigSection.NetworkPerf, ConfigControlType.NumberInput, "25565", Min: 1, Max: 65535) { RequiresRestart = true },
-        new("view-distance", ConfigSection.NetworkPerf, ConfigControlType.Slider, "10", Min: 3, Max: 32),
-        new("simulation-distance", ConfigSection.NetworkPerf, ConfigControlType.Slider, "10", Min: 3, Max: 32) { Since = Since118 },
+        new("view-distance", ConfigSection.NetworkPerf, ConfigControlType.Slider, "10", Min: 3, Max: 32)
+        {
+            HintKey = "ServerConfig_ViewDistance_Hint",
+            HintAbove = 12,
+        },
+        new("simulation-distance", ConfigSection.NetworkPerf, ConfigControlType.Slider, "10", Min: 3, Max: 32)
+        {
+            Since = Since118,
+            HintKey = "ServerConfig_SimulationDistance_Hint",
+            HintAbove = 12,
+        },
         new("white-list", ConfigSection.NetworkPerf, ConfigControlType.Toggle, "false"),
         new("enforce-whitelist", ConfigSection.NetworkPerf, ConfigControlType.Toggle, "false"),
 
