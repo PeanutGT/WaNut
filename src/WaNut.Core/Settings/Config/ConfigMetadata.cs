@@ -15,9 +15,15 @@ public sealed record ConfigMetadata(
     string? WarningTriggerValue = null)
 {
     /// <summary>Resource key of the display name, such as <c>ServerConfig_AllowFlight_Title</c>.</summary>
-    public string TitleKey => KeyFor(Key, "Title");
+    public string TitleKey => KeyFor(TextKey ?? Key, "Title");
 
-    public string DescriptionKey => KeyFor(Key, "Description");
+    public string DescriptionKey => KeyFor(TextKey ?? Key, "Description");
+
+    /// <summary>The key the texts are named after when it differs from <see cref="Key"/> (a game rule item keeps the text of the property it replaces).</summary>
+    public string? TextKey { get; init; }
+
+    /// <summary>True for an item that is a game rule (saved in instance.json, sent as a "gamerule" command), not a server.properties key.</summary>
+    public bool IsGameRuleItem { get; init; }
 
     /// <summary>True when a running server only reads the value at start-up.</summary>
     public bool RequiresRestart { get; init; }

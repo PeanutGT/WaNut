@@ -20,6 +20,7 @@ public static class ServerConfigCatalog
         new("online-mode", ConfigSection.Core, ConfigControlType.Toggle, "true",
             WarningBannerKey: "ServerConfig_OnlineMode_Warning", WarningTriggerValue: "false") { RequiresRestart = true },
         new("pvp", ConfigSection.Core, ConfigControlType.Toggle, "true") { GameRule = RuleSetting.Pvp },
+        new("keepInventory", ConfigSection.Core, ConfigControlType.Toggle, "false") { GameRule = RuleSetting.KeepInventory },
         new("motd", ConfigSection.Core, ConfigControlType.Text, "A Minecraft Server"),
 
         // World and rules

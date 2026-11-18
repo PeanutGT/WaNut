@@ -17,6 +17,17 @@ public sealed class ServerConfigTests
     private static ServerConfig Load(string text = Modded, string version = "1.21.1") =>
         ServerConfig.Load(PropertiesFile.Parse(text), version);
 
+    private static Core.Instances.InstanceMetadata Metadata => new()
+    {
+        Id = "test",
+        Name = "Test",
+        Type = Core.Instances.ServerType.Vanilla,
+        MinecraftVersion = "1.21.11",
+        JavaMajor = 21,
+        MemoryMb = 2048,
+        CreatedAt = DateTimeOffset.UnixEpoch,
+    };
+
     [Fact]
     public void Load_UnknownKey_BecomesRawOnlyItemAfterCatalog()
     {
@@ -109,7 +120,7 @@ public sealed class ServerConfigTests
     {
         var config = Load("pvp=false\n", version: "1.21.9");
 
-        var pvp = config.Items.Single(i => i.Meta.Key == "pvp");
+        var pvp = config.FileItems.Single(i => i.Meta.Key == "pvp");
         Assert.Equal(ConfigSection.RawOnly, pvp.Meta.Section);
         Assert.Equal("false", pvp.RawValue);
     }
@@ -118,6 +129,71 @@ public sealed class ServerConfigTests
     public void Load_GameRuleKeyOnOldVersion_IsInCore()
     {
         Assert.Equal(ConfigSection.Core, Load().Find("pvp")!.Meta.Section);
+    }
+
+    [Fact]
+    public void Load_KeepInventory_IsAlwaysAGameRuleItemWithItsOwnTexts()
+    {
+        var item = Load().Find("keepInventory")!;
+
+        Assert.True(item.Meta.IsGameRuleItem);
+        Assert.Equal("ServerConfig_KeepInventory_Title", item.Meta.TitleKey);
+        Assert.DoesNotContain(Load().FileItems, i => i.Meta.Key == "keepInventory");
+    }
+
+    [Fact]
+    public void Load_PvpOnNewVersion_IsAGameRuleItemKeepingThePropertyTexts()
+    {
+        var pvp = Load("", version: "1.21.9").Items.Single(i => i.Meta.IsGameRuleItem && i.Meta.Key == "pvp");
+
+        Assert.Equal(ConfigSection.Core, pvp.Meta.Section);
+        Assert.Equal("ServerConfig_Pvp_Title", pvp.Meta.TitleKey);
+    }
+
+    [Fact]
+    public void Load_CommandBlocksRule_DefaultsToTrueOnNewVersionAndReadsSavedValue()
+    {
+        var rules = new Dictionary<string, bool> { ["commandBlocks"] = false };
+        var config = ServerConfig.Load(PropertiesFile.Parse(""), "1.21.9", rules);
+
+        Assert.False(config.Find("commandBlocks")!.BoolValue);
+        Assert.True(ServerConfig.Load(PropertiesFile.Parse(""), "1.21.9").Find("commandBlocks")!.BoolValue);
+    }
+
+    [Fact]
+    public void ApplyRulesTo_ChangedRule_IsSavedAndSendsTheVersionsRuleName()
+    {
+        var config = Load(version: "1.21.11");
+        config.Find("keepInventory")!.BoolValue = true;
+        var metadata = Metadata;
+
+        var saved = config.ApplyRulesTo(metadata, out var commands);
+
+        Assert.True(saved.GameRules["keepInventory"]);
+        Assert.Equal(["gamerule keep_inventory true"], commands);
+
+        config.ApplyRulesTo(saved, out var again);
+        Assert.Empty(again);
+    }
+
+    [Fact]
+    public void ApplyRulesTo_NothingChanged_ReturnsSameMetadata()
+    {
+        var metadata = Metadata;
+
+        Assert.Same(metadata, Load().ApplyRulesTo(metadata, out var commands));
+        Assert.Empty(commands);
+    }
+
+    [Fact]
+    public void ApplyTo_GameRuleItem_NeverWritesIntoTheFile()
+    {
+        var config = Load(version: "1.21.9");
+        config.Find("keepInventory")!.BoolValue = true;
+        var file = PropertiesFile.Parse(Modded);
+
+        Assert.False(config.ApplyTo(file));
+        Assert.Null(file.Get("keepInventory"));
     }
 
     [Fact]

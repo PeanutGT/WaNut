@@ -3714,4 +3714,286 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Files_CleanupWorldRefused" xml:space="preserve">
     <value>{0} is part of the world, so nothing was cleaned up.</value>
   </data>
+  <data name="ServerConfig_Gamemode_Title" xml:space="preserve">
+    <value>Game mode</value>
+  </data>
+  <data name="ServerConfig_Gamemode_Description" xml:space="preserve">
+    <value>Players joining for the first time start in this mode.</value>
+  </data>
+  <data name="ServerConfig_Difficulty_Title" xml:space="preserve">
+    <value>Difficulty</value>
+  </data>
+  <data name="ServerConfig_MaxPlayers_Title" xml:space="preserve">
+    <value>Max players</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Title" xml:space="preserve">
+    <value>Check players' Minecraft accounts (online mode)</value>
+  </data>
+  <data name="ServerConfig_OnlineMode_Description" xml:space="preserve">
+    <value>Keeps people from joining under someone else's name.</value>
+  </data>
+  <data name="ServerConfig_Pvp_Title" xml:space="preserve">
+    <value>Players can hurt each other (PvP)</value>
+  </data>
+  <data name="ServerConfig_KeepInventory_Title" xml:space="preserve">
+    <value>Keep items after dying</value>
+  </data>
+  <data name="ServerConfig_Motd_Title" xml:space="preserve">
+    <value>Server message</value>
+  </data>
+  <data name="ServerConfig_Motd_Description" xml:space="preserve">
+    <value>Shown under the server's name in Minecraft's server list.</value>
+  </data>
+  <data name="ServerConfig_AllowFlight_Title" xml:space="preserve">
+    <value>Allow flying</value>
+  </data>
+  <data name="ServerConfig_AllowFlight_Description" xml:space="preserve">
+    <value>Turn on if a mod or plugin lets players fly, so they are not kicked for it.</value>
+  </data>
+  <data name="ServerConfig_SpawnMonsters_Title" xml:space="preserve">
+    <value>Monsters spawn</value>
+  </data>
+  <data name="ServerConfig_SpawnAnimals_Title" xml:space="preserve">
+    <value>Animals spawn</value>
+  </data>
+  <data name="ServerConfig_SpawnNpcs_Title" xml:space="preserve">
+    <value>Villagers spawn</value>
+  </data>
+  <data name="ServerConfig_EnableCommandBlock_Title" xml:space="preserve">
+    <value>Command blocks work</value>
+  </data>
+  <data name="ServerConfig_SpawnProtection_Title" xml:space="preserve">
+    <value>Spawn protection</value>
+  </data>
+  <data name="ServerConfig_SpawnProtection_Description" xml:space="preserve">
+    <value>Only operators can build this many blocks around spawn. 0 turns it off.</value>
+  </data>
+  <data name="ServerConfig_Hardcore_Title" xml:space="preserve">
+    <value>Hardcore</value>
+  </data>
+  <data name="ServerConfig_Hardcore_Description" xml:space="preserve">
+    <value>One life only: players who die become spectators.</value>
+  </data>
+  <data name="ServerConfig_ForceGamemode_Title" xml:space="preserve">
+    <value>Force game mode on join</value>
+  </data>
+  <data name="ServerConfig_ForceGamemode_Description" xml:space="preserve">
+    <value>Every player gets the game mode above each time they join, not only the first time.</value>
+  </data>
+  <data name="ServerConfig_GenerateStructures_Title" xml:space="preserve">
+    <value>Generate structures</value>
+  </data>
+  <data name="ServerConfig_GenerateStructures_Description" xml:space="preserve">
+    <value>Villages, temples and other buildings in new chunks.</value>
+  </data>
+  <data name="ServerConfig_AllowNether_Title" xml:space="preserve">
+    <value>Allow the Nether</value>
+  </data>
+  <data name="ServerConfig_LevelSeed_Title" xml:space="preserve">
+    <value>World seed</value>
+  </data>
+  <data name="ServerConfig_LevelSeed_Description" xml:space="preserve">
+    <value>Leave empty for a random world. It only matters before the world exists.</value>
+  </data>
+  <data name="ServerConfig_ServerPort_Title" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ServerConfig_ServerPort_Description" xml:space="preserve">
+    <value>Friends join with your address and this number. The default is 25565.</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Title" xml:space="preserve">
+    <value>View distance</value>
+  </data>
+  <data name="ServerConfig_ViewDistance_Description" xml:space="preserve">
+    <value>Suggested: 8–10 chunks. Lower numbers run smoother on a slower PC.</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Title" xml:space="preserve">
+    <value>Simulation distance</value>
+  </data>
+  <data name="ServerConfig_SimulationDistance_Description" xml:space="preserve">
+    <value>Suggested: 4–6 chunks. This is how far away crops grow and mobs move; lowering it saves the most CPU.</value>
+  </data>
+  <data name="ServerConfig_WhiteList_Title" xml:space="preserve">
+    <value>Whitelist</value>
+  </data>
+  <data name="ServerConfig_WhiteList_Description" xml:space="preserve">
+    <value>Only players on the whitelist can join.</value>
+  </data>
+  <data name="ServerConfig_EnforceWhitelist_Title" xml:space="preserve">
+    <value>Kick players not on the whitelist</value>
+  </data>
+  <data name="ServerConfig_EnforceWhitelist_Description" xml:space="preserve">
+    <value>Players who are online when the whitelist changes and are not on it are removed.</value>
+  </data>
+  <data name="ServerConfig_LevelName_Title" xml:space="preserve">
+    <value>World folder name</value>
+  </data>
+  <data name="ServerConfig_LevelType_Title" xml:space="preserve">
+    <value>World type</value>
+  </data>
+  <data name="ServerConfig_GeneratorSettings_Title" xml:space="preserve">
+    <value>World generator settings</value>
+  </data>
+  <data name="ServerConfig_ServerIp_Title" xml:space="preserve">
+    <value>Bind to IP address</value>
+  </data>
+  <data name="ServerConfig_ServerIp_Description" xml:space="preserve">
+    <value>Leave empty unless you know you need it.</value>
+  </data>
+  <data name="ServerConfig_EnableStatus_Title" xml:space="preserve">
+    <value>Show in server list</value>
+  </data>
+  <data name="ServerConfig_EnableStatus_Description" xml:space="preserve">
+    <value>If off, the server looks offline in Minecraft's server list.</value>
+  </data>
+  <data name="ServerConfig_HideOnlinePlayers_Title" xml:space="preserve">
+    <value>Hide the online player list</value>
+  </data>
+  <data name="ServerConfig_PreventProxyConnections_Title" xml:space="preserve">
+    <value>Block proxy and VPN connections</value>
+  </data>
+  <data name="ServerConfig_SyncChunkWrites_Title" xml:space="preserve">
+    <value>Sync chunk writes</value>
+  </data>
+  <data name="ServerConfig_NetworkCompressionThreshold_Title" xml:space="preserve">
+    <value>Network compression threshold</value>
+  </data>
+  <data name="ServerConfig_NetworkCompressionThreshold_Description" xml:space="preserve">
+    <value>-1 turns compression off.</value>
+  </data>
+  <data name="ServerConfig_RateLimit_Title" xml:space="preserve">
+    <value>Packet rate limit</value>
+  </data>
+  <data name="ServerConfig_RateLimit_Description" xml:space="preserve">
+    <value>0 means no limit.</value>
+  </data>
+  <data name="ServerConfig_MaxTickTime_Title" xml:space="preserve">
+    <value>Watchdog time limit (ms)</value>
+  </data>
+  <data name="ServerConfig_MaxTickTime_Description" xml:space="preserve">
+    <value>The server stops itself when one tick takes longer. -1 turns it off.</value>
+  </data>
+  <data name="ServerConfig_MaxWorldSize_Title" xml:space="preserve">
+    <value>Max world size</value>
+  </data>
+  <data name="ServerConfig_PlayerIdleTimeout_Title" xml:space="preserve">
+    <value>Idle kick (minutes)</value>
+  </data>
+  <data name="ServerConfig_PlayerIdleTimeout_Description" xml:space="preserve">
+    <value>0 means never.</value>
+  </data>
+  <data name="ServerConfig_OpPermissionLevel_Title" xml:space="preserve">
+    <value>Operator permission level</value>
+  </data>
+  <data name="ServerConfig_FunctionPermissionLevel_Title" xml:space="preserve">
+    <value>Function permission level</value>
+  </data>
+  <data name="ServerConfig_EntityBroadcastRangePercentage_Title" xml:space="preserve">
+    <value>Entity broadcast range (%)</value>
+  </data>
+  <data name="ServerConfig_RequireResourcePack_Title" xml:space="preserve">
+    <value>Require the resource pack</value>
+  </data>
+  <data name="ServerConfig_ResourcePack_Title" xml:space="preserve">
+    <value>Resource pack URL</value>
+  </data>
+  <data name="ServerConfig_ResourcePackPrompt_Title" xml:space="preserve">
+    <value>Resource pack message</value>
+  </data>
+  <data name="ServerConfig_ResourcePackSha1_Title" xml:space="preserve">
+    <value>Resource pack SHA-1</value>
+  </data>
+  <data name="ServerConfig_EnableJmxMonitoring_Title" xml:space="preserve">
+    <value>JMX monitoring</value>
+  </data>
+  <data name="ServerConfig_EnableQuery_Title" xml:space="preserve">
+    <value>Query protocol</value>
+  </data>
+  <data name="ServerConfig_QueryPort_Title" xml:space="preserve">
+    <value>Query port</value>
+  </data>
+  <data name="ServerConfig_EnableRcon_Title" xml:space="preserve">
+    <value>Remote console (RCON)</value>
+  </data>
+  <data name="ServerConfig_RconPort_Title" xml:space="preserve">
+    <value>RCON port</value>
+  </data>
+  <data name="ServerConfig_RconPassword_Title" xml:space="preserve">
+    <value>RCON password</value>
+  </data>
+  <data name="ServerConfig_BroadcastConsoleToOps_Title" xml:space="preserve">
+    <value>Show console commands to operators</value>
+  </data>
+  <data name="ServerConfig_BroadcastRconToOps_Title" xml:space="preserve">
+    <value>Show RCON commands to operators</value>
+  </data>
+  <data name="ServerConfig_EnableCodeOfConduct_Title" xml:space="preserve">
+    <value>Code of conduct</value>
+  </data>
+  <data name="ServerConfig_TextFilteringConfig_Title" xml:space="preserve">
+    <value>Text filtering config</value>
+  </data>
+  <data name="ServerConfig_UseNativeTransport_Title" xml:space="preserve">
+    <value>Use native networking</value>
+  </data>
+  <data name="ServerConfig_LogIps_Title" xml:space="preserve">
+    <value>Log player IP addresses</value>
+  </data>
+  <data name="ServerConfig_AcceptsTransfers_Title" xml:space="preserve">
+    <value>Accept transfers from other servers</value>
+  </data>
+  <data name="ServerConfig_PauseWhenEmptySeconds_Title" xml:space="preserve">
+    <value>Pause when empty (seconds)</value>
+  </data>
+  <data name="ServerConfig_PauseWhenEmptySeconds_Description" xml:space="preserve">
+    <value>-1 means never pause.</value>
+  </data>
+  <data name="ServerConfig_Option_Survival" xml:space="preserve">
+    <value>Survival</value>
+  </data>
+  <data name="ServerConfig_Option_Creative" xml:space="preserve">
+    <value>Creative</value>
+  </data>
+  <data name="ServerConfig_Option_Adventure" xml:space="preserve">
+    <value>Adventure</value>
+  </data>
+  <data name="ServerConfig_Option_Spectator" xml:space="preserve">
+    <value>Spectator</value>
+  </data>
+  <data name="ServerConfig_Option_Peaceful" xml:space="preserve">
+    <value>Peaceful</value>
+  </data>
+  <data name="ServerConfig_Option_Easy" xml:space="preserve">
+    <value>Easy</value>
+  </data>
+  <data name="ServerConfig_Option_Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="ServerConfig_Option_Hard" xml:space="preserve">
+    <value>Hard</value>
+  </data>
+  <data name="Settings_GroupWorldRules" xml:space="preserve">
+    <value>World &amp; rules</value>
+  </data>
+  <data name="Settings_GroupNetworkPerf" xml:space="preserve">
+    <value>Network &amp; performance</value>
+  </data>
+  <data name="Settings_FullProperties" xml:space="preserve">
+    <value>All properties</value>
+  </data>
+  <data name="Settings_FullPropertiesHint" xml:space="preserve">
+    <value>Every line of server.properties, including ones added by mods. Changes here and in the groups above are the same settings.</value>
+  </data>
+  <data name="Settings_SearchPlaceholder" xml:space="preserve">
+    <value>Search settings</value>
+  </data>
+  <data name="Settings_SearchNoResults" xml:space="preserve">
+    <value>No setting matches.</value>
+  </data>
+  <data name="Settings_ColumnKey" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="Settings_ColumnValue" xml:space="preserve">
+    <value>Value</value>
+  </data>
 </root>

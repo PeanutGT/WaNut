@@ -1,9 +1,12 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WaNut.App.Resources;
 using WaNut.Core.Hosting;
+using WaNut.Core.Properties;
 using WaNut.Core.Settings;
+using WaNut.Core.Settings.Config;
 
 namespace WaNut.App.ViewModels;
 
@@ -15,101 +18,70 @@ public sealed record Option<T>(T Value, string Label)
 }
 
 /// <summary>
-/// The Game settings tab. Every change is saved right away. server.properties is only read by the server when it
-/// starts (and rewritten by it while running), so those settings are locked while it runs; game rules can change
-/// at any time and are sent to a running server at once.
+/// The Game settings tab, built from <see cref="ServerConfig"/>: the core settings always open, two collapsible
+/// groups, a search box, and (in Advanced mode) the full list of server.properties lines. All of them edit the same
+/// <see cref="ConfigItem"/> objects. Every change is saved right away. server.properties is only read by the server
+/// when it starts (and rewritten by it while running), so those settings are locked while it runs; game rules can
+/// change at any time and are sent to a running server at once.
 /// </summary>
 public sealed partial class GameSettingsViewModel : ObservableObject
 {
-    // Minecraft's own limits.
-    public const int MinDistance = 3;
-    public const int MaxDistance = 32;
-
-    private static readonly HashSet<string> SettingNames =
-    [
-        nameof(GameMode), nameof(Difficulty), nameof(Pvp), nameof(MaxPlayers), nameof(Motd), nameof(KeepInventory),
-        nameof(ViewDistance), nameof(SimulationDistance), nameof(SpawnProtection), nameof(CommandBlocks),
-        nameof(AllowFlight), nameof(SpawnMonsters), nameof(Hardcore), nameof(Seed),
-    ];
-
     private readonly ServerViewModel _server;
-    private readonly GameFeatures _features;
-    private GameSettings _loaded = new();
+    private readonly List<SettingEntryViewModel> _entries = [];
+    private ServerConfig? _config;
     private bool _loading;
     private bool _worldExists;
+    private bool _wasSearching;
 
-    public GameSettingsViewModel(ServerViewModel server)
+    public GameSettingsViewModel(ServerViewModel server, AppSettingsViewModel app)
     {
         _server = server;
-        _features = GameFeatures.For(server.Metadata.MinecraftVersion);
+        App = app;
+        WorldRules = new SettingsGroup(Text.Get("Settings_GroupWorldRules"));
+        NetworkPerf = new SettingsGroup(Text.Get("Settings_GroupNetworkPerf"));
+        FullList = new SettingsGroup(Text.Get("Settings_FullProperties"));
+        PropertyChangedEventManager.AddHandler(app, (_, _) => OnPropertyChanged(nameof(ShowNoResults)), nameof(AppSettingsViewModel.AdvancedMode));
         Reload();
     }
 
-    public IReadOnlyList<Option<GameMode>> GameModes { get; } =
-        Enum.GetValues<GameMode>().Select(m => new Option<GameMode>(m, Text.Get($"Game_Mode{m}"))).ToList();
+    /// <summary>For the Advanced mode switch: the full property list shows only with it on.</summary>
+    public AppSettingsViewModel App { get; }
 
-    public IReadOnlyList<Option<Difficulty>> Difficulties { get; } =
-        Enum.GetValues<Difficulty>().Select(d => new Option<Difficulty>(d, Text.Get($"Game_Difficulty{d}"))).ToList();
+    /// <summary>Always open.</summary>
+    public ObservableCollection<SettingEntryViewModel> Core { get; } = [];
 
-    [ObservableProperty]
-    private GameMode _gameMode;
+    public SettingsGroup WorldRules { get; }
 
-    [ObservableProperty]
-    private Difficulty _difficulty;
+    public SettingsGroup NetworkPerf { get; }
 
-    [ObservableProperty]
-    private bool _pvp;
+    /// <summary>Every server.properties line, the catalog's and the ones a mod added (Advanced mode).</summary>
+    public SettingsGroup FullList { get; }
 
     [ObservableProperty]
-    private int _maxPlayers;
+    [NotifyPropertyChangedFor(nameof(ShowNoResults))]
+    private string _searchText = string.Empty;
 
     [ObservableProperty]
-    private string _motd = string.Empty;
+    [NotifyPropertyChangedFor(nameof(ShowNoResults))]
+    private bool _coreHasMatch = true;
 
-    [ObservableProperty]
-    private bool _keepInventory;
-
-    [ObservableProperty]
-    private int _viewDistance;
-
-    [ObservableProperty]
-    private int _simulationDistance;
-
-    [ObservableProperty]
-    private int _spawnProtection;
-
-    [ObservableProperty]
-    private bool _commandBlocks;
-
-    [ObservableProperty]
-    private bool _allowFlight;
-
-    [ObservableProperty]
-    private bool _spawnMonsters;
-
-    [ObservableProperty]
-    private bool _hardcore;
-
-    [ObservableProperty]
-    private string _seed = string.Empty;
-
-    public bool HasSimulationDistance => _features.HasSimulationDistance;
+    /// <summary>A search is on and nothing the user can see matches it.</summary>
+    public bool ShowNoResults =>
+        SearchText.Trim().Length > 0
+        && !CoreHasMatch
+        && !WorldRules.IsShown
+        && !NetworkPerf.IsShown
+        && !(App.AdvancedMode && FullList.IsShown);
 
     /// <summary>server.properties settings can only change while the server is stopped.</summary>
     public bool CanEditProperties => _server.Status == ServerStatus.Stopped;
 
     public bool ShowStopHint => !CanEditProperties;
 
-    public bool CanEditPvp => CanEditProperties || _features.IsGameRule(RuleSetting.Pvp);
-
-    public bool CanEditCommandBlocks => CanEditProperties || _features.IsGameRule(RuleSetting.CommandBlocks);
-
-    public bool CanEditSpawnMonsters => CanEditProperties || _features.IsGameRule(RuleSetting.SpawnMonsters);
-
     /// <summary>The seed only matters before the world is generated.</summary>
-    public bool CanEditSeed => CanEditProperties && !_worldExists && !_server.FilesOnVps;
+    private bool CanEditSeed => CanEditProperties && !_worldExists && !_server.FilesOnVps;
 
-    public bool ShowSeedLocked => _worldExists || _server.FilesOnVps;
+    private bool ShowSeedLocked => _worldExists || _server.FilesOnVps;
 
     /// <summary>Reads the settings again, e.g. after the server stopped and may have rewritten server.properties.</summary>
     public void Reload()
@@ -117,9 +89,9 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         _loading = true;
         try
         {
-            _loaded = GameSettingsStore.Load(_server.InstanceDir, _server.Metadata);
+            var file = PropertiesFile.Load(Path.Combine(_server.InstanceDir, GameSettingsStore.PropertiesFileName));
             _worldExists = GameSettingsStore.WorldExists(_server.InstanceDir);
-            Show(_loaded);
+            Build(ServerConfig.Load(file, _server.Metadata.MinecraftVersion, _server.Metadata.GameRules));
         }
         catch (IOException e)
         {
@@ -129,9 +101,6 @@ public sealed partial class GameSettingsViewModel : ObservableObject
         {
             _loading = false;
         }
-
-        OnPropertyChanged(nameof(CanEditSeed));
-        OnPropertyChanged(nameof(ShowSeedLocked));
     }
 
     /// <summary>Says where changes go while the files are on the VPS; null otherwise.</summary>
@@ -143,31 +112,123 @@ public sealed partial class GameSettingsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(ShowVpsSettingsNote));
         OnPropertyChanged(nameof(VpsSettingsNote));
-        OnPropertyChanged(nameof(CanEditSeed));
-        OnPropertyChanged(nameof(ShowSeedLocked));
+        RefreshLocks();
     }
 
     /// <summary>The tab was shown: with the files on the VPS this copies its settings file first.</summary>
-    public void OnShown() => _ = _server.EnsureVpsSettingsAsync();
+    public void OnShown()
+    {
+        // The Server tab may have changed the port or account check since this tab was built.
+        if (_server.Status == ServerStatus.Stopped)
+        {
+            Reload();
+        }
+
+        _ = _server.EnsureVpsSettingsAsync();
+    }
 
     internal void OnServerStatusChanged()
     {
         OnPropertyChanged(nameof(CanEditProperties));
         OnPropertyChanged(nameof(ShowStopHint));
-        OnPropertyChanged(nameof(CanEditPvp));
-        OnPropertyChanged(nameof(CanEditCommandBlocks));
-        OnPropertyChanged(nameof(CanEditSpawnMonsters));
-        OnPropertyChanged(nameof(CanEditSeed));
+        RefreshLocks();
         if (_server.Status == ServerStatus.Stopped)
         {
             Reload();
         }
     }
 
-    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    partial void OnSearchTextChanged(string value) => ApplySearch();
+
+    private void Build(ServerConfig config)
     {
-        base.OnPropertyChanged(e);
-        if (!_loading && e.PropertyName is { } name && SettingNames.Contains(name))
+        foreach (var entry in _entries)
+        {
+            entry.Item.PropertyChanged -= OnItemChanged;
+        }
+
+        _config = config;
+        _entries.Clear();
+        Core.Clear();
+        WorldRules.Entries.Clear();
+        NetworkPerf.Entries.Clear();
+        FullList.Entries.Clear();
+        var made = new Dictionary<ConfigItem, SettingEntryViewModel>();
+        foreach (var item in config.Items)
+        {
+            var entry = new SettingEntryViewModel(item);
+            made[item] = entry;
+            _entries.Add(entry);
+            item.PropertyChanged += OnItemChanged;
+            var list = item.Meta.Section switch
+            {
+                ConfigSection.Core => Core,
+                ConfigSection.WorldRules => WorldRules.Entries,
+                ConfigSection.NetworkPerf => NetworkPerf.Entries,
+                _ => null,
+            };
+            list?.Add(entry);
+        }
+
+        foreach (var item in config.FileItems)
+        {
+            FullList.Entries.Add(made[item]);
+        }
+
+        RefreshLocks();
+        ApplySearch();
+    }
+
+    private void RefreshLocks()
+    {
+        foreach (var entry in _entries)
+        {
+            var meta = entry.Item.Meta;
+            entry.IsEnabled = meta.IsGameRuleItem || (meta.Key == "level-seed" ? CanEditSeed : CanEditProperties);
+            entry.Note = meta.Key == "level-seed" && ShowSeedLocked ? Text.Get("Game_SeedLocked") : string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Hides what does not match and opens the groups that have a match. What the user had open is put back when
+    /// the search is cleared.
+    /// </summary>
+    private void ApplySearch()
+    {
+        var query = SearchText.Trim();
+        var searching = query.Length > 0;
+        foreach (var entry in _entries)
+        {
+            entry.IsVisible = !searching || entry.Matches(query);
+        }
+
+        foreach (var group in new[] { WorldRules, NetworkPerf, FullList })
+        {
+            var hasMatch = group.Entries.Any(e => e.IsVisible);
+            group.IsShown = !searching || hasMatch;
+            if (searching && !_wasSearching)
+            {
+                group.ExpandedBeforeSearch = group.IsExpanded;
+            }
+
+            if (searching)
+            {
+                group.IsExpanded = hasMatch;
+            }
+            else if (_wasSearching)
+            {
+                group.IsExpanded = group.ExpandedBeforeSearch;
+            }
+        }
+
+        _wasSearching = searching;
+        CoreHasMatch = !searching || Core.Any(e => e.IsVisible);
+        OnPropertyChanged(nameof(ShowNoResults));
+    }
+
+    private void OnItemChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!_loading && e.PropertyName == nameof(ConfigItem.RawValue))
         {
             _ = SaveAsync();
         }
@@ -175,46 +236,36 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
     private async Task SaveAsync()
     {
-        var edited = new GameSettings
+        if (_config is not { } config)
         {
-            GameMode = GameMode,
-            Difficulty = Difficulty,
-            Pvp = Pvp,
-            MaxPlayers = Math.Clamp(MaxPlayers, 1, 1000),
-            Motd = Motd,
-            KeepInventory = KeepInventory,
-            ViewDistance = Math.Clamp(ViewDistance, MinDistance, MaxDistance),
-            SimulationDistance = Math.Clamp(SimulationDistance, MinDistance, MaxDistance),
-            SpawnProtection = Math.Clamp(SpawnProtection, 0, 1000),
-            CommandBlocks = CommandBlocks,
-            AllowFlight = AllowFlight,
-            SpawnMonsters = SpawnMonsters,
-            Hardcore = Hardcore,
-            Seed = Seed.Trim(),
-        };
+            return;
+        }
 
-        var before = _loaded;
-        var metadata = _server.Metadata;
+        IReadOnlyList<string> commands;
         try
         {
-            _server.UpdateMetadata(GameSettingsStore.Save(_server.InstanceDir, metadata, before, edited));
+            var path = Path.Combine(_server.InstanceDir, GameSettingsStore.PropertiesFileName);
+            var file = PropertiesFile.Load(path);
+            if (config.ApplyTo(file))
+            {
+                file.Save(path);
+            }
+
+            var updated = config.ApplyRulesTo(_server.Metadata, out commands);
+            if (!ReferenceEquals(updated, _server.Metadata))
+            {
+                _server.UpdateMetadata(updated);
+            }
         }
-        catch (IOException e)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
             _server.ShowError(string.Format(Text.Get("Settings_SaveFailed"), e.Message));
             return;
         }
 
-        _loaded = edited;
-
-        // Show the value that was saved, e.g. 50 view distance becomes 32.
-        _loading = true;
-        Show(edited);
-        _loading = false;
-
         if (_server.IsOnline)
         {
-            foreach (var command in GameSettingsStore.ChangedRuleCommands(metadata, before, edited))
+            foreach (var command in commands)
             {
                 await _server.SendCommandAsync(command);
             }
@@ -222,23 +273,5 @@ public sealed partial class GameSettingsViewModel : ObservableObject
 
         // Last, so a failed send (which puts the tab back to what the VPS has) isn't overwritten by the lines above.
         await _server.PushVpsSettingsAsync();
-    }
-
-    private void Show(GameSettings settings)
-    {
-        GameMode = settings.GameMode;
-        Difficulty = settings.Difficulty;
-        Pvp = settings.Pvp;
-        MaxPlayers = settings.MaxPlayers;
-        Motd = settings.Motd;
-        KeepInventory = settings.KeepInventory;
-        ViewDistance = settings.ViewDistance;
-        SimulationDistance = settings.SimulationDistance;
-        SpawnProtection = settings.SpawnProtection;
-        CommandBlocks = settings.CommandBlocks;
-        AllowFlight = settings.AllowFlight;
-        SpawnMonsters = settings.SpawnMonsters;
-        Hardcore = settings.Hardcore;
-        Seed = settings.Seed;
     }
 }
