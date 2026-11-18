@@ -402,3 +402,13 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - 兩個下拉選單（顯示方式、更多設定裡的語言）一打開分頁就顯示「像玩家本人（Webhook）」、「繁體中文」這類名稱；改選項後存檔再開還是對的；建立伺服器、更換版本、匯出世界的下拉也都正常。
 - 用真的 bot token 按「測試連線」會過。依序貼 Application ID、Public Key、Client Secret、少一段的字串，各自出現對應說明。Token 前面多一個空格、換行、`Bot ` 都能過。
 - 如果真的 token 還是被說錯誤：看錯誤下方「詳細資料」寫什麼。`HTTP 401` 代表 Discord 真的不認這個 token（多半是 Reset Token 後貼了舊的）；若寫別的狀態碼，請把它回報。
+
+## VPS 管理 M1：儲存抽象層（add-server-filesystem-abstraction）
+
+新增 `WaNut.Core/Storage`：`IServerFileSystem`、`LocalFileSystemAdapter`、`ServerFileNode`、`McFileCategory`、`McFileClassifier`、`ServerPath`，並讓 `PropertiesFile` 多 `LoadAsync`/`SaveAsync`。既有的啟動與設定編輯流程沒有改（還沒有呼叫端用新介面），所以不會回歸。單元測試在 Linux 跑過，沒有在 Windows 上試。
+
+還沒確認（Windows）：
+
+- 唯讀檔、被別的程式開著的檔案做 `DeleteBatchAsync`／`CreateArchiveAsync` 的行為；
+- 路徑大小寫與保留名稱（`CON`、`NUL` 等）；
+- 遠端版本（`RemoteVpsAdapter`）在 M2 才做，目前沒有任何遠端實作。

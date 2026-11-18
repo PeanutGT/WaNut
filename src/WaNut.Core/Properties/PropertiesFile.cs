@@ -35,6 +35,12 @@ public sealed class PropertiesFile
     public static PropertiesFile Load(string path) =>
         File.Exists(path) ? Parse(File.ReadAllText(path)) : new PropertiesFile([], Environment.NewLine);
 
+    /// <summary>The same as <see cref="Load(string)"/> for a server folder that may be on a VPS.</summary>
+    public static async Task<PropertiesFile> LoadAsync(Storage.IServerFileSystem files, string relativePath, CancellationToken cancellationToken = default) =>
+        await files.ExistsAsync(relativePath, cancellationToken).ConfigureAwait(false)
+            ? Parse(await files.ReadAllTextAsync(relativePath, cancellationToken).ConfigureAwait(false))
+            : new PropertiesFile([], Environment.NewLine);
+
     public IReadOnlyList<string> Keys => Entries().Select(e => e.Key).Distinct().ToList();
 
     /// <summary>The value for <paramref name="key"/>, or null when the file has no such key. Like Java, the last one wins.</summary>
@@ -66,6 +72,9 @@ public sealed class PropertiesFile
     }
 
     public void Save(string path) => AtomicFile.WriteAllText(path, ToText());
+
+    public Task SaveAsync(Storage.IServerFileSystem files, string relativePath, CancellationToken cancellationToken = default) =>
+        files.WriteAllTextAsync(relativePath, ToText(), cancellationToken);
 
     private sealed record Entry(string Key, string Value, int FirstLine, int LineCount);
 
