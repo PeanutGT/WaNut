@@ -50,6 +50,7 @@ public sealed partial class DiscordViewModel : ObservableObject
         _deathsAndAdvancements = config.Filters.DeathsAndAdvancements;
         _serverState = config.Filters.ServerState;
         _onlineCountStatus = config.Filters.OnlineCountStatus;
+        _statusBoard = config.Filters.StatusBoard;
         _listCommand = config.Filters.ListCommand;
         _remoteConsole = config.Filters.RemoteConsole;
         _ignorePrefixes = config.Filters.IgnoredPrefixes.Count > 0;
@@ -123,6 +124,9 @@ public sealed partial class DiscordViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _onlineCountStatus;
+
+    [ObservableProperty]
+    private bool _statusBoard;
 
     [ObservableProperty]
     private bool _listCommand;
@@ -504,6 +508,7 @@ public sealed partial class DiscordViewModel : ObservableObject
             DeathsAndAdvancements = DeathsAndAdvancements,
             ServerState = ServerState,
             OnlineCountStatus = OnlineCountStatus,
+            StatusBoard = StatusBoard,
             ListCommand = ListCommand,
             RemoteConsole = RemoteConsole,
             IgnoredPrefixes = IgnorePrefixes

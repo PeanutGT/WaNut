@@ -12,7 +12,7 @@ namespace WaNut.Bridge;
 /// Runs the bridge until cancelled: follows the log, keeps RCON and the Discord bot connected and keeps the bot
 /// status up to date. Each part recovers on its own, so a restarting server or a network blip needs nobody.
 /// </summary>
-public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog log)
+public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog log, string? stateDirectory = null)
 {
     public const string RconHost = "127.0.0.1";
 
@@ -124,6 +124,12 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
             // Not in the list WhenAny watches: a refused token ends only Discord to game, not the whole bridge.
             gatewayRun = gateway.RunAsync(stop.Token);
+
+            if (config.Filters.StatusBoard && ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var channel))
+            {
+                var idFile = Path.Combine(stateDirectory ?? AppContext.BaseDirectory, "status-board.id");
+                tasks.Add(new StatusBoard(rest, channel, relay, relay.Texts.Chinese, idFile, log).RunAsync(stop.Token));
+            }
         }
         else
         {

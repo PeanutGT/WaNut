@@ -84,7 +84,7 @@ using var http = WaNutHttp.CreateClient(version);
 http.Timeout = TimeSpan.FromSeconds(30);
 
 log.Info($"WaNut bridge {version} starting for server {config.ServerId}.");
-var engine = new BridgeEngine(config, http, log);
+var engine = new BridgeEngine(config, http, log, Path.GetDirectoryName(Path.GetFullPath(configPath)));
 var pipe = new StatusPipeServer(config.ServerId, engine.Snapshot, stop.Cancel, log);
 var pipeRun = Task.Run(() => pipe.RunAsync(stop.Token));
 try
