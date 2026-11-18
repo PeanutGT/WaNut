@@ -11,4 +11,8 @@ public sealed record InboundMessage(
     bool IsBot,
     bool IsWebhook,
     IReadOnlyList<ulong> RoleIds,
-    string Content);
+    string Content,
+    IReadOnlyList<InboundAttachment>? Attachments = null)
+{
+    public IReadOnlyList<InboundAttachment> Files => Attachments ?? [];
+}

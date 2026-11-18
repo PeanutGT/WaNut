@@ -20,6 +20,10 @@ public sealed class BridgeTexts
         OnlineFormat = "Online ({0}/{1}): {2}",
         NobodyFormat = "Nobody is online (0/{0}).",
         PresenceFormat = "{0} / {1} online",
+        ImageFormat = "[Image: {0}]",
+        FileFormat = "[File: {0}]",
+        OpenHint = "Click to open in your browser",
+        MoreFormat = "+{0} more on Discord",
     };
 
     public static BridgeTexts TraditionalChinese { get; } = new()
@@ -38,6 +42,10 @@ public sealed class BridgeTexts
         OnlineFormat = "線上（{0}/{1}）：{2}",
         NobodyFormat = "目前沒有人在線（0/{0}）。",
         PresenceFormat = "{0} / {1} 人在線",
+        ImageFormat = "[圖片：{0}]",
+        FileFormat = "[檔案：{0}]",
+        OpenHint = "點擊在瀏覽器開啟",
+        MoreFormat = "還有 {0} 個，請到 Discord 查看",
     };
 
     public bool Chinese { get; init; }
@@ -67,6 +75,14 @@ public sealed class BridgeTexts
     public required string NobodyFormat { get; init; }
 
     public required string PresenceFormat { get; init; }
+
+    public required string ImageFormat { get; init; }
+
+    public required string FileFormat { get; init; }
+
+    public required string OpenHint { get; init; }
+
+    public required string MoreFormat { get; init; }
 
     /// <summary>"zh-TW", "zh-Hant" or "zh" give Traditional Chinese; anything else English.</summary>
     public static BridgeTexts For(string? language) =>

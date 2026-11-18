@@ -12,11 +12,12 @@ public sealed class GatewayEventsTests
         var message = GatewayEvents.Message(Parse("""
             {"type":0,"channel_id":"100","content":"hi <@42>","author":{"id":"1","username":"amy","global_name":"Amy G"},
              "member":{"nick":"Captain","roles":["5","6"]},"mentions":[{"id":"42","username":"bob","member":{"nick":"Bobby"}}],
-             "attachments":[{"id":"9"}]}
+             "attachments":[{"id":"9","url":"https://cdn.discordapp.com/attachments/1/2/a.png?ex=1","filename":"a.png","content_type":"image/png","size":2048}]}
             """));
 
         var roles = message!.RoleIds;
-        Assert.Equal(new InboundMessage(100, 1, "Captain", false, false, roles, "hi @Bobby [attachment]"), message);
+        Assert.Equal("hi @Bobby", message.Content);
+        Assert.Equal(new InboundAttachment("https://cdn.discordapp.com/attachments/1/2/a.png?ex=1", "a.png", "image/png", 2048), Assert.Single(message.Files));
         Assert.Equal([5UL, 6UL], roles);
     }
 

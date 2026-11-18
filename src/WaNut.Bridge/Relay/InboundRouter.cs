@@ -20,12 +20,12 @@ public static class InboundRouter
         }
 
         var text = message.Content.Trim();
-        if (text.Length == 0 || !config.Filters.Chat || HasIgnoredPrefix(text, config.Filters))
+        if ((text.Length == 0 && message.Files.Count == 0) || !config.Filters.Chat || HasIgnoredPrefix(text, config.Filters))
         {
             return InboundAction.Ignore;
         }
 
-        return new InboundAction(InboundActionKind.Chat, message.AuthorName, text);
+        return new InboundAction(InboundActionKind.Chat, message.AuthorName, text) { Attachments = message.Files };
     }
 
     public static InboundAction Route(SlashCommand command, BridgeConfig config)

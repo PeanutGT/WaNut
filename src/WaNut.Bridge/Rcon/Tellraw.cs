@@ -2,6 +2,9 @@ using System.Buffers;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using WaNut.Bridge.Discord;
+using WaNut.Bridge.Relay;
 
 namespace WaNut.Bridge.Rcon;
 
@@ -11,7 +14,7 @@ namespace WaNut.Bridge.Rcon;
 /// backslashes in a message cannot change the command. Every non-ASCII character is escaped as \uXXXX, which
 /// Minecraft reads back exactly and which keeps the RCON packet plain ASCII on every server version.
 /// </summary>
-public static class Tellraw
+public static partial class Tellraw
 {
     public const int MaxNameLength = 32;
 
@@ -21,13 +24,24 @@ public static class Tellraw
 
     private static readonly JsonWriterOptions WriterOptions = new() { Encoder = JavaScriptEncoder.Default };
 
-    public static string Build(string author, string text)
+    /// <summary>Most files shown as their own line; the rest are summarised so a burst of uploads cannot flood chat.</summary>
+    public const int MaxAttachmentLines = 4;
+
+    /// <summary>A link longer than this, or with non-ASCII characters (six bytes each once escaped), is shown as plain text, so it cannot fill the packet.</summary>
+    private const int MaxLinkLength = 400;
+
+    private const int MaxLinkLabelLength = 45;
+
+    public static string Build(string author, string text) => Build(author, text, BridgeTexts.English);
+
+    /// <summary>The chat line for a message; web addresses in the text become links that open in the player's browser.</summary>
+    public static string Build(string author, string text, BridgeTexts texts)
     {
         var name = Clean(author, MaxNameLength);
         var body = Clean(text, MaxTextLength);
         while (true)
         {
-            var command = Prefix + Component(name, body);
+            var command = Prefix + Component(name, body, null, texts);
             if (Encoding.UTF8.GetByteCount(command) <= RconPacket.MaxRequestBodyBytes || body.Length <= 1)
             {
                 return command;
@@ -38,22 +52,156 @@ public static class Tellraw
         }
     }
 
-    private static string Component(string name, string text)
+    /// <summary>
+    /// Every command for one Discord message: the chat line, then one line for each attached file so a long CDN address never
+    /// shares a packet with the text. A message with only files gets its name on the first file line.
+    /// </summary>
+    public static IReadOnlyList<string> BuildAll(string author, string text, IReadOnlyList<InboundAttachment> attachments, BridgeTexts texts)
+    {
+        var commands = new List<string>();
+        var hasText = Clean(text, MaxTextLength).Length > 0;
+        if (hasText || attachments.Count == 0)
+        {
+            commands.Add(Build(author, text, texts));
+        }
+
+        var name = Clean(author, MaxNameLength);
+        for (var i = 0; i < Math.Min(attachments.Count, MaxAttachmentLines); i++)
+        {
+            commands.Add(Prefix + Component(name, string.Empty, attachments[i], texts, withName: !hasText && i == 0));
+        }
+
+        if (attachments.Count > MaxAttachmentLines)
+        {
+            commands.Add(Prefix + Component(name, string.Empty, null, texts, more: attachments.Count - MaxAttachmentLines));
+        }
+
+        return commands;
+    }
+
+    private static string Component(string name, string text, InboundAttachment? file, BridgeTexts texts, bool withName = true, int more = 0)
     {
         var buffer = new ArrayBufferWriter<byte>();
         using (var json = new Utf8JsonWriter(buffer, WriterOptions))
         {
             json.WriteStartArray();
             json.WriteStringValue(string.Empty);
-            WritePart(json, "[DC] ", "#5865F2");
-            WritePart(json, name, "aqua");
-            WritePart(json, ": ", "gray");
-            WritePart(json, text, null);
+            if (withName && file is null && more == 0 || withName && file is not null)
+            {
+                WritePart(json, "[DC] ", "#5865F2");
+                WritePart(json, name, "aqua");
+                WritePart(json, ": ", "gray");
+            }
+            else
+            {
+                WritePart(json, "  ↳ ", "dark_gray");
+            }
+
+            if (file is not null)
+            {
+                WriteFile(json, file, texts);
+            }
+            else if (more > 0)
+            {
+                WritePart(json, string.Format(System.Globalization.CultureInfo.InvariantCulture, texts.MoreFormat, more), "gray");
+            }
+            else
+            {
+                WriteText(json, text, texts);
+            }
+
             json.WriteEndArray();
         }
 
         return Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
+
+    private static void WriteText(Utf8JsonWriter json, string text, BridgeTexts texts)
+    {
+        if (text.Length == 0)
+        {
+            WritePart(json, text, null);
+            return;
+        }
+
+        var last = 0;
+        foreach (Match match in UrlPattern().Matches(text))
+        {
+            var url = match.Value.TrimEnd('.', ',', ';', ':', '!', '?', ')', ']', '}', '\'', '"');
+            if (!CanOpen(url, out _))
+            {
+                continue;
+            }
+
+            if (match.Index > last)
+            {
+                WritePart(json, text[last..match.Index], null);
+            }
+
+            var label = url.Length > MaxLinkLabelLength ? url[..(MaxLinkLabelLength - 1)] + "…" : url;
+            WriteLink(json, label, url, "aqua", texts.OpenHint + "\n" + (url.Length > 100 ? url[..99] + "…" : url));
+            last = match.Index + url.Length;
+        }
+
+        if (last < text.Length)
+        {
+            WritePart(json, text[last..], null);
+        }
+    }
+
+    private static void WriteFile(Utf8JsonWriter json, InboundAttachment file, BridgeTexts texts)
+    {
+        var fileName = Clean(file.FileName, 80);
+        var label = string.Format(System.Globalization.CultureInfo.InvariantCulture, file.IsImage ? texts.ImageFormat : texts.FileFormat, fileName);
+        if (CanOpen(file.Url, out _))
+        {
+            WriteLink(json, label, file.Url, file.IsImage ? "green" : "gold", texts.OpenHint + (file.Size > 0 ? $" ({Math.Max(1, file.Size / 1024)} KB)" : string.Empty));
+        }
+        else
+        {
+            WritePart(json, label, file.IsImage ? "green" : "gold");
+        }
+    }
+
+    /// <summary>Only http and https addresses become links; Minecraft refuses anything else, and the player confirms the click anyway.</summary>
+    private static bool CanOpen(string url, out Uri? uri)
+    {
+        uri = null;
+        return url.Length <= MaxLinkLength && url.All(char.IsAscii) && !url.EndsWith('…') && Uri.TryCreate(url, UriKind.Absolute, out uri)
+            && uri.Scheme is "http" or "https" && !string.IsNullOrEmpty(uri.Host);
+    }
+
+    /// <summary>
+    /// A clickable piece of text. Minecraft 1.21.5 renamed <c>clickEvent</c> and <c>hoverEvent</c> and their fields; every version ignores
+    /// keys it does not know, so both spellings are written and the same command works from 1.16.5 on.
+    /// </summary>
+    private static void WriteLink(Utf8JsonWriter json, string label, string url, string color, string hint)
+    {
+        json.WriteStartObject();
+        json.WriteString("text", label);
+        json.WriteString("color", color);
+        json.WriteBoolean("underlined", true);
+        json.WriteStartObject("clickEvent");
+        json.WriteString("action", "open_url");
+        json.WriteString("value", url);
+        json.WriteEndObject();
+        json.WriteStartObject("click_event");
+        json.WriteString("action", "open_url");
+        json.WriteString("url", url);
+        json.WriteEndObject();
+        json.WriteStartObject("hoverEvent");
+        json.WriteString("action", "show_text");
+        json.WriteString("contents", hint);
+        json.WriteEndObject();
+        json.WriteStartObject("hover_event");
+        json.WriteString("action", "show_text");
+        json.WriteString("value", hint);
+        json.WriteEndObject();
+        json.WriteEndObject();
+    }
+
+    [GeneratedRegex(@"https?://[^\s<>""]+", RegexOptions.IgnoreCase)]
+    private static partial Regex UrlPattern();
 
     private static void WritePart(Utf8JsonWriter json, string text, string? color)
     {
