@@ -3616,4 +3616,67 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Files_DiscardAsk" xml:space="preserve">
     <value>要放棄 {0} 尚未儲存的變更嗎？</value>
   </data>
+  <data name="Files_Cleanup" xml:space="preserve">
+    <value>清理…</value>
+  </data>
+  <data name="Files_CleanupTitle" xml:space="preserve">
+    <value>清理空間</value>
+  </data>
+  <data name="Files_CleanupHint" xml:space="preserve">
+    <value>按下「清理勾選項目」之前不會改動任何檔案。世界存檔永遠不會被刪除。</value>
+  </data>
+  <data name="Files_CleanupScanning" xml:space="preserve">
+    <value>正在找可以清理的檔案…</value>
+  </data>
+  <data name="Files_CleanupEmpty" xml:space="preserve">
+    <value>沒有需要清理的東西，很整齊！</value>
+  </data>
+  <data name="Files_CleanupLocked" xml:space="preserve">
+    <value>要先停止伺服器，而且最新的檔案要在 VPS 上，才能清理。清單還是可以先看。</value>
+  </data>
+  <data name="Files_CleanupSummary" xml:space="preserve">
+    <value>已勾選 {0} / {1} 項 · 可釋放 {2}</value>
+  </data>
+  <data name="Files_CleanupRun" xml:space="preserve">
+    <value>清理勾選項目</value>
+  </data>
+  <data name="Files_CleanupClose" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="Files_CleanupRiskBanner" xml:space="preserve">
+    <value>勾選的項目裡有世界資料（區域檔）。移除前會先打包進 backups/，但請確認它真的是舊的複本。</value>
+  </data>
+  <data name="Files_CleanupRiskItem" xml:space="preserve">
+    <value>含世界資料</value>
+  </data>
+  <data name="Files_CleanupReason_OldLog" xml:space="preserve">
+    <value>舊日誌或崩潰報告</value>
+  </data>
+  <data name="Files_CleanupReason_DisabledMod" xml:space="preserve">
+    <value>已停用的模組</value>
+  </data>
+  <data name="Files_CleanupReason_OldBackup" xml:space="preserve">
+    <value>舊備份（超出備份設定）</value>
+  </data>
+  <data name="Files_CleanupReason_LooseWorldCopy" xml:space="preserve">
+    <value>散落的世界複本，會打包進 backups/</value>
+  </data>
+  <data name="Files_CleanupConfirm" xml:space="preserve">
+    <value>要刪除或打包 {0} 個項目嗎？大約釋放 {1}。刪掉的檔案無法復原。</value>
+  </data>
+  <data name="Files_CleanupConfirmRisky" xml:space="preserve">
+    <value>要刪除或打包 {0} 個項目嗎？其中含有世界資料，散落的世界複本會先打包進 backups/。大約釋放 {1}。</value>
+  </data>
+  <data name="Files_CleanupDone" xml:space="preserve">
+    <value>完成：刪除 {0} 個、打包 {1} 個，釋放 {2}。</value>
+  </data>
+  <data name="Files_CleanupSkipped" xml:space="preserve">
+    <value>有 {0} 個在列出後又有變動，所以沒有動它們。</value>
+  </data>
+  <data name="Files_CleanupFailed" xml:space="preserve">
+    <value>無法清理：{0}</value>
+  </data>
+  <data name="Files_CleanupWorldRefused" xml:space="preserve">
+    <value>{0} 是世界存檔的一部分，所以沒有清理任何東西。</value>
+  </data>
 </root>

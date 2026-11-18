@@ -93,7 +93,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Packs = new PacksViewModel(this, packs, dialogs);
         Performance = new PerformanceViewModel(this, spark);
         Discord = new DiscordViewModel(this, bridge, app, dialogs);
-        Files = new ServerFilesViewModel(this, controller, dialogs);
+        Files = new ServerFilesViewModel(this, controller, app, dialogs);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));

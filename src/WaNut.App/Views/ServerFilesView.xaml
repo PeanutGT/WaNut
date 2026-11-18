@@ -93,6 +93,7 @@
 
         <DockPanel Grid.Row="0" Margin="0,0,0,6">
           <Button DockPanel.Dock="Right" Content="{res:Text Files_Refresh}" Command="{Binding RefreshCommand}" />
+          <Button DockPanel.Dock="Right" Content="{res:Text Files_Cleanup}" Command="{Binding OpenCleanupCommand}" Margin="0,0,6,0" />
           <TextBlock Text="{res:Text Files_TreeTitle}" Style="{StaticResource Label}" VerticalAlignment="Center" Margin="0" />
         </DockPanel>
 
@@ -196,6 +197,78 @@
             <Button Content="{res:Text Files_Revert}" Command="{Binding RevertCommand}" Margin="6,0,0,0" />
           </StackPanel>
           <TextBlock Text="{Binding StatusText}" Style="{StaticResource Hint}" Margin="0,6,0,0"
+                     AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+      </Grid>
+
+      <!-- Right, instead of the editor: the clean-up dry run. Nothing changes until "Clean up selected". -->
+      <Grid Grid.Column="2" Visibility="{Binding IsCleanupOpen, Converter={StaticResource Visible}}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+          <TextBlock Text="{res:Text Files_CleanupTitle}" Style="{StaticResource Label}" />
+          <TextBlock Text="{res:Text Files_CleanupHint}" Style="{StaticResource Hint}" Margin="0,0,0,6" />
+          <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,6"
+                  Visibility="{Binding ShowCleanupLocked, Converter={StaticResource Visible}}">
+            <TextBlock Text="{res:Text Files_CleanupLocked}" TextWrapping="Wrap" />
+          </Border>
+          <Border Style="{StaticResource ErrorBanner}" Margin="0,0,0,6"
+                  Visibility="{Binding CleanupHasRisk, Converter={StaticResource Visible}}">
+            <TextBlock Text="{res:Text Files_CleanupRiskBanner}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          </Border>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+          <ListBox ItemsSource="{Binding CleanupItems}" Visibility="{Binding ShowCleanupList, Converter={StaticResource Visible}}"
+                   AutomationProperties.Name="{res:Text Files_CleanupTitle}">
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                <Setter Property="Padding" Value="6,3" />
+                <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+              </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:CleanupItemViewModel}">
+                <CheckBox IsChecked="{Binding IsChecked}" AutomationProperties.Name="{Binding AccessibleName}">
+                  <StackPanel Margin="6,0,0,0">
+                    <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding DetailText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" />
+                    <TextBlock Text="{Binding RiskText}" FontSize="{StaticResource FontSmall}" FontWeight="SemiBold"
+                               Foreground="{DynamicResource ErrorTextBrush}">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding Risky}" Value="False">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </StackPanel>
+                </CheckBox>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <TextBlock Text="{res:Text Files_CleanupScanning}" Style="{StaticResource Hint}" Margin="6,6,0,0"
+                     Visibility="{Binding IsCleaning, Converter={StaticResource Visible}}"
+                     AutomationProperties.LiveSetting="Polite" />
+          <TextBlock Text="{res:Text Files_CleanupEmpty}" Style="{StaticResource Hint}" Margin="6,6,0,0"
+                     Visibility="{Binding ShowCleanupEmpty, Converter={StaticResource Visible}}" />
+        </Grid>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+          <TextBlock Text="{Binding CleanupSummary}" FontWeight="SemiBold" Margin="0,0,0,6"
+                     Visibility="{Binding ShowCleanupList, Converter={StaticResource Visible}}" />
+          <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource PrimaryButton}" Content="{res:Text Files_CleanupRun}" Command="{Binding RunCleanupCommand}" MinWidth="110" />
+            <Button Content="{res:Text Files_CleanupClose}" Command="{Binding CloseCleanupCommand}" Margin="6,0,0,0" />
+          </StackPanel>
+          <TextBlock Text="{Binding CleanupStatus}" Style="{StaticResource Hint}" Margin="0,6,0,0"
                      AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
       </Grid>
