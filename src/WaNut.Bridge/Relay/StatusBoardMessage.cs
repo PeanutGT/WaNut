@@ -60,7 +60,7 @@ public static class StatusBoardMessage
         var days = (int)span.TotalDays;
         return (days, span.Hours) switch
         {
-            (> 0, _) => chinese ? $"{days} 天 {span.Hours} 小時" : $"{days}d {span.Hours}h",
+            ( > 0, _) => chinese ? $"{days} 天 {span.Hours} 小時" : $"{days}d {span.Hours}h",
             (_, > 0) => chinese ? $"{span.Hours} 小時 {span.Minutes} 分" : $"{span.Hours}h {span.Minutes}m",
             _ => chinese ? $"{span.Minutes} 分" : $"{span.Minutes}m",
         };
