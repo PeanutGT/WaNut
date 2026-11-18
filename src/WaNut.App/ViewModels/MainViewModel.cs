@@ -50,7 +50,8 @@ public sealed partial class MainViewModel : ObservableObject
         BackupCopyService backupCopies,
         GuideViewModel guide,
         PlayerFaces faces,
-        BridgeManager bridge)
+        BridgeManager bridge,
+        PresenceService presence)
     {
         _faces = faces;
         _bridge = bridge;
@@ -72,6 +73,7 @@ public sealed partial class MainViewModel : ObservableObject
         _backups = backups;
         AppSettings = appSettings;
         Reload();
+        presence.Start(() => Servers);
     }
 
     public ObservableCollection<ServerViewModel> Servers { get; } = [];

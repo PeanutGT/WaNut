@@ -450,6 +450,12 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - 大的散落世界複本在 VPS 上打包要多久、會不會逾時；BusyBox VPS 上的打包與刪除。
 - 備份時間用檔名裡的本機時間判斷，PC 與 VPS 時區不同時是否合理。
 
+## Discord Rich Presence（add-discord-rich-presence）
+
+App 設定的 Discord 區塊新增勾選「在我的 Discord 個人檔案顯示執行中的伺服器」（預設關）。打開後 WaNut 每 15 秒看一次有沒有上線的伺服器（本機或 VPS，選在線人數最多的一台），在 Discord 個人檔案顯示：第一行伺服器名稱，第二行「類型 版本 · N 人在線」（VPS 加「在 VPS 上」），經過時間，一個按鈕連到 WaNut 的 GitHub。不顯示 IP。自己寫的 Discord IPC 用戶端（named pipe `discord-ipc-0` 到 `-9`，握手加 SET_ACTIVITY），Discord 沒開時靜默重試，不影響伺服器。Application ID 寫在 `PresenceService.ApplicationId`。已有單元測試（框架、握手、斷線重連）；還沒對真的 Discord 測過。要實測：
+- 開著 Discord 桌面版，勾選後啟動一台伺服器，約 15 秒內個人檔案出現「正在玩 WaNut」、名稱、版本與人數；有人進出後更新；停止伺服器後消失；取消勾選也會消失。
+- 先啟動伺服器再開 Discord，Discord 開起來後 15 秒內出現。
+- VPS 伺服器顯示「在 VPS 上」。按鈕在別人看你的檔案時才看得到（自己看不到是正常的）。
 ## Discord 崩潰警報與遠端指令稽核（add-discord-crash-alerts）
 
 橋接看到崩潰訊號（crash report 已存檔、server tick loop 例外、連接埠綁不上、Fabric 不相容 mod、OutOfMemoryError 等）後等 3 秒，用 WaNut 既有的崩潰分析讀最後 300 行與 crash-reports 裡最新的報告，在頻道發一則警報：原因加一個建議做法（中英文依 `language`）；5 分鐘內重複的崩潰訊號不再發，避免重啟迴圈洗版；「伺服器開關機通知」關掉時也不發。`/cmd` 的使用與被拒絕的嘗試都寫進 bridge.log（含 Discord 使用者名稱與 id，被拒絕的是 WARN）。已有單元測試；沒有接真的伺服器與 Discord。要實測：

@@ -16,6 +16,9 @@ public sealed record DiscordSettings
 
     public bool PlayerLeft { get; init; }
 
+    /// <summary>Shows the running server on the person's own Discord profile (Rich Presence). Off by default.</summary>
+    public bool ShowPresence { get; init; }
+
     public bool IsOn(DiscordEvent kind) => DiscordWebhook.IsValidUrl(WebhookUrl) && kind switch
     {
         DiscordEvent.Online => Online,

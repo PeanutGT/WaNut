@@ -131,6 +131,8 @@
         <CheckBox Content="{res:Text Discord_EventCrashed}" IsChecked="{Binding DiscordCrashed}" Margin="0,3,0,0" />
         <CheckBox Content="{res:Text Discord_EventJoined}" IsChecked="{Binding DiscordPlayerJoined}" Margin="0,3,0,0" />
         <CheckBox Content="{res:Text Discord_EventLeft}" IsChecked="{Binding DiscordPlayerLeft}" Margin="0,3,0,0" />
+        <CheckBox Content="{res:Text Discord_ShowPresence}" IsChecked="{Binding DiscordShowPresence}" Margin="0,12,0,0" />
+        <TextBlock Text="{res:Text Discord_ShowPresenceHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="24,3,0,0" />
       </StackPanel>
     </Expander>
 

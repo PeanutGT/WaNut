@@ -1576,6 +1576,18 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Discord_EventJoined" xml:space="preserve">
     <value>有人加入</value>
   </data>
+  <data name="Discord_ShowPresence" xml:space="preserve">
+    <value>在我的 Discord 個人檔案顯示執行中的伺服器</value>
+  </data>
+  <data name="Discord_ShowPresenceHint" xml:space="preserve">
+    <value>顯示伺服器名稱、版本與在線人數，附 WaNut 連結。不會顯示位址。需要這台電腦開著 Discord 應用程式。</value>
+  </data>
+  <data name="Presence_State" xml:space="preserve">
+    <value>{0} · {1} 人在線</value>
+  </data>
+  <data name="Presence_StateVps" xml:space="preserve">
+    <value>{0} · {1} 人在線 · 在 VPS 上</value>
+  </data>
   <data name="Discord_EventLeft" xml:space="preserve">
     <value>有人離開</value>
   </data>
