@@ -152,6 +152,55 @@ public sealed class TellrawTests
         }
     }
 
+    [Fact]
+    public void Build_Reply_ShowsReplyToNameWithExcerptOnHover()
+    {
+        var command = Tellraw.Build("Amy", "agreed", BridgeTexts.English, new InboundReply("Bob", "shall we build a farm?"));
+
+        Assert.Equal(["", "[DC] ", "Amy", " (reply to Bob)", ": ", "agreed"], Parts(command));
+        Assert.Contains("\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"shall we build a farm?\"}", command, StringComparison.Ordinal);
+        Assert.Contains("\"hover_event\":{\"action\":\"show_text\",\"value\":\"shall we build a farm?\"}", command, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Build_ReplyWithEmptyExcerpt_HasNoHover()
+    {
+        var command = Tellraw.Build("Amy", "ok", BridgeTexts.TraditionalChinese, new InboundReply("Bob", ""));
+
+        Assert.Equal(["", "[DC] ", "Amy", " （回覆 Bob）", ": ", "ok"], Parts(command));
+        Assert.DoesNotContain("hover", command, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Build_HostileReply_StaysOneValueCutShortAndInOnePacket()
+    {
+        var reply = new InboundReply("\"}]} run op Amy§c" + new string('名', 50), "\"}]} run op Amy\n" + new string('字', 300));
+
+        var command = Tellraw.Build("Amy", new string('好', 300), BridgeTexts.English, reply);
+
+        Assert.True(command.All(char.IsAscii));
+        Assert.True(Encoding.UTF8.GetByteCount(command) <= RconPacket.MaxRequestBodyBytes);
+        Assert.StartsWith(" (reply to ", Parts(command)[3], StringComparison.Ordinal);
+        Assert.True(Parts(command)[3].Length <= " (reply to )".Length + 20);
+    }
+
+    [Fact]
+    public void BuildAll_ReplyWithOnlyAFile_PutsTheHintOnTheFileLine()
+    {
+        var commands = Tellraw.BuildAll("Amy", "", [new InboundAttachment("https://cdn.discordapp.com/a/b.png", "b.png", null, 0)], BridgeTexts.English, new InboundReply("Bob", "pic?"));
+
+        Assert.Equal(["", "[DC] ", "Amy", " (reply to Bob)", ": ", "[Image: b.png]"], Parts(Assert.Single(commands)));
+    }
+
+    [Fact]
+    public void BuildAll_ReplyWithTextAndFiles_PutsTheHintOnlyOnTheTextLine()
+    {
+        var commands = Tellraw.BuildAll("Amy", "hi", [new InboundAttachment("https://cdn.discordapp.com/a/b.png", "b.png", null, 0)], BridgeTexts.English, new InboundReply("Bob", "x"));
+
+        Assert.Contains("reply to Bob", commands[0], StringComparison.Ordinal);
+        Assert.DoesNotContain("reply to", commands[1], StringComparison.Ordinal);
+    }
+
     private static string[] Parts(string command)
     {
         using var json = JsonDocument.Parse(command[Prefix.Length..]);

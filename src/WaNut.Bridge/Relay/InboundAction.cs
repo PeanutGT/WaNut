@@ -7,5 +7,8 @@ public sealed record InboundAction(InboundActionKind Kind, string? Author = null
     /// <summary>Files that came with a chat message.</summary>
     public IReadOnlyList<WaNut.Bridge.Discord.InboundAttachment> Attachments { get; init; } = [];
 
+    /// <summary>The message a chat message replies to.</summary>
+    public WaNut.Bridge.Discord.InboundReply? Reply { get; init; }
+
     public static InboundAction Ignore { get; } = new(InboundActionKind.Ignore);
 }

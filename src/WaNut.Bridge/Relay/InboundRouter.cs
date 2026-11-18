@@ -25,7 +25,7 @@ public static class InboundRouter
             return InboundAction.Ignore;
         }
 
-        return new InboundAction(InboundActionKind.Chat, message.AuthorName, text) { Attachments = message.Files };
+        return new InboundAction(InboundActionKind.Chat, message.AuthorName, text) { Attachments = message.Files, Reply = message.Reply };
     }
 
     public static InboundAction Route(SlashCommand command, BridgeConfig config)

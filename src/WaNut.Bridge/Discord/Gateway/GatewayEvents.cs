@@ -38,6 +38,13 @@ public static class GatewayEvents
             }
         }
 
+        InboundReply? reply = null;
+        if (type == 19 && d.TryGetProperty("referenced_message", out var referenced) && referenced.ValueKind == JsonValueKind.Object
+            && referenced.TryGetProperty("author", out var referencedAuthor))
+        {
+            reply = new InboundReply(DisplayName(referencedAuthor, default), DiscordText.ToPlain(String(referenced, "content") ?? string.Empty, names));
+        }
+
         return new InboundMessage(
             Snowflake(d, "channel_id"),
             Snowflake(author, "id"),
@@ -46,7 +53,8 @@ public static class GatewayEvents
             d.TryGetProperty("webhook_id", out var webhook) && webhook.ValueKind == JsonValueKind.String,
             Roles(member),
             content,
-            files);
+            files,
+            reply);
     }
 
     /// <summary>A slash command used in a server; buttons, autocomplete and direct messages are null.</summary>

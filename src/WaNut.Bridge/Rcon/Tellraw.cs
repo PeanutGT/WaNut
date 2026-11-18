@@ -32,19 +32,30 @@ public static partial class Tellraw
 
     private const int MaxLinkLabelLength = 45;
 
+    /// <summary>The replied-to name and excerpt are cut short; the excerpt is written twice (both hover spellings), so it must stay small.</summary>
+    private const int MaxReplyNameLength = 20;
+
+    private const int MaxReplyExcerptLength = 40;
+
     public static string Build(string author, string text) => Build(author, text, BridgeTexts.English);
 
     /// <summary>The chat line for a message; web addresses in the text become links that open in the player's browser.</summary>
-    public static string Build(string author, string text, BridgeTexts texts)
+    public static string Build(string author, string text, BridgeTexts texts, InboundReply? reply = null)
     {
         var name = Clean(author, MaxNameLength);
         var body = Clean(text, MaxTextLength);
         while (true)
         {
-            var command = Prefix + Component(name, body, null, texts);
-            if (Encoding.UTF8.GetByteCount(command) <= RconPacket.MaxRequestBodyBytes || body.Length <= 1)
+            var command = Prefix + Component(name, body, null, texts, reply: reply);
+            if (Encoding.UTF8.GetByteCount(command) <= RconPacket.MaxRequestBodyBytes)
             {
                 return command;
+            }
+
+            if (body.Length <= 1)
+            {
+                // Even a one-character text does not fit with the hint; the hint is the part to give up.
+                return reply is null ? command : Build(author, text, texts);
             }
 
             // Escaped non-ASCII text takes six bytes a character; shorten until the packet fits.
@@ -56,19 +67,19 @@ public static partial class Tellraw
     /// Every command for one Discord message: the chat line, then one line for each attached file so a long CDN address never
     /// shares a packet with the text. A message with only files gets its name on the first file line.
     /// </summary>
-    public static IReadOnlyList<string> BuildAll(string author, string text, IReadOnlyList<InboundAttachment> attachments, BridgeTexts texts)
+    public static IReadOnlyList<string> BuildAll(string author, string text, IReadOnlyList<InboundAttachment> attachments, BridgeTexts texts, InboundReply? reply = null)
     {
         var commands = new List<string>();
         var hasText = Clean(text, MaxTextLength).Length > 0;
         if (hasText || attachments.Count == 0)
         {
-            commands.Add(Build(author, text, texts));
+            commands.Add(Build(author, text, texts, reply));
         }
 
         var name = Clean(author, MaxNameLength);
         for (var i = 0; i < Math.Min(attachments.Count, MaxAttachmentLines); i++)
         {
-            commands.Add(Prefix + Component(name, string.Empty, attachments[i], texts, withName: !hasText && i == 0));
+            commands.Add(Prefix + Component(name, string.Empty, attachments[i], texts, withName: !hasText && i == 0, reply: !hasText && i == 0 ? reply : null));
         }
 
         if (attachments.Count > MaxAttachmentLines)
@@ -79,7 +90,7 @@ public static partial class Tellraw
         return commands;
     }
 
-    private static string Component(string name, string text, InboundAttachment? file, BridgeTexts texts, bool withName = true, int more = 0)
+    private static string Component(string name, string text, InboundAttachment? file, BridgeTexts texts, bool withName = true, int more = 0, InboundReply? reply = null)
     {
         var buffer = new ArrayBufferWriter<byte>();
         using (var json = new Utf8JsonWriter(buffer, WriterOptions))
@@ -90,6 +101,11 @@ public static partial class Tellraw
             {
                 WritePart(json, "[DC] ", "#5865F2");
                 WritePart(json, name, "aqua");
+                if (reply is not null)
+                {
+                    WriteReply(json, reply, texts);
+                }
+
                 WritePart(json, ": ", "gray");
             }
             else
@@ -114,6 +130,24 @@ public static partial class Tellraw
         }
 
         return Encoding.UTF8.GetString(buffer.WrittenSpan);
+    }
+
+    /// <summary>" (reply to Bob)" after the author's name; hovering shows the start of the message that was answered.</summary>
+    private static void WriteReply(Utf8JsonWriter json, InboundReply reply, BridgeTexts texts)
+    {
+        var label = " " + string.Format(System.Globalization.CultureInfo.InvariantCulture, texts.ReplyFormat, Clean(reply.AuthorName, MaxReplyNameLength));
+        var excerpt = Clean(reply.Excerpt, MaxReplyExcerptLength);
+        if (excerpt.Length == 0)
+        {
+            WritePart(json, label, "dark_gray");
+            return;
+        }
+
+        json.WriteStartObject();
+        json.WriteString("text", label);
+        json.WriteString("color", "dark_gray");
+        WriteHover(json, excerpt);
+        json.WriteEndObject();
     }
 
     private static void WriteText(Utf8JsonWriter json, string text, BridgeTexts texts)
@@ -189,6 +223,13 @@ public static partial class Tellraw
         json.WriteString("action", "open_url");
         json.WriteString("url", url);
         json.WriteEndObject();
+        WriteHover(json, hint);
+        json.WriteEndObject();
+    }
+
+    /// <summary>The hover text in both spellings, like <see cref="WriteLink"/>.</summary>
+    private static void WriteHover(Utf8JsonWriter json, string hint)
+    {
         json.WriteStartObject("hoverEvent");
         json.WriteString("action", "show_text");
         json.WriteString("contents", hint);
@@ -196,7 +237,6 @@ public static partial class Tellraw
         json.WriteStartObject("hover_event");
         json.WriteString("action", "show_text");
         json.WriteString("value", hint);
-        json.WriteEndObject();
         json.WriteEndObject();
     }
 
