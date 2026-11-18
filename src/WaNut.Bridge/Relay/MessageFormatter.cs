@@ -20,6 +20,8 @@ public static class MessageFormatter
 
     public const int ServerColor = 0x5865F2;
 
+    public const int CrashColor = 0xED4245;
+
     /// <summary>The player's head; names are checked to be plain letters, digits and underscores before they get here.</summary>
     public static string AvatarUrl(string player) => $"https://mc-heads.net/avatar/{player}/64";
 

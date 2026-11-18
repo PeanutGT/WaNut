@@ -58,8 +58,8 @@ public static class InboundRouter
         }
 
         return IsAdmin(command.RoleIds, config)
-            ? new InboundAction(InboundActionKind.Console, command.UserName, line)
-            : new InboundAction(InboundActionKind.ConsoleDenied);
+            ? new InboundAction(InboundActionKind.Console, command.UserName, line, command.UserId)
+            : new InboundAction(InboundActionKind.ConsoleDenied, command.UserName, line, command.UserId);
     }
 
     /// <summary>True when the text starts with one of the prefixes the user chose to keep on one side.</summary>
