@@ -17,6 +17,12 @@ public sealed record BridgeFilters
     /// <summary>Shows "5 / 20 online" in the bot's Discord status.</summary>
     public bool OnlineCountStatus { get; set; } = true;
 
+    /// <summary>
+    /// Keeps one bot message in the channel up to date with players, TPS and uptime. Off by default; needs the bot, not
+    /// only a webhook.
+    /// </summary>
+    public bool StatusBoard { get; set; }
+
     /// <summary>Lets Discord users ask who is online.</summary>
     public bool ListCommand { get; set; } = true;
 

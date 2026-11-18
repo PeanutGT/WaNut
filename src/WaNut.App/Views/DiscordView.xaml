@@ -194,6 +194,7 @@
           <CheckBox IsChecked="{Binding DeathsAndAdvancements}" Content="{res:Text Discord_FilterDeaths}" Margin="0,0,0,3" />
           <CheckBox IsChecked="{Binding ServerState}" Content="{res:Text Discord_FilterServerState}" Margin="0,0,0,3" />
           <CheckBox IsChecked="{Binding OnlineCountStatus}" Content="{res:Text Discord_FilterOnlineCount}" Margin="0,0,0,3" />
+          <CheckBox IsChecked="{Binding StatusBoard}" Content="{res:Text Discord_FilterStatusBoard}" Margin="0,0,0,3" />
           <CheckBox IsChecked="{Binding ListCommand}" Content="{res:Text Discord_FilterListCommand}" Margin="0,0,0,12" />
 
           <CheckBox IsChecked="{Binding IgnorePrefixes}" Content="{res:Text Discord_FilterPrefixes}" />

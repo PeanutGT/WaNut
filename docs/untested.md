@@ -455,3 +455,9 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 橋接看到崩潰訊號（crash report 已存檔、server tick loop 例外、連接埠綁不上、Fabric 不相容 mod、OutOfMemoryError 等）後等 3 秒，用 WaNut 既有的崩潰分析讀最後 300 行與 crash-reports 裡最新的報告，在頻道發一則警報：原因加一個建議做法（中英文依 `language`）；5 分鐘內重複的崩潰訊號不再發，避免重啟迴圈洗版；「伺服器開關機通知」關掉時也不發。`/cmd` 的使用與被拒絕的嘗試都寫進 bridge.log（含 Discord 使用者名稱與 id，被拒絕的是 WARN）。已有單元測試；沒有接真的伺服器與 Discord。要實測：
 - 本機與 VPS 各一台：故意讓連接埠被占用或給太小的記憶體，Discord 收到警報，原因與建議合理；連續重啟只收到一則。
 - 非管理員用 `/cmd`：bridge.log（VPS 用 journalctl）有 `Remote console denied` 一行。
+
+## Discord 狀態看板（add-discord-status-board）
+
+Discord 分頁新增勾選「在頻道放一則會自動更新的狀態訊息」（預設關，需要機器人，只有 Webhook 不行）。橋接每 60 秒編輯同一則訊息：狀態、玩家人數與名單、TPS（Paper 用 `tps`，Vanilla 1.20.3+ 用 `tick query`，兩者都沒有就不顯示）、MSPT、運行時間（橋接在伺服器開完才啟動時，沒有運行時間）。訊息 id 存在 bridge.config.json 旁的 status-board.id，重啟後繼續編輯同一則；訊息被刪掉就重發。記憶體與 CPU 沒做（橋接只透過 RCON 與日誌，取不到 Java 進程）。已有單元測試；沒有接真的伺服器與 Discord。要實測：
+- Paper 與 Vanilla 1.21 各開一台，勾選後頻道出現一則狀態訊息，一分鐘內數字更新；關掉伺服器後變成「未開啟」；刪掉那則訊息後下一輪重發。
+- 重啟橋接後編輯的是同一則訊息，沒有多一則。
