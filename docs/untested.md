@@ -449,3 +449,9 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - 列出後到執行前檔案有變動（例如伺服器又寫了日誌）會被跳過並說明。
 - 大的散落世界複本在 VPS 上打包要多久、會不會逾時；BusyBox VPS 上的打包與刪除。
 - 備份時間用檔名裡的本機時間判斷，PC 與 VPS 時區不同時是否合理。
+
+## Discord 崩潰警報與遠端指令稽核（add-discord-crash-alerts）
+
+橋接看到崩潰訊號（crash report 已存檔、server tick loop 例外、連接埠綁不上、Fabric 不相容 mod、OutOfMemoryError 等）後等 3 秒，用 WaNut 既有的崩潰分析讀最後 300 行與 crash-reports 裡最新的報告，在頻道發一則警報：原因加一個建議做法（中英文依 `language`）；5 分鐘內重複的崩潰訊號不再發，避免重啟迴圈洗版；「伺服器開關機通知」關掉時也不發。`/cmd` 的使用與被拒絕的嘗試都寫進 bridge.log（含 Discord 使用者名稱與 id，被拒絕的是 WARN）。已有單元測試；沒有接真的伺服器與 Discord。要實測：
+- 本機與 VPS 各一台：故意讓連接埠被占用或給太小的記憶體，Discord 收到警報，原因與建議合理；連續重啟只收到一則。
+- 非管理員用 `/cmd`：bridge.log（VPS 用 journalctl）有 `Remote console denied` 一行。
