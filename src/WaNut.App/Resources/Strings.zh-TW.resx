@@ -3505,4 +3505,115 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Discord_OpenPortal" xml:space="preserve">
     <value>開啟 Discord 開發者入口網站</value>
   </data>
+  <data name="Server_TabFiles" xml:space="preserve">
+    <value>檔案</value>
+  </data>
+  <data name="Files_TreeTitle" xml:space="preserve">
+    <value>VPS 上的伺服器資料夾</value>
+  </data>
+  <data name="Files_Refresh" xml:space="preserve">
+    <value>重新整理</value>
+  </data>
+  <data name="Files_Loading" xml:space="preserve">
+    <value>正在連線到 VPS…</value>
+  </data>
+  <data name="Files_Empty" xml:space="preserve">
+    <value>這個資料夾是空的。</value>
+  </data>
+  <data name="Files_ConnectFailed" xml:space="preserve">
+    <value>讀不到 VPS 上的伺服器資料夾：{0}</value>
+  </data>
+  <data name="Files_NoFolder" xml:space="preserve">
+    <value>VPS 上還沒有這個伺服器的資料夾，第一次在 VPS 上啟動時會建立。</value>
+  </data>
+  <data name="Files_ReadFailed" xml:space="preserve">
+    <value>讀不到這個檔案：{0}</value>
+  </data>
+  <data name="Files_SaveFailed" xml:space="preserve">
+    <value>存不了這個檔案：{0}</value>
+  </data>
+  <data name="Files_FolderKind" xml:space="preserve">
+    <value>資料夾</value>
+  </data>
+  <data name="Files_OpenFolder" xml:space="preserve">
+    <value>展開資料夾 {0}</value>
+  </data>
+  <data name="Files_CloseFolder" xml:space="preserve">
+    <value>收合資料夾 {0}</value>
+  </data>
+  <data name="Files_SpaceTitle" xml:space="preserve">
+    <value>空間用量</value>
+  </data>
+  <data name="Files_SpaceTotal" xml:space="preserve">
+    <value>共 {0}</value>
+  </data>
+  <data name="Files_SpaceMeasuring" xml:space="preserve">
+    <value>正在計算大小…</value>
+  </data>
+  <data name="Files_Category_ServerCore" xml:space="preserve">
+    <value>伺服器檔案</value>
+  </data>
+  <data name="Files_Category_ModOrPlugin" xml:space="preserve">
+    <value>模組與外掛</value>
+  </data>
+  <data name="Files_Category_DisabledMod" xml:space="preserve">
+    <value>已停用的模組</value>
+  </data>
+  <data name="Files_Category_Configuration" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="Files_Category_WorldData" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="Files_Category_LogOrCrash" xml:space="preserve">
+    <value>日誌與崩潰報告</value>
+  </data>
+  <data name="Files_Category_BackupArchive" xml:space="preserve">
+    <value>備份與壓縮檔</value>
+  </data>
+  <data name="Files_Category_Other" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Files_EditorHint" xml:space="preserve">
+    <value>在左邊選一個設定檔就能讀或改。修改會存在 VPS 上，下次伺服器啟動時生效。</value>
+  </data>
+  <data name="Files_InfoFolder" xml:space="preserve">
+    <value>這是資料夾，按箭頭展開看裡面有什麼。</value>
+  </data>
+  <data name="Files_InfoTooLarge" xml:space="preserve">
+    <value>這個檔案太大，不能在這裡編輯（上限 1 MB）。</value>
+  </data>
+  <data name="Files_InfoNotText" xml:space="preserve">
+    <value>WaNut 只能編輯 server.properties 這類小型文字檔，這個檔案不能在這裡編輯。</value>
+  </data>
+  <data name="Files_ReadOnlyRunning" xml:space="preserve">
+    <value>伺服器正在執行，檔案只能讀取。先停止伺服器才能修改。</value>
+  </data>
+  <data name="Files_ReadOnlyBusy" xml:space="preserve">
+    <value>WaNut 正在搬移這個伺服器的檔案，完成後才能再編輯。</value>
+  </data>
+  <data name="Files_ReadOnlyOnPc" xml:space="preserve">
+    <value>最新的檔案在這台電腦上，伺服器啟動時才會送去 VPS，在這裡改的內容會被蓋掉。目前看到的是 VPS 上最後一份。</value>
+  </data>
+  <data name="Files_ReadOnlyLog" xml:space="preserve">
+    <value>這個檔案由伺服器自己寫入，只能讀取。</value>
+  </data>
+  <data name="Files_Unsaved" xml:space="preserve">
+    <value>尚未儲存</value>
+  </data>
+  <data name="Files_Save" xml:space="preserve">
+    <value>儲存</value>
+  </data>
+  <data name="Files_Revert" xml:space="preserve">
+    <value>放棄變更</value>
+  </data>
+  <data name="Files_Saved" xml:space="preserve">
+    <value>已存到 VPS。</value>
+  </data>
+  <data name="Files_ChangedAsk" xml:space="preserve">
+    <value>這個檔案在你打開之後，VPS 上又被改過。要照樣儲存、蓋掉那次修改嗎？</value>
+  </data>
+  <data name="Files_DiscardAsk" xml:space="preserve">
+    <value>要放棄 {0} 尚未儲存的變更嗎？</value>
+  </data>
 </root>

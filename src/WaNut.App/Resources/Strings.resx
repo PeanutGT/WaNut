@@ -3525,4 +3525,115 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Discord_OpenPortal" xml:space="preserve">
     <value>Open the Discord developer portal</value>
   </data>
+  <data name="Server_TabFiles" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Files_TreeTitle" xml:space="preserve">
+    <value>Server folder on the VPS</value>
+  </data>
+  <data name="Files_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Files_Loading" xml:space="preserve">
+    <value>Connecting to the VPS…</value>
+  </data>
+  <data name="Files_Empty" xml:space="preserve">
+    <value>This folder is empty.</value>
+  </data>
+  <data name="Files_ConnectFailed" xml:space="preserve">
+    <value>Couldn't read the server folder on the VPS: {0}</value>
+  </data>
+  <data name="Files_NoFolder" xml:space="preserve">
+    <value>The VPS has no folder for this server yet. It is created the first time the server starts there.</value>
+  </data>
+  <data name="Files_ReadFailed" xml:space="preserve">
+    <value>Couldn't read the file: {0}</value>
+  </data>
+  <data name="Files_SaveFailed" xml:space="preserve">
+    <value>Couldn't save the file: {0}</value>
+  </data>
+  <data name="Files_FolderKind" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Files_OpenFolder" xml:space="preserve">
+    <value>Open folder {0}</value>
+  </data>
+  <data name="Files_CloseFolder" xml:space="preserve">
+    <value>Close folder {0}</value>
+  </data>
+  <data name="Files_SpaceTitle" xml:space="preserve">
+    <value>Space used</value>
+  </data>
+  <data name="Files_SpaceTotal" xml:space="preserve">
+    <value>{0} in total</value>
+  </data>
+  <data name="Files_SpaceMeasuring" xml:space="preserve">
+    <value>Adding up the sizes…</value>
+  </data>
+  <data name="Files_Category_ServerCore" xml:space="preserve">
+    <value>Server files</value>
+  </data>
+  <data name="Files_Category_ModOrPlugin" xml:space="preserve">
+    <value>Mods and plugins</value>
+  </data>
+  <data name="Files_Category_DisabledMod" xml:space="preserve">
+    <value>Turned-off mods</value>
+  </data>
+  <data name="Files_Category_Configuration" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Files_Category_WorldData" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="Files_Category_LogOrCrash" xml:space="preserve">
+    <value>Logs and crash reports</value>
+  </data>
+  <data name="Files_Category_BackupArchive" xml:space="preserve">
+    <value>Backups and archives</value>
+  </data>
+  <data name="Files_Category_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Files_EditorHint" xml:space="preserve">
+    <value>Pick a settings file on the left to read or edit it. Changes are saved on the VPS and apply the next time the server starts.</value>
+  </data>
+  <data name="Files_InfoFolder" xml:space="preserve">
+    <value>This is a folder. Open it with the arrow to see what is inside.</value>
+  </data>
+  <data name="Files_InfoTooLarge" xml:space="preserve">
+    <value>This file is too big to edit here (the limit is 1 MB).</value>
+  </data>
+  <data name="Files_InfoNotText" xml:space="preserve">
+    <value>WaNut can only edit small text files such as server.properties. This one can't be edited here.</value>
+  </data>
+  <data name="Files_ReadOnlyRunning" xml:space="preserve">
+    <value>The server is running, so its files can only be read. Stop it to edit them.</value>
+  </data>
+  <data name="Files_ReadOnlyBusy" xml:space="preserve">
+    <value>WaNut is moving this server's files right now. You can edit them again when that is done.</value>
+  </data>
+  <data name="Files_ReadOnlyOnPc" xml:space="preserve">
+    <value>The newest files are on this PC and are sent to the VPS when the server starts, so a change made here would be overwritten. You are reading the VPS's last copy.</value>
+  </data>
+  <data name="Files_ReadOnlyLog" xml:space="preserve">
+    <value>The server writes this file itself, so it is shown for reading only.</value>
+  </data>
+  <data name="Files_Unsaved" xml:space="preserve">
+    <value>Not saved yet</value>
+  </data>
+  <data name="Files_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Files_Revert" xml:space="preserve">
+    <value>Discard changes</value>
+  </data>
+  <data name="Files_Saved" xml:space="preserve">
+    <value>Saved on the VPS.</value>
+  </data>
+  <data name="Files_ChangedAsk" xml:space="preserve">
+    <value>This file changed on the VPS after you opened it. Save anyway and replace that change?</value>
+  </data>
+  <data name="Files_DiscardAsk" xml:space="preserve">
+    <value>Discard your unsaved changes to {0}?</value>
+  </data>
 </root>

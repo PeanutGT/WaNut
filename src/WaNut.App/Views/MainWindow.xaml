@@ -509,6 +509,10 @@
           <TabItem Header="{res:Text Server_TabDiscord}">
             <views:DiscordView DataContext="{Binding Discord}" />
           </TabItem>
+
+          <TabItem Header="{res:Text Server_TabFiles}" Visibility="{Binding RunsOnVps, Converter={StaticResource BoolToVisibility}}">
+            <views:ServerFilesView DataContext="{Binding Files}" />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Grid>
