@@ -69,6 +69,12 @@ public sealed class DiscordRest(HttpClient http, string botToken, Func<TimeSpan,
         using var response = await SendAsync(HttpMethod.Patch, $"channels/{channelId.ToString(CultureInfo.InvariantCulture)}/messages/{messageId}", body, true, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <exception cref="HttpRequestException">With status 404 when the message is already gone.</exception>
+    public async Task DeleteMessageAsync(ulong channelId, string messageId, CancellationToken cancellationToken)
+    {
+        using var response = await SendAsync(HttpMethod.Delete, $"channels/{channelId.ToString(CultureInfo.InvariantCulture)}/messages/{messageId}", null, true, cancellationToken).ConfigureAwait(false);
+    }
+
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string? body, bool authorize, CancellationToken cancellationToken)
     {
         var response = await RateLimitRetry.SendAsync(

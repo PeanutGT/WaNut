@@ -34,11 +34,21 @@ public static class InboundRouter
         {
             SlashCommandDefinitions.List when config.Filters.ListCommand => InboundActionKind.ListPlayers,
             SlashCommandDefinitions.Console when config.Filters.RemoteConsole => InboundActionKind.Console,
+            SlashCommandDefinitions.Status => InboundActionKind.Status,
             _ => InboundActionKind.Ignore,
         };
         if (kind == InboundActionKind.Ignore)
         {
             return InboundAction.Ignore;
+        }
+
+        // The one command that works in any channel of the server: it is how the board gets there.
+        if (kind == InboundActionKind.Status)
+        {
+            return new InboundAction(IsAdmin(command.RoleIds, config) ? InboundActionKind.Status : InboundActionKind.StatusDenied, command.UserName, null, command.UserId)
+            {
+                ChannelId = command.ChannelId,
+            };
         }
 
         if (!IsBridgeChannel(command.ChannelId, config))
