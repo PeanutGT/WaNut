@@ -24,6 +24,7 @@ public sealed class BridgeTexts
         FileFormat = "[File: {0}]",
         OpenHint = "Click to open in your browser",
         MoreFormat = "+{0} more on Discord",
+        ReplyFormat = "(reply to {0})",
     };
 
     public static BridgeTexts TraditionalChinese { get; } = new()
@@ -46,6 +47,7 @@ public sealed class BridgeTexts
         FileFormat = "[檔案：{0}]",
         OpenHint = "點擊在瀏覽器開啟",
         MoreFormat = "還有 {0} 個，請到 Discord 查看",
+        ReplyFormat = "（回覆 {0}）",
     };
 
     public bool Chinese { get; init; }
@@ -83,6 +85,8 @@ public sealed class BridgeTexts
     public required string OpenHint { get; init; }
 
     public required string MoreFormat { get; init; }
+
+    public required string ReplyFormat { get; init; }
 
     /// <summary>"zh-TW", "zh-Hant" or "zh" give Traditional Chinese; anything else English.</summary>
     public static BridgeTexts For(string? language) =>

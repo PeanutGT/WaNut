@@ -4,6 +4,7 @@ namespace WaNut.Bridge.Discord;
 /// <param name="AuthorName">The server nickname, else the display name, else the username.</param>
 /// <param name="IsWebhook">Posted by a webhook, which includes the bridge's own posts.</param>
 /// <param name="Content">Mentions already turned into readable "@name" text.</param>
+/// <param name="Reply">The message this one answers, when Discord still has it.</param>
 public sealed record InboundMessage(
     ulong ChannelId,
     ulong AuthorId,
@@ -12,7 +13,8 @@ public sealed record InboundMessage(
     bool IsWebhook,
     IReadOnlyList<ulong> RoleIds,
     string Content,
-    IReadOnlyList<InboundAttachment>? Attachments = null)
+    IReadOnlyList<InboundAttachment>? Attachments = null,
+    InboundReply? Reply = null)
 {
     public IReadOnlyList<InboundAttachment> Files => Attachments ?? [];
 }

@@ -22,6 +22,28 @@ public sealed class GatewayEventsTests
     }
 
     [Fact]
+    public void Message_Reply_ReadsWhoAndWhatItAnswers()
+    {
+        var message = GatewayEvents.Message(Parse("""
+            {"type":19,"channel_id":"100","content":"agreed","author":{"id":"1","username":"amy"},
+             "referenced_message":{"content":"shall we build <@42>?","author":{"id":"2","username":"bob","global_name":"Bob G"}},
+             "mentions":[{"id":"42","username":"cat"}]}
+            """));
+
+        Assert.Equal(new InboundReply("Bob G", "shall we build @cat?"), message!.Reply);
+    }
+
+    [Fact]
+    public void Message_ReplyToDeletedMessageOrPlainMessage_HasNoReply()
+    {
+        var deleted = GatewayEvents.Message(Parse("""{"type":19,"channel_id":"1","content":"x","author":{"id":"1","username":"a"},"referenced_message":null}"""));
+        var plain = GatewayEvents.Message(Parse("""{"type":0,"channel_id":"1","content":"x","author":{"id":"1","username":"a"}}"""));
+
+        Assert.Null(deleted!.Reply);
+        Assert.Null(plain!.Reply);
+    }
+
+    [Fact]
     public void Message_FromWebhookOrBot_IsMarked()
     {
         var message = GatewayEvents.Message(Parse("""{"type":0,"channel_id":"1","content":"x","webhook_id":"3","author":{"id":"2","username":"hook","bot":true}}"""));

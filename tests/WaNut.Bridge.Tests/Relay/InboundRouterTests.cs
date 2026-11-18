@@ -106,5 +106,15 @@ public sealed class InboundRouterTests
     private static SlashCommand Command(string name, string? line = null) =>
         new("1", "tok", "app", Channel, 1, "Amy", [], name, line is null ? new Dictionary<string, string>() : new Dictionary<string, string> { ["command"] = line });
 
+    [Fact]
+    public void Route_Reply_CarriesTheReplyHintToTheChatAction()
+    {
+        var reply = new InboundReply("Bob", "hi");
+
+        var action = InboundRouter.Route(Message("yes") with { Reply = reply }, Config, Bot);
+
+        Assert.Equal(reply, action.Reply);
+    }
+
     private static InboundMessage Message(string content) => new(Channel, 1, "Amy", false, false, [], content);
 }

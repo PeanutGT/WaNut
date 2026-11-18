@@ -103,7 +103,7 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
         {
             // Lost while the server is off; a Discord-only chat is fine then.
             log.Info($"Discord to Minecraft: Chat {action.Author}.");
-            foreach (var command in Tellraw.BuildAll(action.Author!, action.Text!, action.Attachments, Texts))
+            foreach (var command in Tellraw.BuildAll(action.Author!, action.Text!, action.Attachments, Texts, action.Reply))
             {
                 if (await rcon.TryExecuteAsync(command, cancellationToken).ConfigureAwait(false) is null)
                 {
