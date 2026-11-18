@@ -12,10 +12,12 @@ namespace WaNut.Core.Remote.Sync;
 public static class RemoteListing
 {
     /// <summary>Type, size, modified time and path (relative, '/'), separated by tabs; entries end with NUL so any file name is safe.</summary>
-    public static string Command(string root) =>
+    /// <param name="root">Relative to the SSH user's home, or absolute.</param>
+    /// <param name="recursive">False lists only the folder's own entries.</param>
+    public static string Command(string root, bool recursive = true) =>
         "sh -c " + RemoteShell.Quote(
-            $"cd {RemoteShell.Home(root)} 2>/dev/null || exit 0; " +
-            "find . -mindepth 1 \\( -type f -o -type d \\) -printf '%y\\t%s\\t%T@\\t%P\\0'");
+            $"cd {RemoteShell.Folder(root)} 2>/dev/null || exit 0; " +
+            $"find . -mindepth 1 {(recursive ? string.Empty : "-maxdepth 1 ")}\\( -type f -o -type d \\) -printf '%y\\t%s\\t%T@\\t%P\\0'");
 
     /// <summary>Entries from <see cref="Command"/>'s output. A name Windows can't hold as one path part is left out.</summary>
     public static IReadOnlyList<SyncEntry> Parse(string output)

@@ -412,3 +412,13 @@ Bot 設定（之後 Phase 4 畫面要帶使用者做）：
 - 唯讀檔、被別的程式開著的檔案做 `DeleteBatchAsync`／`CreateArchiveAsync` 的行為；
 - 路徑大小寫與保留名稱（`CON`、`NUL` 等）；
 - 遠端版本（`RemoteVpsAdapter`）在 M2 才做，目前沒有任何遠端實作。
+
+## VPS 管理 M2：SSH 核心與安全（add-vps-ssh-core）
+
+新增 `WaNut.Core/Remote/Files`：`VpsSession`（SSH 與 SFTP 共用連線、SFTP 一次一個、15 秒 keepalive、斷線重連並重試一次、上傳下載用自己的連線）、`RemoteVpsAdapter`（`IServerFileSystem` 的 VPS 版）、`WorkspaceRootGuard`（擋 `/`、系統資料夾、`/home/<名字>`、`/var/<名字>`、使用者家目錄與其上層；刪除前在 VPS 上再確認有 `server.properties`、`eula.txt` 或 `libraries/`，並拒絕經由連結跑出伺服器資料夾的路徑）。`RemoteShell.Quote` 遇到 NUL 會拒絕。密碼與金鑰沿用既有的 `SecretStore`（DPAPI），沒有新的憑證儲存。還沒有介面（M3 才做）。單元測試與真的 sshd（Linux 容器裡的 OpenSSH，`--filter Category=Ssh`）跑過，含斷線重連、特殊檔名、連結逃脫。
+
+還沒確認：
+
+- 真的 VPS 上（Ubuntu、Debian、Alpine/BusyBox）：BusyBox 沒有 GNU `find -printf` 時會改用 SFTP 列出，這條路沒實測；BusyBox 的 `xargs -0`、`tar -czf ... --` 也沒試。
+- 真的網路瞬斷（Wi-Fi 換線、NAT 逾時）下的重連；目前只用「砍掉自己的 sshd 程序」模擬。
+- Windows 上從 WaNut 呼叫（目前沒有呼叫端，要等 M3 的介面）。

@@ -16,6 +16,16 @@ public sealed class RemoteRunTests
         Assert.Equal(expected, RemoteShell.Quote(value));
 
     [Fact]
+    public void Quote_NulCharacter_Throws() =>
+        Assert.Throws<ArgumentException>(() => RemoteShell.Quote("a\0b"));
+
+    [Theory]
+    [InlineData("/srv/mc server", "'/srv/mc server'")]
+    [InlineData("wanut/servers/a", "\"$HOME\"/'wanut/servers/a'")]
+    public void Folder_AbsoluteOrHomeRelative_IsOneWord(string path, string expected) =>
+        Assert.Equal(expected, RemoteShell.Folder(path));
+
+    [Fact]
     public void Home_RelativePath_StaysUnderHome() =>
         Assert.Equal("\"$HOME\"/'wanut/servers/a b'", RemoteShell.Home("/wanut/servers/a b"));
 
