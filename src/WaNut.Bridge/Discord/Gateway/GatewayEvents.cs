@@ -26,9 +26,16 @@ public static class GatewayEvents
         }
 
         var content = DiscordText.ToPlain(String(d, "content") ?? string.Empty, names);
-        if (d.TryGetProperty("attachments", out var attachments) && attachments.ValueKind == JsonValueKind.Array && attachments.GetArrayLength() > 0)
+        var files = new List<InboundAttachment>();
+        if (d.TryGetProperty("attachments", out var attachments) && attachments.ValueKind == JsonValueKind.Array)
         {
-            content = (content + " [attachment]").Trim();
+            foreach (var a in attachments.EnumerateArray())
+            {
+                if (String(a, "url") is { Length: > 0 } url)
+                {
+                    files.Add(new InboundAttachment(url, String(a, "filename") ?? "file", String(a, "content_type"), a.TryGetProperty("size", out var size) && size.TryGetInt64(out var n) ? n : 0));
+                }
+            }
         }
 
         return new InboundMessage(
@@ -38,7 +45,8 @@ public static class GatewayEvents
             author.TryGetProperty("bot", out var bot) && bot.ValueKind == JsonValueKind.True,
             d.TryGetProperty("webhook_id", out var webhook) && webhook.ValueKind == JsonValueKind.String,
             Roles(member),
-            content);
+            content,
+            files);
     }
 
     /// <summary>A slash command used in a server; buttons, autocomplete and direct messages are null.</summary>

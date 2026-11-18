@@ -83,6 +83,19 @@ public sealed class BridgeRelayTests
     }
 
     [Fact]
+    public async Task OnDiscordMessageAsync_FileOnlyMessage_SendsTheFileLine()
+    {
+        var rcon = new FakeRcon(_ => string.Empty);
+        var relay = NewRelay(new BridgeConfig { ChannelId = "100" }, rcon);
+        var file = new InboundAttachment("https://cdn.discordapp.com/a/b.png", "b.png", "image/png", 5);
+
+        await relay.OnDiscordMessageAsync(new InboundMessage(100, 1, "Amy", false, false, [], "", [file]), 999, CancellationToken.None);
+
+        var command = Assert.Single(rcon.Commands);
+        Assert.Contains("[Image: b.png]", command, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task RunCommandAsync_List_AnswersWithPlayers()
     {
         var relay = NewRelay(new BridgeConfig(), new FakeRcon(_ => "There are 2 of a max of 20 players online: Steve, Alex"));
