@@ -93,6 +93,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Packs = new PacksViewModel(this, packs, dialogs);
         Performance = new PerformanceViewModel(this, spark);
         Discord = new DiscordViewModel(this, bridge, app, dialogs);
+        Files = new ServerFilesViewModel(this, controller, dialogs);
         CrashHelp = new CrashHelpViewModel(this, dialogs, clipboard, mods);
         // App settings outlive every server, so a deleted server must not stay reachable through this subscription.
         PropertyChangedEventManager.AddHandler(app, OnAdvancedModeChanged, nameof(AppSettingsViewModel.AdvancedMode));
@@ -133,6 +134,9 @@ public sealed partial class ServerViewModel : ObservableObject
     public BackupsViewModel Backups { get; }
 
     public ConnectViewModel Connect { get; }
+
+    /// <summary>The Files tab, for a server set to run on a VPS.</summary>
+    public ServerFilesViewModel Files { get; }
 
     public PerformanceViewModel Performance { get; }
 
@@ -272,6 +276,22 @@ public sealed partial class ServerViewModel : ObservableObject
         GameSettings.OnVpsStateChanged();
     }
 
+    /// <summary>
+    /// A file was saved on the VPS from the Files tab. The settings tabs show a copy of server.properties made earlier,
+    /// so it is copied again instead of letting the next settings change send the old one back.
+    /// </summary>
+    internal void OnVpsFileEdited(string path)
+    {
+        if (path == Core.Settings.GameSettingsStore.PropertiesFileName && VpsSettingsReady)
+        {
+            VpsSettingsReady = false;
+            if (_settingsShown)
+            {
+                _ = EnsureVpsSettingsAsync();
+            }
+        }
+    }
+
     private bool _settingsShown;
     private Task? _pullingSettings;
 
@@ -343,9 +363,11 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(VpsBannerText));
         OnPropertyChanged(nameof(ReconnectText));
         OnPropertyChanged(nameof(CanReconnect));
+        OnPropertyChanged(nameof(RunsOnVps));
         ReconnectCommand.NotifyCanExecuteChanged();
         ServerSettings.OnVpsStateChanged();
         GameSettings.OnVpsStateChanged();
+        Files.OnVpsStateChanged();
 
         // A run (or a change of where the files are) may have changed the settings file, so copy it again next time.
         if (!ConfigOnVps)

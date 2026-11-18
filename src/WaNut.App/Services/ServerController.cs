@@ -10,10 +10,12 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Network;
 using WaNut.Core.Remote;
+using WaNut.Core.Remote.Files;
 using WaNut.Core.Remote.Run;
 using WaNut.Core.Remote.Sync;
 using WaNut.Core.Settings;
 using WaNut.Core.Steps;
+using WaNut.Core.Storage;
 
 namespace WaNut.App.Services;
 
@@ -464,6 +466,38 @@ public sealed class ServerController(
             return false;
         }
     }
+
+    /// <summary>Opens the server's folder on its VPS for the Files tab. The connection closes when the returned file system is disposed.</summary>
+    /// <exception cref="InvalidOperationException">The VPS is no longer in App settings.</exception>
+    public async Task<IServerFileSystem> OpenVpsFilesAsync(ServerViewModel server, CancellationToken cancellationToken)
+    {
+        if (app.VpsList.FirstOrDefault(v => v.Id == server.Metadata.VpsId) is not { } vps)
+        {
+            throw new InvalidOperationException(Text.Get("Server_VpsMissing"));
+        }
+
+        var session = new VpsSession(vpsConnector, vps);
+        try
+        {
+            return await RemoteVpsAdapter.OpenAsync(session, SftpSyncTree.ServerRoot(server.Id), ownsSession: true, cancellationToken);
+        }
+        catch
+        {
+            await session.DisposeAsync();
+            throw;
+        }
+    }
+
+    /// <summary>The words for a failure of the Files tab, or null when it is not a VPS problem (a bug that should surface).</summary>
+    public string? DescribeVpsFilesProblem(Exception e) => e switch
+    {
+        DirectoryNotFoundException => Text.Get("Files_NoFolder"),
+        WorkspaceRootException => e.Message,
+        FileNotFoundException => e.Message,
+        ArgumentException => e.Message,
+        _ when IsVpsProblem(e) => VpsMessage(e),
+        _ => null,
+    };
 
     private static bool IsVpsProblem(Exception e) =>
         e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException;
