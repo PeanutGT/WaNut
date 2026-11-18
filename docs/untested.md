@@ -467,3 +467,10 @@ App 設定的 Discord 區塊新增勾選「在我的 Discord 個人檔案顯示�
 Discord 分頁新增勾選「在頻道放一則會自動更新的狀態訊息」（預設關，需要機器人，只有 Webhook 不行）。橋接每 60 秒編輯同一則訊息：狀態、玩家人數與名單、TPS（Paper 用 `tps`，Vanilla 1.20.3+ 用 `tick query`，兩者都沒有就不顯示）、MSPT、運行時間（橋接在伺服器開完才啟動時，沒有運行時間）。訊息 id 存在 bridge.config.json 旁的 status-board.id，重啟後繼續編輯同一則；訊息被刪掉就重發。記憶體與 CPU 沒做（橋接只透過 RCON 與日誌，取不到 Java 進程）。已有單元測試；沒有接真的伺服器與 Discord。要實測：
 - Paper 與 Vanilla 1.21 各開一台，勾選後頻道出現一則狀態訊息，一分鐘內數字更新；關掉伺服器後變成「未開啟」；刪掉那則訊息後下一輪重發。
 - 重啟橋接後編輯的是同一則訊息，沒有多一則。
+
+## 伺服器設定資料模型 Phase 1（add-data-driven-server-config）
+
+只新增 Core 的資料模型（`Settings/Config/`），還沒有任何畫面使用它，所以沒有可點的行為。還沒確認：
+
+- 用真實的模組服 `server.properties`（含自訂 key 和註解）載入、改一個值、存檔後，自訂 key、註解與順序都還在（單元測試只用手寫的樣本）。
+- 目錄（`ServerConfigCatalog`）的預設值與範圍和各版本真實伺服器一致，尤其 1.21.9 之後 `pvp`、`enable-command-block`、`spawn-monsters` 改成遊戲規則的版本，以及 `pause-when-empty-seconds` 等新 key。
