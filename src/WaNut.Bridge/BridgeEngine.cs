@@ -12,7 +12,7 @@ namespace WaNut.Bridge;
 /// Runs the bridge until cancelled: follows the log, keeps RCON and the Discord bot connected and keeps the bot
 /// status up to date. Each part recovers on its own, so a restarting server or a network blip needs nobody.
 /// </summary>
-public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog log)
+public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog log, string? stateDirectory = null)
 {
     public const string RconHost = "127.0.0.1";
 
@@ -21,6 +21,9 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
     /// <summary>Discord limits status changes; a burst of joins becomes one change.</summary>
     public static readonly TimeSpan MinPresenceGap = TimeSpan.FromSeconds(5);
+
+    /// <summary>How long after the first crash line the log is read for the cause.</summary>
+    public static readonly TimeSpan CrashSettleTime = TimeSpan.FromSeconds(3);
 
     private RconLink? _rcon;
     private DiscordGateway? _gateway;
@@ -42,9 +45,27 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
+        using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var outbox = new DiscordOutbox(CreatePoster(), log);
         var rcon = _rcon = new RconLink(token => RconClient.ConnectAsync(RconHost, config.RconPort, config.RconPassword, token), log);
         var relay = new BridgeRelay(config, rcon, outbox.Enqueue, log);
+        // The rest of a crash report and its stack trace arrive over the next seconds; read them before judging.
+        relay.CrashSuspected += () =>
+        {
+            var since = DateTime.UtcNow;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(CrashSettleTime, stop.Token).ConfigureAwait(false);
+                    relay.ReportCrash(since - TimeSpan.FromMinutes(1));
+                }
+                catch (OperationCanceledException)
+                {
+                    // Stopping.
+                }
+            });
+        };
         using var statusKick = new SemaphoreSlim(0, 1);
         void Kick()
         {
@@ -62,7 +83,6 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         }
 
         rcon.ConnectionChanged += _ => Kick();
-        using var stop = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var gateway = _gateway = string.IsNullOrWhiteSpace(config.BotToken) ? null : new DiscordGateway(config.BotToken, log);
         var gatewayRun = Task.CompletedTask;
         var tasks = new List<Task>
@@ -104,6 +124,12 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
 
             // Not in the list WhenAny watches: a refused token ends only Discord to game, not the whole bridge.
             gatewayRun = gateway.RunAsync(stop.Token);
+
+            if (config.Filters.StatusBoard && ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var channel))
+            {
+                var idFile = Path.Combine(stateDirectory ?? AppContext.BaseDirectory, "status-board.id");
+                tasks.Add(new StatusBoard(rest, channel, relay, relay.Texts.Chinese, idFile, log).RunAsync(stop.Token));
+            }
         }
         else
         {

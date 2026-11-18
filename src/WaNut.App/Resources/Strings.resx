@@ -3477,6 +3477,9 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Discord_FilterOnlineCount" xml:space="preserve">
     <value>Show who is online in the bot's Discord status</value>
   </data>
+  <data name="Discord_FilterStatusBoard" xml:space="preserve">
+    <value>Keep a status message in the channel up to date (players, TPS, uptime; needs the bot)</value>
+  </data>
   <data name="Discord_FilterListCommand" xml:space="preserve">
     <value>Let Discord use /list to see who is online</value>
   </data>

@@ -13,9 +13,45 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
 
     public PlayerRoster Roster { get; } = new();
 
+    public CrashWatcher Crashes { get; } = new();
+
+    /// <summary>When the server last said it was ready; null if the bridge started after that.</summary>
+    public DateTimeOffset? ServerStartedAt { get; private set; }
+
+    private bool _tpsUnsupported;
+
+    private bool _tickQueryUnsupported;
+
     /// <summary>Handles one log line and returns what it was, or null for any other line.</summary>
+    /// <summary>Raised when a log line looks like a crash; the engine waits a moment for the rest of the report, then calls <see cref="ReportCrash"/>.</summary>
+    public event Action? CrashSuspected;
+
+    /// <summary>Posts the crash alert with the likely cause, when server notices are on.</summary>
+    public void ReportCrash(DateTime sinceUtc)
+    {
+        if (!config.Filters.ServerState)
+        {
+            return;
+        }
+
+        var diagnosis = Crashes.Diagnose(config.LogFile, sinceUtc);
+        log.Info($"Minecraft to Discord: Crash {diagnosis?.Cause.ToString() ?? "Unknown"}.");
+        var text = DiscordWebhook.Escape(CrashTexts.Alert(diagnosis, Texts.Chinese));
+        post(config.Presentation switch
+        {
+            DiscordPresentation.Embed => new OutgoingMessage(text, EmbedColor: MessageFormatter.CrashColor),
+            DiscordPresentation.Webhook => new OutgoingMessage(text),
+            _ => new OutgoingMessage("[MC] " + text),
+        });
+    }
+
     public GameEvent? OnLogLine(string line)
     {
+        if (Crashes.OnLine(line))
+        {
+            CrashSuspected?.Invoke();
+        }
+
         var e = MinecraftLogParser.Parse(line);
         if (e is not null)
         {
@@ -43,6 +79,10 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
                 break;
             case GameEventKind.ServerStarted or GameEventKind.ServerStopping:
                 Roster.Clear();
+                ServerStartedAt = e.Kind == GameEventKind.ServerStarted ? DateTimeOffset.UtcNow : null;
+
+                // A new run may be another version or have another plugin.
+                _tpsUnsupported = _tickQueryUnsupported = false;
                 break;
         }
 
@@ -78,10 +118,11 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
                     : PlayerList.TryParse(output) is { } list ? Texts.Online(list)
                     : DiscordWebhook.Escape(PlainOutput(output));
             case InboundActionKind.Console:
-                log.Info($"Remote console: {action.Author} ran \"{action.Text}\".");
+                log.Info($"Remote console: {action.Author} ({action.UserId}) ran \"{action.Text}\".");
                 var result = await rcon.TryExecuteAsync(action.Text!, cancellationToken).ConfigureAwait(false);
                 return result is null ? Texts.ServerOffline : CodeBlock(result);
             case InboundActionKind.ConsoleDenied:
+                log.Warn($"Remote console denied: {action.Author} ({action.UserId}) tried \"{action.Text}\".");
                 return Texts.ConsoleDenied;
             case InboundActionKind.WrongChannel:
                 return Texts.WrongChannel;
@@ -103,6 +144,57 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
         }
 
         return list;
+    }
+
+    /// <summary>Everything the status board shows; players are null when RCON is down.</summary>
+    public async Task<StatusBoardData> CollectBoardAsync(CancellationToken cancellationToken)
+    {
+        var players = rcon.IsConnected ? await RefreshPlayersAsync(cancellationToken).ConfigureAwait(false) : null;
+        if (players is null)
+        {
+            return new StatusBoardData(null, null, null);
+        }
+
+        var uptime = ServerStartedAt is { } started ? DateTimeOffset.UtcNow - started : (TimeSpan?)null;
+        return new StatusBoardData(players, await QueryTicksAsync(cancellationToken).ConfigureAwait(false), uptime);
+    }
+
+    /// <summary>TPS from Paper's <c>tps</c> or vanilla's <c>tick query</c>; null when the server has neither.</summary>
+    public async Task<TickStats?> QueryTicksAsync(CancellationToken cancellationToken)
+    {
+        if (!_tpsUnsupported)
+        {
+            var output = await rcon.TryExecuteAsync("tps", cancellationToken).ConfigureAwait(false);
+            if (output is null)
+            {
+                return null;
+            }
+
+            if (TickStats.TryParseTps(PlainOutput(output)) is { } stats)
+            {
+                return stats;
+            }
+
+            _tpsUnsupported = true;
+        }
+
+        if (!_tickQueryUnsupported)
+        {
+            var output = await rcon.TryExecuteAsync("tick query", cancellationToken).ConfigureAwait(false);
+            if (output is null)
+            {
+                return null;
+            }
+
+            if (TickStats.TryParseTickQuery(PlainOutput(output)) is { } stats)
+            {
+                return stats;
+            }
+
+            _tickQueryUnsupported = true;
+        }
+
+        return null;
     }
 
     private bool ShouldForward(GameEvent e) => e.Kind switch

@@ -108,6 +108,37 @@ public sealed class BridgeRelayTests
         Assert.Equal("```\nDone `\u200B`` sneaky\n```", answer);
     }
 
+    [Fact]
+    public async Task RunCommandAsync_ConsoleUseAndDenial_AreBothAudited()
+    {
+        var writer = new StringWriter();
+        var relay = new BridgeRelay(new BridgeConfig(), new FakeRcon(_ => "ok"), _posted.Add, new BridgeLog(writer));
+
+        await relay.RunCommandAsync(new InboundAction(InboundActionKind.Console, "Amy", "op Amy", 42UL), CancellationToken.None);
+        await relay.RunCommandAsync(new InboundAction(InboundActionKind.ConsoleDenied, "Bob", "stop", 7UL), CancellationToken.None);
+
+        var text = writer.ToString();
+        Assert.Contains("[INFO] Remote console: Amy (42) ran \"op Amy\".", text, StringComparison.Ordinal);
+        Assert.Contains("[WARN] Remote console denied: Bob (7) tried \"stop\".", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReportCrash_PostsTheCause_UnlessServerNoticesAreOff()
+    {
+        var relay = NewRelay(new BridgeConfig());
+        relay.OnLogLine(Prefix + "**** FAILED TO BIND TO PORT!");
+        relay.OnLogLine(Prefix + "The exception was: java.net.BindException: Address already in use");
+
+        relay.ReportCrash(DateTime.UtcNow);
+
+        Assert.Contains(_posted, m => m.Text.Contains("Port", StringComparison.Ordinal) && m.Text.Contains("crashed", StringComparison.Ordinal));
+
+        var quiet = NewRelay(new BridgeConfig { Filters = new BridgeFilters { ServerState = false } });
+        _posted.Clear();
+        quiet.ReportCrash(DateTime.UtcNow);
+        Assert.Empty(_posted);
+    }
+
     private BridgeRelay NewRelay(BridgeConfig config, FakeRcon? rcon = null) =>
         new(config with { Presentation = DiscordPresentation.Webhook }, rcon ?? new FakeRcon(_ => null), _posted.Add, new BridgeLog(TextWriter.Null));
 }

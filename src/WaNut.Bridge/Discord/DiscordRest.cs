@@ -55,6 +55,20 @@ public sealed class DiscordRest(HttpClient http, string botToken, Func<TimeSpan,
         using var response = await SendAsync(HttpMethod.Patch, $"webhooks/{command.ApplicationId}/{command.Token}/messages/@original", body, false, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>Posts <paramref name="body"/> (a message JSON) to the channel and returns the new message's id.</summary>
+    public async Task<string> PostMessageAsync(ulong channelId, string body, CancellationToken cancellationToken)
+    {
+        using var response = await SendAsync(HttpMethod.Post, $"channels/{channelId.ToString(CultureInfo.InvariantCulture)}/messages", body, true, cancellationToken).ConfigureAwait(false);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false));
+        return json.RootElement.GetProperty("id").GetString() ?? throw new HttpRequestException("Discord sent no message id.");
+    }
+
+    /// <exception cref="HttpRequestException">With status 404 when the message was deleted.</exception>
+    public async Task EditMessageAsync(ulong channelId, string messageId, string body, CancellationToken cancellationToken)
+    {
+        using var response = await SendAsync(HttpMethod.Patch, $"channels/{channelId.ToString(CultureInfo.InvariantCulture)}/messages/{messageId}", body, true, cancellationToken).ConfigureAwait(false);
+    }
+
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string path, string? body, bool authorize, CancellationToken cancellationToken)
     {
         var response = await RateLimitRetry.SendAsync(

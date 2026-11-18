@@ -3457,6 +3457,9 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Discord_FilterOnlineCount" xml:space="preserve">
     <value>在機器人的 Discord 狀態顯示線上人數</value>
   </data>
+  <data name="Discord_FilterStatusBoard" xml:space="preserve">
+    <value>在頻道放一則會自動更新的狀態訊息（人數、TPS、運行時間；需要機器人）</value>
+  </data>
   <data name="Discord_FilterListCommand" xml:space="preserve">
     <value>讓 Discord 用 /list 查詢誰在線上</value>
   </data>

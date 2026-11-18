@@ -79,7 +79,7 @@ public sealed class InboundRouterTests
     {
         var command = Command("cmd", "/time set day") with { RoleIds = [1, AdminRole] };
 
-        Assert.Equal(new InboundAction(InboundActionKind.Console, "Amy", "time set day"), InboundRouter.Route(command, Config));
+        Assert.Equal(new InboundAction(InboundActionKind.Console, "Amy", "time set day", 1UL), InboundRouter.Route(command, Config));
     }
 
     [Fact]

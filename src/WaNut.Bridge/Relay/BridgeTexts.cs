@@ -24,6 +24,7 @@ public sealed class BridgeTexts
 
     public static BridgeTexts TraditionalChinese { get; } = new()
     {
+        Chinese = true,
         ServerStarted = "✅ 伺服器已啟動",
         ServerStopping = "🛑 伺服器正在關閉",
         ServerOffline = "伺服器目前沒有開。",
@@ -38,6 +39,8 @@ public sealed class BridgeTexts
         NobodyFormat = "目前沒有人在線（0/{0}）。",
         PresenceFormat = "{0} / {1} 人在線",
     };
+
+    public bool Chinese { get; init; }
 
     public required string ServerStarted { get; init; }
 
