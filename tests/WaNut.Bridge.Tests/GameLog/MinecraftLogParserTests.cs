@@ -35,6 +35,23 @@ public sealed class MinecraftLogParserTests
         Assert.Null(MinecraftLogParser.Parse(line));
     }
 
+    [Theory]
+    [InlineData("[19:54:25 INFO]: [Not Secure] [VIP] Steve: hello there")]
+    [InlineData("[19:54:25 INFO]: [Admin] Steve: hello there")]
+    [InlineData("[19:54:25 INFO]: Admin | Steve » hello there")]
+    [InlineData("[19:54:25 INFO]: [Not Secure] Steve » hello there")]
+    public void Parse_ChatPluginPrefix_IsChatForAnOnlinePlayer(string line)
+    {
+        Assert.Equal(new GameEvent(GameEventKind.Chat, "Steve", "hello there"), MinecraftLogParser.Parse(line, name => name == "Steve"));
+        Assert.Null(MinecraftLogParser.Parse(line, _ => false));
+    }
+
+    [Fact]
+    public void Parse_CommandFeedbackWithOnlineName_IsNotChat()
+    {
+        Assert.Null(MinecraftLogParser.Parse("[12:00:00] [Server thread/INFO]: System chat: [Steve: Teleported Steve to 0.5, 0.0, 0.5]", name => name == "Steve"));
+    }
+
     [Fact]
     public void Parse_PluginLineThatLooksLikePaper26Chat_IsNotChat()
     {

@@ -34,7 +34,8 @@ public static partial class MinecraftLogParser
         }
 
         var plainChat = PlainChatMessage().Match(message);
-        if (plainChat.Success && (plainChat.Groups["unsigned"].Success || isOnline?.Invoke(plainChat.Groups["name"].Value) == true))
+        var bare = plainChat.Success && plainChat.Groups["unsigned"].Success && plainChat.Groups["prefix"].Length == 0 && plainChat.Groups["separator"].Value == ":";
+        if (plainChat.Success && (bare || isOnline?.Invoke(plainChat.Groups["name"].Value) == true))
         {
             return new GameEvent(GameEventKind.Chat, plainChat.Groups["name"].Value, plainChat.Groups["text"].Value);
         }
@@ -65,8 +66,10 @@ public static partial class MinecraftLogParser
     [GeneratedRegex(@"^(?:\[Not Secure\] )?<(?<name>[A-Za-z0-9_]{1,16})> (?<text>.+)$")]
     private static partial Regex ChatMessage();
 
-    // Paper 26.x: "[Not Secure] Steve: hello" or "Steve: hello".
-    [GeneratedRegex(@"^(?<unsigned>\[Not Secure\] )?(?<name>[A-Za-z0-9_]{1,16}): (?<text>.+)$")]
+    // Paper 26.x: "[Not Secure] Steve: hello" or "Steve: hello"; with a chat plugin (LuckPerms prefixes through Vault and
+    // a formatter) also "[VIP] Steve: hello", "Admin | Steve » hello" and the like. The prefix must end in a space, "]"
+    // or "|", so command feedback such as "[Steve: Teleported ...]" is not chat.
+    [GeneratedRegex(@"^(?<unsigned>\[Not Secure\] )?(?:(?<prefix>.{0,48}?[\s\]|]))?(?<name>[A-Za-z0-9_]{1,16}) ?(?<separator>:|»|>>|>|\|) (?<text>.+)$")]
     private static partial Regex PlainChatMessage();
 
     [GeneratedRegex(@"^(?<name>[A-Za-z0-9_]{1,16}) has (?:made the advancement|completed the challenge|reached the goal) \[.+\]$")]
