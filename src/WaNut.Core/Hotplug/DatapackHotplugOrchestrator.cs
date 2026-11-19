@@ -107,6 +107,12 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
             return Aborted("Cancelled after the pre-flight warnings.", inspections);
         }
 
+        // Before the lock, so a hot-plug queued until the server is quiet doesn't keep other administrators out.
+        if (_hooks.Gate is { } gate && await gate.CheckAsync(connection.Console, cancellationToken).ConfigureAwait(false) is { } heldBack)
+        {
+            return Aborted(heldBack, inspections);
+        }
+
         var workspace = await HotplugWorkspaceInitializer.InitializeAsync(connection.Runner, connection.Root, await LiveDatapacks.WorldFolderAsync(connection.Files, cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
         var acquired = await HotplugLock.TryAcquireAsync(connection.Runner, connection.Root, workspace, cancellationToken: cancellationToken).ConfigureAwait(false);
         if (!acquired.Acquired)
@@ -131,11 +137,6 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
         if (missing.Count > 0)
         {
             return Aborted($"Not in the datapacks folder: {string.Join(", ", missing)}.", inspections);
-        }
-
-        if (_hooks.Gate is { } gate && await gate.CheckAsync(connection.Console, cancellationToken).ConfigureAwait(false) is { } heldBack)
-        {
-            return Aborted(heldBack, inspections);
         }
 
         var stamp = _time.GetUtcNow();
@@ -202,7 +203,7 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
         if (swap.ExitStatus != 0)
         {
             var why = SwapFailure(swap, swapped.Count < steps.Count ? steps[swapped.Count] : null);
-            var undone = await UndoAsync(swapped, reload: false).ConfigureAwait(false);
+            var undone = await UndoAsync(swapped).ConfigureAwait(false);
             await ReEnableAsync(retiring).ConfigureAwait(false);
             await CleanAsync(uploads).ConfigureAwait(false);
             return swapped.Count == 0
@@ -214,10 +215,11 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
         var (failure, warning, reloadSent) = await ApplyAsync(swapped, clock).ConfigureAwait(false);
         if (failure is not null)
         {
-            var undone = await UndoAsync(swapped, reload: true).ConfigureAwait(false);
+            var (undone, stillFailing) = await UndoAndReloadAsync(swapped).ConfigureAwait(false);
             await ReEnableAsync(retiring).ConfigureAwait(false);
             await CleanAsync(uploads).ConfigureAwait(false);
-            return new HotplugReport(HotplugState.RolledBack, failure + (undone ? string.Empty : UndoFailedNote), Items(swapped, inspections), inspections, SwapToReload: reloadSent);
+            var message = failure.Summary + (undone ? string.Empty : UndoFailedNote) + (stillFailing ? StillFailingNote : string.Empty);
+            return new HotplugReport(HotplugState.RolledBack, message, Items(swapped, inspections), inspections, SwapToReload: reloadSent, ConsoleLines: failure.Lines);
         }
 
         await CleanAsync(uploads).ConfigureAwait(false);
@@ -234,6 +236,8 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
     }
 
     private const string UndoFailedNote = " Putting the old files back also failed in part; check the datapacks folder and .nut-backup on the VPS.";
+
+    private const string StillFailingNote = " The server still reported errors after the old packs were back, so some of them may come from another pack in the folder.";
 
     private async Task UploadAndVerifyAsync(List<DatapackInspection> inspections, List<HotplugStep> steps, HotplugLock held, IProgress<HotplugProgress>? progress, CancellationToken cancellationToken)
     {
@@ -286,7 +290,7 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
     }
 
     /// <summary>/reload, then the enabled list; packs it didn't enable by itself get /datapack enable. Returns why to roll back, if anything.</summary>
-    private async Task<(string? Failure, string? Warning, TimeSpan? ReloadSent)> ApplyAsync(List<(HotplugStep Step, HotplugSwapResult Done)> swapped, Stopwatch clock)
+    private async Task<(ReloadFailure? Failure, string? Warning, TimeSpan? ReloadSent)> ApplyAsync(List<(HotplugStep Step, HotplugSwapResult Done)> swapped, Stopwatch clock)
     {
         var console = connection.Console;
         var put = swapped.Where(s => s.Done != HotplugSwapResult.Retired).ToList();
@@ -311,7 +315,9 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
             // /reload enables new packs by itself unless they were disabled before; those need an explicit enable. An
             // updated pack keeps whatever state the administrator gave it.
             var off = put.Where(s => s.Done == HotplugSwapResult.Added && !enabled.Contains(HotplugNames.PackId(s.Step.FileName))).ToList();
-            if (off.Count > 0)
+
+            // A reload that already failed is rolled back; enabling would only reload the broken data once more.
+            if (off.Count > 0 && watch?.HasFailed != true)
             {
                 foreach (var step in off)
                 {
@@ -322,7 +328,7 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
                 var still = after is null ? [] : off.Where(s => !after.Contains(HotplugNames.PackId(s.Step.FileName))).ToList();
                 if (still.Count > 0)
                 {
-                    return ($"The server didn't enable {string.Join(", ", still.Select(s => s.Step.FileName))}.", null, reloadSent);
+                    return (new ReloadFailure($"The server didn't enable {string.Join(", ", still.Select(s => s.Step.FileName))}.", []), null, reloadSent);
                 }
 
                 warning = after is null ? "The server didn't answer \"datapack list\" in time after enabling the new packs." : null;
@@ -337,8 +343,8 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
         return (null, warning, reloadSent);
     }
 
-    /// <summary>Puts the old files back, newest step first, and reloads when the server had already loaded the new ones.</summary>
-    private async Task<bool> UndoAsync(List<(HotplugStep Step, HotplugSwapResult Done)> swapped, bool reload)
+    /// <summary>Puts the old files back, newest step first.</summary>
+    private async Task<bool> UndoAsync(List<(HotplugStep Step, HotplugSwapResult Done)> swapped)
     {
         if (swapped.Count == 0)
         {
@@ -346,12 +352,25 @@ public sealed class DatapackHotplugOrchestrator(HotplugConnection connection, Ho
         }
 
         var undo = await connection.Runner.RunAsync(HotplugSwapCommands.Undo(connection.Root, swapped), cancellationToken: CancellationToken.None).ConfigureAwait(false);
-        if (reload && swapped.Any(s => s.Done != HotplugSwapResult.Retired))
+        return undo.ExitStatus == 0;
+    }
+
+    /// <summary>
+    /// Puts the old files back and reloads, since the server had already loaded the new ones. The sentinel watches that
+    /// reload too: errors that stay after the rollback come from somewhere else.
+    /// </summary>
+    private async Task<(bool Undone, bool StillFailing)> UndoAndReloadAsync(List<(HotplugStep Step, HotplugSwapResult Done)> swapped)
+    {
+        var undone = await UndoAsync(swapped).ConfigureAwait(false);
+        if (!swapped.Any(s => s.Done != HotplugSwapResult.Retired))
         {
-            await connection.Console.SendCommandAsync("reload", CancellationToken.None).ConfigureAwait(false);
+            return (undone, false);
         }
 
-        return undo.ExitStatus == 0;
+        using var watch = _hooks.Sentinel?.Begin(connection.Console);
+        await connection.Console.SendCommandAsync("reload", CancellationToken.None).ConfigureAwait(false);
+        var again = watch is null ? null : await watch.FailureAsync(CancellationToken.None).ConfigureAwait(false);
+        return (undone, again is not null);
     }
 
     private async Task ReEnableAsync(IEnumerable<HotplugStep> retiring)

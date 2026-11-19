@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -4101,5 +4101,23 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   </data>
   <data name="Hotplug_WarnRestart" xml:space="preserve">
     <value>{0} 要重啟後才會生效，地形變化也只影響新區塊。</value>
+  </data>
+  <data name="Hotplug_BusyPrompt" xml:space="preserve">
+    <value>伺服器現在比較忙（每 tick {0} 毫秒，{1} 位玩家在線），重新載入可能會短暫卡頓。也可以先排隊，等在線玩家少於 {2} 位時自動套用。</value>
+  </data>
+  <data name="Hotplug_BusyRunNow" xml:space="preserve">
+    <value>仍立即執行</value>
+  </data>
+  <data name="Hotplug_BusyQueue" xml:space="preserve">
+    <value>排隊等人少</value>
+  </data>
+  <data name="Hotplug_BusyCancel" xml:space="preserve">
+    <value>先不要</value>
+  </data>
+  <data name="Hotplug_StateQueued" xml:space="preserve">
+    <value>排隊中：在線玩家少於 {1} 位時自動套用（目前 {0} 位）…</value>
+  </data>
+  <data name="Hotplug_ConsoleErrors" xml:space="preserve">
+    <value>伺服器主控台的訊息</value>
   </data>
 </root>

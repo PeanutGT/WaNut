@@ -121,12 +121,31 @@
                        AutomationProperties.Name="{Binding StatusText}" />
         </StackPanel>
 
+        <!-- Busy server: run anyway, queue until quiet, or don't. -->
+        <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,6" Visibility="{Binding ShowLoadPrompt, Converter={StaticResource Visible}}">
+          <StackPanel>
+            <TextBlock Text="{Binding LoadPrompt}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Assertive" />
+            <WrapPanel Margin="0,6,0,0">
+              <Button Content="{res:Text Hotplug_BusyRunNow}" Command="{Binding RunAnywayCommand}" Padding="12,3" Margin="0,0,6,6" />
+              <Button Content="{res:Text Hotplug_BusyQueue}" Command="{Binding QueueUntilQuietCommand}" Padding="12,3" Margin="0,0,6,6" />
+              <Button Content="{res:Text Hotplug_BusyCancel}" Command="{Binding DontHotplugCommand}" Padding="12,3" Margin="0,0,0,6" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
+
         <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,6" Visibility="{Binding ShowResultNotice, Converter={StaticResource Visible}}">
           <TextBlock Text="{Binding ResultText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </Border>
         <Border Style="{StaticResource ErrorBanner}" Margin="0,0,0,6" Visibility="{Binding ShowResultError, Converter={StaticResource Visible}}">
           <TextBlock Text="{Binding ResultText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
         </Border>
+        <!-- The console lines behind a rollback, selectable so they can be copied. -->
+        <StackPanel Margin="0,0,0,6" Visibility="{Binding ShowErrorLog, Converter={StaticResource Visible}}">
+          <TextBlock Text="{res:Text Hotplug_ConsoleErrors}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" Margin="0,0,0,3" />
+          <TextBox Text="{Binding ErrorLog, Mode=OneWay}" IsReadOnly="True" TextWrapping="NoWrap" FontFamily="Consolas" FontSize="{StaticResource FontSmall}"
+                   MaxHeight="160" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                   AutomationProperties.Name="{res:Text Hotplug_ConsoleErrors}" />
+        </StackPanel>
 
         <TextBlock Text="{res:Text Hotplug_Loading}" Style="{StaticResource Hint}" Margin="0,0,0,6"
                    Visibility="{Binding IsLoading, Converter={StaticResource Visible}}" />
