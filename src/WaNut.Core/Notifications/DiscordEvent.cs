@@ -7,4 +7,6 @@ public enum DiscordEvent
     Crashed,
     PlayerJoined,
     PlayerLeft,
+    BackupDone,
+    Restarting,
 }

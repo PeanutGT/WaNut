@@ -16,6 +16,10 @@ public sealed record DiscordSettings
 
     public bool PlayerLeft { get; init; }
 
+    public bool BackupDone { get; init; }
+
+    public bool Restarting { get; init; } = true;
+
     /// <summary>Shows the running server on the person's own Discord profile (Rich Presence). Off by default.</summary>
     public bool ShowPresence { get; init; }
 
@@ -26,6 +30,8 @@ public sealed record DiscordSettings
         DiscordEvent.Crashed => Crashed,
         DiscordEvent.PlayerJoined => PlayerJoined,
         DiscordEvent.PlayerLeft => PlayerLeft,
+        DiscordEvent.BackupDone => BackupDone,
+        DiscordEvent.Restarting => Restarting,
         _ => false,
     };
 }
