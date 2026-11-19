@@ -17,6 +17,46 @@ public sealed class MinecraftLogParserTests
         Assert.Equal(new GameEvent(GameEventKind.Chat, "Steve", "hello there"), MinecraftLogParser.Parse(line));
     }
 
+    [Theory]
+    [InlineData("[19:54:25 INFO]: [Not Secure] Steve: hello there")]
+    [InlineData("[19:54:25 INFO]: System chat: <Steve> hello there")]
+    public void Parse_Paper26Chat_ReturnsChat(string line)
+    {
+        Assert.Equal(new GameEvent(GameEventKind.Chat, "Steve", "hello there"), MinecraftLogParser.Parse(line));
+    }
+
+    [Fact]
+    public void Parse_Paper26SignedChat_IsChatOnlyForAnOnlinePlayer()
+    {
+        const string line = "[19:54:25 INFO]: Steve: hello there";
+
+        Assert.Equal(new GameEvent(GameEventKind.Chat, "Steve", "hello there"), MinecraftLogParser.Parse(line, name => name == "Steve"));
+        Assert.Null(MinecraftLogParser.Parse(line, _ => false));
+        Assert.Null(MinecraftLogParser.Parse(line));
+    }
+
+    [Fact]
+    public void Parse_PluginLineThatLooksLikePaper26Chat_IsNotChat()
+    {
+        Assert.Null(MinecraftLogParser.Parse("[19:54:25 INFO]: Timings: reset", name => name == "Steve"));
+    }
+
+    [Theory]
+    [InlineData("[12:00:00] [Server thread/INFO]: System chat: Steve joined the game", GameEventKind.Joined)]
+    [InlineData("[12:00:00] [Server thread/INFO]: System chat: Steve left the game", GameEventKind.Left)]
+    public void Parse_Minecraft26SystemChatPrefix_IsDropped(string line, GameEventKind kind)
+    {
+        Assert.Equal(new GameEvent(kind, "Steve"), MinecraftLogParser.Parse(line));
+    }
+
+    [Fact]
+    public void Parse_Minecraft26DeathWithSystemChatPrefix_ReturnsDeath()
+    {
+        Assert.Equal(
+            new GameEvent(GameEventKind.Death, "Steve", "Steve fell from a high place"),
+            MinecraftLogParser.Parse("[12:00:00] [Server thread/INFO]: System chat: Steve fell from a high place"));
+    }
+
     [Fact]
     public void Parse_ChatThatLooksLikeAJoin_StaysChat()
     {

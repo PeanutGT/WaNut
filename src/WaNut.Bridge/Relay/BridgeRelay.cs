@@ -52,7 +52,7 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
             CrashSuspected?.Invoke();
         }
 
-        var e = MinecraftLogParser.Parse(line);
+        var e = MinecraftLogParser.Parse(line, Roster.IsOnline);
         if (e is not null)
         {
             OnGameEvent(e);

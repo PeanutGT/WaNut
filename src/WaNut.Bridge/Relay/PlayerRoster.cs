@@ -53,6 +53,15 @@ public sealed class PlayerRoster
         }
     }
 
+    /// <summary>The name is known to be in the game now; unlike <see cref="MayBeOnline"/>, false while nobody is known yet.</summary>
+    public bool IsOnline(string name)
+    {
+        lock (_gate)
+        {
+            return _names.Contains(name);
+        }
+    }
+
     public bool MayBeOnline(string name)
     {
         lock (_gate)
