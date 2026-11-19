@@ -97,6 +97,117 @@
         <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" />
       </Border>
 
+      <!-- Live data packs on the VPS: hot-plugged while the server runs there. -->
+      <StackPanel DataContext="{Binding Hotplug}" Margin="0,0,0,24"
+                  Visibility="{Binding IsAvailable, Converter={StaticResource Visible}}">
+        <DockPanel Margin="0,0,0,6">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <Button Content="{res:Text Hotplug_Refresh}" Command="{Binding RefreshCommand}" Padding="12,3" Margin="0,0,6,0" />
+            <Button Content="{res:Text Hotplug_Add}" Command="{Binding AddCommand}" Padding="12,3" />
+          </StackPanel>
+          <TextBlock Text="{Binding Header}" Style="{StaticResource SectionCaption}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBlock Text="{res:Text Hotplug_Hint}" Style="{StaticResource Hint}" Margin="0,0,0,6" />
+
+        <!-- Status line: waiting, debounce countdown, upload, swap, reload. -->
+        <StackPanel Margin="0,0,0,6" Visibility="{Binding IsBusy, Converter={StaticResource Visible}}">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Content="{res:Text Hotplug_Cancel}" Command="{Binding CancelCommand}" Padding="12,3" />
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+          </DockPanel>
+          <ProgressBar Minimum="0" Maximum="1" Value="{Binding Fraction, Mode=OneWay, TargetNullValue=0}" Height="6" Margin="0,6,0,0"
+                       IsIndeterminate="{Binding ProgressIndeterminate}"
+                       Visibility="{Binding ShowProgress, Converter={StaticResource Visible}}"
+                       AutomationProperties.Name="{Binding StatusText}" />
+        </StackPanel>
+
+        <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,6" Visibility="{Binding ShowResultNotice, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding ResultText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+        <Border Style="{StaticResource ErrorBanner}" Margin="0,0,0,6" Visibility="{Binding ShowResultError, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding ResultText}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
+
+        <TextBlock Text="{res:Text Hotplug_Loading}" Style="{StaticResource Hint}" Margin="0,0,0,6"
+                   Visibility="{Binding IsLoading, Converter={StaticResource Visible}}" />
+        <ListBox Style="{StaticResource ScrollingList}" ItemsSource="{Binding Packs}" AutomationProperties.Name="{Binding Header}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,6">
+                <DockPanel>
+                  <Button DockPanel.Dock="Right" Content="{res:Text Mods_Remove}" Padding="12,3" VerticalAlignment="Center"
+                          AutomationProperties.Name="{Binding RemoveLabel}"
+                          Visibility="{Binding CanRemove, Converter={StaticResource Visible}}"
+                          Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                          CommandParameter="{Binding}" />
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding StateText}" VerticalAlignment="Center" Margin="12,0">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource OnlineBadgeTextBrush}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding DetailText}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </DockPanel>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock Text="{res:Text Hotplug_Empty}" FontWeight="SemiBold" Margin="0,3,0,0">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <MultiDataTrigger>
+                  <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Packs.Count}" Value="0" />
+                    <Condition Binding="{Binding IsLoading}" Value="False" />
+                  </MultiDataTrigger.Conditions>
+                  <Setter Property="Visibility" Value="Visible" />
+                </MultiDataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Watch & hot-plug mode -->
+        <DockPanel Margin="0,12,0,0">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button Content="{res:Text Hotplug_TriggerNow}" Command="{Binding TriggerNowCommand}" Padding="12,3" Margin="0,0,6,0"
+                    Visibility="{Binding IsWatching, Converter={StaticResource Visible}}" />
+          </StackPanel>
+          <CheckBox IsChecked="{Binding IsWatching, Mode=OneWay}" Command="{Binding ToggleWatchCommand}"
+                    Content="{res:Text Hotplug_WatchToggle}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBlock Text="{Binding WatchText}" Style="{StaticResource Hint}" />
+
+        <TextBlock Text="{res:Text Hotplug_History}" Margin="0,12,0,3">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource SectionCaption}">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding History.Count}" Value="0">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <ItemsControl ItemsSource="{Binding History}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding}" Style="{StaticResource Hint}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
       <!-- Server resource pack -->
       <TextBlock Text="{res:Text Packs_ResourcePack}" Style="{StaticResource SectionCaption}" Margin="0,0,0,6" />
       <TextBlock Text="{res:Text Packs_ResourcePackHint}" Style="{StaticResource Hint}" Margin="0,0,0,6" />

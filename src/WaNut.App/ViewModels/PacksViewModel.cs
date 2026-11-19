@@ -27,13 +27,17 @@ public sealed partial class PacksViewModel : ObservableObject
     private bool _searched;
     private bool _loading;
 
-    public PacksViewModel(ServerViewModel server, PackLibrary library, IDialogService dialogs)
+    public PacksViewModel(ServerViewModel server, PackLibrary library, IDialogService dialogs, HotplugViewModel hotplug)
     {
         _server = server;
         _library = library;
         _dialogs = dialogs;
+        Hotplug = hotplug;
         Reload();
     }
+
+    /// <summary>The live data pack panel, shown while the server runs on its VPS.</summary>
+    public HotplugViewModel Hotplug { get; }
 
     [ObservableProperty]
     private ObservableCollection<InstalledPackViewModel> _datapacks = [];
@@ -184,6 +188,7 @@ public sealed partial class PacksViewModel : ObservableObject
 
     public void OnShown()
     {
+        Hotplug.OnShown();
         if (IsWorking)
         {
             return;
@@ -200,6 +205,7 @@ public sealed partial class PacksViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanChange));
         OnPropertyChanged(nameof(ShowStopToChange));
+        Hotplug.OnServerStatusChanged();
         UseCommand.NotifyCanExecuteChanged();
         RemoveCommand.NotifyCanExecuteChanged();
         ClearResourcePackCommand.NotifyCanExecuteChanged();

@@ -8,6 +8,7 @@ using WaNut.Core.Backups;
 using WaNut.Core.Crashes;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
+using WaNut.Core.Hotplug;
 using WaNut.Core.Network;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Files;
@@ -480,6 +481,36 @@ public sealed class ServerController(
         try
         {
             return await RemoteVpsAdapter.OpenAsync(session, SftpSyncTree.ServerRoot(server.Id), ownsSession: true, cancellationToken);
+        }
+        catch
+        {
+            await session.DisposeAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Opens the server's folder on its VPS for a datapack hot-plug, with the running server's console. The connection
+    /// closes when the returned connection's <see cref="HotplugConnection.Files"/> is disposed.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The server isn't running on its VPS, or the VPS is no longer in App settings.</exception>
+    public async Task<HotplugConnection> OpenVpsHotplugAsync(ServerViewModel server, CancellationToken cancellationToken)
+    {
+        if (server.Process is not { IsRunning: true } process || !server.RunsOnVps)
+        {
+            throw new InvalidOperationException(Text.Get("Hotplug_NotRunning"));
+        }
+
+        if (app.VpsList.FirstOrDefault(v => v.Id == server.Metadata.VpsId) is not { } vps)
+        {
+            throw new InvalidOperationException(Text.Get("Server_VpsMissing"));
+        }
+
+        var session = new VpsSession(vpsConnector, vps);
+        try
+        {
+            var files = await RemoteVpsAdapter.OpenAsync(session, SftpSyncTree.ServerRoot(server.Id), ownsSession: true, cancellationToken);
+            return new HotplugConnection(session, files, process);
         }
         catch
         {

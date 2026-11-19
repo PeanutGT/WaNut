@@ -3993,4 +3993,133 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Settings_ChangedFromDefault" xml:space="preserve">
     <value>Changed from the default</value>
   </data>
+  <data name="Hotplug_Header" xml:space="preserve">
+    <value>Live data packs on the VPS ({0})</value>
+  </data>
+  <data name="Hotplug_Hint" xml:space="preserve">
+    <value>The server is running on your VPS, so packs here change without a restart: WaNut uploads, checks and swaps the file, then runs /reload.</value>
+  </data>
+  <data name="Hotplug_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Hotplug_Add" xml:space="preserve">
+    <value>Add or update…</value>
+  </data>
+  <data name="Hotplug_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Hotplug_Loading" xml:space="preserve">
+    <value>Reading the datapacks folder on the VPS…</value>
+  </data>
+  <data name="Hotplug_Empty" xml:space="preserve">
+    <value>No data packs in this world yet.</value>
+  </data>
+  <data name="Hotplug_Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Hotplug_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Hotplug_StateUnknown" xml:space="preserve">
+    <value>State unknown</value>
+  </data>
+  <data name="Hotplug_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Hotplug_Format" xml:space="preserve">
+    <value>pack_format {0}</value>
+  </data>
+  <data name="Hotplug_FormatUnknown" xml:space="preserve">
+    <value>pack_format unknown</value>
+  </data>
+  <data name="Hotplug_RemoveLabel" xml:space="preserve">
+    <value>Remove {0} from the running server</value>
+  </data>
+  <data name="Hotplug_ConfirmRemove" xml:space="preserve">
+    <value>Disable {0} and take it out of the world now? A copy stays in .nut-backup on the VPS.</value>
+  </data>
+  <data name="Hotplug_PickTitle" xml:space="preserve">
+    <value>Choose data pack zips to hot-plug</value>
+  </data>
+  <data name="Hotplug_PickWatchFolder" xml:space="preserve">
+    <value>Choose the folder to watch for data pack zips</value>
+  </data>
+  <data name="Hotplug_WatchToggle" xml:space="preserve">
+    <value>Watch a folder and hot-plug changes</value>
+  </data>
+  <data name="Hotplug_WatchOff" xml:space="preserve">
+    <value>Off. When on, zips saved into the folder are applied once they stop changing for 3 seconds.</value>
+  </data>
+  <data name="Hotplug_Watching" xml:space="preserve">
+    <value>Watching {0}</value>
+  </data>
+  <data name="Hotplug_TriggerNow" xml:space="preserve">
+    <value>Apply now</value>
+  </data>
+  <data name="Hotplug_History" xml:space="preserve">
+    <value>Recent hot-plugs</value>
+  </data>
+  <data name="Hotplug_HistoryDone" xml:space="preserve">
+    <value>applied</value>
+  </data>
+  <data name="Hotplug_HistoryRolledBack" xml:space="preserve">
+    <value>rolled back</value>
+  </data>
+  <data name="Hotplug_HistoryAborted" xml:space="preserve">
+    <value>stopped</value>
+  </data>
+  <data name="Hotplug_StateWaiting" xml:space="preserve">
+    <value>Waiting for data…</value>
+  </data>
+  <data name="Hotplug_StateWaitingFor" xml:space="preserve">
+    <value>Waiting for {0}…</value>
+  </data>
+  <data name="Hotplug_StateSettling" xml:space="preserve">
+    <value>{0} is still changing…</value>
+  </data>
+  <data name="Hotplug_StateDebounce" xml:space="preserve">
+    <value>Debounce countdown ({0} s)…</value>
+  </data>
+  <data name="Hotplug_StateChecking" xml:space="preserve">
+    <value>Checking the packs…</value>
+  </data>
+  <data name="Hotplug_StateUploading" xml:space="preserve">
+    <value>Uploading {0} ({1})…</value>
+  </data>
+  <data name="Hotplug_StateVerifying" xml:space="preserve">
+    <value>Checking {0} on the VPS…</value>
+  </data>
+  <data name="Hotplug_StateSwapping" xml:space="preserve">
+    <value>Swapping files…</value>
+  </data>
+  <data name="Hotplug_StateReloading" xml:space="preserve">
+    <value>Reloading and checking…</value>
+  </data>
+  <data name="Hotplug_Done" xml:space="preserve">
+    <value>Applied without a restart: {0}.</value>
+  </data>
+  <data name="Hotplug_RolledBack" xml:space="preserve">
+    <value>Rolled back, the old packs are back in place. {0}</value>
+  </data>
+  <data name="Hotplug_Aborted" xml:space="preserve">
+    <value>Nothing was changed. {0}</value>
+  </data>
+  <data name="Hotplug_Cancelled" xml:space="preserve">
+    <value>Cancelled. Nothing was changed.</value>
+  </data>
+  <data name="Hotplug_Locked" xml:space="preserve">
+    <value>Someone else is hot-plugging on this VPS ({0}, since {1}). Try again when they're done.</value>
+  </data>
+  <data name="Hotplug_NotRunning" xml:space="preserve">
+    <value>The server isn't running on its VPS.</value>
+  </data>
+  <data name="Hotplug_WarnIntro" xml:space="preserve">
+    <value>Some packs may not fully work right away. Hot-plug them anyway?</value>
+  </data>
+  <data name="Hotplug_WarnFormat" xml:space="preserve">
+    <value>made for pack_format {0}, this server uses {1}.</value>
+  </data>
+  <data name="Hotplug_WarnRestart" xml:space="preserve">
+    <value>{0} only apply after a restart, and new terrain only in new chunks.</value>
+  </data>
 </root>

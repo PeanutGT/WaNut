@@ -65,8 +65,8 @@ public static class HotplugCommands
         return Sh($"{Enter(root)}; f={f}; if grep -qxF -- {RemoteShell.Quote(ownerLine)} \"$f\" 2>/dev/null; then rm -f -- \"$f\"; fi");
     }
 
-    private static string Enter(string root) =>
+    internal static string Enter(string root) =>
         $"cd {RemoteShell.Quote(root)} 2>/dev/null || exit {RemoteFileCommands.NoFolderExit}; [ \"$(pwd -P)\" = {RemoteShell.Quote(root)} ] || exit {RemoteFileCommands.MovedExit}";
 
-    private static string Sh(string script) => "sh -c " + RemoteShell.Quote(script);
+    internal static string Sh(string script) => "sh -c " + RemoteShell.Quote(script);
 }
