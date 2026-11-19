@@ -10,7 +10,7 @@ namespace WaNut.Core.Remote.Files;
 /// so a background job never interleaves with an edit; long transfers get a connection of their own
 /// (<see cref="TransferAsync{T}"/>) so they don't hold edits up.
 /// </summary>
-public sealed class VpsSession(VpsConnector connector, VpsProfile profile) : IAsyncDisposable
+public sealed class VpsSession(VpsConnector connector, VpsProfile profile) : IAsyncDisposable, IRemoteCommandRunner
 {
     /// <summary>Often enough that NAT routers and firewalls don't drop a connection left open while the user reads.</summary>
     public static readonly TimeSpan KeepAliveInterval = TimeSpan.FromSeconds(15);

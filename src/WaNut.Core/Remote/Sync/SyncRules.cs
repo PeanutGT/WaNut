@@ -22,7 +22,7 @@ public static class SyncRules
         return name == "session.lock"
             || name.EndsWith(".wanut-part", StringComparison.Ordinal)
             || name.EndsWith(".wanut-new", StringComparison.Ordinal)
-            || segments.Any(s => s.StartsWith(".wanut-", StringComparison.Ordinal));
+            || segments.Any(s => s.StartsWith(".wanut-", StringComparison.Ordinal) || s is Hotplug.HotplugWorkspace.StagingName or Hotplug.HotplugWorkspace.BackupName);
     }
 
     public static bool IsKept(string path) => KeptFolders.Any(folder => IsUnder(path, folder));
