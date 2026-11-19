@@ -75,13 +75,24 @@ public sealed class DatapackInspectorTests : IDisposable
     [Theory]
     [InlineData("pack.json")]
     [InlineData(".hidden.zip")]
-    [InlineData("quote\".zip")]
     [InlineData("[x].zip")]
     public async Task InspectAsync_BadName_Blocked(string name)
     {
         var result = await DatapackInspector.InspectAsync(Zip(name), 48);
         Assert.True(result.IsBlocked);
     }
+
+    [Theory]
+    [InlineData("quote\".zip")]
+    [InlineData("back\\slash.zip")]
+    [InlineData("line\nbreak.zip")]
+    [InlineData("folder/a.zip")]
+    public void HotplugNames_UnsafeName_HasProblem(string name) => Assert.NotNull(WaNut.Core.Hotplug.HotplugNames.Problem(name));
+
+    [Theory]
+    [InlineData("pack (1).zip")]
+    [InlineData("Loot Tables v2.ZIP")]
+    public void HotplugNames_OrdinaryName_NoProblem(string name) => Assert.Null(WaNut.Core.Hotplug.HotplugNames.Problem(name));
 
     [Theory]
     [InlineData("data/ns/loot_table/a.json", "loot_table")]
