@@ -324,6 +324,10 @@ public sealed partial class BackupsViewModel : ObservableObject
                 _server.Steps.MoveTo(StepLists.Backup, "Pack");
             }));
             _server.Steps.Finish(StepLists.Backup);
+            if (showsSteps && DoneText == Text.Get("Backups_Done"))
+            {
+                _server.NotifyBackupDone();
+            }
         }
         catch (BackupException e)
         {

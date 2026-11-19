@@ -873,6 +873,7 @@ public sealed partial class ServerViewModel : ObservableObject
 
         if (_restarts.TryRestart(DateTimeOffset.UtcNow))
         {
+            Notify(DiscordEvent.Restarting, "Discord_Restarting");
             AddConsoleLine(string.Format(Text.Get("Server_Restarting"), RestartDelay.TotalSeconds, _restarts.Count, RestartPolicy.MaxRestarts));
             _ = RestartAfterCrashAsync(process);
         }
@@ -981,6 +982,8 @@ public sealed partial class ServerViewModel : ObservableObject
             ConsoleLines.Add(batch[i]);
         }
     }
+
+    internal void NotifyBackupDone() => Notify(DiscordEvent.BackupDone, "Discord_BackupDone");
 
     private void Notify(DiscordEvent kind, string key, string? player = null) =>
         _discord.Notify(kind, string.Format(Text.Get(key), DiscordWebhook.Escape(Name), player is null ? null : DiscordWebhook.Escape(player)));

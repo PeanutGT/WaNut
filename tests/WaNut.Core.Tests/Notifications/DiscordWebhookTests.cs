@@ -76,4 +76,13 @@ public class DiscordSettingsTests
         Assert.True(settings.IsOn(DiscordEvent.Crashed));
         Assert.False(settings.IsOn(DiscordEvent.PlayerJoined));
     }
+
+    [Fact]
+    public void IsOn_Defaults_RestartingOnBackupDoneOff()
+    {
+        var settings = new DiscordSettings { WebhookUrl = "https://discord.com/api/webhooks/1/a" };
+
+        Assert.True(settings.IsOn(DiscordEvent.Restarting));
+        Assert.False(settings.IsOn(DiscordEvent.BackupDone));
+    }
 }

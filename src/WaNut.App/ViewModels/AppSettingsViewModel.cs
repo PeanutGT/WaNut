@@ -48,6 +48,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         DiscordCrashed = settings.Discord.Crashed;
         DiscordPlayerJoined = settings.Discord.PlayerJoined;
         DiscordPlayerLeft = settings.Discord.PlayerLeft;
+        DiscordBackupDone = settings.Discord.BackupDone;
+        DiscordRestarting = settings.Discord.Restarting;
         DiscordShowPresence = settings.Discord.ShowPresence;
         VpsList = new ObservableCollection<VpsProfile>(settings.Vps);
         _loading = false;
@@ -142,6 +144,12 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     private bool _discordPlayerLeft;
 
     [ObservableProperty]
+    private bool _discordBackupDone;
+
+    [ObservableProperty]
+    private bool _discordRestarting;
+
+    [ObservableProperty]
     private bool _discordShowPresence;
 
     [ObservableProperty]
@@ -157,6 +165,8 @@ public sealed partial class AppSettingsViewModel : ObservableObject
         Crashed = DiscordCrashed,
         PlayerJoined = DiscordPlayerJoined,
         PlayerLeft = DiscordPlayerLeft,
+        BackupDone = DiscordBackupDone,
+        Restarting = DiscordRestarting,
         ShowPresence = DiscordShowPresence,
     };
 
@@ -171,6 +181,10 @@ public sealed partial class AppSettingsViewModel : ObservableObject
     partial void OnDiscordPlayerJoinedChanged(bool value) => Save();
 
     partial void OnDiscordPlayerLeftChanged(bool value) => Save();
+
+    partial void OnDiscordBackupDoneChanged(bool value) => Save();
+
+    partial void OnDiscordRestartingChanged(bool value) => Save();
 
     partial void OnDiscordShowPresenceChanged(bool value) => Save();
 

@@ -1594,6 +1594,18 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Discord_Crashed" xml:space="preserve">
     <value>🔴 **{0}** 當機了。</value>
   </data>
+  <data name="Discord_BackupDone" xml:space="preserve">
+    <value>💾 **{0}** 備份好了，世界很安全。</value>
+  </data>
+  <data name="Discord_Restarting" xml:space="preserve">
+    <value>🔄 **{0}** 當機了，正在重新啟動。</value>
+  </data>
+  <data name="Discord_EventBackupDone" xml:space="preserve">
+    <value>備份完成</value>
+  </data>
+  <data name="Discord_EventRestarting" xml:space="preserve">
+    <value>當機後自動重啟</value>
+  </data>
   <data name="Discord_PlayerJoined" xml:space="preserve">
     <value>➕ {1} 加入了 **{0}**。</value>
   </data>

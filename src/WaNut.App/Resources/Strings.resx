@@ -1612,6 +1612,18 @@ Install {0} anyway?</value>
   <data name="Discord_Crashed" xml:space="preserve">
     <value>🔴 **{0}** crashed.</value>
   </data>
+  <data name="Discord_BackupDone" xml:space="preserve">
+    <value>💾 **{0}** was backed up. The world is safe.</value>
+  </data>
+  <data name="Discord_Restarting" xml:space="preserve">
+    <value>🔄 **{0}** crashed and is restarting.</value>
+  </data>
+  <data name="Discord_EventBackupDone" xml:space="preserve">
+    <value>Backup finished</value>
+  </data>
+  <data name="Discord_EventRestarting" xml:space="preserve">
+    <value>Server restarting after a crash</value>
+  </data>
   <data name="Discord_PlayerJoined" xml:space="preserve">
     <value>➕ {1} joined **{0}**.</value>
   </data>
