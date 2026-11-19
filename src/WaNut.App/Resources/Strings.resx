@@ -1604,7 +1604,7 @@ Install {0} anyway?</value>
     <value>Couldn't send the test message: {0}</value>
   </data>
   <data name="Discord_Online" xml:space="preserve">
-    <value>🟢 **{0}** is online. Come play!</value>
+    <value>🟢 **{0}** is running.</value>
   </data>
   <data name="Discord_Stopped" xml:space="preserve">
     <value>⚪ **{0}** has stopped.</value>

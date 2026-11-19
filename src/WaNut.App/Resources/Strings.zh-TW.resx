@@ -1586,7 +1586,7 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
     <value>無法傳送測試訊息：{0}</value>
   </data>
   <data name="Discord_Online" xml:space="preserve">
-    <value>🟢 **{0}** 上線了，快來玩！</value>
+    <value>🟢 **{0}** 正在運行。</value>
   </data>
   <data name="Discord_Stopped" xml:space="preserve">
     <value>⚪ **{0}** 已經關閉。</value>
