@@ -1465,6 +1465,9 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Reset_Done" xml:space="preserve">
     <value>好了！下次啟動時會產生全新的世界。</value>
   </data>
+  <data name="Server_NameHint" xml:space="preserve">
+    <value>只會改 WaNut 裡顯示的名稱，按 Enter 或點其他地方就會儲存。伺服器資料夾與朋友連線的位址都不會變。</value>
+  </data>
   <data name="Server_AutoRestart" xml:space="preserve">
     <value>伺服器當機時自動重開</value>
   </data>

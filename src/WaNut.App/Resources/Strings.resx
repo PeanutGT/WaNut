@@ -1483,6 +1483,9 @@ Install {0} anyway?</value>
   <data name="Reset_Done" xml:space="preserve">
     <value>Done! A brand-new world will be made at the next start.</value>
   </data>
+  <data name="Server_NameHint" xml:space="preserve">
+    <value>Changes only the name shown in WaNut. Press Enter or click away to save. The server’s folder and your friends’ addresses stay the same.</value>
+  </data>
   <data name="Server_AutoRestart" xml:space="preserve">
     <value>Restart the server if it crashes</value>
   </data>

@@ -196,4 +196,23 @@ public sealed class GameSettingsStoreTests : IDisposable
         Assert.Contains("level-seed=42", text);
         Assert.Contains("motd=hi", text);
     }
+
+    [Fact]
+    public void SetWorldGeneration_WritesTypeAndSeed_AndResetsItToNormalLater()
+    {
+        File.WriteAllText(Path.Combine(_dir.Path, "server.properties"), "motd=hi\nlevel-seed=123\n");
+        var path = Path.Combine(_dir.Path, "server.properties");
+
+        GameSettingsStore.SetWorldGeneration(_dir.Path, new WorldGeneration("42", WorldType.Amplified), "1.21.1");
+        var text = File.ReadAllText(path);
+        Assert.Contains("level-seed=42", text);
+        Assert.Contains("level-type=minecraft\\:amplified", text);
+        Assert.Contains("motd=hi", text);
+
+        GameSettingsStore.SetWorldGeneration(_dir.Path, new WorldGeneration(), "1.21.1");
+        text = File.ReadAllText(path);
+        Assert.Contains("level-type=minecraft\\:normal", text);
+        Assert.Contains("level-seed=", text);
+        Assert.DoesNotContain("amplified", text);
+    }
 }
