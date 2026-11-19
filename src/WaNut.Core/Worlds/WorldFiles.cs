@@ -18,8 +18,10 @@ internal static class WorldFiles
         IgnoreInaccessible = false,
     };
 
+    // The hot-plug staging and backup folders may sit inside the world on a VPS; they are WaNut's, not the world's.
     public static IEnumerable<FileInfo> Files(string dir) =>
-        new DirectoryInfo(dir).EnumerateFiles("*", AllFiles).Where(f => !IsSessionLock(f.Name));
+        new DirectoryInfo(dir).EnumerateFiles("*", AllFiles)
+            .Where(f => !IsSessionLock(f.Name) && !Hotplug.HotplugWorkspace.IsWorkspacePath(Path.GetRelativePath(dir, f.FullName)));
 
     public static long FolderSize(string dir) => Files(dir).Sum(f => f.Length);
 

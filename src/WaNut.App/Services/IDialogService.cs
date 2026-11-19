@@ -59,6 +59,9 @@ public interface IDialogService
     /// <summary>Asks for a .zip file to read. Returns null if the user cancelled.</summary>
     string? PickZipToOpen();
 
+    /// <summary>One or more data pack zips to hot-plug; empty when cancelled.</summary>
+    IReadOnlyList<string> PickDatapackZips();
+
     /// <summary>Asks for a Modrinth .mrpack file. Returns null if the user cancelled.</summary>
     string? PickModpack();
 

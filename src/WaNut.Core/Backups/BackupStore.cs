@@ -423,7 +423,7 @@ public sealed partial class BackupStore(TimeProvider clock)
             }
 
             Directory.CreateDirectory(target);
-            foreach (var file in new DirectoryInfo(source).EnumerateFiles("*", AllFiles).Where(f => !IsSessionLock(f.Name)))
+            foreach (var file in new DirectoryInfo(source).EnumerateFiles("*", AllFiles).Where(f => IsWorldFile(source, f)))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var copy = Path.Combine(target, Path.GetRelativePath(source, file.FullName));
@@ -451,7 +451,7 @@ public sealed partial class BackupStore(TimeProvider clock)
     {
         var files = folders
             .SelectMany(folder => new DirectoryInfo(Path.Combine(instanceDir, folder)).EnumerateFiles("*", AllFiles))
-            .Where(file => !IsSessionLock(file.Name))
+            .Where(file => IsWorldFile(instanceDir, file))
             .ToList();
         var total = Math.Max(1, files.Sum(f => f.Length));
         long done = 0;
@@ -603,6 +603,13 @@ public sealed partial class BackupStore(TimeProvider clock)
     }
 
     private static string EntryName(string instanceDir, string file) => Path.GetRelativePath(instanceDir, file).Replace('\\', '/');
+
+    /// <summary>
+    /// Leaves out session.lock and anything in a hot-plug staging or backup folder, which a VPS server may keep inside
+    /// the world (world/.nut-staging) when the world is on another mount: WaNut's own spare copies, not world data.
+    /// </summary>
+    private static bool IsWorldFile(string root, FileInfo file) =>
+        !IsSessionLock(file.Name) && !Hotplug.HotplugWorkspace.IsWorkspacePath(Path.GetRelativePath(root, file.FullName));
 
     // Minecraft holds session.lock open while running and writes a new one on every start, so it is never worth saving.
     private static bool IsSessionLock(string fileName) => fileName.Equals("session.lock", StringComparison.OrdinalIgnoreCase);

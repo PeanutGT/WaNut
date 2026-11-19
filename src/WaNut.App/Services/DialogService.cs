@@ -114,6 +114,12 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileName : null;
     }
 
+    public IReadOnlyList<string> PickDatapackZips()
+    {
+        var dialog = new OpenFileDialog { Title = Text.Get("Hotplug_PickTitle"), Filter = Text.Get("World_ZipFilter"), Multiselect = true };
+        return dialog.ShowDialog(ActiveWindow()) == true ? dialog.FileNames : [];
+    }
+
     public string? PickModpack()
     {
         var dialog = new OpenFileDialog { Title = Text.Get("Modpack_PickTitle"), Filter = Text.Get("Modpack_Filter") };

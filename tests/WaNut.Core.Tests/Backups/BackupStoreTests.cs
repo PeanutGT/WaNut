@@ -65,6 +65,23 @@ public sealed class BackupStoreTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateAsync_HotplugFoldersInWorld_LeftOut()
+    {
+        WriteWorld();
+        WriteFile("world/datapacks/loot.zip", "pack");
+        WriteFile("world/.nut-staging/datapacks/loot.zip.part", "upload");
+        WriteFile("world/.nut-backup/datapacks/loot.20261119T064152Z.zip", "old pack");
+        WriteFile("world/.nut-backup/hotplug-audit.log", "{}");
+
+        var backup = await BackUpAsync();
+
+        using var zip = ZipFile.OpenRead(backup.FilePath);
+        Assert.Equal(
+            ["world/datapacks/loot.zip", "world/dimensions/minecraft/overworld/region/r.0.0.mca", "world/level.dat"],
+            zip.Entries.Select(e => e.FullName).Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
     public async Task CreateAsync_OldPaperLayout_IncludesNetherAndEndFolders()
     {
         WriteWorld();

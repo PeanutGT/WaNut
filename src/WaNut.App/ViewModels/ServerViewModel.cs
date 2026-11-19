@@ -92,7 +92,7 @@ public sealed partial class ServerViewModel : ObservableObject
         Backups = new BackupsViewModel(this, backups, app, dialogs);
         Connect = new ConnectViewModel(this, firewall, portForwards, tunnels, clipboard, app);
         Mods = new ModsViewModel(this, mods, dialogs, backups);
-        Packs = new PacksViewModel(this, packs, dialogs);
+        Packs = new PacksViewModel(this, packs, dialogs, new HotplugViewModel(this, controller, dialogs));
         Performance = new PerformanceViewModel(this, spark);
         Discord = new DiscordViewModel(this, bridge, app, dialogs);
         Files = new ServerFilesViewModel(this, controller, app, dialogs);

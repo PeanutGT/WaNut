@@ -15,4 +15,13 @@ public sealed record HotplugWorkspace(string StagingFolder, string BackupFolder,
 
     /// <summary>The lock file that keeps a second hot-plug out while one runs.</summary>
     public string LockFile => StagingFolder[..StagingFolder.LastIndexOf('/')] + "/.lock";
+
+    /// <summary>One JSON line per hot-plug, next to the backups, so every administrator of the VPS sees the same history.</summary>
+    public string AuditFile => BackupFolder[..BackupFolder.LastIndexOf('/')] + "/" + AuditName;
+
+    public const string AuditName = "hotplug-audit.log";
+
+    /// <summary>True for a path (relative, '/') inside a hot-plug staging or backup folder, wherever it sits.</summary>
+    public static bool IsWorkspacePath(string relativePath) =>
+        relativePath.Replace('\\', '/').Split('/').Any(s => s is StagingName or BackupName);
 }

@@ -3973,4 +3973,133 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Settings_ChangedFromDefault" xml:space="preserve">
     <value>已和預設值不同</value>
   </data>
+  <data name="Hotplug_Header" xml:space="preserve">
+    <value>VPS 上的即時資料包（{0}）</value>
+  </data>
+  <data name="Hotplug_Hint" xml:space="preserve">
+    <value>伺服器正在 VPS 上執行，這裡的資料包不用重啟就能更換：WaNut 會上傳、檢查、替換檔案，再執行 /reload。</value>
+  </data>
+  <data name="Hotplug_Refresh" xml:space="preserve">
+    <value>重新整理</value>
+  </data>
+  <data name="Hotplug_Add" xml:space="preserve">
+    <value>新增或更新…</value>
+  </data>
+  <data name="Hotplug_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Hotplug_Loading" xml:space="preserve">
+    <value>正在讀取 VPS 上的 datapacks 資料夾…</value>
+  </data>
+  <data name="Hotplug_Empty" xml:space="preserve">
+    <value>這個世界還沒有資料包。</value>
+  </data>
+  <data name="Hotplug_Enabled" xml:space="preserve">
+    <value>已啟用</value>
+  </data>
+  <data name="Hotplug_Disabled" xml:space="preserve">
+    <value>已停用</value>
+  </data>
+  <data name="Hotplug_StateUnknown" xml:space="preserve">
+    <value>狀態不明</value>
+  </data>
+  <data name="Hotplug_Folder" xml:space="preserve">
+    <value>資料夾</value>
+  </data>
+  <data name="Hotplug_Format" xml:space="preserve">
+    <value>pack_format {0}</value>
+  </data>
+  <data name="Hotplug_FormatUnknown" xml:space="preserve">
+    <value>pack_format 不明</value>
+  </data>
+  <data name="Hotplug_RemoveLabel" xml:space="preserve">
+    <value>從執行中的伺服器移除 {0}</value>
+  </data>
+  <data name="Hotplug_ConfirmRemove" xml:space="preserve">
+    <value>現在停用 {0} 並從世界移除嗎？VPS 的 .nut-backup 會留一份備份。</value>
+  </data>
+  <data name="Hotplug_PickTitle" xml:space="preserve">
+    <value>選擇要熱插拔的資料包 zip</value>
+  </data>
+  <data name="Hotplug_PickWatchFolder" xml:space="preserve">
+    <value>選擇要監看資料包 zip 的資料夾</value>
+  </data>
+  <data name="Hotplug_WatchToggle" xml:space="preserve">
+    <value>監看資料夾並自動熱更新</value>
+  </data>
+  <data name="Hotplug_WatchOff" xml:space="preserve">
+    <value>關閉中。開啟後，存進資料夾的 zip 停止變動 3 秒後就會自動套用。</value>
+  </data>
+  <data name="Hotplug_Watching" xml:space="preserve">
+    <value>正在監看 {0}</value>
+  </data>
+  <data name="Hotplug_TriggerNow" xml:space="preserve">
+    <value>立即套用</value>
+  </data>
+  <data name="Hotplug_History" xml:space="preserve">
+    <value>最近的熱插拔</value>
+  </data>
+  <data name="Hotplug_HistoryDone" xml:space="preserve">
+    <value>已套用</value>
+  </data>
+  <data name="Hotplug_HistoryRolledBack" xml:space="preserve">
+    <value>已回復</value>
+  </data>
+  <data name="Hotplug_HistoryAborted" xml:space="preserve">
+    <value>已中止</value>
+  </data>
+  <data name="Hotplug_StateWaiting" xml:space="preserve">
+    <value>等待資料中…</value>
+  </data>
+  <data name="Hotplug_StateWaitingFor" xml:space="preserve">
+    <value>等待 {0}…</value>
+  </data>
+  <data name="Hotplug_StateSettling" xml:space="preserve">
+    <value>{0} 還在變動…</value>
+  </data>
+  <data name="Hotplug_StateDebounce" xml:space="preserve">
+    <value>防抖動倒數（{0} 秒）…</value>
+  </data>
+  <data name="Hotplug_StateChecking" xml:space="preserve">
+    <value>檢查資料包中…</value>
+  </data>
+  <data name="Hotplug_StateUploading" xml:space="preserve">
+    <value>上傳 {0} 中（{1}）…</value>
+  </data>
+  <data name="Hotplug_StateVerifying" xml:space="preserve">
+    <value>在 VPS 上驗證 {0}…</value>
+  </data>
+  <data name="Hotplug_StateSwapping" xml:space="preserve">
+    <value>原子替換中…</value>
+  </data>
+  <data name="Hotplug_StateReloading" xml:space="preserve">
+    <value>重新載入並確認中…</value>
+  </data>
+  <data name="Hotplug_Done" xml:space="preserve">
+    <value>已套用，不用重啟：{0}。</value>
+  </data>
+  <data name="Hotplug_RolledBack" xml:space="preserve">
+    <value>已回復，舊的資料包已放回原位。{0}</value>
+  </data>
+  <data name="Hotplug_Aborted" xml:space="preserve">
+    <value>沒有任何變更。{0}</value>
+  </data>
+  <data name="Hotplug_Cancelled" xml:space="preserve">
+    <value>已取消，沒有任何變更。</value>
+  </data>
+  <data name="Hotplug_Locked" xml:space="preserve">
+    <value>有其他人正在這台 VPS 上熱插拔（{0}，從 {1} 開始）。等他完成後再試。</value>
+  </data>
+  <data name="Hotplug_NotRunning" xml:space="preserve">
+    <value>伺服器沒有在 VPS 上執行。</value>
+  </data>
+  <data name="Hotplug_WarnIntro" xml:space="preserve">
+    <value>有些資料包可能不會馬上完整生效。仍要熱插拔嗎？</value>
+  </data>
+  <data name="Hotplug_WarnFormat" xml:space="preserve">
+    <value>為 pack_format {0} 製作，這台伺服器用的是 {1}。</value>
+  </data>
+  <data name="Hotplug_WarnRestart" xml:space="preserve">
+    <value>{0} 要重啟後才會生效，地形變化也只影響新區塊。</value>
+  </data>
 </root>
