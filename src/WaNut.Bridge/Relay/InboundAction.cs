@@ -10,5 +10,8 @@ public sealed record InboundAction(InboundActionKind Kind, string? Author = null
     /// <summary>The message a chat message replies to.</summary>
     public WaNut.Bridge.Discord.InboundReply? Reply { get; init; }
 
+    /// <summary>The channel a /status was used in.</summary>
+    public ulong ChannelId { get; init; }
+
     public static InboundAction Ignore { get; } = new(InboundActionKind.Ignore);
 }

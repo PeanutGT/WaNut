@@ -75,6 +75,23 @@ public sealed class InboundRouterTests
     }
 
     [Fact]
+    public void RouteCommand_StatusFromAdminInAnyChannel_PlacesTheBoardThere()
+    {
+        var command = Command("status") with { RoleIds = [AdminRole], ChannelId = 777 };
+
+        var action = InboundRouter.Route(command, Config);
+
+        Assert.Equal(InboundActionKind.Status, action.Kind);
+        Assert.Equal(777UL, action.ChannelId);
+    }
+
+    [Fact]
+    public void RouteCommand_StatusFromMember_IsDenied()
+    {
+        Assert.Equal(InboundActionKind.StatusDenied, InboundRouter.Route(Command("status"), Config).Kind);
+    }
+
+    [Fact]
     public void RouteCommand_CmdFromAdmin_RunsTheCommandWithoutSlash()
     {
         var command = Command("cmd", "/time set day") with { RoleIds = [1, AdminRole] };

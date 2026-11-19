@@ -16,6 +16,12 @@ public enum InboundActionKind
     /// <summary>/cmd from someone without the admin role.</summary>
     ConsoleDenied,
 
+    /// <summary>/status: put the live status message in the channel the command was used in.</summary>
+    Status,
+
+    /// <summary>/status from someone without the admin role.</summary>
+    StatusDenied,
+
     /// <summary>A bridge command used outside the bridge channel.</summary>
     WrongChannel,
 }

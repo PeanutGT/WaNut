@@ -130,6 +130,9 @@ public sealed class BridgeRelay(BridgeConfig config, IRconCommands rcon, Action<
             case InboundActionKind.ConsoleDenied:
                 log.Warn($"Remote console denied: {action.Author} ({action.UserId}) tried \"{action.Text}\".");
                 return Texts.ConsoleDenied;
+            case InboundActionKind.StatusDenied:
+                log.Warn($"Status board denied: {action.Author} ({action.UserId}) tried /status.");
+                return Texts.StatusDenied;
             case InboundActionKind.WrongChannel:
                 return Texts.WrongChannel;
             default:

@@ -14,6 +14,11 @@ public sealed class BridgeTexts
         PresenceOnline = "Server online",
         ConsoleDenied = "Only members with the admin role can use /cmd.",
         ConsoleNoOutput = "(no output)",
+        StatusDenied = "Only members with the admin role can use /status.",
+        StatusCreatedFormat = "The live status message is now in <#{0}>. It updates every minute.",
+        StatusAlreadyHereFormat = "The live status message is already in <#{0}>. Refreshed it. A server has only one.",
+        StatusMovedFormat = "Moved the live status message to <#{0}>. A server has only one, so the old one was removed.",
+        StatusFailedFormat = "Could not post in <#{0}>. Give the bot View Channel, Send Messages and Embed Links there.",
         WrongChannel = "This command only works in the bridge channel.",
         JoinedFormat = "{0} joined the game",
         LeftFormat = "{0} left the game",
@@ -37,6 +42,11 @@ public sealed class BridgeTexts
         PresenceOnline = "伺服器已開啟",
         ConsoleDenied = "只有管理員身分組的成員可以使用 /cmd。",
         ConsoleNoOutput = "（沒有輸出）",
+        StatusDenied = "只有管理員身分組的成員可以使用 /status。",
+        StatusCreatedFormat = "自動更新的狀態訊息已放在 <#{0}>，每分鐘更新一次。",
+        StatusAlreadyHereFormat = "自動更新的狀態訊息本來就在 <#{0}>，已重新整理。每個伺服器只會有一則。",
+        StatusMovedFormat = "已把自動更新的狀態訊息搬到 <#{0}>。每個伺服器只會有一則，舊的已刪除。",
+        StatusFailedFormat = "無法在 <#{0}> 發訊息。請讓機器人在該頻道有「檢視頻道」「傳送訊息」「嵌入連結」權限。",
         WrongChannel = "這個指令只能在橋接頻道使用。",
         JoinedFormat = "{0} 加入了遊戲",
         LeftFormat = "{0} 離開了遊戲",
@@ -65,6 +75,16 @@ public sealed class BridgeTexts
     public required string ConsoleDenied { get; init; }
 
     public required string ConsoleNoOutput { get; init; }
+
+    public required string StatusDenied { get; init; }
+
+    public required string StatusCreatedFormat { get; init; }
+
+    public required string StatusAlreadyHereFormat { get; init; }
+
+    public required string StatusMovedFormat { get; init; }
+
+    public required string StatusFailedFormat { get; init; }
 
     public required string WrongChannel { get; init; }
 
@@ -98,6 +118,17 @@ public sealed class BridgeTexts
 
     public string Online(PlayerList list) =>
         list.Names.Count == 0 ? Format(NobodyFormat, list.Max) : Format(OnlineFormat, list.Online, list.Max, string.Join(", ", list.Names));
+
+    public string StatusPlaced(StatusPlacement placement, ulong channelId) => Format(
+        placement switch
+        {
+            StatusPlacement.AlreadyHere => StatusAlreadyHereFormat,
+            StatusPlacement.Moved => StatusMovedFormat,
+            _ => StatusCreatedFormat,
+        },
+        channelId);
+
+    public string StatusFailed(ulong channelId) => Format(StatusFailedFormat, channelId);
 
     public string Presence(PlayerList list) => Format(PresenceFormat, list.Online, list.Max);
 

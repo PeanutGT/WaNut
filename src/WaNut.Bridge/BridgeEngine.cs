@@ -105,10 +105,18 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
                 chat.Enqueue(message);
                 return Task.CompletedTask;
             };
+            var idleBoard = ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var channel);
+            var board = new StatusBoard(
+                rest,
+                config.Filters.StatusBoard && idleBoard ? channel : null,
+                relay,
+                relay.Texts.Chinese,
+                Path.Combine(stateDirectory ?? AppContext.BaseDirectory, "status-board.json"),
+                log);
             // REST calls and RCON can be slow; off the Gateway's read loop so heartbeats keep being answered.
             gateway.CommandReceived += command =>
             {
-                _ = Task.Run(() => AnswerCommandAsync(relay, rest, command, stop.Token), stop.Token);
+                _ = Task.Run(() => AnswerCommandAsync(relay, rest, board, command, stop.Token), stop.Token);
                 return Task.CompletedTask;
             };
             gateway.Ready += applicationId =>
@@ -125,11 +133,7 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
             // Not in the list WhenAny watches: a refused token ends only Discord to game, not the whole bridge.
             gatewayRun = gateway.RunAsync(stop.Token);
 
-            if (config.Filters.StatusBoard && ulong.TryParse(config.ChannelId, NumberStyles.None, CultureInfo.InvariantCulture, out var channel))
-            {
-                var idFile = Path.Combine(stateDirectory ?? AppContext.BaseDirectory, "status-board.id");
-                tasks.Add(new StatusBoard(rest, channel, relay, relay.Texts.Chinese, idFile, log).RunAsync(stop.Token));
-            }
+            tasks.Add(board.RunAsync(stop.Token));
         }
         else
         {
@@ -176,7 +180,7 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         }
     }
 
-    private async Task AnswerCommandAsync(BridgeRelay relay, DiscordRest rest, SlashCommand command, CancellationToken cancellationToken)
+    private async Task AnswerCommandAsync(BridgeRelay relay, DiscordRest rest, StatusBoard board, SlashCommand command, CancellationToken cancellationToken)
     {
         var action = InboundRouter.Route(command, config);
         if (action.Kind == InboundActionKind.Ignore)
@@ -188,7 +192,9 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         {
             // Everyone may see who is online; console output and refusals are for the asker only.
             await rest.DeferReplyAsync(command, ephemeral: action.Kind != InboundActionKind.ListPlayers, cancellationToken).ConfigureAwait(false);
-            var answer = await relay.RunCommandAsync(action, cancellationToken).ConfigureAwait(false);
+            var answer = action.Kind == InboundActionKind.Status
+                ? await PlaceBoardAsync(board, relay, action, cancellationToken).ConfigureAwait(false)
+                : await relay.RunCommandAsync(action, cancellationToken).ConfigureAwait(false);
             if (answer is not null)
             {
                 await rest.EditReplyAsync(command, answer, cancellationToken).ConfigureAwait(false);
@@ -197,6 +203,21 @@ public sealed class BridgeEngine(BridgeConfig config, HttpClient http, BridgeLog
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested)
         {
             log.Warn($"Could not answer /{command.Name}: {ex.Message}");
+        }
+    }
+
+    private async Task<string> PlaceBoardAsync(StatusBoard board, BridgeRelay relay, InboundAction action, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var placement = await board.PlaceAsync(action.ChannelId, cancellationToken).ConfigureAwait(false);
+            log.Info($"Status board: {action.Author} ({action.UserId}) used /status in channel {action.ChannelId}: {placement}.");
+            return relay.Texts.StatusPlaced(placement, action.ChannelId);
+        }
+        catch (HttpRequestException ex)
+        {
+            log.Warn($"Status board: could not post in channel {action.ChannelId}: {ex.Message}");
+            return relay.Texts.StatusFailed(action.ChannelId);
         }
     }
 
