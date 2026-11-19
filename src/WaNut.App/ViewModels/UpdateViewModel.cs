@@ -118,11 +118,13 @@ public sealed partial class UpdateViewModel : ObservableObject
             }
 
             StatusText = Text.Get("Update_Restarting");
+            _log.Write($"Applying {update.TargetFullRelease.Version} (running {_updater.CurrentVersion}); WaNut closes now.");
             _updater.ApplyAndRestart(update);
         }
         catch (Exception e)
         {
             // Network errors, a full disk, and Velopack's own checksum and feed exceptions all end here.
+            _log.Write($"Update failed: {e.GetType().Name}: {e.Message}");
             StatusText = string.Format(Text.Get("Update_Failed"), e.Message);
         }
         finally

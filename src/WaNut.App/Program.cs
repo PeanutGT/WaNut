@@ -1,4 +1,6 @@
 using Velopack;
+using WaNut.Core;
+using WaNut.Core.Updates;
 using WaNut.App.Services;
 
 namespace WaNut.App;
@@ -11,6 +13,7 @@ public static class Program
         // Must run first: during install, update and uninstall Velopack starts WaNut with special arguments, and
         // this handles them and exits before any window opens.
         VelopackApp.Build()
+            .SetLogger(new VelopackLogAdapter(new UpdateLog(LauncherPaths.CreateDefault(), TimeProvider.System)))
             .OnBeforeUninstallFastCallback(_ => DesktopShortcut.Remove())
             .Run();
 
