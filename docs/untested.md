@@ -532,3 +532,10 @@ Discord 訊息裡的網址現在在遊戲聊天裡是可點擊的藍色底線連
 - 兩台電腦同時拿鎖：第二台被拒絕並看得到對方電腦名稱與時間；第一台關掉 WaNut（沒釋放）後超過 10 分鐘，第二台可以接手。鎖的時間用 VPS 的時鐘，不受本機時間影響。
 - 就緒閘門（本機收件匣）：在檔案複製到一半時（大檔案，如 1 GB）閘門不放行；三個檔案相隔 1.5 秒放入只放行一次；`.ready` 與 `manifest.json` 模式；5 分鐘逾時。VPS 收件匣因為 SFTP 問不到「檔案是否仍被寫入」，只靠大小/時間穩定加 3 秒防抖，要確認上傳工具（如 rsync、WinSCP）結束前不會誤放行；用 `.part` 或 `.tmp` 暫存名可避開。
 - 世界備份（本機）與 VPS 同步不會帶上 `.nut-staging`、`.nut-backup`；但後援位置 `world/.nut-staging` 會被「世界備份」一起打包，等第 2 階段決定是否排除。
+
+## 遠端桌面空白視窗修正（fix-blank-window-remote-desktop）
+
+遠端桌面（RDP）連線時視窗內容只有白色，標題列正常。修正：偵測到遠端工作階段（`SystemParameters.IsRemoteSession`）或環境變數 `WANUT_SOFTWARE_RENDER=1` 時，改用軟體繪圖（`RenderMode.SoftwareOnly`）。在 Linux 無法執行 WPF，沒有實測。要確認：
+- 用遠端桌面連到這台電腦開 WaNut：內容正常顯示，不再是白色。
+- 在本機螢幕開 WaNut：仍使用顯示卡繪圖，外觀與動畫不變。
+- 若遠端仍是白色，先設 `WANUT_SOFTWARE_RENDER=1` 再開，並看 `%APPDATA%\WaNut` 內的錯誤記錄檔。
