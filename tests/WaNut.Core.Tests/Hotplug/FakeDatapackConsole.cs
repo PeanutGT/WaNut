@@ -8,6 +8,9 @@ namespace WaNut.Core.Tests.Hotplug;
 /// </summary>
 internal sealed class FakeDatapackConsole(string datapacksFolder) : IServerConsole
 {
+    /// <summary>A pack whose file holds this text logs a parse error on every /reload, like a loot table with broken JSON.</summary>
+    public const string BrokenMarker = "BROKEN";
+
     public event Action<string>? OutputReceived;
 
     public List<string> Commands { get; } = [];
@@ -35,6 +38,11 @@ internal sealed class FakeDatapackConsole(string datapacksFolder) : IServerConso
             }
 
             Say("Reloading!");
+            foreach (var broken in files.OfType<string>().Where(n => File.ReadAllText(Path.Combine(datapacksFolder, n)).Contains(BrokenMarker, StringComparison.Ordinal)))
+            {
+                OutputReceived?.Invoke($"[12:00:00] [Worker-Main-2/ERROR]: Couldn't parse element minecraft:loot_table/ev:{broken} - Not a JSON object");
+                OutputReceived?.Invoke("\tat net.minecraft.server.ReloadableServerRegistries.parse(ReloadableServerRegistries.java:40)");
+            }
         }
         else if (command == "datapack list enabled" && Answers)
         {

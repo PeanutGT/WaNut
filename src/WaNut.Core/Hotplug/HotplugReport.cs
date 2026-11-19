@@ -9,13 +9,15 @@ namespace WaNut.Core.Hotplug;
 /// <param name="Inspections">The pre-flight result of every pack to add.</param>
 /// <param name="Holder">Who holds the lock, when that is why the run didn't start.</param>
 /// <param name="SwapToReload">From the first rename to /reload being sent.</param>
+/// <param name="ConsoleLines">The console's error lines that made the run roll back, for the user to read.</param>
 public sealed record HotplugReport(
     HotplugState Outcome,
     string? Message,
     IReadOnlyList<HotplugItem> Items,
     IReadOnlyList<DatapackInspection> Inspections,
     HotplugLockHolder? Holder = null,
-    TimeSpan? SwapToReload = null)
+    TimeSpan? SwapToReload = null,
+    IReadOnlyList<string>? ConsoleLines = null)
 {
     public bool Succeeded => Outcome == HotplugState.Completed;
 }

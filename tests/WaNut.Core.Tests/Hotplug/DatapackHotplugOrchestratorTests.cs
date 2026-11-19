@@ -1,5 +1,6 @@
 using WaNut.Core.Hosting;
 using WaNut.Core.Hotplug;
+using WaNut.Core.Hotplug.Safety;
 using WaNut.Core.Remote.Files;
 using WaNut.Core.Remote.Run;
 using WaNut.Core.Storage;
@@ -140,9 +141,78 @@ public sealed class DatapackHotplugOrchestratorTests : IAsyncLifetime
         var report = await Orchestrator(hooks).RunAsync(Add(Local("broken.zip")));
 
         Assert.Equal(HotplugState.RolledBack, report.Outcome);
-        Assert.Equal("Couldn't parse data file", report.Message);
+        Assert.StartsWith("Couldn't parse data file", report.Message);
+        Assert.Equal(["Couldn't parse data file"], report.ConsoleLines);
         Assert.Empty(Directory.GetFiles(_datapacks));
         Assert.Contains("RolledBack", File.ReadAllText(Path.Combine(_root, ".nut-backup", "hotplug-audit.log")));
+    }
+
+    private static HotplugHooks LogSentinel() =>
+        new(Sentinel: new ReloadLogSentinel { Window = TimeSpan.FromSeconds(1), Grace = TimeSpan.FromMilliseconds(100) });
+
+    [Fact]
+    public async Task RunAsync_BrokenLootTableUpdate_RolledBackToOldVersion()
+    {
+        var target = Path.Combine(_datapacks, "loot.zip");
+        File.WriteAllText(target, "old version");
+        _console.Enabled.Add("loot.zip");
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+
+        var report = await Orchestrator(LogSentinel()).RunAsync(Add(Local("loot.zip", $"data/ev/loot_table/{FakeDatapackConsole.BrokenMarker}.json")));
+
+        Assert.Equal(HotplugState.RolledBack, report.Outcome);
+        Assert.Equal("old version", File.ReadAllText(target));
+        Assert.Contains("loot.zip", _console.Enabled);
+        Assert.Contains("Couldn't parse element", report.Message);
+        Assert.DoesNotContain("another pack", report.Message);
+        Assert.Equal(2, report.ConsoleLines!.Count);
+        Assert.Equal(2, _console.Commands.Count(c => c == "reload"));
+        Assert.Contains("\"log\":[", File.ReadAllText(Path.Combine(_root, ".nut-backup", "hotplug-audit.log")));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
+    public async Task RunAsync_BrokenNewPack_RemovedAndNotEnabled()
+    {
+        var report = await Orchestrator(LogSentinel()).RunAsync(Add(Local("new.zip", $"data/ev/loot_table/{FakeDatapackConsole.BrokenMarker}.json")));
+
+        Assert.Equal(HotplugState.RolledBack, report.Outcome);
+        Assert.Empty(Directory.GetFiles(_datapacks));
+        Assert.Empty(Backups());
+        Assert.DoesNotContain(_console.Commands, c => c.StartsWith("datapack enable", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task RunAsync_ErrorsFromAnotherPack_SaysSoAfterRollback()
+    {
+        File.WriteAllText(Path.Combine(_datapacks, "old.zip"), FakeDatapackConsole.BrokenMarker);
+        _console.Enabled.Add("old.zip");
+
+        var report = await Orchestrator(LogSentinel()).RunAsync(Add(Local("fine.zip")));
+
+        Assert.Equal(HotplugState.RolledBack, report.Outcome);
+        Assert.Contains("another pack", report.Message);
+        Assert.False(File.Exists(Path.Combine(_datapacks, "fine.zip")));
+    }
+
+    [Fact]
+    public async Task RunAsync_CleanReloadWithSentinel_Completed()
+    {
+        var report = await Orchestrator(LogSentinel()).RunAsync(Add(Local("fine.zip")));
+
+        Assert.Equal(HotplugState.Completed, report.Outcome);
+        Assert.Null(report.ConsoleLines);
+    }
+
+    [Fact]
+    public async Task RunAsync_GateHoldsBack_NothingTouched()
+    {
+        var report = await Orchestrator(new HotplugHooks(Gate: new HoldingGate("busy"))).RunAsync(Add(Local("loot.zip")));
+
+        Assert.Equal(HotplugState.Aborted, report.Outcome);
+        Assert.Equal("busy", report.Message);
+        Assert.Empty(_console.Commands);
+        Assert.False(Directory.Exists(Path.Combine(_root, ".nut-staging")));
     }
 
     [Fact]
@@ -275,11 +345,18 @@ public sealed class DatapackHotplugOrchestratorTests : IAsyncLifetime
     {
         public IReloadWatch Begin(IServerConsole console) => this;
 
-        public Task<string?> FailureAsync(CancellationToken cancellationToken) => Task.FromResult<string?>(error);
+        public bool HasFailed => true;
+
+        public Task<ReloadFailure?> FailureAsync(CancellationToken cancellationToken) => Task.FromResult<ReloadFailure?>(new ReloadFailure(error, [error]));
 
         public void Dispose()
         {
         }
+    }
+
+    private sealed class HoldingGate(string? reason) : IReloadGate
+    {
+        public Task<string?> CheckAsync(IServerConsole console, CancellationToken cancellationToken) => Task.FromResult(reason);
     }
 
     /// <summary>Flips one byte of every upload, like a connection that corrupts data.</summary>

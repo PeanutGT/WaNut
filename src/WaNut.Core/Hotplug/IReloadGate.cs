@@ -3,8 +3,9 @@ using WaNut.Core.Hosting;
 namespace WaNut.Core.Hotplug;
 
 /// <summary>
-/// Asked before anything in the world changes, e.g. to hold a reload back while the server is busy (MSPT, players).
-/// Phase 3 plugs in here; with none, the hot-plug goes ahead.
+/// Asked once the packs passed the pre-flight and before the VPS is touched, e.g. to hold a reload back while the
+/// server is busy (<see cref="Safety.LoadReloadGate"/>). It may wait (a queue until the server is quiet); the hot-plug
+/// lock isn't held yet, so waiting blocks nobody else. With none, the hot-plug goes ahead.
 /// </summary>
 public interface IReloadGate
 {

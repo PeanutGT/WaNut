@@ -9,6 +9,7 @@ using WaNut.Core.Hosting;
 using WaNut.Core.Hotplug;
 using WaNut.Core.Hotplug.Preflight;
 using WaNut.Core.Hotplug.Readiness;
+using WaNut.Core.Hotplug.Safety;
 
 namespace WaNut.App.ViewModels;
 
@@ -69,6 +70,22 @@ public sealed partial class HotplugViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowResultNotice), nameof(ShowResultError))]
     private bool _resultIsError;
+
+    /// <summary>The console's error lines behind the last rollback.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowErrorLog))]
+    private string? _errorLog;
+
+    public bool ShowErrorLog => ErrorLog is not null;
+
+    /// <summary>Asks what to do while the server is busy; null when nothing is asked.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowLoadPrompt))]
+    private string? _loadPrompt;
+
+    public bool ShowLoadPrompt => LoadPrompt is not null;
+
+    private TaskCompletionSource<LoadChoice>? _loadAnswer;
 
     public bool ProgressIndeterminate => Fraction is null;
 
@@ -267,6 +284,7 @@ public sealed partial class HotplugViewModel : ObservableObject
         var cts = new CancellationTokenSource();
         _run = cts;
         ResultText = null;
+        ErrorLog = null;
         try
         {
             var connection = await ConnectAsync(cts.Token);
@@ -327,6 +345,7 @@ public sealed partial class HotplugViewModel : ObservableObject
     private void Finished(HotplugReport report)
     {
         State = report.Outcome;
+        ErrorLog = report.ConsoleLines is { Count: > 0 } lines ? string.Join(Environment.NewLine, lines) : null;
         var names = string.Join(", ", report.Items.Select(i => i.FileName));
         switch (report.Outcome)
         {
@@ -407,7 +426,8 @@ public sealed partial class HotplugViewModel : ObservableObject
     {
         if (_orchestrator is null || !ReferenceEquals(_lastConnection, connection))
         {
-            _orchestrator = new DatapackHotplugOrchestrator(connection);
+            var gate = new LoadReloadGate(AskLoadAsync, Queued);
+            _orchestrator = new DatapackHotplugOrchestrator(connection, new HotplugHooks(gate, new ReloadLogSentinel()));
             _lastConnection = connection;
         }
 
@@ -415,6 +435,55 @@ public sealed partial class HotplugViewModel : ObservableObject
     }
 
     private HotplugConnection? _lastConnection;
+
+    /// <summary>Shows the busy-server question in the panel and waits for a button, wherever the orchestrator is.</summary>
+    private Task<LoadChoice> AskLoadAsync(ServerLoad load, CancellationToken cancellationToken)
+    {
+        var answer = new TaskCompletionSource<LoadChoice>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _ui.Post(_ =>
+        {
+            _loadAnswer?.TrySetResult(LoadChoice.Cancel);
+            _loadAnswer = answer;
+            LoadPrompt = string.Format(
+                Text.Get("Hotplug_BusyPrompt"),
+                load.Mspt?.ToString("0.#", CultureInfo.CurrentCulture) ?? "?",
+                load.Players?.ToString(CultureInfo.CurrentCulture) ?? "?",
+                LoadReloadGate.DefaultQueueBelowPlayers);
+        }, null);
+        var registration = cancellationToken.Register(() => _ui.Post(_ => Answer(answer, LoadChoice.Cancel), null));
+        _ = answer.Task.ContinueWith(_ => registration.Dispose(), TaskScheduler.Default);
+        return answer.Task.WaitAsync(cancellationToken);
+    }
+
+    private void Queued(ServerLoad load) => _ui.Post(_ =>
+        StatusText = string.Format(
+            Text.Get("Hotplug_StateQueued"),
+            load.Players?.ToString(CultureInfo.CurrentCulture) ?? "?",
+            LoadReloadGate.DefaultQueueBelowPlayers), null);
+
+    [RelayCommand]
+    private void RunAnyway() => Answer(_loadAnswer, LoadChoice.RunNow);
+
+    [RelayCommand]
+    private void QueueUntilQuiet() => Answer(_loadAnswer, LoadChoice.Queue);
+
+    [RelayCommand]
+    private void DontHotplug() => Answer(_loadAnswer, LoadChoice.Cancel);
+
+    private void Answer(TaskCompletionSource<LoadChoice>? answer, LoadChoice choice)
+    {
+        if (answer is null)
+        {
+            return;
+        }
+
+        answer.TrySetResult(choice);
+        if (ReferenceEquals(answer, _loadAnswer))
+        {
+            _loadAnswer = null;
+            LoadPrompt = null;
+        }
+    }
 
     /// <summary>Reads pack_format from each zip once (by name, size and time); datapacks are small.</summary>
     private async Task LoadFormatsAsync(HotplugConnection connection, int refresh)
