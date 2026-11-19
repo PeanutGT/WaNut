@@ -69,6 +69,22 @@ public sealed record WorldGeneration(
         return properties;
     }
 
+    /// <summary>
+    /// Like <see cref="Properties"/>, but every key is returned, with Minecraft's default for what this world leaves
+    /// out. For a server.properties that already has these keys, such as when a world is started over.
+    /// </summary>
+    public IReadOnlyList<KeyValuePair<string, string>> PropertiesToApply(string minecraftVersion)
+    {
+        var features = GameFeatures.For(minecraftVersion);
+        var written = Properties(minecraftVersion).ToDictionary(p => p.Key, p => p.Value);
+        return
+        [
+            new("level-seed", written.GetValueOrDefault("level-seed", string.Empty)),
+            new("level-type", written.GetValueOrDefault("level-type", features.HasWorldPresets ? "minecraft:normal" : "default")),
+            new("generator-settings", written.GetValueOrDefault("generator-settings", features.HasWorldPresets ? "{}" : string.Empty)),
+        ];
+    }
+
     // Up to 1.18.2 the server matches these names ignoring case; from 1.19 level-type is a world preset id.
     private static string LevelType(WorldType type, bool presetIds) => (type, presetIds) switch
     {

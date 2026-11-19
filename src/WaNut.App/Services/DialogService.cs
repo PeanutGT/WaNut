@@ -8,6 +8,7 @@ using WaNut.App.Views;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Remote;
+using WaNut.Core.Settings;
 using WaNut.Core.Worlds;
 
 namespace WaNut.App.Services;
@@ -74,10 +75,10 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.ViewModel.Copy : null;
     }
 
-    public string? AskResetWorld(string serverName)
+    public WorldGeneration? AskResetWorld(string serverName)
     {
         var panel = new ResetWorldPanel(string.Format(Text.Get("Reset_Question"), serverName));
-        return InlinePanel.Show(Application.Current.MainWindow, panel) ? panel.Seed : null;
+        return InlinePanel.Show(Application.Current.MainWindow, panel) ? new WorldGeneration(panel.Seed, panel.WorldType) : null;
     }
 
     public string? AskBan(string playerName)

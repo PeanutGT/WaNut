@@ -559,6 +559,7 @@ public sealed partial class ServerViewModel : ObservableObject
         _store.Save(metadata);
         Metadata = metadata;
         OnPropertyChanged(nameof(Metadata));
+        OnPropertyChanged(nameof(Name));
         OnPropertyChanged(nameof(LoaderText));
         OnPropertyChanged(nameof(TypeAndVersionText));
         OnVpsStateChanged();

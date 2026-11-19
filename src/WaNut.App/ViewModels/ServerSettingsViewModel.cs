@@ -33,6 +33,10 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         Reload();
     }
 
+    /// <summary>The name shown in WaNut and in friends' invite cards. The folder keeps its name; only instance.json changes.</summary>
+    [ObservableProperty]
+    private string _serverName = string.Empty;
+
     /// <summary>"This PC" and every VPS from App settings (Advanced mode only, plan decision 6A).</summary>
     public ObservableCollection<RunLocationOption> RunLocations { get; } = [];
 
@@ -154,6 +158,7 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         _loading = true;
         try
         {
+            ServerName = _server.Metadata.Name;
             MemoryMb = _server.Metadata.MemoryMb;
             CustomJvmArguments = _server.Metadata.CustomJvmArguments;
             AutoRestart = _server.Metadata.AutoRestart;
@@ -334,6 +339,9 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
 
         switch (e.PropertyName)
         {
+            case nameof(ServerName):
+                RenameServer();
+                break;
             case nameof(MemoryMb):
                 SaveMetadata(_server.Metadata with { MemoryMb = Math.Clamp(MemoryMb, MinMemoryMb, MaxMemoryMb) });
                 UpdateMemoryLimit();
@@ -438,6 +446,24 @@ public sealed partial class ServerSettingsViewModel : ObservableObject
         }
 
         SaveMetadata(_server.Metadata with { AutoStopMinutes = AutoStop ? AutoStopMinutes : 0 });
+    }
+
+    private void RenameServer()
+    {
+        var name = ServerName.Trim();
+        if (name.Length == 0)
+        {
+            // An empty name is not a name: show the old one again.
+            _loading = true;
+            ServerName = _server.Metadata.Name;
+            _loading = false;
+            return;
+        }
+
+        if (name != _server.Metadata.Name)
+        {
+            SaveMetadata(_server.Metadata with { Name = name });
+        }
     }
 
     private void SaveMetadata(Core.Instances.InstanceMetadata metadata)

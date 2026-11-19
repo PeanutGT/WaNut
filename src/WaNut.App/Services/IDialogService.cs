@@ -2,6 +2,7 @@ using WaNut.App.ViewModels;
 using WaNut.Core.Backups;
 using WaNut.Core.Instances;
 using WaNut.Core.Remote;
+using WaNut.Core.Settings;
 using WaNut.Core.Worlds;
 
 namespace WaNut.App.Services;
@@ -30,7 +31,7 @@ public interface IDialogService
     InstanceMetadata? ShowDuplicateServer(ServerViewModel server);
 
     /// <summary>Asks before resetting the world. Returns the seed for the new world (empty for random), or null to cancel.</summary>
-    string? AskResetWorld(string serverName);
+    WorldGeneration? AskResetWorld(string serverName);
 
     /// <summary>Asks before banning a player. Returns the reason they see (empty for none), or null to cancel.</summary>
     string? AskBan(string playerName);

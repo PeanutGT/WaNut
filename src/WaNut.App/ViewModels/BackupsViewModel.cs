@@ -131,13 +131,13 @@ public sealed partial class BackupsViewModel : ObservableObject
         DoneText = Text.Get("World_Replaced") + (notes.Length > 0 ? Environment.NewLine + notes : string.Empty);
     }
 
-    /// <summary>"Start a new world": backs the world up, deletes it and optionally sets a new seed. Settings stay.</summary>
+    /// <summary>"Start a new world": backs the world up, deletes it and sets the seed and world type for the new one. Settings stay.</summary>
     [RelayCommand(CanExecute = nameof(CanChange))]
     private async Task ResetWorldAsync()
     {
         ErrorText = null;
         DoneText = null;
-        if (_dialogs.AskResetWorld(_server.Name) is not { } seed)
+        if (_dialogs.AskResetWorld(_server.Name) is not { } world)
         {
             return;
         }
@@ -145,7 +145,7 @@ public sealed partial class BackupsViewModel : ObservableObject
         await RunAsync(BackupReason.Reset, async progress =>
         {
             await _store.ResetWorldAsync(_server.InstanceDir, progress);
-            Core.Settings.GameSettingsStore.SetSeed(_server.InstanceDir, seed);
+            Core.Settings.GameSettingsStore.SetWorldGeneration(_server.InstanceDir, world, _server.Metadata.MinecraftVersion);
             return Text.Get("Reset_Done");
         });
     }

@@ -12,6 +12,10 @@
     <TextBox x:Name="SeedBox" MaxLength="64" AutomationProperties.Name="{res:Text Reset_SeedLabel}" />
     <TextBlock Text="{res:Text Reset_SeedHint}" Style="{StaticResource MutedText}" FontSize="{StaticResource FontSmall}" TextWrapping="Wrap" Margin="0,3,0,0" />
 
+    <TextBlock Text="{res:Text CreateServer_WorldTypeLabel}" FontWeight="SemiBold" Margin="0,14,0,6" />
+    <ComboBox x:Name="TypeBox" DisplayMemberPath="Label" SelectedValuePath="Value"
+              AutomationProperties.Name="{res:Text CreateServer_WorldTypeLabel}" />
+
     <Border Style="{StaticResource NoticeBanner}" Margin="0,18,0,0">
       <TextBlock Text="{res:Text Reset_BackupNote}" TextWrapping="Wrap" />
     </Border>

@@ -169,6 +169,19 @@ public static class GameSettingsStore
         properties.Save(path);
     }
 
+    /// <summary>Sets the seed and terrain the next new world is generated from; every key is rewritten, so an older terrain does not linger.</summary>
+    public static void SetWorldGeneration(string instanceDir, WorldGeneration world, string minecraftVersion)
+    {
+        var path = Path.Combine(instanceDir, PropertiesFileName);
+        var properties = PropertiesFile.Load(path);
+        foreach (var (key, value) in world.PropertiesToApply(minecraftVersion))
+        {
+            properties.Set(key, value);
+        }
+
+        properties.Save(path);
+    }
+
     private static IEnumerable<(RuleSetting Setting, bool Before, bool After)> RuleValues(GameSettings before, GameSettings after)
     {
         yield return (RuleSetting.KeepInventory, before.KeepInventory, after.KeepInventory);

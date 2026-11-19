@@ -28,6 +28,13 @@
 
       <!-- Always visible -->
       <StackPanel Style="{StaticResource Item}">
+        <TextBlock Text="{res:Text CreateServer_NameLabel}" Style="{StaticResource Label}" />
+        <TextBox Text="{Binding ServerName, UpdateSourceTrigger=LostFocus}" MaxLength="64"
+                 AutomationProperties.Name="{res:Text CreateServer_NameLabel}" />
+        <TextBlock Text="{res:Text Server_NameHint}" Style="{StaticResource Hint}" />
+      </StackPanel>
+
+      <StackPanel Style="{StaticResource Item}">
         <DockPanel Margin="0,0,0,6">
           <TextBlock DockPanel.Dock="Right" Text="{Binding MemoryText}" FontWeight="SemiBold" />
           <TextBlock Text="{res:Text CreateServer_MemoryLabel}" FontWeight="SemiBold" />
