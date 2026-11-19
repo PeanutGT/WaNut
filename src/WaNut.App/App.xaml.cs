@@ -46,6 +46,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        RenderFallback.Apply();
         MotionSettings.Apply(this, SystemParameters.ClientAreaAnimation);
         var paths = LauncherPaths.CreateDefault();
         _crashGuard = new CrashGuard(new ErrorLog(paths.ErrorLogFile));
