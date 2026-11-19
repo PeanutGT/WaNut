@@ -1,7 +1,7 @@
 using Velopack;
+using WaNut.App.Services;
 using WaNut.Core;
 using WaNut.Core.Updates;
-using WaNut.App.Services;
 
 namespace WaNut.App;
 
