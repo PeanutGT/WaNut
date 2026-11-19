@@ -8,28 +8,36 @@ namespace WaNut.Bridge.GameLog;
 /// ("[12:00:00] [Server thread/INFO]: "), Paper and Purpur ("[12:00:00 INFO]: ") and Forge and NeoForge
 /// ("[12:00:00] [Server thread/INFO] [minecraft/MinecraftServer]: "). Only the text after the first "]: " is read,
 /// so chat can never pass for a server message. Private messages (/tell, /msg, /w) are never logged as chat, and
-/// the "issued server command" lines some servers write for them match nothing here.
+/// the "issued server command" lines some servers write for them match nothing here. Minecraft 26.x writes
+/// "System chat: " before joins, deaths and advancements, and Paper 26.x before player chat too; it is dropped first.
 /// </summary>
 public static partial class MinecraftLogParser
 {
-    private const string MessageMarker = "]: ";
-
-    public static GameEvent? Parse(string line)
+    /// <param name="isOnline">
+    /// Tells whether a name belongs to a player in the game now. Paper 26.x logs chat as "Name: text" without the angle
+    /// brackets; without "[Not Secure] " in front, such a line counts as chat only for a player who is online, so a
+    /// plugin line like "Timings: ..." is never sent to Discord as chat.
+    /// </param>
+    public static GameEvent? Parse(string line, Func<string, bool>? isOnline = null)
     {
         line = ServerLogParser.Clean(line);
-        var start = line.IndexOf(MessageMarker, StringComparison.Ordinal);
-        if (start < 0)
+        if (ServerLogParser.MessageOf(line) is not { } message)
         {
             return null;
         }
 
-        var message = line[(start + MessageMarker.Length)..].TrimEnd();
-
-        // Chat first: a chat line starts with "<", so no later rule can be fooled by what a player types.
+        // Chat first: a chat line starts with "<" or a name and ": ", so no later rule can be fooled by what a player types.
         var chat = ChatMessage().Match(message);
         if (chat.Success)
         {
             return new GameEvent(GameEventKind.Chat, chat.Groups["name"].Value, chat.Groups["text"].Value);
+        }
+
+        var plainChat = PlainChatMessage().Match(message);
+        var bare = plainChat.Success && plainChat.Groups["unsigned"].Success && plainChat.Groups["prefix"].Length == 0 && plainChat.Groups["separator"].Value == ":";
+        if (plainChat.Success && (bare || isOnline?.Invoke(plainChat.Groups["name"].Value) == true))
+        {
+            return new GameEvent(GameEventKind.Chat, plainChat.Groups["name"].Value, plainChat.Groups["text"].Value);
         }
 
         switch (ServerLogParser.Parse(line))
@@ -57,6 +65,12 @@ public static partial class MinecraftLogParser
     // 1.19+ marks unsigned chat with "[Not Secure] ".
     [GeneratedRegex(@"^(?:\[Not Secure\] )?<(?<name>[A-Za-z0-9_]{1,16})> (?<text>.+)$")]
     private static partial Regex ChatMessage();
+
+    // Paper 26.x: "[Not Secure] Steve: hello" or "Steve: hello"; with a chat plugin (LuckPerms prefixes through Vault and
+    // a formatter) also "[VIP] Steve: hello", "Admin | Steve » hello" and the like. The prefix must end in a space, "]"
+    // or "|", so command feedback such as "[Steve: Teleported ...]" is not chat.
+    [GeneratedRegex(@"^(?<unsigned>\[Not Secure\] )?(?:(?<prefix>.{0,48}?[\s\]|]))?(?<name>[A-Za-z0-9_]{1,16}) ?(?<separator>:|»|>>|>|\|) (?<text>.+)$")]
+    private static partial Regex PlainChatMessage();
 
     [GeneratedRegex(@"^(?<name>[A-Za-z0-9_]{1,16}) has (?:made the advancement|completed the challenge|reached the goal) \[.+\]$")]
     private static partial Regex AdvancementMessage();

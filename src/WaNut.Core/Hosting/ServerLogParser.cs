@@ -43,14 +43,17 @@ public static partial class ServerLogParser
 {
     private const string MessageMarker = "]: ";
 
+    private const string SystemChatPrefix = "System chat: ";
+
     /// <summary>Removes ANSI color codes and Minecraft formatting codes (§.), which some servers print even when the output is not a terminal.</summary>
     public static string Clean(string line) => SectionEscape().Replace(AnsiEscape().Replace(line, string.Empty), string.Empty);
 
-    public static LogEvent? Parse(string line)
+    /// <summary>
+    /// The message part of a log line: the text after the first "]: ", without the "System chat: " that Minecraft 26.x
+    /// puts before joins, deaths, advancements and, on Paper, player chat. Null when the line has no "]: ".
+    /// </summary>
+    public static string? MessageOf(string line)
     {
-        line = Clean(line);
-        // Only the text after the first "]: " is the message. Anything later in the line, such as chat,
-        // can never pass for a server message: a player typing "]: Steve joined the game" does not add Steve.
         var start = line.IndexOf(MessageMarker, StringComparison.Ordinal);
         if (start < 0)
         {
@@ -58,6 +61,18 @@ public static partial class ServerLogParser
         }
 
         var message = line[(start + MessageMarker.Length)..].TrimEnd();
+        return message.StartsWith(SystemChatPrefix, StringComparison.Ordinal) ? message[SystemChatPrefix.Length..] : message;
+    }
+
+    public static LogEvent? Parse(string line)
+    {
+        // Only the text after the first "]: " is the message. Anything later in the line, such as chat,
+        // can never pass for a server message: a player typing "]: Steve joined the game" does not add Steve.
+        if (MessageOf(Clean(line)) is not { } message)
+        {
+            return null;
+        }
+
         if (DoneMessage().IsMatch(message))
         {
             return new LogEvent(LogEventKind.Online);

@@ -18,6 +18,7 @@ public sealed class ServerLogParserTests
     [Theory]
     [InlineData("[12:35:00] [Server thread/INFO]: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
     [InlineData("[12:35:00 INFO]: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
+    [InlineData("[12:35:00] [Server thread/INFO]: System chat: Steve joined the game", LogEventKind.PlayerJoined, "Steve")]
     [InlineData("[12:35:00 INFO]: Steve joined the game.", LogEventKind.PlayerJoined, "Steve")]
     [InlineData("[12:35:00 INFO]: §eSteve joined the game", LogEventKind.PlayerJoined, "Steve")]
     [InlineData("[12:35:00 INFO]: .Steve joined the game", LogEventKind.PlayerJoined, ".Steve")]
