@@ -4111,6 +4111,21 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Hotplug_NotRunning" xml:space="preserve">
     <value>伺服器沒有在 VPS 上執行。</value>
   </data>
+  <data name="Hotplug_ReasonNotOnline" xml:space="preserve">
+    <value>等待中：伺服器尚未上線。在 VPS 上啟動完成後，這些按鈕就會開放。</value>
+  </data>
+  <data name="Hotplug_ReasonNoProcess" xml:space="preserve">
+    <value>等待中：WaNut 沒有接上這台伺服器在 VPS 上的執行。請從 WaNut 停止後再啟動，才能即時變更資料包。</value>
+  </data>
+  <data name="Hotplug_ReasonWatching" xml:space="preserve">
+    <value>監看模式開啟中，資料包會自動更新。要手動新增或移除，請先取消下方的勾選。</value>
+  </data>
+  <data name="Hotplug_ReasonBusy" xml:space="preserve">
+    <value>已有變更正在進行。請等它完成，或按「取消」。</value>
+  </data>
+  <data name="Hotplug_ReasonLoading" xml:space="preserve">
+    <value>正在從 VPS 讀取資料包清單，完成後按鈕就會開放。</value>
+  </data>
   <data name="Hotplug_WarnIntro" xml:space="preserve">
     <value>有些資料包可能不會馬上完整生效。仍要熱插拔嗎？</value>
   </data>

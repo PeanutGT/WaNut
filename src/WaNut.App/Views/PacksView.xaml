@@ -100,7 +100,7 @@
 
       <!-- Live data packs on the VPS: hot-plugged while the server runs there. -->
       <StackPanel DataContext="{Binding Hotplug}" Margin="0,0,0,24"
-                  Visibility="{Binding IsAvailable, Converter={StaticResource Visible}}">
+                  Visibility="{Binding ShowPanel, Converter={StaticResource Visible}}">
         <DockPanel Margin="0,0,0,6">
           <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
             <Button Content="{res:Text Hotplug_Refresh}" Command="{Binding RefreshCommand}" Padding="12,3" Margin="0,0,6,0" />
@@ -109,6 +109,10 @@
           <TextBlock Text="{Binding Header}" Style="{StaticResource SectionCaption}" VerticalAlignment="Center" />
         </DockPanel>
         <TextBlock Text="{res:Text Hotplug_Hint}" Style="{StaticResource Hint}" Margin="0,0,0,6" />
+        <!-- Says exactly why the buttons above are off, so it is never a silent failure. -->
+        <Border Style="{StaticResource WarningBanner}" Margin="0,0,0,6" Visibility="{Binding ShowDisabledReason, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding DisabledReason}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </Border>
 
         <!-- Status line: waiting, debounce countdown, upload, swap, reload. -->
         <StackPanel Margin="0,0,0,6" Visibility="{Binding IsBusy, Converter={StaticResource Visible}}">

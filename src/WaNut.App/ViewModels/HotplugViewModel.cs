@@ -50,8 +50,47 @@ public sealed partial class HotplugViewModel : ObservableObject
     /// <summary>Shown while the server runs on its VPS; packs then change without a restart.</summary>
     public bool IsAvailable => _server.RunsOnVps && _server.Status == ServerStatus.Online;
 
+    /// <summary>The panel also shows while the server is still starting or stopping on its VPS, with the reason its buttons wait.</summary>
+    public bool ShowPanel => _server.RunsOnVps && _server.IsRunning;
+
+    /// <summary>Why the buttons are off right now, in words; null when they work. Never leave a disabled button unexplained.</summary>
+    public string? DisabledReason
+    {
+        get
+        {
+            if (!ShowPanel)
+            {
+                return null;
+            }
+
+            if (_server.Status != ServerStatus.Online)
+            {
+                return Text.Get("Hotplug_ReasonNotOnline");
+            }
+
+            if (_server.Process is not { IsRunning: true })
+            {
+                return Text.Get("Hotplug_ReasonNoProcess");
+            }
+
+            if (IsWatching)
+            {
+                return Text.Get("Hotplug_ReasonWatching");
+            }
+
+            if (IsBusy)
+            {
+                return Text.Get("Hotplug_ReasonBusy");
+            }
+
+            return IsLoading ? Text.Get("Hotplug_ReasonLoading") : null;
+        }
+    }
+
+    public bool ShowDisabledReason => DisabledReason is not null;
+
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBusy), nameof(ShowProgress))]
+    [NotifyPropertyChangedFor(nameof(IsBusy), nameof(ShowProgress), nameof(DisabledReason), nameof(ShowDisabledReason))]
     [NotifyCanExecuteChangedFor(nameof(AddCommand), nameof(RemoveCommand), nameof(RefreshCommand), nameof(CancelCommand))]
     private HotplugState _state;
 
@@ -94,10 +133,11 @@ public sealed partial class HotplugViewModel : ObservableObject
     public bool ShowResultError => ResultText is not null && ResultIsError;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisabledReason), nameof(ShowDisabledReason))]
     private bool _isLoading;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(WatchText))]
+    [NotifyPropertyChangedFor(nameof(WatchText), nameof(DisabledReason), nameof(ShowDisabledReason))]
     [NotifyCanExecuteChangedFor(nameof(TriggerNowCommand), nameof(AddCommand), nameof(RemoveCommand))]
     private bool _isWatching;
 
@@ -119,6 +159,9 @@ public sealed partial class HotplugViewModel : ObservableObject
     internal void OnServerStatusChanged()
     {
         OnPropertyChanged(nameof(IsAvailable));
+        OnPropertyChanged(nameof(ShowPanel));
+        OnPropertyChanged(nameof(DisabledReason));
+        OnPropertyChanged(nameof(ShowDisabledReason));
         NotifyCommands();
         if (IsAvailable)
         {
@@ -179,7 +222,8 @@ public sealed partial class HotplugViewModel : ObservableObject
             }
 
             OnPropertyChanged(nameof(Header));
-            await LoadFormatsAsync(connection, mine);
+            IsLoading = false;
+            _ = LoadFormatsSafelyAsync(connection, mine);
         }
         catch (Exception e) when (Describe(e) is { } message)
         {
@@ -491,6 +535,18 @@ public sealed partial class HotplugViewModel : ObservableObject
         {
             _loadAnswer = null;
             LoadPrompt = null;
+        }
+    }
+
+    // The format column is a nicety: a slow or failing read must not keep Refresh and Add switched off.
+    private async Task LoadFormatsSafelyAsync(HotplugConnection connection, int refresh)
+    {
+        try
+        {
+            await LoadFormatsAsync(connection, refresh);
+        }
+        catch (Exception e) when (Describe(e) is not null || e is ObjectDisposedException)
+        {
         }
     }
 
