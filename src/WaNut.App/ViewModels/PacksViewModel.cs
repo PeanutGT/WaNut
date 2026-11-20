@@ -331,17 +331,10 @@ public sealed partial class PacksViewModel : ObservableObject
         {
             try
             {
-                if (resource && _server.Metadata.VpsId is null)
+                if (resource)
                 {
                     var change = await _library.AddResourcePackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress);
                     return DescribeChange(string.Format(Text.Get("Packs_ResourcePackSet"), item.Title), change);
-                }
-
-                if (resource)
-                {
-                    // On a VPS the pack stays a single Modrinth link: WaNut cannot serve a merged zip from there yet.
-                    await _library.SetResourcePackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, RequireResourcePack);
-                    return string.Format(Text.Get("Packs_ResourcePackSet"), item.Title);
                 }
 
                 return await _library.InstallDatapackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress)

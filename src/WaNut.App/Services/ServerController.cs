@@ -33,6 +33,7 @@ public sealed class ServerController(
     VpsLaunchPlanner vpsPlanner,
     VpsConnector vpsConnector,
     VpsSettingsSync vpsSettings,
+    VpsPackHost vpsPackHost,
     PackLibrary packs)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
@@ -245,6 +246,7 @@ public sealed class ServerController(
 
         // From here the VPS copy is the one that counts, until it has come back.
         server.UpdateMetadata(server.Metadata with { VpsCopyIsNewer = true });
+        await ServeMergedPackOnVpsAsync(server, vps, automatic);
         Track(server, vps, host.Start(server.Id, launch, server.Attach, new RemoteServerRuntime(vpsConnector, vps)));
     }
 
@@ -287,6 +289,75 @@ public sealed class ServerController(
             await StopPackHostAsync(server);
             server.ShowConsoleNote(string.Format(Text.Get("Server_PackHostFailed"), e.Message));
         }
+    }
+
+    /// <summary>
+    /// The VPS version of <see cref="ServeMergedPackAsync"/>: with two or more resource packs the merged zip goes up to
+    /// the VPS, which serves it on its own port, and the VPS's server.properties gets the address and SHA-1. Never stops
+    /// the start: a failure leaves a console note and the server runs without the pack.
+    /// </summary>
+    private async Task ServeMergedPackOnVpsAsync(ServerViewModel server, VpsProfile vps, bool automatic)
+    {
+        if (packs.GetMergedPackPath(server.InstanceDir) is not { } zip)
+        {
+            return;
+        }
+
+        server.VpsText = Text.Get("Status_VpsPackHost");
+        try
+        {
+            var hosted = await vpsPackHost.StartAsync(vps, server.Id, SftpSyncTree.ServerRoot(server.Id), zip);
+            if (hosted is null)
+            {
+                server.ShowConsoleNote(Text.Get("Server_VpsPackNoWebServer"));
+                return;
+            }
+
+            var required = PackLibrary.IsResourcePackRequired(server.InstanceDir);
+            if (server.Metadata.KeepFilesOnVps)
+            {
+                // The VPS's copy is the newer one: take its other settings, change only the pack lines, send it back.
+                await vpsSettings.PullAsync(server.Id, vps);
+            }
+
+            PackLibrary.PointMergedPackAt(Path.Combine(server.InstanceDir, GameSettingsStore.PropertiesFileName), zip, hosted.Url, required);
+            await vpsSettings.PushAsync(server.Id, vps);
+            await OpenVpsPackPortAsync(server, vps, hosted.Port, automatic);
+        }
+        catch (Exception e) when (IsVpsProblem(e) || e is FileNotFoundException)
+        {
+            server.ShowConsoleNote(string.Format(Text.Get("Server_PackHostFailed"), VpsMessage(e)));
+        }
+        finally
+        {
+            server.VpsText = null;
+        }
+    }
+
+    /// <summary>Lets the pack download port through the VPS's firewall, by the same answer the game port got; otherwise tells which commands to run.</summary>
+    private async Task OpenVpsPackPortAsync(ServerViewModel server, VpsProfile vps, int port, bool automatic)
+    {
+        var (_, hostFirewall) = await vpsPlanner.CheckFirewallAsync(vps);
+        if (hostFirewall.IsOpen(port) == true)
+        {
+            return;
+        }
+
+        if (hostFirewall.OpenCommand(port) is { } command && MayOpenFirewall(vps.Id, port, automatic))
+        {
+            try
+            {
+                await vpsPlanner.OpenFirewallAsync(vps, command);
+                server.ShowConsoleNote(string.Format(Text.Get("Server_VpsFirewallOpened"), port));
+                return;
+            }
+            catch (InvalidOperationException e)
+            {
+                server.ShowConsoleNote(string.Format(Text.Get("Server_VpsFirewallFailed"), e.Message));
+            }
+        }
+
+        server.ShowConsoleNote(string.Format(Text.Get("Server_VpsPackPortManual"), port, hostFirewall.ManualCommands(port) ?? string.Empty));
     }
 
     private async Task StopPackHostAfterExitAsync(ServerViewModel server, IRunningServer process)

@@ -12,7 +12,9 @@ public static class SyncRules
     /// </summary>
     public static bool IsIgnored(string path)
     {
-        if (path == Instances.InstanceMetadata.FileName || IsUnder(path, Backups.BackupStore.FolderName))
+        // The resource pack sources and the merged zip are served from the VPS's pack host, not from the server folder.
+        if (path == Instances.InstanceMetadata.FileName || IsUnder(path, Backups.BackupStore.FolderName)
+            || path == Packs.PackLibrary.MergedFileName || IsUnder(path, "resourcepacks"))
         {
             return true;
         }

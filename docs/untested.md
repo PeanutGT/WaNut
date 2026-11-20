@@ -555,3 +555,12 @@ VPS 的「即時資料包」面板按鈕（重新整理、新增或更新）在�
 - 伺服器停止後下載站會關閉；沒有 Radmin 也沒有區域網路位址時，主控台會顯示「合併的資源包沒有分享」。
 - 沒有做：VPS 上的伺服器仍只能用單一資源包（Modrinth 網址）；沒有拖曳排序，只有 ▲▼；多個網路卡時只會挑一個位址（虛擬區域網路優先）。
 
+## VPS 上的合併資源包（add-vps-resource-pack-hosting）
+VPS 上執行的伺服器現在也能用多個資源包：兩個以上合併成一個 zip，啟動時上傳到 VPS（`~/wanut/packhost/<id>/www/`，SHA-1 相同就不重傳），由 VPS 上的 `wanut-pack-host.sh` 用 python3（沒有就用 BusyBox httpd）在 25800–25899 之間第一個空的連接埠提供下載，並把網址、SHA-1、是否強制寫進 VPS 的 `server.properties`。防火牆沿用 VPS 的「自動開連接埠」答案，不能自動開時在主控台顯示要執行的指令。下載站在伺服器的執行結束時自己關掉（WaNut 關掉也一樣）。合併的 zip 和 `resourcepacks/` 不再同步到 VPS。腳本和指令在這台容器用本機 sh + python3 跑過（`WANUT_TEST_LOCAL_SH=1`，`Category=Ssh`），沒有透過真的 SSH 連線，也沒有在 Windows 或真的 VPS 上試。要確認：
+- 在 VPS 伺服器加兩個資源包後啟動：主控台沒有錯誤，玩家加入時下載到合併的包；`server.properties` 有 `http://<VPS位址>:258xx/resourcepack.zip` 和正確的 sha1。
+- Oracle 這類預設擋連接埠的 VPS：自動開 258xx 之後，從外面（朋友的電腦）下載得到；雲端安全清單沒開時，主控台顯示的指令與說明合理。
+- 沒有 python3 的 VPS（例如 Alpine）：顯示「沒有 python3 或 BusyBox」的說明，伺服器仍正常啟動。
+- 停止伺服器後，VPS 上的下載站程序消失；伺服器還在跑時關掉 WaNut，下載仍可用，重新連上後行為正常。
+- 檔案留在 VPS 的伺服器：啟動時只改資源包三行，其他設定沒被舊內容蓋掉。
+- 改了資源包順序後再啟動：新的 zip 會重傳，玩家拿到新的 SHA-1。
+- 沒有做：沒有 HTTPS，也沒有加密或限速；網址是 VPS 的位址加 258xx 連接埠，任何知道網址的人都能下載這個資源包。

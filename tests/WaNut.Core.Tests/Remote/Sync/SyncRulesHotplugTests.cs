@@ -13,4 +13,9 @@ public sealed class SyncRulesHotplugTests
 
     [Fact]
     public void IsIgnored_WorldDatapack_False() => Assert.False(SyncRules.IsIgnored("world/datapacks/a.zip"));
+
+    [Theory]
+    [InlineData("resourcepack-merged.zip")]
+    [InlineData("resourcepacks/a.zip")]
+    public void IsIgnored_ResourcePackFiles_True(string path) => Assert.True(SyncRules.IsIgnored(path));
 }
