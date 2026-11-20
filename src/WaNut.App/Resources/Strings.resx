@@ -2958,6 +2958,9 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Packs_StopToChange" xml:space="preserve">
     <value>Stop the server to change packs.</value>
   </data>
+  <data name="Packs_StopToChangeVps" xml:space="preserve">
+    <value>Packs changed in the lists below need the server stopped. Live data packs on the VPS can be changed while it runs.</value>
+  </data>
   <data name="Mods_ClientAlsoNeeded" xml:space="preserve">
     <value>Friends also need {0} in their own game to join.</value>
   </data>

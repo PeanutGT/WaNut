@@ -2938,6 +2938,9 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Packs_StopToChange" xml:space="preserve">
     <value>停止伺服器後才能變更。</value>
   </data>
+  <data name="Packs_StopToChangeVps" xml:space="preserve">
+    <value>下方清單的資料包要先停止伺服器才能變更；VPS 上的即時資料包不用停止，可以直接更換。</value>
+  </data>
   <data name="Mods_ClientAlsoNeeded" xml:space="preserve">
     <value>朋友的遊戲也要裝 {0} 才能加入。</value>
   </data>
