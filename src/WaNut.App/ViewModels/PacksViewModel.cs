@@ -157,6 +157,11 @@ public sealed partial class PacksViewModel : ObservableObject
 
     public bool IsWorking => WorkText is not null;
 
+    /// <summary>False while the newest copy of the server's files is on the VPS; the live panel stays usable then.</summary>
+    public bool CanEditFiles => !_server.FilesOnVps;
+
+    internal void OnVpsStateChanged() => OnPropertyChanged(nameof(CanEditFiles));
+
     public bool CanChange => _server.Status == ServerStatus.Stopped && !_server.IsPreparing && !IsWorking;
 
     public bool ShowStopToChange => _server.IsRunning;

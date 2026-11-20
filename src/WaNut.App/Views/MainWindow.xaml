@@ -495,7 +495,7 @@
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabPacks}">
-            <views:PacksView DataContext="{Binding Packs}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:PacksView DataContext="{Binding Packs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabConnect}">
