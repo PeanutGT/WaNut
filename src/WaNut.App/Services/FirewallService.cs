@@ -51,4 +51,35 @@ public sealed class FirewallService(IFirewall firewall, JavaRuntimeManager java,
 
         return await firewall.AllowAsync(javaExe, RuleName(javaMajor));
     }
+
+    /// <summary>
+    /// The same once-only question for WaNut's own program, which serves the merged resource pack. Asked before the
+    /// download port opens, so Windows never shows its own prompt behind WaNut's window.
+    /// </summary>
+    public async Task<FirewallChange?> AskForPackHostOnceAsync(string wanutExe)
+    {
+        if (app.WasFirewallAsked(wanutExe))
+        {
+            return null;
+        }
+
+        var state = await firewall.GetStateAsync(wanutExe);
+        if (state == FirewallState.Unknown)
+        {
+            return null;
+        }
+
+        app.MarkFirewallAsked(wanutExe);
+        if (state == FirewallState.Allowed)
+        {
+            return null;
+        }
+
+        if (!dialogs.Confirm(Text.Get("Firewall_AskPackHost")))
+        {
+            return FirewallChange.Declined;
+        }
+
+        return await firewall.AllowAsync(wanutExe, "WaNut - resource pack download");
+    }
 }

@@ -242,10 +242,39 @@
         </TextBlock.Style>
       </TextBlock>
       <StackPanel Visibility="{Binding HasResourcePack, Converter={StaticResource Visible}}">
-        <DockPanel>
+        <DockPanel Visibility="{Binding ShowSingleResourcePack, Converter={StaticResource Visible}}">
           <Button DockPanel.Dock="Right" Content="{res:Text Packs_ClearResourcePack}" Command="{Binding ClearResourcePackCommand}" Padding="12,3" />
           <TextBlock Text="{Binding ResourcePackName}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
         </DockPanel>
+        <StackPanel Visibility="{Binding ShowResourcePackList, Converter={StaticResource Visible}}">
+          <ItemsControl ItemsSource="{Binding ResourcePacks}" AutomationProperties.Name="{res:Text Packs_ResourcePack}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0,6">
+                  <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="{res:Text Mods_Remove}" Padding="12,3" Margin="6,0,0,0" VerticalAlignment="Center"
+                            AutomationProperties.Name="{Binding RemoveLabel}"
+                            Command="{Binding DataContext.RemoveResourcePackCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}" />
+                    <Button DockPanel.Dock="Right" Content="&#x25BC;" Padding="12,3" Margin="6,0,0,0" VerticalAlignment="Center"
+                            IsEnabled="{Binding CanMoveDown}" ToolTip="{res:Text Packs_MoveDown}" AutomationProperties.Name="{res:Text Packs_MoveDown}"
+                            Command="{Binding DataContext.MoveResourcePackDownCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}" />
+                    <Button DockPanel.Dock="Right" Content="&#x25B2;" Padding="12,3" VerticalAlignment="Center"
+                            IsEnabled="{Binding CanMoveUp}" ToolTip="{res:Text Packs_MoveUp}" AutomationProperties.Name="{res:Text Packs_MoveUp}"
+                            Command="{Binding DataContext.MoveResourcePackUpCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}" />
+                    <TextBlock Text="{Binding PositionText}" Style="{StaticResource MutedText}" Width="24" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}" FontSize="{StaticResource FontSubheading}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  </DockPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="{res:Text Packs_MergeHint}" Style="{StaticResource Hint}" Margin="0,6,0,0"
+                     Visibility="{Binding ShowMergeHint, Converter={StaticResource Visible}}" />
+          <Button Content="{res:Text Packs_ClearResourcePack}" Command="{Binding ClearResourcePackCommand}" Padding="12,3" HorizontalAlignment="Left" Margin="0,6,0,0" />
+        </StackPanel>
         <CheckBox Content="{res:Text Packs_Require}" IsChecked="{Binding RequireResourcePack}" IsEnabled="{Binding CanChange}" Margin="0,6,0,0" />
       </StackPanel>
 

@@ -46,10 +46,20 @@ public sealed partial class PacksViewModel : ObservableObject
 
     /// <summary>The pack players get on join, or null.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasResourcePack), nameof(ResourcePackName))]
+    [NotifyPropertyChangedFor(nameof(HasResourcePack), nameof(ResourcePackName), nameof(ShowSingleResourcePack))]
     private ServerResourcePack? _resourcePack;
 
-    public bool HasResourcePack => ResourcePack is not null;
+    /// <summary>The resource packs WaNut manages, highest priority first. Two or more are merged into one zip.</summary>
+    public ObservableCollection<ResourcePackItemViewModel> ResourcePacks { get; } = [];
+
+    public bool HasResourcePack => ResourcePack is not null || ResourcePacks.Count > 0;
+
+    public bool ShowResourcePackList => ResourcePacks.Count > 0;
+
+    /// <summary>A pack set by hand or by an older WaNut, outside the list.</summary>
+    public bool ShowSingleResourcePack => ResourcePack is not null && ResourcePacks.Count == 0;
+
+    public bool ShowMergeHint => ResourcePacks.Count > 1;
 
     public string ResourcePackName => ResourcePack?.Title ?? ResourcePack?.Url ?? string.Empty;
 
@@ -59,7 +69,7 @@ public sealed partial class PacksViewModel : ObservableObject
 
     partial void OnRequireResourcePackChanged(bool value)
     {
-        if (_loading || ResourcePack is null || ResourcePack.Required == value)
+        if (_loading || !HasResourcePack || PackLibrary.IsResourcePackRequired(_server.InstanceDir) == value)
         {
             return;
         }
@@ -67,7 +77,10 @@ public sealed partial class PacksViewModel : ObservableObject
         try
         {
             _library.SetResourcePackRequired(_server.InstanceDir, value);
-            ResourcePack = ResourcePack with { Required = value };
+            if (ResourcePack is not null)
+            {
+                ResourcePack = ResourcePack with { Required = value };
+            }
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -126,7 +139,8 @@ public sealed partial class PacksViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWorking), nameof(CanChange))]
-    [NotifyCanExecuteChangedFor(nameof(UseCommand), nameof(RemoveCommand), nameof(ClearResourcePackCommand))]
+    [NotifyCanExecuteChangedFor(nameof(UseCommand), nameof(RemoveCommand), nameof(ClearResourcePackCommand),
+        nameof(MoveResourcePackUpCommand), nameof(MoveResourcePackDownCommand), nameof(RemoveResourcePackCommand))]
     private string? _workText;
 
     [ObservableProperty]
@@ -161,7 +175,15 @@ public sealed partial class PacksViewModel : ObservableObject
             packs.AddRange(_library.ListDatapacks(_server.InstanceDir).Select(p => new InstalledPackViewModel(p)));
             _loading = true;
             ResourcePack = _library.GetResourcePack(_server.InstanceDir);
-            RequireResourcePack = ResourcePack?.Required ?? false;
+            var listed = _library.ListResourcePacks(_server.InstanceDir);
+            ResourcePacks.Clear();
+            for (var i = 0; i < listed.Count; i++)
+            {
+                ResourcePacks.Add(new ResourcePackItemViewModel(listed[i], i, listed.Count));
+            }
+
+            RequireResourcePack = HasResourcePack && PackLibrary.IsResourcePackRequired(_server.InstanceDir);
+            OnPropertyChanged(string.Empty);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
         {
@@ -212,6 +234,9 @@ public sealed partial class PacksViewModel : ObservableObject
         UseCommand.NotifyCanExecuteChanged();
         RemoveCommand.NotifyCanExecuteChanged();
         ClearResourcePackCommand.NotifyCanExecuteChanged();
+        MoveResourcePackUpCommand.NotifyCanExecuteChanged();
+        MoveResourcePackDownCommand.NotifyCanExecuteChanged();
+        RemoveResourcePackCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -275,7 +300,7 @@ public sealed partial class PacksViewModel : ObservableObject
         foreach (var result in Results)
         {
             result.IsInstalled = IsResourcePacks
-                ? ResourcePack?.Title == result.Title
+                ? ResourcePack?.Title == result.Title || ResourcePacks.Any(p => p.Entry.ProjectId == result.Hit.ProjectId)
                 : installed.Contains(result.Hit.ProjectId);
         }
 
@@ -306,8 +331,15 @@ public sealed partial class PacksViewModel : ObservableObject
         {
             try
             {
+                if (resource && _server.Metadata.VpsId is null)
+                {
+                    var change = await _library.AddResourcePackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress);
+                    return DescribeChange(string.Format(Text.Get("Packs_ResourcePackSet"), item.Title), change);
+                }
+
                 if (resource)
                 {
+                    // On a VPS the pack stays a single Modrinth link: WaNut cannot serve a merged zip from there yet.
                     await _library.SetResourcePackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, RequireResourcePack);
                     return string.Format(Text.Get("Packs_ResourcePackSet"), item.Title);
                 }
@@ -356,6 +388,69 @@ public sealed partial class PacksViewModel : ObservableObject
     }
 
     private bool CanRemove(InstalledPackViewModel? item) => item is not null && CanChange;
+
+    /// <summary>The message after a resource pack list change: the list's new state plus a warning when packs overlap.</summary>
+    private string DescribeChange(string message, ResourcePackChange change)
+    {
+        var count = _library.ListResourcePacks(_server.InstanceDir).Count;
+        if (count > 1)
+        {
+            message = string.Format(Text.Get("Packs_ResourcePackMerged"), message, count);
+        }
+
+        return change.Overlaps.Count == 0
+            ? message
+            : $"{message} {string.Format(Text.Get("Packs_ResourcePackOverlap"), change.Overlaps.Count, change.Overlaps[0].Path, change.Overlaps[0].Winner)}";
+    }
+
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private Task MoveResourcePackUpAsync(ResourcePackItemViewModel? item) => MoveResourcePackAsync(item, -1);
+
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private Task MoveResourcePackDownAsync(ResourcePackItemViewModel? item) => MoveResourcePackAsync(item, 1);
+
+    private async Task MoveResourcePackAsync(ResourcePackItemViewModel? item, int step)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        await RunAsync(Text.Get("Packs_Setting"), _ =>
+        {
+            try
+            {
+                var change = _library.MoveResourcePack(_server.InstanceDir, item.Entry.FileName, item.Index + step);
+                return Task.FromResult(DescribeChange(string.Format(Text.Get("Packs_ResourcePackMoved"), item.Name), change));
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
+            {
+                throw new PacksProblem(string.Format(Text.Get("Packs_SaveFailed"), e.Message));
+            }
+        });
+    }
+
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private async Task RemoveResourcePackAsync(ResourcePackItemViewModel? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        await RunAsync(Text.Get("Packs_Setting"), _ =>
+        {
+            try
+            {
+                var change = _library.RemoveResourcePack(_server.InstanceDir, item.Entry.FileName);
+                return Task.FromResult(DescribeChange(string.Format(Text.Get("Packs_ResourcePackCleared"), item.Name), change));
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
+            {
+                throw new PacksProblem(string.Format(Text.Get("Packs_SaveFailed"), e.Message));
+            }
+        });
+    }
 
     [RelayCommand(CanExecute = nameof(CanChange))]
     private async Task ClearResourcePackAsync()
@@ -433,6 +528,28 @@ public sealed partial class PacksViewModel : ObservableObject
 
     /// <summary>A failure already worded for the user.</summary>
     private sealed class PacksProblem(string message) : Exception(message);
+}
+
+/// <summary>One resource pack in the priority list; <paramref name="index"/> 0 is the top.</summary>
+public sealed class ResourcePackItemViewModel(ResourcePackEntry entry, int index, int count)
+{
+    public ResourcePackEntry Entry { get; } = entry;
+
+    public int Index { get; } = index;
+
+    public string Name => Entry.Title;
+
+    public string PositionText => (Index + 1).ToString(System.Globalization.CultureInfo.CurrentCulture);
+
+    public bool CanMoveUp => Index > 0;
+
+    public bool CanMoveDown => Index < count - 1;
+
+    public string AccessibleName => string.Format(Text.Get("Packs_ResourcePackRow"), PositionText, Name);
+
+    public string RemoveLabel => string.Format(Text.Get("Mods_RemoveLabel"), Name);
+
+    public override string ToString() => AccessibleName;
 }
 
 /// <summary>One zip or folder in the world's datapacks folder.</summary>
