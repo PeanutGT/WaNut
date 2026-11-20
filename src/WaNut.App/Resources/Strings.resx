@@ -4131,6 +4131,21 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Hotplug_NotRunning" xml:space="preserve">
     <value>The server isn't running on its VPS.</value>
   </data>
+  <data name="Hotplug_ReasonNotOnline" xml:space="preserve">
+    <value>Waiting: the server isn't online yet. These buttons unlock once it has finished starting on the VPS.</value>
+  </data>
+  <data name="Hotplug_ReasonNoProcess" xml:space="preserve">
+    <value>Waiting: WaNut isn't attached to this server's run on the VPS. Stop and start it from WaNut to change packs live.</value>
+  </data>
+  <data name="Hotplug_ReasonWatching" xml:space="preserve">
+    <value>Watch mode is on, so packs change by themselves. Untick it below to add or remove one by hand.</value>
+  </data>
+  <data name="Hotplug_ReasonBusy" xml:space="preserve">
+    <value>A change is already in progress. Wait for it to finish, or press Cancel.</value>
+  </data>
+  <data name="Hotplug_ReasonLoading" xml:space="preserve">
+    <value>Reading the pack list from the VPS. The buttons unlock when it is done.</value>
+  </data>
   <data name="Hotplug_WarnIntro" xml:space="preserve">
     <value>Some packs may not fully work right away. Hot-plug them anyway?</value>
   </data>

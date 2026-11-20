@@ -237,6 +237,7 @@ public sealed partial class PacksViewModel : ObservableObject
         OnPropertyChanged(nameof(CanChange));
         OnPropertyChanged(nameof(ShowStopToChange));
         Hotplug.OnServerStatusChanged();
+        OnPropertyChanged(nameof(StopToChangeText));
         UseCommand.NotifyCanExecuteChanged();
         RemoveCommand.NotifyCanExecuteChanged();
         ClearResourcePackCommand.NotifyCanExecuteChanged();
