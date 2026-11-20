@@ -4179,4 +4179,49 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Server_VpsPackPortManual" xml:space="preserve">
     <value>TCP 連接埠 {0} 在 VPS 上開放之前，玩家無法下載合併的資源包。請在 VPS 上執行下列指令，雲端服務商的防火牆也要開放：&#10;{1}</value>
   </data>
+  <data name="Packs_OwnUrl" xml:space="preserve">
+    <value>合併的資源包改用我自己的公開連結</value>
+  </data>
+  <data name="Packs_OwnUrlHelp" xml:space="preserve">
+    <value>不從這台電腦或 VPS 分享合併的 zip，改上傳到能提供直接下載連結的網站，再把連結貼在這裡。直接連結是指點下去就開始下載、而不是開啟網頁：Dropbox 連結結尾要有 dl=1（WaNut 會把 dl=0 幫你換掉），GitHub Releases、Cloudflare R2 等也有直接連結。SHA-1 由 WaNut 計算。更換資源包後，請重新上傳新的 zip，再按「檢查連結」。</value>
+  </data>
+  <data name="Packs_OwnUrlShowFile" xml:space="preserve">
+    <value>在資料夾中顯示 zip</value>
+  </data>
+  <data name="Packs_OwnUrlCopyPath" xml:space="preserve">
+    <value>複製 zip 路徑</value>
+  </data>
+  <data name="Packs_OwnUrlSave" xml:space="preserve">
+    <value>儲存連結</value>
+  </data>
+  <data name="Packs_OwnUrlCheck" xml:space="preserve">
+    <value>檢查連結</value>
+  </data>
+  <data name="Packs_OwnUrlInvalid" xml:space="preserve">
+    <value>這不是網址。請貼上以 http:// 或 https:// 開頭的連結。</value>
+  </data>
+  <data name="Packs_OwnUrlSaved" xml:space="preserve">
+    <value>已儲存連結。在儲存連結之前，WaNut 會自己分享資源包。</value>
+  </data>
+  <data name="Packs_OwnUrlChecking" xml:space="preserve">
+    <value>正在下載連結來比對…</value>
+  </data>
+  <data name="Packs_OwnUrlPathCopied" xml:space="preserve">
+    <value>已複製路徑。</value>
+  </data>
+  <data name="Server_PackLinkOk" xml:space="preserve">
+    <value>資源包連結已檢查：玩家會拿到目前合併的資源包。</value>
+  </data>
+  <data name="Server_PackLinkDifferent" xml:space="preserve">
+    <value>資源包連結不是目前合併的資源包（可能是舊的上傳）。請重新上傳 zip，否則玩家拿到的檔案與 SHA-1 不符，可能被拒絕。</value>
+  </data>
+  <data name="Server_PackLinkWebPage" xml:space="preserve">
+    <value>資源包連結打開的是網頁，不是檔案。請改用直接下載連結（Dropbox 要以 dl=1 結尾）。</value>
+  </data>
+  <data name="Server_PackLinkUnreachable" xml:space="preserve">
+    <value>無法下載資源包連結：{0}</value>
+  </data>
+  <data name="Status_VpsPackAddress" xml:space="preserve">
+    <value>正在把資源包連結寫進 VPS…</value>
+  </data>
 </root>

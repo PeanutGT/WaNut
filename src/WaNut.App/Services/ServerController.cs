@@ -267,6 +267,21 @@ public sealed class ServerController(
             return;
         }
 
+        if (packs.GetCustomPackUrl(server.InstanceDir) is { } custom)
+        {
+            try
+            {
+                PackLibrary.PointMergedPackAt(Path.Combine(server.InstanceDir, GameSettingsStore.PropertiesFileName), zip, custom, PackLibrary.IsResourcePackRequired(server.InstanceDir));
+                _ = CheckCustomPackUrlAsync(server);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                server.ShowConsoleNote(string.Format(Text.Get("Server_PackHostFailed"), e.Message));
+            }
+
+            return;
+        }
+
         if (ResourcePackAddress.Pick(LocalAddresses.Get()) is not { } address)
         {
             server.ShowConsoleNote(Text.Get("Server_PackNoAddress"));
@@ -303,6 +318,12 @@ public sealed class ServerController(
             return;
         }
 
+        if (packs.GetCustomPackUrl(server.InstanceDir) is { } custom)
+        {
+            await PointVpsPackAtCustomUrlAsync(server, vps, zip, custom);
+            return;
+        }
+
         server.VpsText = Text.Get("Status_VpsPackHost");
         try
         {
@@ -332,6 +353,44 @@ public sealed class ServerController(
         {
             server.VpsText = null;
         }
+    }
+
+    /// <summary>The user hosts the merged pack: nothing is uploaded or opened, only the VPS's server.properties changes.</summary>
+    private async Task PointVpsPackAtCustomUrlAsync(ServerViewModel server, VpsProfile vps, string zip, Uri custom)
+    {
+        server.VpsText = Text.Get("Status_VpsPackAddress");
+        try
+        {
+            if (server.Metadata.KeepFilesOnVps)
+            {
+                await vpsSettings.PullAsync(server.Id, vps);
+            }
+
+            PackLibrary.PointMergedPackAt(Path.Combine(server.InstanceDir, GameSettingsStore.PropertiesFileName), zip, custom, PackLibrary.IsResourcePackRequired(server.InstanceDir));
+            await vpsSettings.PushAsync(server.Id, vps);
+            _ = CheckCustomPackUrlAsync(server);
+        }
+        catch (Exception e) when (IsVpsProblem(e) || e is FileNotFoundException)
+        {
+            server.ShowConsoleNote(string.Format(Text.Get("Server_PackHostFailed"), VpsMessage(e)));
+        }
+        finally
+        {
+            server.VpsText = null;
+        }
+    }
+
+    /// <summary>Downloads the user's link in the background and says in the console when players would not get this zip.</summary>
+    private async Task CheckCustomPackUrlAsync(ServerViewModel server)
+    {
+        var check = await packs.CheckCustomPackUrlAsync(server.InstanceDir);
+        server.ShowConsoleNote(check.Status switch
+        {
+            ResourcePackLinkStatus.Match => Text.Get("Server_PackLinkOk"),
+            ResourcePackLinkStatus.Different => Text.Get("Server_PackLinkDifferent"),
+            ResourcePackLinkStatus.WebPage => Text.Get("Server_PackLinkWebPage"),
+            _ => string.Format(Text.Get("Server_PackLinkUnreachable"), check.Detail),
+        });
     }
 
     /// <summary>Lets the pack download port through the VPS's firewall, by the same answer the game port got; otherwise tells which commands to run.</summary>

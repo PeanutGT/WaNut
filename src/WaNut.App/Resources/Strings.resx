@@ -4199,4 +4199,49 @@ WaNut shares it from this PC while the server runs. Windows will ask for adminis
   <data name="Server_VpsPackPortManual" xml:space="preserve">
     <value>Players can't download the merged resource pack until TCP port {0} is open on the VPS. Run these commands there, and in the cloud provider's firewall too:&#10;{1}</value>
   </data>
+  <data name="Packs_OwnUrl" xml:space="preserve">
+    <value>Use my own public link for the merged pack</value>
+  </data>
+  <data name="Packs_OwnUrlHelp" xml:space="preserve">
+    <value>Instead of sharing the merged zip from this PC or your VPS, upload it to a site that gives a direct download link and paste that link here. A direct link starts the download itself instead of opening a web page: Dropbox links need dl=1 at the end (WaNut changes dl=0 for you), GitHub Releases, Cloudflare R2 and similar hosts give direct links. WaNut checks the zip's SHA-1 for you. When you change the packs, upload the new zip again, then use Check link.</value>
+  </data>
+  <data name="Packs_OwnUrlShowFile" xml:space="preserve">
+    <value>Show zip in folder</value>
+  </data>
+  <data name="Packs_OwnUrlCopyPath" xml:space="preserve">
+    <value>Copy zip path</value>
+  </data>
+  <data name="Packs_OwnUrlSave" xml:space="preserve">
+    <value>Save link</value>
+  </data>
+  <data name="Packs_OwnUrlCheck" xml:space="preserve">
+    <value>Check link</value>
+  </data>
+  <data name="Packs_OwnUrlInvalid" xml:space="preserve">
+    <value>That isn't a web address. Paste a link that starts with http:// or https://.</value>
+  </data>
+  <data name="Packs_OwnUrlSaved" xml:space="preserve">
+    <value>Link saved. Until you save one, WaNut shares the pack itself.</value>
+  </data>
+  <data name="Packs_OwnUrlChecking" xml:space="preserve">
+    <value>Downloading the link to compare it…</value>
+  </data>
+  <data name="Packs_OwnUrlPathCopied" xml:space="preserve">
+    <value>Path copied.</value>
+  </data>
+  <data name="Server_PackLinkOk" xml:space="preserve">
+    <value>Resource pack link checked: players get the current merged pack.</value>
+  </data>
+  <data name="Server_PackLinkDifferent" xml:space="preserve">
+    <value>Resource pack link is not the current merged pack (an older upload?). Upload the zip again, or players get a pack that does not match its SHA-1 and may be refused.</value>
+  </data>
+  <data name="Server_PackLinkWebPage" xml:space="preserve">
+    <value>Resource pack link opens a web page, not the file. Use a direct download link (for Dropbox, end it with dl=1).</value>
+  </data>
+  <data name="Server_PackLinkUnreachable" xml:space="preserve">
+    <value>Could not download the resource pack link: {0}</value>
+  </data>
+  <data name="Status_VpsPackAddress" xml:space="preserve">
+    <value>Writing the resource pack link to the VPS…</value>
+  </data>
 </root>

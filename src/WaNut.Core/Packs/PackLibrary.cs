@@ -11,7 +11,7 @@ namespace WaNut.Core.Packs;
 /// The server's data packs (zips or folders in the world's datapacks folder) and the resource pack server.properties
 /// offers players on join, both from Modrinth. Works for every server type, Vanilla too.
 /// </summary>
-public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader downloader)
+public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader downloader, HttpClient? http = null)
 {
     public const string RecordsFileName = "installed-packs.json";
 
@@ -158,6 +158,7 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
         }
 
         records.ResourcePacks.Clear();
+        records.CustomPackUrl = null;
         File.Delete(MergedPackPath(instanceDir));
         WriteRecords(instanceDir, records);
     }
@@ -239,6 +240,30 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
     public string? GetMergedPackPath(string instanceDir) =>
         ReadRecords(instanceDir).ResourcePacks.Count >= 2 && File.Exists(MergedPackPath(instanceDir)) ? MergedPackPath(instanceDir) : null;
 
+    /// <summary>The public address the user uploaded the merged pack to, or null when WaNut serves it itself.</summary>
+    public Uri? GetCustomPackUrl(string instanceDir) =>
+        ReadRecords(instanceDir).CustomPackUrl is { } text ? ResourcePackLink.Parse(text) : null;
+
+    /// <summary>Chooses where players download the merged pack: <paramref name="url"/>, or null for WaNut's own sharing.</summary>
+    public void SetCustomPackUrl(string instanceDir, Uri? url)
+    {
+        var records = ReadRecords(instanceDir);
+        records.CustomPackUrl = url?.AbsoluteUri;
+        WriteRecords(instanceDir, records);
+    }
+
+    /// <summary>Downloads the user's own link and compares it with the merged zip, so a stale upload or a share page is noticed.</summary>
+    /// <exception cref="InvalidOperationException">No link is saved, there is no merged pack, or this library has no HTTP client.</exception>
+    public Task<ResourcePackLinkCheck> CheckCustomPackUrlAsync(string instanceDir, CancellationToken cancellationToken = default)
+    {
+        if (http is null || GetCustomPackUrl(instanceDir) is not { } url || GetMergedPackPath(instanceDir) is not { } zip)
+        {
+            throw new InvalidOperationException("There is no link and merged pack to check.");
+        }
+
+        return ResourcePackLink.CheckAsync(http, url, ResourcePackLink.Sha1Of(zip), cancellationToken);
+    }
+
     /// <summary>Points server.properties at where the merged pack is served now. Only call while the server is stopped.</summary>
     public void PointResourcePackAt(string instanceDir, Uri url)
     {
@@ -254,15 +279,9 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
     /// <exception cref="FileNotFoundException">There is no merged pack.</exception>
     public static void PointMergedPackAt(string propertiesPath, string mergedZipPath, Uri url, bool required)
     {
-        string sha1;
-        using (var file = File.OpenRead(mergedZipPath))
-        {
-            sha1 = Convert.ToHexStringLower(System.Security.Cryptography.SHA1.HashData(file));
-        }
-
         var properties = PropertiesFile.Load(propertiesPath);
         properties.Set("resource-pack", url.AbsoluteUri);
-        properties.Set("resource-pack-sha1", sha1);
+        properties.Set("resource-pack-sha1", ResourcePackLink.Sha1Of(mergedZipPath));
         properties.Set("require-resource-pack", required ? "true" : "false");
         properties.Save(propertiesPath);
     }
@@ -371,6 +390,9 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
 
         /// <summary>The resource packs in priority order, first wins.</summary>
         public List<ResourcePackEntry> ResourcePacks { get; set; } = [];
+
+        /// <summary>Where the user hosts the merged pack; null means WaNut serves it while the server runs.</summary>
+        public string? CustomPackUrl { get; set; }
     }
 
     private sealed record ResourcePackRecord(string ProjectId, string Title, string Url);

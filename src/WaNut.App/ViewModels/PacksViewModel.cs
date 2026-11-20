@@ -23,12 +23,14 @@ public sealed partial class PacksViewModel : ObservableObject
     private readonly ServerViewModel _server;
     private readonly PackLibrary _library;
     private readonly IDialogService _dialogs;
+    private readonly IClipboardService _clipboard;
     private CancellationTokenSource? _search;
     private bool _searched;
     private bool _loading;
 
-    public PacksViewModel(ServerViewModel server, PackLibrary library, IDialogService dialogs, HotplugViewModel hotplug)
+    public PacksViewModel(ServerViewModel server, PackLibrary library, IDialogService dialogs, IClipboardService clipboard, HotplugViewModel hotplug)
     {
+        _clipboard = clipboard;
         _server = server;
         _library = library;
         _dialogs = dialogs;
@@ -183,6 +185,9 @@ public sealed partial class PacksViewModel : ObservableObject
             }
 
             RequireResourcePack = HasResourcePack && PackLibrary.IsResourcePackRequired(_server.InstanceDir);
+            var custom = _library.GetCustomPackUrl(_server.InstanceDir);
+            UseOwnUrl = custom is not null || (UseOwnUrl && listed.Count > 1);
+            OwnUrlText = custom?.AbsoluteUri ?? string.Empty;
             OnPropertyChanged(string.Empty);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
@@ -461,6 +466,117 @@ public sealed partial class PacksViewModel : ObservableObject
                 throw new PacksProblem(string.Format(Text.Get("Packs_SaveFailed"), e.Message));
             }
         });
+    }
+
+    /// <summary>The merged pack can be hosted at the user's own public link instead of being shared from this PC or the VPS.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowOwnUrl))]
+    private bool _useOwnUrl;
+
+    [ObservableProperty]
+    private string _ownUrlText = string.Empty;
+
+    [ObservableProperty]
+    private string? _ownUrlStatus;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckOwnUrlCommand))]
+    private bool _isCheckingUrl;
+
+    public bool ShowOwnUrl => ShowMergeHint && UseOwnUrl;
+
+    partial void OnUseOwnUrlChanged(bool value)
+    {
+        if (_loading || value)
+        {
+            return;
+        }
+
+        try
+        {
+            _library.SetCustomPackUrl(_server.InstanceDir, null);
+            OwnUrlText = string.Empty;
+            OwnUrlStatus = null;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            ErrorText = string.Format(Text.Get("Packs_SaveFailed"), e.Message);
+        }
+    }
+
+    [RelayCommand]
+    private void SaveOwnUrl()
+    {
+        ErrorText = null;
+        if (ResourcePackLink.Parse(OwnUrlText) is not { } url)
+        {
+            OwnUrlStatus = Text.Get("Packs_OwnUrlInvalid");
+            return;
+        }
+
+        try
+        {
+            _library.SetCustomPackUrl(_server.InstanceDir, url);
+            // Shows what was saved, so a Dropbox link visibly becomes dl=1.
+            OwnUrlText = url.AbsoluteUri;
+            OwnUrlStatus = Text.Get("Packs_OwnUrlSaved");
+            CheckOwnUrlCommand.NotifyCanExecuteChanged();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            ErrorText = string.Format(Text.Get("Packs_SaveFailed"), e.Message);
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCheckOwnUrl))]
+    private async Task CheckOwnUrlAsync()
+    {
+        IsCheckingUrl = true;
+        OwnUrlStatus = Text.Get("Packs_OwnUrlChecking");
+        try
+        {
+            var check = await _library.CheckCustomPackUrlAsync(_server.InstanceDir);
+            OwnUrlStatus = check.Status switch
+            {
+                ResourcePackLinkStatus.Match => Text.Get("Server_PackLinkOk"),
+                ResourcePackLinkStatus.Different => Text.Get("Server_PackLinkDifferent"),
+                ResourcePackLinkStatus.WebPage => Text.Get("Server_PackLinkWebPage"),
+                _ => string.Format(Text.Get("Server_PackLinkUnreachable"), check.Detail),
+            };
+        }
+        catch (Exception e) when (e is InvalidOperationException or IOException)
+        {
+            OwnUrlStatus = e.Message;
+        }
+        finally
+        {
+            IsCheckingUrl = false;
+        }
+    }
+
+    private bool CanCheckOwnUrl() => !IsCheckingUrl && _library.GetCustomPackUrl(_server.InstanceDir) is not null;
+
+    [RelayCommand]
+    private void ShowMergedPack()
+    {
+        try
+        {
+            var path = PackLibrary.MergedPackPath(_server.InstanceDir);
+            Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{path}\"") { UseShellExecute = true });
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception)
+        {
+            ErrorText = string.Format(Text.Get("Mods_OpenFailed"), e.Message);
+        }
+    }
+
+    [RelayCommand]
+    private void CopyMergedPackPath()
+    {
+        if (_clipboard.TrySetText(PackLibrary.MergedPackPath(_server.InstanceDir)))
+        {
+            OwnUrlStatus = Text.Get("Packs_OwnUrlPathCopied");
+        }
     }
 
     [RelayCommand]

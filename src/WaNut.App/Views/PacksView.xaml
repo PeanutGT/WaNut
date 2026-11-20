@@ -273,6 +273,21 @@
           </ItemsControl>
           <TextBlock Text="{res:Text Packs_MergeHint}" Style="{StaticResource Hint}" Margin="0,6,0,0"
                      Visibility="{Binding ShowMergeHint, Converter={StaticResource Visible}}" />
+          <CheckBox Content="{res:Text Packs_OwnUrl}" IsChecked="{Binding UseOwnUrl}" Margin="0,8,0,0"
+                    Visibility="{Binding ShowMergeHint, Converter={StaticResource Visible}}" />
+          <StackPanel Margin="20,6,0,0" Visibility="{Binding ShowOwnUrl, Converter={StaticResource Visible}}">
+            <TextBlock Text="{res:Text Packs_OwnUrlHelp}" Style="{StaticResource Hint}" />
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+              <Button Content="{res:Text Packs_OwnUrlShowFile}" Command="{Binding ShowMergedPackCommand}" Padding="12,3" />
+              <Button Content="{res:Text Packs_OwnUrlCopyPath}" Command="{Binding CopyMergedPackPathCommand}" Padding="12,3" Margin="6,0,0,0" />
+            </StackPanel>
+            <DockPanel Margin="0,6,0,0">
+              <Button DockPanel.Dock="Right" Content="{res:Text Packs_OwnUrlSave}" Command="{Binding SaveOwnUrlCommand}" Padding="12,3" Margin="6,0,0,0" />
+              <TextBox Text="{Binding OwnUrlText, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="{res:Text Packs_OwnUrl}" />
+            </DockPanel>
+            <Button Content="{res:Text Packs_OwnUrlCheck}" Command="{Binding CheckOwnUrlCommand}" Padding="12,3" HorizontalAlignment="Left" Margin="0,6,0,0" />
+            <TextBlock Text="{Binding OwnUrlStatus}" Style="{StaticResource Hint}" Margin="0,6,0,0" />
+          </StackPanel>
           <Button Content="{res:Text Packs_ClearResourcePack}" Command="{Binding ClearResourcePackCommand}" Padding="12,3" HorizontalAlignment="Left" Margin="0,6,0,0" />
         </StackPanel>
         <CheckBox Content="{res:Text Packs_Require}" IsChecked="{Binding RequireResourcePack}" IsEnabled="{Binding CanChange}" Margin="0,6,0,0" />
