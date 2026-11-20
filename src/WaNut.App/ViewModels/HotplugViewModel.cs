@@ -119,6 +119,7 @@ public sealed partial class HotplugViewModel : ObservableObject
     internal void OnServerStatusChanged()
     {
         OnPropertyChanged(nameof(IsAvailable));
+        NotifyCommands();
         if (IsAvailable)
         {
             if (_connection is null && _opening is null)
@@ -130,6 +131,14 @@ public sealed partial class HotplugViewModel : ObservableObject
         }
 
         Close();
+    }
+
+    // CanExecute reads IsAvailable, which follows the server status, so the buttons must be re-checked when it moves.
+    private void NotifyCommands()
+    {
+        AddCommand.NotifyCanExecuteChanged();
+        RemoveCommand.NotifyCanExecuteChanged();
+        RefreshCommand.NotifyCanExecuteChanged();
     }
 
     internal void OnShown()

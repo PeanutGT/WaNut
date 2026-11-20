@@ -144,6 +144,9 @@ public sealed partial class PacksViewModel : ObservableObject
 
     public bool ShowStopToChange => _server.IsRunning;
 
+    /// <summary>On a running VPS server the live panel below changes packs without a stop, so the banner says what still needs one.</summary>
+    public string StopToChangeText => Text.Get(Hotplug.IsAvailable ? "Packs_StopToChangeVps" : "Packs_StopToChange");
+
     public bool CanLoadMore => Results.Count < TotalHits;
 
     public bool ShowNoResults => _searched && !IsSearching && Results.Count == 0;

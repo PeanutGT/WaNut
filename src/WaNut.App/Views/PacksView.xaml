@@ -61,7 +61,7 @@
     <StackPanel MaxWidth="640" HorizontalAlignment="Left" Margin="3,3,18,18">
       <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,12"
               Visibility="{Binding ShowStopToChange, Converter={StaticResource Visible}}">
-        <TextBlock Text="{res:Text Packs_StopToChange}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding StopToChangeText}" TextWrapping="Wrap" />
       </Border>
 
       <StackPanel Margin="0,0,0,12" Visibility="{Binding IsWorking, Converter={StaticResource Visible}}">
