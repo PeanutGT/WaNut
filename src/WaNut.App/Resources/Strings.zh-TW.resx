@@ -4170,4 +4170,13 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Server_PackHostFailed" xml:space="preserve">
     <value>無法分享合併的資源包：{0}</value>
   </data>
+  <data name="Status_VpsPackHost" xml:space="preserve">
+    <value>正在把合併的資源包傳到 VPS…</value>
+  </data>
+  <data name="Server_VpsPackNoWebServer" xml:space="preserve">
+    <value>合併的資源包沒有分享：VPS 上沒有 python3 或 BusyBox 可以提供下載。請在 VPS 安裝 python3 後再啟動。</value>
+  </data>
+  <data name="Server_VpsPackPortManual" xml:space="preserve">
+    <value>TCP 連接埠 {0} 在 VPS 上開放之前，玩家無法下載合併的資源包。請在 VPS 上執行下列指令，雲端服務商的防火牆也要開放：&#10;{1}</value>
+  </data>
 </root>

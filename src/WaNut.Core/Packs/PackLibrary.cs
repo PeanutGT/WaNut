@@ -247,6 +247,26 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
         properties.Save(PropertiesPath(instanceDir));
     }
 
+    /// <summary>
+    /// Points a server.properties at the merged pack for a VPS server: the address, the zip's SHA-1 and whether it is
+    /// required. All three are written because the VPS's own copy of the file may be older than this PC's records.
+    /// </summary>
+    /// <exception cref="FileNotFoundException">There is no merged pack.</exception>
+    public static void PointMergedPackAt(string propertiesPath, string mergedZipPath, Uri url, bool required)
+    {
+        string sha1;
+        using (var file = File.OpenRead(mergedZipPath))
+        {
+            sha1 = Convert.ToHexStringLower(System.Security.Cryptography.SHA1.HashData(file));
+        }
+
+        var properties = PropertiesFile.Load(propertiesPath);
+        properties.Set("resource-pack", url.AbsoluteUri);
+        properties.Set("resource-pack-sha1", sha1);
+        properties.Set("require-resource-pack", required ? "true" : "false");
+        properties.Save(propertiesPath);
+    }
+
     private async Task<ResourcePackEntry> DownloadResourcePackAsync(
         string instanceDir, string gameVersion, string projectId, string title, IProgress<double>? progress, CancellationToken cancellationToken)
     {

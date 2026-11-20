@@ -115,6 +115,7 @@ public partial class App : Application
         services.AddSingleton<SecretStore>();
         services.AddSingleton<VpsConnector>();
         services.AddSingleton<VpsSettingsSync>();
+        services.AddSingleton<VpsPackHost>();
         services.AddSingleton<VpsTester>();
         services.AddSingleton(sp => new DiscordCheck(sp.GetRequiredService<HttpClient>()));
         services.AddSingleton<IBridgeBinarySource>(sp => new BridgeBinarySource(sp.GetRequiredService<LauncherPaths>()));

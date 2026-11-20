@@ -4190,4 +4190,13 @@ WaNut shares it from this PC while the server runs. Windows will ask for adminis
   <data name="Server_PackHostFailed" xml:space="preserve">
     <value>Could not share the merged resource pack: {0}</value>
   </data>
+  <data name="Status_VpsPackHost" xml:space="preserve">
+    <value>Sending the merged resource pack to the VPS…</value>
+  </data>
+  <data name="Server_VpsPackNoWebServer" xml:space="preserve">
+    <value>Merged resource pack not shared: the VPS has neither python3 nor BusyBox to serve it. Install python3 on the VPS and start again.</value>
+  </data>
+  <data name="Server_VpsPackPortManual" xml:space="preserve">
+    <value>Players can't download the merged resource pack until TCP port {0} is open on the VPS. Run these commands there, and in the cloud provider's firewall too:&#10;{1}</value>
+  </data>
 </root>
