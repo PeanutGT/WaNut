@@ -61,7 +61,8 @@ public sealed partial class PacksViewModel : ObservableObject
     /// <summary>A pack set by hand or by an older WaNut, outside the list.</summary>
     public bool ShowSingleResourcePack => ResourcePack is not null && ResourcePacks.Count == 0;
 
-    public bool ShowMergeHint => ResourcePacks.Count > 1;
+    /// <summary>The pack players get is WaNut's merged zip: two or more packs, or a pack from this PC.</summary>
+    public bool ShowMergeHint => ResourcePacks.Count > 1 || ResourcePacks.Any(p => PackLibrary.IsLocalPack(p.Entry));
 
     public string ResourcePackName => ResourcePack?.Title ?? ResourcePack?.Url ?? string.Empty;
 
@@ -186,7 +187,7 @@ public sealed partial class PacksViewModel : ObservableObject
 
             RequireResourcePack = HasResourcePack && PackLibrary.IsResourcePackRequired(_server.InstanceDir);
             var custom = _library.GetCustomPackUrl(_server.InstanceDir);
-            UseOwnUrl = custom is not null || (UseOwnUrl && listed.Count > 1);
+            UseOwnUrl = custom is not null || (UseOwnUrl && ShowMergeHint);
             OwnUrlText = custom?.AbsoluteUri ?? string.Empty;
             OnPropertyChanged(string.Empty);
         }
@@ -358,6 +359,51 @@ public sealed partial class PacksViewModel : ObservableObject
             {
                 throw new PacksProblem(string.Format(Text.Get("Mods_InstallFailed"), item.Title, e.Message));
             }
+        });
+    }
+
+    /// <summary>Resource pack zips from this PC: picked in a dialog (no paths) or dropped on the tab.</summary>
+    [RelayCommand(CanExecute = nameof(CanChange))]
+    private Task AddLocalResourcePacksAsync() => AddLocalResourcePacksAsync(_dialogs.PickResourcePackZips());
+
+    public bool CanDrop => CanChange;
+
+    public async Task AddLocalResourcePacksAsync(IReadOnlyList<string> paths)
+    {
+        var zips = paths.Where(p => p.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)).ToList();
+        if (zips.Count == 0 || !CanChange)
+        {
+            return;
+        }
+
+        await RunAsync(Text.Get("Packs_Setting"), async _ =>
+        {
+            var done = new List<string>();
+            ResourcePackChange? last = null;
+            try
+            {
+                foreach (var zip in zips)
+                {
+                    var change = await _library.AddLocalResourcePackAsync(_server.InstanceDir, _server.Metadata.MinecraftVersion, zip);
+                    if (change.Changed)
+                    {
+                        last = change;
+                        done.Add(Path.GetFileNameWithoutExtension(zip));
+                    }
+                }
+            }
+            catch (NoCompatibleVersionException e)
+            {
+                throw new PacksProblem(string.Format(Text.Get("Packs_NoVersion"), e.Message, _server.Metadata.MinecraftVersion));
+            }
+            catch (Exception e) when (e is InvalidDataException or IOException or UnauthorizedAccessException)
+            {
+                throw new PacksProblem(string.Format(Text.Get("Packs_LocalAddFailed"), e.Message));
+            }
+
+            return last is null
+                ? Text.Get("Packs_LocalAlreadyAdded")
+                : DescribeChange(string.Format(Text.Get("Packs_ResourcePackSet"), string.Join(", ", done)), last);
         });
     }
 
@@ -646,7 +692,7 @@ public sealed class ResourcePackItemViewModel(ResourcePackEntry entry, int index
 
     public int Index { get; } = index;
 
-    public string Name => Entry.Title;
+    public string Name => PackLibrary.IsLocalPack(Entry) ? $"{Entry.Title} ({Text.Get("Packs_LocalTag")})" : Entry.Title;
 
     public string PositionText => (Index + 1).ToString(System.Globalization.CultureInfo.CurrentCulture);
 

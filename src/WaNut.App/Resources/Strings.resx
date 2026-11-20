@@ -4247,4 +4247,22 @@ WaNut shares it from this PC while the server runs. Windows will ask for adminis
   <data name="Server_VpsPackUnreachable" xml:space="preserve">
     <value>This PC can't reach TCP port {0} on the VPS, so players can't download the merged resource pack. Open TCP {0} (or 25800-25899) in the cloud provider's own firewall (security list, security group or firewall rules).</value>
   </data>
+  <data name="Packs_AddLocal" xml:space="preserve">
+    <value>Add my own resource pack…</value>
+  </data>
+  <data name="Packs_AddLocalHint" xml:space="preserve">
+    <value>Pick a .zip from this PC, or drop it here. It is copied into the server and shared in the merged zip, so friends need to reach this PC (or your own public link below).</value>
+  </data>
+  <data name="Packs_PickResourcePackTitle" xml:space="preserve">
+    <value>Pick resource pack zip files</value>
+  </data>
+  <data name="Packs_LocalAddFailed" xml:space="preserve">
+    <value>Couldn't add that resource pack: {0}</value>
+  </data>
+  <data name="Packs_LocalAlreadyAdded" xml:space="preserve">
+    <value>That resource pack is already in the list.</value>
+  </data>
+  <data name="Packs_LocalTag" xml:space="preserve">
+    <value>from this PC</value>
+  </data>
 </root>

@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text.Json;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
@@ -202,6 +203,73 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
         return ApplyResourcePacks(instanceDir, records);
     }
 
+    /// <summary>
+    /// Adds a resource pack zip from this PC at the bottom of the list (lowest priority): the zip is copied into the
+    /// server's resourcepacks folder. A pack with no Modrinth address always goes out as WaNut's merged zip, even
+    /// alone, so players download it from WaNut's sharing or the user's own link. The same file added twice is
+    /// ignored. Only call while the server is stopped.
+    /// </summary>
+    /// <exception cref="InvalidDataException">The file is not a zip, or has no pack.mcmeta at its top.</exception>
+    /// <exception cref="NoCompatibleVersionException">An older single Modrinth pack that has to join has no version for this Minecraft version.</exception>
+    public async Task<ResourcePackChange> AddLocalResourcePackAsync(
+        string instanceDir, string gameVersion, string zipPath, CancellationToken cancellationToken = default)
+    {
+        var sha1 = ResourcePackLink.Sha1Of(zipPath);
+        var records = ReadRecords(instanceDir);
+        var projectId = LocalProjectPrefix + sha1[..12];
+        if (records.ResourcePacks.Any(p => p.ProjectId == projectId))
+        {
+            return new ResourcePackChange(false, []);
+        }
+
+        var name = Path.GetFileName(zipPath);
+        CheckIsResourcePack(zipPath, name);
+        var title = Path.GetFileNameWithoutExtension(name);
+        var fileName = LocalFileName(projectId, name);
+        Directory.CreateDirectory(ResourcePacksDir(instanceDir));
+        File.Copy(zipPath, Path.Combine(ResourcePacksDir(instanceDir), fileName), overwrite: true);
+
+        if (records.ResourcePacks.Count == 0 && records.ResourcePack is { } old)
+        {
+            records.ResourcePacks.Add(await DownloadResourcePackAsync(instanceDir, gameVersion, old.ProjectId, old.Title, null, cancellationToken).ConfigureAwait(false));
+        }
+
+        records.ResourcePacks.Add(new ResourcePackEntry(fileName, projectId, title, string.Empty, sha1));
+        return ApplyResourcePacks(instanceDir, records);
+    }
+
+    /// <summary>Whether this pack has no Modrinth address, so it can only be offered inside WaNut's own zip.</summary>
+    public static bool IsLocalPack(ResourcePackEntry pack) => pack.Url.Length == 0;
+
+    private const string LocalProjectPrefix = "local-";
+
+    private static string LocalFileName(string projectId, string name)
+    {
+        var clean = new string([.. name.Select(c => Path.GetInvalidFileNameChars().Contains(c) || c is ':' or '*' or '?' or '"' or '<' or '>' or '|' or '/' or '\\' ? '_' : c)]).TrimStart('.').Trim();
+        if (!clean.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            clean += ".zip";
+        }
+
+        return $"{projectId}-{clean}";
+    }
+
+    private static void CheckIsResourcePack(string zipPath, string name)
+    {
+        try
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+            if (archive.GetEntry("pack.mcmeta") is null)
+            {
+                throw new InvalidDataException($"{name} has no pack.mcmeta at its top, so it is not a resource pack.");
+            }
+        }
+        catch (InvalidDataException e) when (!e.Message.Contains("pack.mcmeta", StringComparison.Ordinal))
+        {
+            throw new InvalidDataException($"{name} is not a zip file.", e);
+        }
+    }
+
     /// <summary>Moves a pack to <paramref name="newIndex"/>; index 0 has the top priority.</summary>
     public ResourcePackChange MoveResourcePack(string instanceDir, string fileName, int newIndex)
     {
@@ -236,9 +304,11 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
         return ApplyResourcePacks(instanceDir, records);
     }
 
-    /// <summary>The merged zip when two or more packs are merged, else null.</summary>
+    private static bool NeedsMergedZip(List<ResourcePackEntry> packs) => packs.Count >= 2 || packs.Exists(IsLocalPack);
+
+    /// <summary>The merged zip when two or more packs are merged or the only pack is one from this PC, else null.</summary>
     public string? GetMergedPackPath(string instanceDir) =>
-        ReadRecords(instanceDir).ResourcePacks.Count >= 2 && File.Exists(MergedPackPath(instanceDir)) ? MergedPackPath(instanceDir) : null;
+        NeedsMergedZip(ReadRecords(instanceDir).ResourcePacks) && File.Exists(MergedPackPath(instanceDir)) ? MergedPackPath(instanceDir) : null;
 
     /// <summary>The public address the user uploaded the merged pack to, or null when WaNut serves it itself.</summary>
     public Uri? GetCustomPackUrl(string instanceDir) =>
@@ -313,7 +383,7 @@ public sealed class PackLibrary(ModrinthClient modrinth, FileDownloader download
         var packs = records.ResourcePacks;
         IReadOnlyList<ResourcePackOverlap> overlaps = [];
         records.ResourcePack = null;
-        switch (packs.Count)
+        switch (NeedsMergedZip(packs) ? 2 : packs.Count)
         {
             case 0:
                 WriteResourcePack(instanceDir, new ServerResourcePack(string.Empty, string.Empty, false));

@@ -211,4 +211,105 @@ public sealed class ResourcePackListTests : IDisposable
         Assert.Equal(lan.Address, ResourcePackAddress.Pick([lan]));
         Assert.Null(ResourcePackAddress.Pick([]));
     }
+
+    private string MakeLocalZip(string fileName, bool withMcmeta = true, string content = "local")
+    {
+        var path = Path.Combine(_dir.Path, "incoming-" + fileName);
+        using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
+        using (var writer = new StreamWriter(archive.CreateEntry(withMcmeta ? "pack.mcmeta" : "readme.txt").Open()))
+        {
+            writer.Write(content);
+        }
+
+        return path;
+    }
+
+    [Fact]
+    public async Task AddLocalResourcePackAsync_OnlyPack_IsMergedZipWithItsSha1AndNoUrl()
+    {
+        var zip = MakeLocalZip("My Pack.zip");
+
+        var change = await _library.AddLocalResourcePackAsync(_dir.Path, Game, zip);
+
+        Assert.True(change.Changed);
+        var entry = Assert.Single(_library.ListResourcePacks(_dir.Path));
+        Assert.Equal("incoming-My Pack", entry.Title);
+        Assert.True(PackLibrary.IsLocalPack(entry));
+        Assert.True(File.Exists(Path.Combine(PackLibrary.ResourcePacksDir(_dir.Path), entry.FileName)));
+        var merged = _library.GetMergedPackPath(_dir.Path)!;
+        Assert.NotNull(merged);
+        Assert.Contains($"resource-pack-sha1={ResourcePackLink.Sha1Of(merged)}", Properties, StringComparison.Ordinal);
+        Assert.DoesNotContain("modrinth", Properties, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task AddLocalResourcePackAsync_SameFileTwice_DoesNothing()
+    {
+        var zip = MakeLocalZip("a.zip");
+        await _library.AddLocalResourcePackAsync(_dir.Path, Game, zip);
+
+        var again = await _library.AddLocalResourcePackAsync(_dir.Path, Game, zip);
+
+        Assert.False(again.Changed);
+        Assert.Single(_library.ListResourcePacks(_dir.Path));
+    }
+
+    [Fact]
+    public async Task AddLocalResourcePackAsync_NoMcmeta_ThrowsAndChangesNothing()
+    {
+        var zip = MakeLocalZip("bad.zip", withMcmeta: false);
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => _library.AddLocalResourcePackAsync(_dir.Path, Game, zip));
+
+        Assert.Empty(_library.ListResourcePacks(_dir.Path));
+        Assert.Null(_library.GetMergedPackPath(_dir.Path));
+    }
+
+    [Fact]
+    public async Task AddLocalResourcePackAsync_NotAZip_Throws()
+    {
+        var path = Path.Combine(_dir.Path, "text.zip");
+        File.WriteAllText(path, "hello");
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => _library.AddLocalResourcePackAsync(_dir.Path, Game, path));
+    }
+
+    [Fact]
+    public async Task AddLocalResourcePackAsync_AfterModrinthPack_Merges()
+    {
+        AddPack("a", "assets/x.txt", "from-a");
+        await _library.AddResourcePackAsync(_dir.Path, Game, "a", "Pack A");
+
+        await _library.AddLocalResourcePackAsync(_dir.Path, Game, MakeLocalZip("mine.zip"));
+
+        Assert.Equal(2, _library.ListResourcePacks(_dir.Path).Count);
+        Assert.NotNull(_library.GetMergedPackPath(_dir.Path));
+    }
+
+    [Fact]
+    public async Task RemoveResourcePack_LocalPackLeavingModrinthPack_GoesBackToItsUrl()
+    {
+        AddPack("a", "assets/x.txt", "from-a");
+        await _library.AddResourcePackAsync(_dir.Path, Game, "a", "Pack A");
+        await _library.AddLocalResourcePackAsync(_dir.Path, Game, MakeLocalZip("mine.zip"));
+        var local = _library.ListResourcePacks(_dir.Path).Single(PackLibrary.IsLocalPack);
+
+        _library.RemoveResourcePack(_dir.Path, local.FileName);
+
+        Assert.Null(_library.GetMergedPackPath(_dir.Path));
+        Assert.Contains("resource-pack=https\\://cdn.modrinth.com/data/a/a.zip", Properties, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task RemoveResourcePack_LastLocalPack_ClearsProperties()
+    {
+        await _library.AddLocalResourcePackAsync(_dir.Path, Game, MakeLocalZip("mine.zip"));
+        var local = _library.ListResourcePacks(_dir.Path).Single();
+
+        _library.RemoveResourcePack(_dir.Path, local.FileName);
+
+        Assert.Empty(_library.ListResourcePacks(_dir.Path));
+        Assert.Null(_library.GetMergedPackPath(_dir.Path));
+        Assert.Null(_library.GetResourcePack(_dir.Path));
+    }
 }
