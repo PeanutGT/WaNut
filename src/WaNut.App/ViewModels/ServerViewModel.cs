@@ -370,6 +370,7 @@ public sealed partial class ServerViewModel : ObservableObject
         ServerSettings.OnVpsStateChanged();
         GameSettings.OnVpsStateChanged();
         Files.OnVpsStateChanged();
+        Packs.OnVpsStateChanged();
 
         // A run (or a change of where the files are) may have changed the settings file, so copy it again next time.
         if (!ConfigOnVps)

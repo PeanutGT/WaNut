@@ -232,6 +232,8 @@
         </ItemsControl>
       </StackPanel>
 
+      <!-- Everything below changes files here, so it is locked while the newest copy is on the VPS. The live panel above is not. -->
+      <StackPanel IsEnabled="{Binding CanEditFiles}">
       <!-- Server resource pack -->
       <TextBlock Text="{res:Text Packs_ResourcePack}" Style="{StaticResource SectionCaption}" Margin="0,0,0,6" />
       <TextBlock Text="{res:Text Packs_ResourcePackHint}" Style="{StaticResource Hint}" Margin="0,0,0,6" />
@@ -415,6 +417,7 @@
                  Visibility="{Binding ShowNoResults, Converter={StaticResource Visible}}" />
       <Button Content="{res:Text Mods_LoadMore}" Command="{Binding LoadMoreCommand}" HorizontalAlignment="Left" Margin="0,12,0,0"
               Visibility="{Binding CanLoadMore, Converter={StaticResource Visible}}" />
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </UserControl>
