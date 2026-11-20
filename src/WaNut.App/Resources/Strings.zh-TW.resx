@@ -4224,4 +4224,7 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Status_VpsPackAddress" xml:space="preserve">
     <value>正在把資源包連結寫進 VPS…</value>
   </data>
+  <data name="Server_VpsPackUnreachable" xml:space="preserve">
+    <value>從這台電腦連不到 VPS 的 TCP 連接埠 {0}，玩家會下載不到合併的資源包。請到雲端服務商的網頁（安全清單、安全群組或防火牆規則）開放 TCP {0}，或開放 25800-25899。</value>
+  </data>
 </root>

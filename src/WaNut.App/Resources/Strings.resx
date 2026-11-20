@@ -4244,4 +4244,7 @@ WaNut shares it from this PC while the server runs. Windows will ask for adminis
   <data name="Status_VpsPackAddress" xml:space="preserve">
     <value>Writing the resource pack link to the VPS…</value>
   </data>
+  <data name="Server_VpsPackUnreachable" xml:space="preserve">
+    <value>This PC can't reach TCP port {0} on the VPS, so players can't download the merged resource pack. Open TCP {0} (or 25800-25899) in the cloud provider's own firewall (security list, security group or firewall rules).</value>
+  </data>
 </root>
