@@ -573,3 +573,11 @@ VPS 上執行的伺服器現在也能用多個資源包：兩個以上合併成�
 - 啟動本機伺服器：不再問防火牆、不開下載站，`resource-pack` 是貼的網址，`resource-pack-sha1` 是目前合併檔的 SHA-1，主控台出現檢查結果。
 - 啟動 VPS 伺服器：不上傳 zip、不開 258xx 連接埠，VPS 的 `server.properties` 只改資源包三行；朋友真的能用該連結下載並套用。
 - 取消勾選：回到 WaNut 自己分享（本機或 VPS）。清除所有資源包時連結一併清掉。
+
+## 手動加入自己的資源包（add-local-resource-pack-import）
+Packs 分頁的資源包區新增「加入我自己的資源包…」按鈕，也可以把 .zip 直接拖進分頁（伺服器停止時）。zip 會複製到伺服器的 `resourcepacks/`，必須在最上層有 `pack.mcmeta`。只有一個自己的資源包時也會走合併 zip（沒有 Modrinth 網址），所以沿用 WaNut 自己提供下載、VPS 提供下載或「我自己的公開連結」。核心邏輯在容器跑了單元測試，沒有在 Windows 上點過介面。要確認：
+- 按「加入我自己的資源包…」選一個 zip：清單出現「名稱（來自這台電腦）」，`server.properties` 的 `resource-pack-sha1` 是合併檔的 sha1，啟動後 `resource-pack` 變成 WaNut 提供的網址，玩家加入時下載到。
+- 從檔案總管把 zip 拖進 Packs 分頁：同上；拖多個 zip 一次加入；拖非 zip 檔沒反應；伺服器執行中拖入沒有效果。
+- 加入沒有 pack.mcmeta 的 zip 或壞掉的 zip：顯示錯誤，清單不變。同一個檔案加兩次：顯示已經在清單。
+- 自己的包加上 Modrinth 的包：合併，順序可以上下移；刪掉自己的包後只剩 Modrinth 包，回到直接用 Modrinth 網址。
+- VPS 伺服器、勾「改用我自己的公開連結」時，自己的包也一樣可用。

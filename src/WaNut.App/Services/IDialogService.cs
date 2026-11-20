@@ -63,6 +63,9 @@ public interface IDialogService
     /// <summary>One or more data pack zips to hot-plug; empty when cancelled.</summary>
     IReadOnlyList<string> PickDatapackZips();
 
+    /// <summary>One or more resource pack zips to add; empty when cancelled.</summary>
+    IReadOnlyList<string> PickResourcePackZips();
+
     /// <summary>Asks for a Modrinth .mrpack file. Returns null if the user cancelled.</summary>
     string? PickModpack();
 
