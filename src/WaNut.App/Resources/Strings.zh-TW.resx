@@ -4138,4 +4138,36 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Hotplug_ConsoleErrors" xml:space="preserve">
     <value>伺服器主控台的訊息</value>
   </data>
+  <data name="Packs_MoveUp" xml:space="preserve">
+    <value>提高優先順序</value>
+  </data>
+  <data name="Packs_MoveDown" xml:space="preserve">
+    <value>降低優先順序</value>
+  </data>
+  <data name="Packs_ResourcePackRow" xml:space="preserve">
+    <value>{0}. {1}</value>
+  </data>
+  <data name="Packs_ResourcePackMoved" xml:space="preserve">
+    <value>已移動 {0}。</value>
+  </data>
+  <data name="Packs_ResourcePackMerged" xml:space="preserve">
+    <value>{0} 現在有 {1} 個資源包合併成一個。</value>
+  </data>
+  <data name="Packs_ResourcePackOverlap" xml:space="preserve">
+    <value>有 {0} 個檔案出現在多個資源包中，清單上方的資源包優先（例如 {1}，來自 {2}）。</value>
+  </data>
+  <data name="Packs_MergeHint" xml:space="preserve">
+    <value>多個資源包會合併成一個 zip。兩個資源包有相同檔案時，清單上方的優先，並使用最上面那個資源包的 pack.mcmeta。伺服器執行時，WaNut 會從這台電腦提供這個 zip，所以朋友必須連得到這台電腦（Radmin 這類虛擬區域網路可以）。</value>
+  </data>
+  <data name="Firewall_AskPackHost" xml:space="preserve">
+    <value>要讓朋友透過 Windows 防火牆下載合併後的資源包嗎？
+
+伺服器執行時，WaNut 會從這台電腦分享它。Windows 會要求系統管理員同意。</value>
+  </data>
+  <data name="Server_PackNoAddress" xml:space="preserve">
+    <value>合併的資源包沒有分享：這台電腦沒有朋友可以使用的網路位址。請連上網路或虛擬區域網路後再啟動。</value>
+  </data>
+  <data name="Server_PackHostFailed" xml:space="preserve">
+    <value>無法分享合併的資源包：{0}</value>
+  </data>
 </root>

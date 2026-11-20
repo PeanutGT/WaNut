@@ -4158,4 +4158,36 @@ Start with the copy on this PC instead? Anything played on the VPS since the las
   <data name="Hotplug_ConsoleErrors" xml:space="preserve">
     <value>What the server console said</value>
   </data>
+  <data name="Packs_MoveUp" xml:space="preserve">
+    <value>Higher priority</value>
+  </data>
+  <data name="Packs_MoveDown" xml:space="preserve">
+    <value>Lower priority</value>
+  </data>
+  <data name="Packs_ResourcePackRow" xml:space="preserve">
+    <value>{0}. {1}</value>
+  </data>
+  <data name="Packs_ResourcePackMoved" xml:space="preserve">
+    <value>Moved {0}.</value>
+  </data>
+  <data name="Packs_ResourcePackMerged" xml:space="preserve">
+    <value>{0} {1} packs are now merged into one.</value>
+  </data>
+  <data name="Packs_ResourcePackOverlap" xml:space="preserve">
+    <value>{0} files are in more than one pack; the pack higher in the list wins (for example {1}, from {2}).</value>
+  </data>
+  <data name="Packs_MergeHint" xml:space="preserve">
+    <value>Several packs are merged into one zip. A pack higher in the list wins when two have the same file, and the top pack's pack.mcmeta is used. While the server runs, WaNut serves the zip from this PC, so friends must reach this PC (a virtual LAN like Radmin works).</value>
+  </data>
+  <data name="Firewall_AskPackHost" xml:space="preserve">
+    <value>Let friends download the merged resource pack through Windows Firewall?
+
+WaNut shares it from this PC while the server runs. Windows will ask for administrator approval.</value>
+  </data>
+  <data name="Server_PackNoAddress" xml:space="preserve">
+    <value>Merged resource pack not shared: this PC has no network address friends can use. Connect to your network or virtual LAN and start again.</value>
+  </data>
+  <data name="Server_PackHostFailed" xml:space="preserve">
+    <value>Could not share the merged resource pack: {0}</value>
+  </data>
 </root>

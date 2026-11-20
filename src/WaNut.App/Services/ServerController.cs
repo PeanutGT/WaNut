@@ -10,6 +10,7 @@ using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Hotplug;
 using WaNut.Core.Network;
+using WaNut.Core.Packs;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Files;
 using WaNut.Core.Remote.Run;
@@ -31,7 +32,8 @@ public sealed class ServerController(
     DesktopNotifier notifier,
     VpsLaunchPlanner vpsPlanner,
     VpsConnector vpsConnector,
-    VpsSettingsSync vpsSettings)
+    VpsSettingsSync vpsSettings,
+    PackLibrary packs)
 {
     /// <summary>How long a server gets to save and exit before the user is asked about forcing it.</summary>
     public static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(60);
@@ -40,6 +42,9 @@ public sealed class ServerController(
     private readonly SemaphoreSlim _prepareGate = new(1, 1);
     private readonly Dictionary<ServerViewModel, CancellationTokenSource> _queue = [];
     private readonly List<ServerViewModel> _started = [];
+
+    // The download site for a server's merged resource pack, open while that server runs.
+    private readonly Dictionary<ServerViewModel, ResourcePackHost> _packHosts = [];
 
     // Servers whose folder is coming back from the VPS after a run.
     private readonly Dictionary<ServerViewModel, Task> _syncingBack = [];
@@ -121,9 +126,14 @@ public sealed class ServerController(
                 server.Connect.OnFirewallAsked(change);
             }
 
+            await ServeMergedPackAsync(server);
             host.Start(server.Id, launch, server.Attach);
             _started.Remove(server);
             _started.Add(server);
+            if (server.Process is { } started)
+            {
+                _ = StopPackHostAfterExitAsync(server, started);
+            }
         }
         catch (ServerStartException e)
         {
@@ -243,6 +253,56 @@ public sealed class ServerController(
     /// VPS (Peanut's decision 1A); when WaNut may not or can't, the Connect tab shows the commands to run instead.
     /// Never stops the start: the reachability check after it tells whether friends get in.
     /// </summary>
+    /// <summary>
+    /// With two or more resource packs the server offers one merged zip: serve it from this PC and point
+    /// server.properties at the address friends reach this PC on. Nothing to do for one pack (Modrinth serves it).
+    /// </summary>
+    private async Task ServeMergedPackAsync(ServerViewModel server)
+    {
+        await StopPackHostAsync(server);
+        if (packs.GetMergedPackPath(server.InstanceDir) is not { } zip)
+        {
+            return;
+        }
+
+        if (ResourcePackAddress.Pick(LocalAddresses.Get()) is not { } address)
+        {
+            server.ShowConsoleNote(Text.Get("Server_PackNoAddress"));
+            return;
+        }
+
+        if (Environment.ProcessPath is { } wanutExe)
+        {
+            await firewall.AskForPackHostOnceAsync(wanutExe);
+        }
+
+        try
+        {
+            var hosted = ResourcePackHost.Start(zip);
+            _packHosts[server] = hosted;
+            packs.PointResourcePackAt(server.InstanceDir, hosted.UrlFor(address));
+        }
+        catch (Exception e) when (e is System.Net.Sockets.SocketException or IOException or UnauthorizedAccessException)
+        {
+            await StopPackHostAsync(server);
+            server.ShowConsoleNote(string.Format(Text.Get("Server_PackHostFailed"), e.Message));
+        }
+    }
+
+    private async Task StopPackHostAfterExitAsync(ServerViewModel server, IRunningServer process)
+    {
+        await process.Exited;
+        await StopPackHostAsync(server);
+    }
+
+    private async Task StopPackHostAsync(ServerViewModel server)
+    {
+        if (_packHosts.Remove(server, out var hosted))
+        {
+            await hosted.DisposeAsync();
+        }
+    }
+
     private async Task OpenVpsFirewallAsync(ServerViewModel server, VpsProfile vps, bool automatic)
     {
         server.Connect.VpsFirewallCommands = null;
