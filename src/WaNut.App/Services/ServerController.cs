@@ -13,6 +13,7 @@ using WaNut.Core.Network;
 using WaNut.Core.Packs;
 using WaNut.Core.Remote;
 using WaNut.Core.Remote.Files;
+using WaNut.Core.Remote.Reach;
 using WaNut.Core.Remote.Run;
 using WaNut.Core.Remote.Sync;
 using WaNut.Core.Settings;
@@ -323,6 +324,7 @@ public sealed class ServerController(
             PackLibrary.PointMergedPackAt(Path.Combine(server.InstanceDir, GameSettingsStore.PropertiesFileName), zip, hosted.Url, required);
             await vpsSettings.PushAsync(server.Id, vps);
             await OpenVpsPackPortAsync(server, vps, hosted.Port, automatic);
+            _ = CheckVpsPackReachableAsync(server, vps.Host, hosted.Port);
         }
         catch (Exception e) when (IsVpsProblem(e) || e is FileNotFoundException)
         {
@@ -358,6 +360,20 @@ public sealed class ServerController(
         }
 
         server.ShowConsoleNote(string.Format(Text.Get("Server_VpsPackPortManual"), port, hostFirewall.ManualCommands(port) ?? string.Empty));
+    }
+
+    /// <summary>
+    /// The VPS's own firewall can be open while the cloud provider's (security list, security group) still drops the
+    /// pack port, and then every player's download fails with nothing said. One connection from this PC tells; it runs
+    /// beside the start so the 8 second wait costs nothing.
+    /// </summary>
+    private async Task CheckVpsPackReachableAsync(ServerViewModel server, string host, int port)
+    {
+        var reach = await VpsReachability.CheckAsync(host, port);
+        if (reach is VpsReach.NoAnswer or VpsReach.Refused)
+        {
+            server.ShowConsoleNote(string.Format(Text.Get("Server_VpsPackUnreachable"), port));
+        }
     }
 
     private async Task StopPackHostAfterExitAsync(ServerViewModel server, IRunningServer process)

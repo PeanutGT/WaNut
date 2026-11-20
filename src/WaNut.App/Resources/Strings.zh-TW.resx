@@ -4179,4 +4179,7 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Server_VpsPackPortManual" xml:space="preserve">
     <value>TCP 連接埠 {0} 在 VPS 上開放之前，玩家無法下載合併的資源包。請在 VPS 上執行下列指令，雲端服務商的防火牆也要開放：&#10;{1}</value>
   </data>
+  <data name="Server_VpsPackUnreachable" xml:space="preserve">
+    <value>從這台電腦連不到 VPS 的 TCP 連接埠 {0}，玩家會下載不到合併的資源包。請到雲端服務商的網頁（安全清單、安全群組或防火牆規則）開放 TCP {0}，或開放 25800-25899。</value>
+  </data>
 </root>
