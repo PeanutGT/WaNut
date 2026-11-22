@@ -3,17 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:res="clr-namespace:WaNut.App.Resources"
              xmlns:controls="clr-namespace:WaNut.App.Controls">
-  <!-- Closing WaNut while a server runs: keep it running in the notification area, or stop it. Shown with InlinePanel. -->
+  <!-- Closing WaNut: keep it in the notification area, or exit (stopping a server that runs). Shown with InlinePanel. -->
   <StackPanel>
     <DockPanel>
       <TextBlock x:Name="QuestionText" TextWrapping="Wrap" FontSize="{StaticResource FontSubheading}" VerticalAlignment="Center" />
     </DockPanel>
-    <TextBlock Text="{res:Text Close_Hint}" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />
+    <TextBlock x:Name="HintText" Style="{StaticResource MutedText}" TextWrapping="Wrap" Margin="0,12,0,0" />
     <CheckBox x:Name="RememberBox" Content="{res:Text Close_Remember}" Margin="0,12,0,0" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{res:Text Close_Tray}" Style="{StaticResource PrimaryButton}" MinWidth="80" Margin="0,0,6,0"
               controls:InlinePanel.IsDefault="True" controls:InlinePanel.TakesFocus="True" Click="OnTray" />
-      <Button Content="{res:Text Close_Stop}" MinWidth="80" Margin="0,0,6,0" Click="OnStop" />
+      <Button x:Name="StopButton" MinWidth="80" Margin="0,0,6,0" Click="OnStop" />
       <Button Content="{res:Text Common_Cancel}" MinWidth="80" controls:InlinePanel.Answer="False" />
     </StackPanel>
   </StackPanel>

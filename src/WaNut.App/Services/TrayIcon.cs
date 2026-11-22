@@ -23,6 +23,7 @@ public sealed class TrayIcon : IDisposable
     private readonly Dictionary<Color, Icon> _icons = [];
     private Forms.NotifyIcon? _icon;
     private readonly List<Forms.ToolStripItem> _stopItems = [];
+    private Forms.ToolStripItem? _exitItem;
     private bool _toldOnce;
 
     // Shown only to carry a notification while the window is open; hidden again once the notification goes.
@@ -37,7 +38,7 @@ public sealed class TrayIcon : IDisposable
     /// <summary>"Open WaNut" was picked, or the icon double-clicked.</summary>
     public event EventHandler? OpenRequested;
 
-    /// <summary>"Exit WaNut" was picked: stop the server and close.</summary>
+    /// <summary>"Exit WaNut" was picked: stop any server on this PC and close.</summary>
     public event EventHandler? ExitRequested;
 
     public void Show()
@@ -51,7 +52,8 @@ public sealed class TrayIcon : IDisposable
         {
             // Once per run, so the user knows where WaNut went.
             _toldOnce = true;
-            icon.ShowBalloonTip(5000, Text.Get("App_Title"), Text.Get("Tray_Balloon"), Forms.ToolTipIcon.None);
+            var message = Text.Get(_controller.RunningServers.Count > 0 ? "Tray_Balloon" : "Tray_BalloonIdle");
+            icon.ShowBalloonTip(5000, Text.Get("App_Title"), message, Forms.ToolTipIcon.None);
         }
     }
 
@@ -98,7 +100,7 @@ public sealed class TrayIcon : IDisposable
             menu.Items.Add(Text.Get("Tray_Open"), null, (_, _) => OpenRequested?.Invoke(this, EventArgs.Empty));
             menu.Opening += (_, _) => FillStopItems(menu);
             menu.Items.Add(new Forms.ToolStripSeparator());
-            menu.Items.Add(Text.Get("Tray_Exit"), null, (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty));
+            _exitItem = menu.Items.Add(Text.Get("Tray_Exit"), null, (_, _) => ExitRequested?.Invoke(this, EventArgs.Empty));
             _icon = new Forms.NotifyIcon { ContextMenuStrip = menu };
             _icon.DoubleClick += (_, _) => OpenRequested?.Invoke(this, EventArgs.Empty);
             _icon.BalloonTipClicked += (_, _) =>
@@ -152,6 +154,11 @@ public sealed class TrayIcon : IDisposable
         }
 
         _stopItems.Clear();
+        if (_exitItem is not null)
+        {
+            _exitItem.Text = Text.Get(_controller.RunningServers.Count > 0 ? "Tray_Exit" : "Tray_ExitIdle");
+        }
+
         var running = _controller.RunningServers.Where(s => s.Status is ServerStatus.Starting or ServerStatus.Online).ToList();
         var index = 1;
         foreach (var server in running)
