@@ -37,15 +37,23 @@ public partial class App : Application
     private readonly ThemeService _theme;
     private ServiceProvider? _services;
     private CrashGuard? _crashGuard;
-
     public App()
     {
         _theme = new ThemeService(this);
     }
 
+    /// <summary>Set by <see cref="Program"/>; the generated entry point has no way to pass it in.</summary>
+    public SingleInstanceGuard? Instance { get; init; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (Instance is { } instance)
+        {
+            instance.ActivationRequested += (_, _) => Dispatcher.BeginInvoke(BringForward);
+            instance.StartListening();
+        }
+
         RenderFallback.Apply();
         MotionSettings.Apply(this, SystemParameters.ClientAreaAnimation);
         var paths = LauncherPaths.CreateDefault();
@@ -77,6 +85,25 @@ public partial class App : Application
         if (_services.GetRequiredService<AppSettingsViewModel>().CheckForUpdates)
         {
             _ = _services.GetRequiredService<UpdateViewModel>().CheckOnStartupAsync();
+        }
+    }
+
+    /// <summary>Another start asked this WaNut to come forward: show the main window, or setup while it is open.</summary>
+    private void BringForward()
+    {
+        if (MainWindow is MainWindow main)
+        {
+            main.ShowFromTray();
+        }
+        else if (Windows.Count > 0)
+        {
+            var window = Windows[0]!;
+            if (window.WindowState == WindowState.Minimized)
+            {
+                window.WindowState = WindowState.Normal;
+            }
+
+            window.Activate();
         }
     }
 
