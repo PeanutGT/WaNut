@@ -7,10 +7,23 @@ namespace WaNut.App.Views;
 
 public partial class CloseChoicePanel : UserControl
 {
-    public CloseChoicePanel(string serverName)
+    /// <summary>The server name, or null when no server runs on this PC and the question is about WaNut itself.</summary>
+    public CloseChoicePanel(string? serverName)
     {
         InitializeComponent();
-        QuestionText.Text = string.Format(WaNut.App.Resources.Text.Get("Close_Question"), serverName);
+        var text = WaNut.App.Resources.Text.Get;
+        if (serverName is null)
+        {
+            QuestionText.Text = text("Close_QuestionIdle");
+            HintText.Text = text("Close_HintIdle");
+            StopButton.Content = text("Close_StopIdle");
+        }
+        else
+        {
+            QuestionText.Text = string.Format(text("Close_Question"), serverName);
+            HintText.Text = text("Close_Hint");
+            StopButton.Content = text("Close_Stop");
+        }
     }
 
     /// <summary>Tray or Stop, or null when the user cancelled.</summary>

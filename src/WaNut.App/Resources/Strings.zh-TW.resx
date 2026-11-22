@@ -1654,17 +1654,26 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Close_Stop" xml:space="preserve">
     <value>關閉伺服器並離開</value>
   </data>
+  <data name="Close_QuestionIdle" xml:space="preserve">
+    <value>要讓 WaNut 在背景繼續執行嗎？</value>
+  </data>
+  <data name="Close_HintIdle" xml:space="preserve">
+    <value>在背景時，WaNut 會待在右下角時鐘旁邊的通知區域。在那裡的花生上按兩下可以再打開 WaNut。</value>
+  </data>
+  <data name="Close_StopIdle" xml:space="preserve">
+    <value>關閉 WaNut</value>
+  </data>
   <data name="Close_Setting" xml:space="preserve">
-    <value>伺服器執行中關閉 WaNut 時</value>
+    <value>關閉 WaNut 時</value>
   </data>
   <data name="Close_ActionAsk" xml:space="preserve">
     <value>每次都問我</value>
   </data>
   <data name="Close_ActionTray" xml:space="preserve">
-    <value>讓伺服器在背景繼續執行</value>
+    <value>讓 WaNut 在背景繼續執行</value>
   </data>
   <data name="Close_ActionStop" xml:space="preserve">
-    <value>關閉伺服器並離開</value>
+    <value>關閉 WaNut（會先關閉伺服器）</value>
   </data>
   <data name="Tray_Open" xml:space="preserve">
     <value>打開 WaNut</value>
@@ -1677,6 +1686,12 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   </data>
   <data name="Tray_Balloon" xml:space="preserve">
     <value>WaNut 還在這裡，伺服器繼續執行中。按兩下花生就能再打開。</value>
+  </data>
+  <data name="Tray_BalloonIdle" xml:space="preserve">
+    <value>WaNut 還在這裡。按兩下花生就能再打開。</value>
+  </data>
+  <data name="Tray_ExitIdle" xml:space="preserve">
+    <value>離開 WaNut</value>
   </data>
   <data name="World_ModdedInstallWarning" xml:space="preserve">
     <value>這個世界是用 {0}{1} 玩的。WaNut 會到 Modrinth 找這些模組，安裝能在伺服器上跑的那些。裝不了的模組，它們的方塊、物品和生物會從伺服器這份世界消失。你原本的世界不會被改動。</value>

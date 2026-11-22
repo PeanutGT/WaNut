@@ -32,6 +32,8 @@ public partial class MainWindow : Window
             viewModel.StartPendingGuide();
             viewModel.ReconnectVpsServers();
         };
+        // Signing out or shutting down must not wait for an answer to "keep running?".
+        Application.Current.SessionEnding += (_, _) => _exitRequested = true;
         tray.OpenRequested += (_, _) => ShowFromTray();
         tray.ExitRequested += (_, _) =>
         {
@@ -44,41 +46,44 @@ public partial class MainWindow : Window
     protected override async void OnClosing(CancelEventArgs e)
     {
         base.OnClosing(e);
-        if (_readyToClose || !_viewModel.NeedsShutdown)
+        if (_readyToClose)
         {
             return;
         }
 
-        // Only VPS servers: they keep running there, so there is nothing to ask; let go of them and close.
-        if (!_viewModel.HasRunningServer)
-        {
-            e.Cancel = true;
-            if (!_viewModel.IsShuttingDown)
-            {
-                await ShutDownAndCloseAsync();
-            }
-
-            return;
-        }
-
-        // Never close with the server still running: keep it running in the tray, or send "stop" and let it save.
-        e.Cancel = true;
         if (_viewModel.IsShuttingDown)
         {
+            e.Cancel = true;
             return;
         }
 
-        if (!_exitRequested && AskCloseAction() is var action && action != CloseAction.Stop)
+        // The close button hides WaNut in the tray unless the user said to exit, or Windows is signing out.
+        if (!_exitRequested)
         {
+            e.Cancel = true;
+            var action = AskCloseAction();
             if (action == CloseAction.Tray)
             {
                 Hide();
                 _tray.Show();
+                return;
             }
 
+            if (action == CloseAction.Ask)
+            {
+                return;
+            }
+        }
+
+        // Nothing runs here and nothing is syncing back: close right away.
+        if (!_viewModel.NeedsShutdown)
+        {
+            e.Cancel = false;
             return;
         }
 
+        // Never close with the server still running: send "stop" and let it save (VPS servers are let go of).
+        e.Cancel = true;
         await ShutDownAndCloseAsync();
     }
 
@@ -107,7 +112,7 @@ public partial class MainWindow : Window
         base.OnClosed(e);
     }
 
-    /// <summary>Tray, Stop, or Ask when the user cancelled (the window stays open).</summary>
+    /// <summary>Tray, Stop (exit), or Ask when the user cancelled (the window stays open).</summary>
     private CloseAction AskCloseAction()
     {
         if (_viewModel.AppSettings.CloseAction != CloseAction.Ask)
@@ -115,7 +120,7 @@ public partial class MainWindow : Window
             return _viewModel.AppSettings.CloseAction;
         }
 
-        var panel = new CloseChoicePanel(_viewModel.RunningServerNames);
+        var panel = new CloseChoicePanel(_viewModel.HasRunningServer ? _viewModel.RunningServerNames : null);
         if (!InlinePanel.Show(this, panel) || panel.Choice is not { } choice)
         {
             return CloseAction.Ask;
