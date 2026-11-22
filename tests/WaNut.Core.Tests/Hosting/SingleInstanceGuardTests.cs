@@ -24,8 +24,12 @@ public class SingleInstanceGuardTests
         first.ActivationRequested += (_, _) => asked.TrySetResult();
         first.StartListening();
 
-        // A mutex is owned per thread, so the second start comes from another thread, like another process would.
-        var second = await Task.Run(() => SingleInstanceGuard.TryAcquire(name));
+        // A mutex is owned per thread and the thread pool may hand back this very thread, so the second start comes
+        // from a thread of its own, like another process would.
+        SingleInstanceGuard? second = null;
+        var other = new Thread(() => second = SingleInstanceGuard.TryAcquire(name));
+        other.Start();
+        other.Join();
 
         Assert.Null(second);
         await asked.Task.WaitAsync(TimeSpan.FromSeconds(5));
