@@ -156,7 +156,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ShowFromTray()
+    /// <summary>Shows the window again from the tray or the taskbar and brings it to the front.</summary>
+    public void ShowFromTray()
     {
         _tray.Hide();
         Show();
