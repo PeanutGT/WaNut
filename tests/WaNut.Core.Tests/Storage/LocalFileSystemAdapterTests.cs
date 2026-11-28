@@ -157,4 +157,33 @@ public sealed class LocalFileSystemAdapterTests : IDisposable
 
         Assert.Empty(file.Keys);
     }
+
+    [Fact]
+    public async Task Move_RenamesIntoNewFolderAndNeverReplaces()
+    {
+        await _fs.WriteAllTextAsync("mods/a.jar", "a");
+        await _fs.WriteAllTextAsync("mods/b.jar", "b");
+
+        await _fs.MoveAsync("mods/a.jar", "mods-disabled/a.jar");
+
+        Assert.False(await _fs.ExistsAsync("mods/a.jar"));
+        Assert.Equal("a", await _fs.ReadAllTextAsync("mods-disabled/a.jar"));
+        await Assert.ThrowsAsync<IOException>(() => _fs.MoveAsync("mods/b.jar", "mods-disabled/a.jar"));
+        await Assert.ThrowsAsync<FileNotFoundException>(() => _fs.MoveAsync("mods/none.jar", "mods/c.jar"));
+        await Assert.ThrowsAsync<ArgumentException>(() => _fs.MoveAsync("mods/b.jar", "../b.jar"));
+    }
+
+    [Fact]
+    public async Task HashSha512_HashesInOrder()
+    {
+        await _fs.WriteAllTextAsync("b.jar", "bee");
+        await _fs.WriteAllTextAsync("a.jar", "a");
+
+        var hashes = await _fs.HashSha512Async(["b.jar", "a.jar"]);
+
+        Assert.Equal([Sha512("bee"), Sha512("a")], hashes);
+    }
+
+    private static string Sha512(string text) =>
+        Convert.ToHexStringLower(System.Security.Cryptography.SHA512.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
 }

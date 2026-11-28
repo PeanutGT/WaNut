@@ -81,6 +81,11 @@
           <TextBlock Text="{res:Text Mods_StopToChange}" TextWrapping="Wrap" />
         </Border>
 
+        <Border Style="{StaticResource NoticeBanner}" Margin="0,0,0,12"
+                Visibility="{Binding ShowVpsNote, Converter={StaticResource Visible}}">
+          <TextBlock Text="{Binding VpsNoteText}" TextWrapping="Wrap" />
+        </Border>
+
         <!-- Working: the peanut wobbles while files download. -->
         <StackPanel Margin="0,0,0,12" Visibility="{Binding IsWorking, Converter={StaticResource Visible}}">
           <StackPanel Orientation="Horizontal" Margin="0,0,0,6">

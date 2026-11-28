@@ -736,10 +736,11 @@ public sealed class ServerController(
         _ => null,
     };
 
-    private static bool IsVpsProblem(Exception e) =>
+    /// <summary>Failures that come from reaching or using the VPS (or this PC's files), worded with <see cref="VpsMessage"/>.</summary>
+    internal static bool IsVpsProblem(Exception e) =>
         e is IOException or UnauthorizedAccessException or SshException or VpsUnreachableException or VpsLoginException or HostKeyException or InvalidOperationException;
 
-    private static string VpsMessage(Exception e) => e switch
+    internal static string VpsMessage(Exception e) => e switch
     {
         HostKeyException h => Text.Get(h.Changed ? "Server_VpsHostKeyChanged" : "Server_VpsHostKeyNew"),
         VpsLoginException => Text.Get("Server_VpsLoginFailed"),

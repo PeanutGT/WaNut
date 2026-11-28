@@ -1228,6 +1228,12 @@ The details were saved to {1}</value>
   <data name="Mods_Vanilla" xml:space="preserve">
     <value>Vanilla servers can't load mods or plugins. To add some, switch this server to Fabric, Forge or NeoForge (mods) or Paper (plugins) under Server › More settings › Change type or version.</value>
   </data>
+  <data name="Mods_OnVps" xml:space="preserve">
+    <value>Changes go straight to the server's folder on the VPS. Nothing has to come back to this PC first.</value>
+  </data>
+  <data name="Mods_OnVpsRunning" xml:space="preserve">
+    <value>Changes go straight to the server's folder on the VPS. The server is running, so they load the next time it starts.</value>
+  </data>
   <data name="Mods_StopToChange" xml:space="preserve">
     <value>Stop the server to add or remove files. You can still look around.</value>
   </data>

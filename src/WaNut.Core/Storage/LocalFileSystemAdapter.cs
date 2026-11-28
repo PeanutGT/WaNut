@@ -121,6 +121,38 @@ public sealed class LocalFileSystemAdapter : IServerFileSystem
         return output;
     }
 
+    public Task MoveAsync(string fromRelativePath, string toRelativePath, CancellationToken cancellationToken = default)
+    {
+        var from = FullPath(FileRelative(fromRelativePath));
+        var to = FullPath(FileRelative(toRelativePath));
+        if (!File.Exists(from))
+        {
+            throw new FileNotFoundException($"'{fromRelativePath}' doesn't exist in the server folder.", fromRelativePath);
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(to)!);
+        File.Move(from, to, overwrite: false);
+        return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<string>> HashSha512Async(IReadOnlyList<string> relativePaths, CancellationToken cancellationToken = default)
+    {
+        var hashes = new List<string>(relativePaths.Count);
+        foreach (var path in relativePaths)
+        {
+            await using var stream = new FileStream(FullPath(FileRelative(path)), FileMode.Open, FileAccess.Read, FileShare.ReadWrite, BufferSize, useAsync: true);
+            hashes.Add(Convert.ToHexStringLower(await System.Security.Cryptography.SHA512.HashDataAsync(stream, cancellationToken).ConfigureAwait(false)));
+        }
+
+        return hashes;
+    }
+
+    private static string FileRelative(string relativePath)
+    {
+        var relative = ServerPath.Normalize(relativePath);
+        return relative.Length > 0 ? relative : throw new ArgumentException("A file path is needed, not the server folder.", nameof(relativePath));
+    }
+
     private async Task AddToTarAsync(TarWriter tar, string relative, string skipFull, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

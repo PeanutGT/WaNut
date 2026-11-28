@@ -235,6 +235,72 @@ public sealed class RemoteVpsAdapterSshTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task MoveAsync_RenamesAndNeverReplaces()
+    {
+        await using var files = await RemoteVpsAdapter.OpenAsync(_session, _root);
+        await files.WriteAllTextAsync("mods/a.jar", "a");
+        await files.WriteAllTextAsync("mods/b.jar", "b");
+
+        await files.MoveAsync("mods/a.jar", "mods-disabled/it's $(x).jar");
+
+        Assert.False(await files.ExistsAsync("mods/a.jar"));
+        Assert.Equal("a", await files.ReadAllTextAsync("mods-disabled/it's $(x).jar"));
+        await Assert.ThrowsAsync<IOException>(() => files.MoveAsync("mods/b.jar", "mods-disabled/it's $(x).jar"));
+        await Assert.ThrowsAsync<FileNotFoundException>(() => files.MoveAsync("mods/missing.jar", "mods/c.jar"));
+        Assert.Equal("b", await files.ReadAllTextAsync("mods/b.jar"));
+    }
+
+    [Fact]
+    public async Task MoveAsync_ThroughLinkOutOfFolder_Refused()
+    {
+        var outside = $"wanut-test/outside-{Guid.NewGuid():N}";
+        await _session.RunAsync($"mkdir -p {RemoteShell.Home(outside)} && ln -s \"$HOME\"/{RemoteShell.Quote(outside)} {RemoteShell.Home(_root + "/out")}");
+        await using var files = await RemoteVpsAdapter.OpenAsync(_session, _root);
+        await files.WriteAllTextAsync("mods/a.jar", "a");
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => files.MoveAsync("mods/a.jar", "out/a.jar"));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => files.MoveAsync("mods/a.jar", "out/new/deeper/a.jar"));
+
+        Assert.True(await files.ExistsAsync("mods/a.jar"));
+        var left = await _session.RunAsync($"ls -A {RemoteShell.Home(outside)}");
+        Assert.Equal(string.Empty, left.Output);
+    }
+
+    [Fact]
+    public async Task HashSha512Async_MatchesLocalHashesInOrder()
+    {
+        await using var files = await RemoteVpsAdapter.OpenAsync(_session, _root);
+        await files.WriteAllTextAsync("mods/b.jar", "bee");
+        await files.WriteAllTextAsync("mods/a b.jar", "a");
+
+        var hashes = await files.HashSha512Async(["mods/b.jar", "mods/a b.jar"]);
+
+        Assert.Equal([Sha512("bee"), Sha512("a")], hashes);
+        Assert.Empty(await files.HashSha512Async([]));
+        await Assert.ThrowsAsync<FileNotFoundException>(() => files.HashSha512Async(["mods/missing.jar"]));
+    }
+
+    [Fact]
+    public async Task ModLibrary_OverSsh_ListsAddsAndRemovesOnTheVps()
+    {
+        await using var files = await RemoteVpsAdapter.OpenAsync(_session, _root);
+        await files.WriteAllTextAsync("server.properties", "x");
+        await files.WriteAllTextAsync("mods/by-hand.jar", "hand");
+        var platform = Core.Mods.ModPlatform.For(Core.Instances.ServerType.Fabric)!;
+        var library = new Core.Mods.ModLibrary(null!, null!);
+
+        var listed = await library.ListInstalledAsync(files, platform);
+        await library.RemoveAsync(files, platform, listed.Single());
+
+        Assert.Equal(["by-hand.jar"], listed.Select(m => m.FileName));
+        Assert.Empty(await library.ListInstalledAsync(files, platform));
+        Assert.Equal("[]", (await files.ReadAllTextAsync(Core.Mods.ModLibrary.RecordsFileName)).Trim());
+    }
+
+    private static string Sha512(string text) =>
+        Convert.ToHexStringLower(System.Security.Cryptography.SHA512.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
+
+    [Fact]
     public async Task RunAsync_AfterConnectionDrops_ReconnectsOnce()
     {
         // Kills this connection's own sshd process, as a dropped network would.

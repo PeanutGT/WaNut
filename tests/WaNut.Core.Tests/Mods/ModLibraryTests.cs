@@ -2,6 +2,7 @@ using System.Text;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
 using WaNut.Core.Mods;
+using WaNut.Core.Storage;
 using WaNut.Core.Tests.TestSupport;
 
 namespace WaNut.Core.Tests.Mods;
@@ -399,5 +400,40 @@ public sealed class ModLibraryTests : IDisposable
         Assert.Contains(new InstalledMod("cool.jar", "cool", "c1", "Cool Mod"), installed);
         Assert.Contains(new InstalledMod("mystery.jar"), installed);
         Assert.False(File.Exists(Path.Combine(ModsDir, "api-new.jar")));
+    }
+
+    [Fact]
+    public async Task ServerFiles_InstallUpdateCheckAndRemove_WorkThroughTheFileSystem()
+    {
+        // The same steps the Mods tab runs against the VPS copy, here through the local adapter.
+        AddProject("api", "Fabric API", "api");
+        AddProject("mod", "Cool Mod", "mod", dependencies: """[{"project_id":"api","dependency_type":"required"}]""");
+        await using var files = new LocalFileSystemAdapter(_dir.Path);
+
+        var result = await _library.InstallAsync(files, Fabric, Game, "mod", "Cool Mod");
+        var listed = await _library.ListInstalledAsync(files, Fabric);
+        await _library.RemoveAsync(files, Fabric, listed.Single(m => m.DisplayName == "Fabric API"));
+
+        Assert.Equal(["Cool Mod", "Fabric API"], result.Installed);
+        Assert.Equal(["Cool Mod", "Fabric API"], listed.Select(m => m.DisplayName));
+        Assert.Equal(["Cool Mod"], (await _library.ListInstalledAsync(files, Fabric)).Select(m => m.DisplayName));
+        Assert.Equal(["Cool Mod"], _library.ListInstalled(_dir.Path, Fabric).Select(m => m.DisplayName));
+        Assert.False(File.Exists(Path.Combine(ModsDir, "api.jar")));
+    }
+
+    [Fact]
+    public async Task ServerFiles_AddJars_CopiesIntoTheFolder()
+    {
+        var source = Path.Combine(_dir.Path, "drop");
+        Directory.CreateDirectory(source);
+        var jar = Path.Combine(source, "hand.jar");
+        File.WriteAllText(jar, "hand");
+        _http.Add(ModrinthClient.VersionFilesUrl, "{}").Add(ModrinthClient.ProjectsUrl([]), "[]");
+        await using var files = new LocalFileSystemAdapter(Path.Combine(_dir.Path, "server"));
+
+        var result = await _library.AddJarsAsync(files, Fabric, [jar]);
+
+        Assert.Equal(["hand.jar"], result.Added);
+        Assert.Equal("hand", File.ReadAllText(Path.Combine(_dir.Path, "server", "mods", "hand.jar")));
     }
 }

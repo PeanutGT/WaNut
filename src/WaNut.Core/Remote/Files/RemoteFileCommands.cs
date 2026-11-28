@@ -72,6 +72,55 @@ public static class RemoteFileCommands
             $"mv -f -- {RemoteShell.Quote(temp)} {RemoteShell.Quote(output)}");
     }
 
+    /// <summary>Move: the file to move doesn't exist. Hash: a file to hash doesn't exist.</summary>
+    public const int NotFoundExit = 7;
+
+    /// <summary>Move: something already has the target's name.</summary>
+    public const int ExistsExit = 8;
+
+    /// <summary>The shell exits with this when a command (here sha512sum) isn't installed.</summary>
+    public const int NoCommandExit = 127;
+
+    /// <summary>
+    /// Renames <paramref name="from"/> to <paramref name="to"/> (relative, already normalized), creating the target's
+    /// folder. Before anything changes, the source's folder and the target's nearest existing folder must really lie
+    /// inside <paramref name="root"/>, so a link can't carry a file out of (or into) the server folder. Never replaces.
+    /// </summary>
+    /// <param name="root">The real absolute path from <see cref="Resolve"/>.</param>
+    public static string Move(string root, string from, string to)
+    {
+        var quotedRoot = RemoteShell.Quote(root);
+        var f = RemoteShell.Quote(from);
+        var t = RemoteShell.Quote(to);
+        var targetFolder = RemoteShell.Quote(to.Contains('/') ? to[..to.LastIndexOf('/')] : ".");
+
+        // inside DIR: DIR's real path is the server folder or below it. "&& echo x" keeps a trailing newline.
+        var inside =
+            "inside() { r=$(cd -- \"$1\" && pwd -P && echo x) || return 1; r=${r%??}; " +
+            $"case \"$r/\" in {quotedRoot}/*) return 0;; *) return 1;; esac; }}; ";
+        return Sh(
+            $"{Enter(root)}; {inside}f={f}; t={t}; td={targetFolder}; " +
+            $"{{ [ -f \"$f\" ] || [ -L \"$f\" ]; }} || exit {NotFoundExit}; " +
+            "case $f in */*) s=${f%/*};; *) s=.;; esac; " +
+            "d=$td; while [ ! -d \"$d\" ]; do case $d in */*) d=${d%/*};; *) d=.;; esac; done; " +
+            $"inside \"$s\" && inside \"$d\" || {{ printf '{OutsideMarker}\\n' >&2; exit {OutsideExit}; }}; " +
+            $"{{ [ -e \"$t\" ] || [ -L \"$t\" ]; }} && exit {ExistsExit}; " +
+            $"mkdir -p -- \"$td\" && inside \"$td\" || exit {OutsideExit}; " +
+            "mv -- \"$f\" \"$t\"");
+    }
+
+    /// <summary>
+    /// Prints the SHA-512 of each file (relative paths, passed as arguments after the script) on its own line, in order.
+    /// Exits with <see cref="NotFoundExit"/> when one is missing and <see cref="NoCommandExit"/> without sha512sum.
+    /// </summary>
+    public static string Hash(string root, IReadOnlyList<string> files)
+    {
+        var perFile =
+            "command -v sha512sum >/dev/null 2>&1 || exit " + NoCommandExit + "; " +
+            "for f; do [ -f \"$f\" ] || exit " + NotFoundExit + "; h=$(sha512sum < \"$f\") || exit 1; printf '%s\\n' \"${h%% *}\"; done";
+        return Sh($"{Enter(root)}; sh -c {RemoteShell.Quote(perFile)} sh {string.Join(' ', files.Select(RemoteShell.Quote))}");
+    }
+
     /// <summary>Enters the folder and checks it is still the real path that was opened.</summary>
     private static string Enter(string root) =>
         $"cd {RemoteShell.Quote(root)} 2>/dev/null || exit {NoFolderExit}; [ \"$(pwd -P)\" = {RemoteShell.Quote(root)} ] || exit {MovedExit}";
