@@ -1,6 +1,8 @@
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using WaNut.App.Services;
 using WaNut.App.ViewModels;
@@ -48,13 +50,16 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        // Draw on the CPU, before any window exists: through remote tools the GPU path leaves WPF windows blank. RDP can be
+        // detected, but tools such as DeskIn cannot and may connect while WaNut is open, so this is not conditional.
+        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+
         if (Instance is { } instance)
         {
             instance.ActivationRequested += (_, _) => Dispatcher.BeginInvoke(BringForward);
             instance.StartListening();
         }
 
-        RenderFallback.Apply();
         MotionSettings.Apply(this, SystemParameters.ClientAreaAnimation);
         var paths = LauncherPaths.CreateDefault();
         _crashGuard = new CrashGuard(new ErrorLog(paths.ErrorLogFile));

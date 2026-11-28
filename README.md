@@ -60,7 +60,7 @@ A Windows app for starting your own Minecraft: Java Edition server in a few clic
 - Questions like "delete this server?" open as a panel inside the window instead of a popup, and titles use a rounded font
 - Download times left, and a notification when long jobs finish
 - Updates itself from GitHub Releases, and writes what it did to `update.log` if an update goes wrong
-- Works in remote desktop sessions too: the window is drawn on the CPU there so it doesn't show up blank
+- Works over Remote Desktop and remote control tools too: the window is drawn on the CPU so it doesn't show up blank
 
 See [docs/blueprint.md](docs/blueprint.md) for the full design.
 

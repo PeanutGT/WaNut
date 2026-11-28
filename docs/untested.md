@@ -533,12 +533,11 @@ Discord 訊息裡的網址現在在遊戲聊天裡是可點擊的藍色底線連
 - 就緒閘門（本機收件匣）：在檔案複製到一半時（大檔案，如 1 GB）閘門不放行；三個檔案相隔 1.5 秒放入只放行一次；`.ready` 與 `manifest.json` 模式；5 分鐘逾時。VPS 收件匣因為 SFTP 問不到「檔案是否仍被寫入」，只靠大小/時間穩定加 3 秒防抖，要確認上傳工具（如 rsync、WinSCP）結束前不會誤放行；用 `.part` 或 `.tmp` 暫存名可避開。
 - 世界備份（本機）與 VPS 同步不會帶上 `.nut-staging`、`.nut-backup`；但後援位置 `world/.nut-staging` 會被「世界備份」一起打包，等第 2 階段決定是否排除。
 
-## 遠端桌面空白視窗修正（fix-blank-window-remote-desktop）
+## 遠端控制空白視窗修正（fix-remote-view-blank）
 
-遠端桌面（RDP）連線時視窗內容只有白色，標題列正常。修正：偵測到遠端工作階段（`SystemParameters.IsRemoteSession`）或環境變數 `WANUT_SOFTWARE_RENDER=1` 時，改用軟體繪圖（`RenderMode.SoftwareOnly`）。在 Linux 無法執行 WPF，沒有實測。要確認：
-- 用遠端桌面連到這台電腦開 WaNut：內容正常顯示，不再是白色。
-- 在本機螢幕開 WaNut：仍使用顯示卡繪圖，外觀與動畫不變。
-- 若遠端仍是白色，先設 `WANUT_SOFTWARE_RENDER=1` 再開，並看 `%APPDATA%\WaNut` 內的錯誤記錄檔。
+遠端桌面（RDP）或遠端控制軟體（DeskIn）下，視窗內容空白、標題列正常。先前只在偵測到 RDP 時改用軟體繪圖，DeskIn 偵測不到。現在 WaNut 一律用軟體繪圖（`RenderMode.SoftwareOnly`），`WANUT_SOFTWARE_RENDER` 已移除。已在 DeskIn 連線中的電腦用 `PrintWindow` 確認：修改前全白，修改後內容正常。還要確認：
+- 在遠端端的 DeskIn 畫面實際看到主視窗與其他視窗（建立伺服器、設定）內容正常，下拉選單也正常。
+- 中斷遠端後在本機螢幕開 WaNut：外觀正常，動畫與捲動沒有明顯變慢，放大視窗到全螢幕也一樣。
 
 ## 即時資料包按鈕在 VPS 伺服器執行時被鎖住
 VPS 的「即時資料包」面板按鈕（重新整理、新增或更新）在伺服器上線後仍是灰的，上方還寫「停止伺服器後才能變更」。原因：按鈕的 CanExecute 讀 `IsAvailable`（跟著伺服器狀態），但狀態變成 Online 時沒有重新檢查按鈕。修正：狀態改變時通知三個指令重新檢查，並在 VPS 伺服器執行時把橫幅改成只說下方清單要先停止。沒有在 Linux 建置 WPF，也沒連真實 VPS。要確認：
