@@ -337,6 +337,18 @@ public sealed partial class ServerViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// The Mods tab works straight on the VPS copy while it is the newest: nothing comes back first. Also while the
+    /// server runs there, since Linux doesn't lock the jars; a change loads on the next start.
+    /// </summary>
+    public bool ModsOnVps => FilesOnVps && RunsOnVps && !IsPreparing;
+
+    /// <summary>The Mods tab can change jars: here, or on the VPS (<see cref="ModsOnVps"/>).</summary>
+    public bool CanEditMods => CanEditFiles || ModsOnVps;
+
+    /// <summary>Opens this server's folder on its VPS; dispose it to close the connection.</summary>
+    internal Task<Core.Storage.IServerFileSystem> OpenVpsFilesAsync(CancellationToken cancellationToken) => _controller.OpenVpsFilesAsync(this, cancellationToken);
+
     /// <summary>Players can change while a VPS server runs (through its console), not while its files are away.</summary>
     public bool CanEditPlayers => !FilesOnVps || IsRunning;
 
@@ -360,6 +372,8 @@ public sealed partial class ServerViewModel : ObservableObject
         OnPropertyChanged(nameof(FilesOnVps));
         OnPropertyChanged(nameof(CanEditFiles));
         OnPropertyChanged(nameof(CanEditPlayers));
+        OnPropertyChanged(nameof(ModsOnVps));
+        OnPropertyChanged(nameof(CanEditMods));
         OnPropertyChanged(nameof(ConfigOnVps));
         OnPropertyChanged(nameof(CanEditSettings));
         OnPropertyChanged(nameof(VpsBannerText));
@@ -371,6 +385,7 @@ public sealed partial class ServerViewModel : ObservableObject
         GameSettings.OnVpsStateChanged();
         Files.OnVpsStateChanged();
         Packs.OnVpsStateChanged();
+        Mods.OnVpsStateChanged();
 
         // A run (or a change of where the files are) may have changed the settings file, so copy it again next time.
         if (!ConfigOnVps)

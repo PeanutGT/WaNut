@@ -491,7 +491,7 @@
           </TabItem>
 
           <TabItem Header="{Binding Mods.Header}">
-            <views:ModsView DataContext="{Binding Mods}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditFiles, ElementName=ServerTabs}" />
+            <views:ModsView DataContext="{Binding Mods}" behaviors:ContentLock.IsUnlocked="{Binding DataContext.CanEditMods, ElementName=ServerTabs}" />
           </TabItem>
 
           <TabItem Header="{res:Text Server_TabPacks}">

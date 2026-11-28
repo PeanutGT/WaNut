@@ -114,6 +114,10 @@ public sealed class FolderTreeTests : IDisposable
 
         public Task<string> CreateArchiveAsync(IEnumerable<string> targetRelativePaths, string outputArchiveRelativePath, CancellationToken cancellationToken = default) => inner.CreateArchiveAsync(targetRelativePaths, outputArchiveRelativePath, cancellationToken);
 
+        public Task MoveAsync(string fromRelativePath, string toRelativePath, CancellationToken cancellationToken = default) => inner.MoveAsync(fromRelativePath, toRelativePath, cancellationToken);
+
+        public Task<IReadOnlyList<string>> HashSha512Async(IReadOnlyList<string> relativePaths, CancellationToken cancellationToken = default) => inner.HashSha512Async(relativePaths, cancellationToken);
+
         public ValueTask DisposeAsync() => inner.DisposeAsync();
     }
 }

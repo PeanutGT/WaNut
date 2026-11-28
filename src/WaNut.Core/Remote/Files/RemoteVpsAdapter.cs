@@ -223,6 +223,72 @@ public sealed class RemoteVpsAdapter : IServerFileSystem
         return output;
     }
 
+    /// <exception cref="UnauthorizedAccessException">A path goes through a link out of the server folder. Nothing was moved.</exception>
+    public async Task MoveAsync(string fromRelativePath, string toRelativePath, CancellationToken cancellationToken = default)
+    {
+        var from = FileRelative(fromRelativePath);
+        var to = FileRelative(toRelativePath);
+        var result = await _session.RunAsync(RemoteFileCommands.Move(Root, from, to), cancellationToken: cancellationToken).ConfigureAwait(false);
+        switch (result.ExitStatus)
+        {
+            case RemoteFileCommands.NotFoundExit:
+                throw new FileNotFoundException($"'{from}' doesn't exist in the server folder.", from);
+            case RemoteFileCommands.ExistsExit:
+                throw new IOException($"'{to}' already exists in the server folder.");
+            case RemoteFileCommands.OutsideExit:
+                throw new UnauthorizedAccessException("A path to move goes through a link out of the server folder. Nothing was moved.");
+        }
+
+        ThrowForGuard(result);
+        Succeeded(result, "Moving");
+    }
+
+    public async Task<IReadOnlyList<string>> HashSha512Async(IReadOnlyList<string> relativePaths, CancellationToken cancellationToken = default)
+    {
+        var paths = relativePaths.Select(FileRelative).ToList();
+        if (paths.Count == 0)
+        {
+            return [];
+        }
+
+        var result = await _session.RunAsync(RemoteFileCommands.Hash(Root, paths), cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (result.ExitStatus == RemoteFileCommands.NoCommandExit)
+        {
+            return await HashByDownloadAsync(paths, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (result.ExitStatus == RemoteFileCommands.NotFoundExit)
+        {
+            throw new FileNotFoundException("A file to check doesn't exist in the server folder.");
+        }
+
+        ThrowForGuard(result);
+        var lines = Succeeded(result, "Checking files").Output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        if (lines.Length != paths.Count || lines.Any(l => l.Length != 128 || !l.All(char.IsAsciiHexDigitLower)))
+        {
+            throw new FormatException("Unexpected answer from the VPS while checking files.");
+        }
+
+        return lines;
+    }
+
+    /// <summary>A VPS without sha512sum (rare: it is part of coreutils): each file is read over SFTP and hashed here.</summary>
+    private async Task<IReadOnlyList<string>> HashByDownloadAsync(IReadOnlyList<string> paths, CancellationToken cancellationToken)
+    {
+        var hashes = new List<string>(paths.Count);
+        foreach (var path in paths)
+        {
+            var full = FullPath(path);
+            hashes.Add(await _session.TransferAsync(async sftp =>
+            {
+                await using var read = await OpenOrNotFoundAsync(sftp, full, path, cancellationToken).ConfigureAwait(false);
+                return Convert.ToHexStringLower(await System.Security.Cryptography.SHA512.HashDataAsync(read, cancellationToken).ConfigureAwait(false));
+            }, cancellationToken).ConfigureAwait(false));
+        }
+
+        return hashes;
+    }
+
     /// <summary>The same listing without GNU find (BusyBox, some minimal images): slower, folder by folder.</summary>
     private Task<IReadOnlyList<SyncEntry>> ListOverSftpAsync(string full, bool recursive, CancellationToken cancellationToken) =>
         _session.SftpAsync<IReadOnlyList<SyncEntry>>(async sftp =>

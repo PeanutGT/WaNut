@@ -1210,6 +1210,12 @@ WaNut 仍然開著，你的伺服器也繼續執行。如果畫面看起來不�
   <data name="Mods_Vanilla" xml:space="preserve">
     <value>Vanilla 伺服器不能載入模組或插件。想加的話，到「伺服器 › 更多設定 › 更改類型或版本」把這台伺服器換成 Fabric、Forge、NeoForge（模組）或 Paper（插件）。</value>
   </data>
+  <data name="Mods_OnVps" xml:space="preserve">
+    <value>變更會直接寫到 VPS 上的伺服器資料夾，不用先把檔案抓回這台電腦。</value>
+  </data>
+  <data name="Mods_OnVpsRunning" xml:space="preserve">
+    <value>變更會直接寫到 VPS 上的伺服器資料夾。伺服器正在執行，下次啟動時才會載入。</value>
+  </data>
   <data name="Mods_StopToChange" xml:space="preserve">
     <value>停止伺服器後才能新增或移除檔案。現在還是可以先逛逛。</value>
   </data>

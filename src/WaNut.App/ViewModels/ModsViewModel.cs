@@ -12,13 +12,15 @@ using WaNut.Core.Collections;
 using WaNut.Core.Downloads;
 using WaNut.Core.Hosting;
 using WaNut.Core.Mods;
+using WaNut.Core.Storage;
 
 namespace WaNut.App.ViewModels;
 
 /// <summary>
 /// The Mods tab: the jars in the server's mods (Fabric, Forge, NeoForge) or plugins (Paper) folder, and a Modrinth search limited to
 /// the server's loader and Minecraft version. Installing and removing wait until the server is stopped, because
-/// Windows locks the jars of a running server and new ones only load on start.
+/// Windows locks the jars of a running server and new ones only load on start. While the newest files are on the VPS
+/// (<see cref="ServerViewModel.ModsOnVps"/>) every change goes straight there, even while it runs.
 /// </summary>
 public sealed partial class ModsViewModel : ObservableObject
 {
@@ -136,9 +138,20 @@ public sealed partial class ModsViewModel : ObservableObject
 
     public bool IsWorking => WorkText is not null;
 
-    public bool CanChange => _server.Status == ServerStatus.Stopped && !_server.IsPreparing && !IsWorking;
+    public bool CanChange => (_server.Status == ServerStatus.Stopped || OnTheVps) && !_server.IsPreparing && !IsWorking;
 
-    public bool ShowStopToChange => IsSupported && _server.IsRunning;
+    public bool ShowStopToChange => IsSupported && _server.IsRunning && !OnTheVps;
+
+    /// <summary>Changes go straight to the VPS copy (<see cref="ServerViewModel.ModsOnVps"/>).</summary>
+    private bool OnTheVps => _server.ModsOnVps;
+
+    /// <summary>Above the list while it shows the VPS copy: where changes go, and when a running server picks them up.</summary>
+    public string? VpsNoteText => !IsSupported || !OnTheVps ? null : Text.Get(_server.IsRunning ? "Mods_OnVpsRunning" : "Mods_OnVps");
+
+    public bool ShowVpsNote => VpsNoteText is not null;
+
+    /// <summary>Counts reloads, so an older VPS listing that answers late doesn't replace a newer one.</summary>
+    private int _reloads;
 
     public bool CanLoadMore => Results.Count < TotalHits;
 
@@ -147,6 +160,14 @@ public sealed partial class ModsViewModel : ObservableObject
     /// <summary>Rereads the folder; after a type change the old results are for the wrong loader, so they go too.</summary>
     public void Reload()
     {
+        var reload = ++_reloads;
+        _listedOnVps = OnTheVps;
+        if (OnTheVps && Platform is { } vpsPlatform)
+        {
+            _ = ReloadFromVpsAsync(vpsPlatform, reload);
+            return;
+        }
+
         var installed = new List<InstalledMod>();
         if (Platform is { } platform)
         {
@@ -160,6 +181,36 @@ public sealed partial class ModsViewModel : ObservableObject
             }
         }
 
+        Show(installed);
+    }
+
+    /// <summary>Lists the VPS copy's folder; nothing comes back to this PC.</summary>
+    private async Task ReloadFromVpsAsync(ModPlatform platform, int reload)
+    {
+        IReadOnlyList<InstalledMod> installed;
+        try
+        {
+            await using var files = await _server.OpenVpsFilesAsync(CancellationToken.None);
+            installed = await _library.ListInstalledAsync(files, platform);
+        }
+        catch (Exception e) when (ServerController.IsVpsProblem(e))
+        {
+            if (reload == _reloads)
+            {
+                ErrorText = string.Format(Text.Get("Mods_ListFailed"), platform.FolderName, Reason(e));
+            }
+
+            return;
+        }
+
+        if (reload == _reloads && OnTheVps)
+        {
+            Show(installed);
+        }
+    }
+
+    private void Show(IReadOnlyList<InstalledMod> installed)
+    {
         ListSync.Sync(Installed, installed, m => m.FileName, i => i.Mod.FileName, m => new InstalledModViewModel(m, UpdateFor(m)),
             StringComparer.OrdinalIgnoreCase, isCurrent: (i, m) => i.Mod == m && i.Update == UpdateFor(m));
         var installedIds = InstalledProjectIds();
@@ -231,7 +282,9 @@ public sealed partial class ModsViewModel : ObservableObject
         IsCheckingUpdates = true;
         try
         {
-            var updates = await _library.CheckUpdatesAsync(_server.InstanceDir, platform, _server.Metadata.MinecraftVersion, check.Token);
+            var updates = await WithFilesAsync(
+                files => _library.CheckUpdatesAsync(files, platform, _server.Metadata.MinecraftVersion, check.Token),
+                () => _library.CheckUpdatesAsync(_server.InstanceDir, platform, _server.Metadata.MinecraftVersion, check.Token));
             _updates = updates.ToDictionary(u => u.Mod.FileName, StringComparer.OrdinalIgnoreCase);
             _updatesChecked = true;
         }
@@ -239,9 +292,9 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             return;
         }
-        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or FormatException || ServerController.IsVpsProblem(e))
         {
-            UpdateCheckError = e.Message;
+            UpdateCheckError = Reason(e);
         }
         finally
         {
@@ -257,8 +310,28 @@ public sealed partial class ModsViewModel : ObservableObject
         }
     }
 
+    /// <summary>The newest files went to the VPS or came back: the list shows the other copy now.</summary>
+    internal void OnVpsStateChanged()
+    {
+        OnPropertyChanged(nameof(VpsNoteText));
+        OnPropertyChanged(nameof(ShowVpsNote));
+        OnServerStatusChanged();
+        OpenFolderCommand.NotifyCanExecuteChanged();
+        if (OnTheVps != _listedOnVps && !IsWorking)
+        {
+            _listedOnVps = OnTheVps;
+            _updatesChecked = false;
+            Reload();
+        }
+    }
+
+    /// <summary>Which copy the list last came from, so only a real switch rereads it.</summary>
+    private bool _listedOnVps;
+
     internal void OnServerStatusChanged()
     {
+        OnPropertyChanged(nameof(VpsNoteText));
+        OnPropertyChanged(nameof(ShowVpsNote));
         OnPropertyChanged(nameof(CanChange));
         OnPropertyChanged(nameof(CanDrop));
         OnPropertyChanged(nameof(ShowStopToChange));
@@ -354,34 +427,38 @@ public sealed partial class ModsViewModel : ObservableObject
         var names = string.Join(", ", updates.Select(u => u.Title));
         await RunAsync(Text.Get("Mods_BackingUp"), async progress =>
         {
-            BackupInfo? backup;
+            object? backup;
             try
             {
-                backup = await _backups.CreateAsync(_server.InstanceDir, BackupReason.ModUpdate, new Progress<double>(f => progress.Report(f * 0.3)));
+                backup = OnTheVps
+                    ? await WithFilesAsync<string?>(files => ServerFolderArchive.CreateAsync(files, "mod-update", [platform.FolderName], DateTime.UtcNow), () => Task.FromResult<string?>(null))
+                    : await _backups.CreateAsync(_server.InstanceDir, BackupReason.ModUpdate, new Progress<double>(f => progress.Report(f * 0.3)));
             }
             catch (BackupException e)
             {
                 throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), Text.Get($"Backups_Problem_{e.Problem}")));
             }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidDataException)
+            catch (Exception e) when (e is InvalidDataException || ServerController.IsVpsProblem(e))
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), e.Message));
+                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateBackupFailed"), Reason(e)));
             }
 
             WorkText = string.Format(Text.Get("Mods_Updating"), names);
             try
             {
-                var done = await _library.UpdateAsync(
-                    _server.InstanceDir, platform, updates, new Progress<double>(f => progress.Report(0.3 + (f * 0.7))));
+                var fileProgress = new Progress<double>(f => progress.Report(0.3 + (f * 0.7)));
+                var done = await WithFilesAsync(
+                    files => _library.UpdateAsync(files, platform, updates, fileProgress),
+                    () => _library.UpdateAsync(_server.InstanceDir, platform, updates, fileProgress));
                 return string.Format(Text.Get(backup is null ? "Mods_UpdateDoneNoWorld" : "Mods_UpdateDone"), string.Join(", ", done));
             }
             catch (DownloadVerificationException)
             {
                 throw new ModsProblem(string.Format(Text.Get("Mods_VerifyFailed"), names));
             }
-            catch (Exception e) when (e is HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException || ServerController.IsVpsProblem(e))
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateFailed"), names, e.Message));
+                throw new ModsProblem(string.Format(Text.Get("Mods_UpdateFailed"), names, Reason(e)));
             }
         });
     }
@@ -494,11 +571,13 @@ public sealed partial class ModsViewModel : ObservableObject
             JarAddResult result;
             try
             {
-                result = await _library.AddJarsAsync(_server.InstanceDir, platform, paths);
+                result = await WithFilesAsync(
+                    files => _library.AddJarsAsync(files, platform, paths),
+                    () => _library.AddJarsAsync(_server.InstanceDir, platform, paths));
             }
-            catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or FormatException || ServerController.IsVpsProblem(e))
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_AddFailed"), e.Message));
+                throw new ModsProblem(string.Format(Text.Get("Mods_AddFailed"), Reason(e)));
             }
 
             var lines = new List<string>
@@ -532,8 +611,9 @@ public sealed partial class ModsViewModel : ObservableObject
             ModInstallResult result;
             try
             {
-                result = await _library.InstallAsync(
-                    _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress, chosenVersion: version);
+                result = await WithFilesAsync(
+                    files => _library.InstallAsync(files, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress, chosenVersion: version),
+                    () => _library.InstallAsync(_server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, progress: progress, chosenVersion: version));
             }
             catch (IncompatibleModsException e)
             {
@@ -542,8 +622,9 @@ public sealed partial class ModsViewModel : ObservableObject
                     return string.Format(Text.Get("Mods_IncompatibleSkipped"), item.Title);
                 }
 
-                result = await _library.InstallAsync(
-                    _server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress, chosenVersion: version);
+                result = await WithFilesAsync(
+                    files => _library.InstallAsync(files, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress, chosenVersion: version),
+                    () => _library.InstallAsync(_server.InstanceDir, platform, _server.Metadata.MinecraftVersion, item.Hit.ProjectId, item.Title, allowIncompatible: true, progress, chosenVersion: version));
             }
 
             var message = InstallMessage(item.Title, result);
@@ -559,9 +640,9 @@ public sealed partial class ModsViewModel : ObservableObject
         {
             throw new ModsProblem(string.Format(Text.Get("Mods_VerifyFailed"), item.Title));
         }
-        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException or FormatException || ServerController.IsVpsProblem(e))
         {
-            throw new ModsProblem(string.Format(Text.Get("Mods_InstallFailed"), item.Title, e.Message));
+            throw new ModsProblem(string.Format(Text.Get("Mods_InstallFailed"), item.Title, Reason(e)));
         }
     }
 
@@ -576,23 +657,36 @@ public sealed partial class ModsViewModel : ObservableObject
             return;
         }
 
-        await RunAsync(Text.Get("Mods_Removing"), _ =>
+        await RunAsync(Text.Get("Mods_Removing"), async _ =>
         {
             try
             {
-                _library.Remove(_server.InstanceDir, platform, item.Mod);
-                return Task.FromResult(string.Format(Text.Get("Mods_Removed"), item.Name));
+                await WithFilesAsync(
+                    async files =>
+                    {
+                        await _library.RemoveAsync(files, platform, item.Mod);
+                        return true;
+                    },
+                    () =>
+                    {
+                        _library.Remove(_server.InstanceDir, platform, item.Mod);
+                        return Task.FromResult(true);
+                    });
+                return string.Format(Text.Get("Mods_Removed"), item.Name);
             }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            catch (Exception e) when (ServerController.IsVpsProblem(e))
             {
-                throw new ModsProblem(string.Format(Text.Get("Mods_RemoveFailed"), item.Name, e.Message));
+                throw new ModsProblem(string.Format(Text.Get("Mods_RemoveFailed"), item.Name, Reason(e)));
             }
         });
     }
 
     private bool CanRemove(InstalledModViewModel? item) => item is not null && CanChange;
 
-    [RelayCommand]
+    /// <summary>The folder on this PC is an older copy while the newest files are on the VPS (the Files tab shows those).</summary>
+    private bool CanOpenFolder() => !OnTheVps;
+
+    [RelayCommand(CanExecute = nameof(CanOpenFolder))]
     private void OpenFolder()
     {
         if (Platform is not { } platform)
@@ -645,6 +739,21 @@ public sealed partial class ModsViewModel : ObservableObject
             : done + Environment.NewLine + string.Format(Text.Get("Mods_MissingDependencies"), title, string.Join(", ", result.MissingDependencies));
     }
 
+    /// <summary>
+    /// Runs <paramref name="onVps"/> against the VPS copy while it is the newest (one connection, closed afterwards),
+    /// otherwise <paramref name="here"/> on this PC's folder.
+    /// </summary>
+    private async Task<T> WithFilesAsync<T>(Func<IServerFileSystem, Task<T>> onVps, Func<Task<T>> here)
+    {
+        if (!OnTheVps)
+        {
+            return await here();
+        }
+
+        await using var files = await _server.OpenVpsFilesAsync(CancellationToken.None);
+        return await onVps(files);
+    }
+
     private HashSet<string> InstalledProjectIds() =>
         Installed.Where(m => m.Mod.ProjectId is not null).Select(m => m.Mod.ProjectId!).ToHashSet(StringComparer.Ordinal);
 
@@ -694,6 +803,9 @@ public sealed partial class ModsViewModel : ObservableObject
             Reload();
         }
     }
+
+    /// <summary>Why something failed, worded for a VPS problem (sign-in, host key) where it is one.</summary>
+    private static string Reason(Exception e) => ServerController.IsVpsProblem(e) ? ServerController.VpsMessage(e) : e.Message;
 
     /// <summary>A failure already worded for the user.</summary>
     private sealed class ModsProblem(string message) : Exception(message);

@@ -35,4 +35,13 @@ public interface IServerFileSystem : IAsyncDisposable
 
     /// <summary>Packs files and folders into one .tar.gz inside the server folder and returns its normalized relative path.</summary>
     Task<string> CreateArchiveAsync(IEnumerable<string> targetRelativePaths, string outputArchiveRelativePath, CancellationToken cancellationToken = default);
+
+    /// <summary>Moves or renames a file inside the server folder, creating the target's folder. Never replaces a file.</summary>
+    /// <exception cref="FileNotFoundException"><paramref name="fromRelativePath"/> doesn't exist.</exception>
+    /// <exception cref="IOException"><paramref name="toRelativePath"/> already exists.</exception>
+    Task MoveAsync(string fromRelativePath, string toRelativePath, CancellationToken cancellationToken = default);
+
+    /// <summary>The SHA-512 of each file, lower-case hex, in the order given. A VPS works them out itself, so nothing is downloaded.</summary>
+    /// <exception cref="FileNotFoundException">One of the files doesn't exist.</exception>
+    Task<IReadOnlyList<string>> HashSha512Async(IReadOnlyList<string> relativePaths, CancellationToken cancellationToken = default);
 }

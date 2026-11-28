@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using WaNut.Core.Downloads;
 using WaNut.Core.Instances;
+using WaNut.Core.Storage;
 
 namespace WaNut.Core.Mods;
 
@@ -9,6 +10,8 @@ namespace WaNut.Core.Mods;
 /// The mods or plugins of one server: lists the jars in its folder, installs Modrinth projects with their required
 /// dependencies (each file checked against its SHA-512), and removes files. Which jars came from Modrinth is kept in
 /// installed-mods.json, so the list can show their names and search results can show them as installed.
+/// Each change works on a folder on this PC (an instance folder path) or straight on the VPS (an
+/// <see cref="IServerFileSystem"/>), where a jar changed while the server runs loads on its next start.
 /// </summary>
 public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloader)
 {
@@ -38,10 +41,29 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             return [];
         }
 
-        var records = ReadRecords(instanceDir).ToDictionary(r => r.FileName, StringComparer.OrdinalIgnoreCase);
-        return Directory.EnumerateFiles(folder, "*.jar")
-            .Select(Path.GetFileName)
-            .Select(name => records.GetValueOrDefault(name!) ?? new InstalledMod(name!))
+        return Named(Directory.EnumerateFiles(folder, "*.jar").Select(p => Path.GetFileName(p)), ParseRecords(ReadLocalRecords(instanceDir)));
+    }
+
+    /// <summary>The same list as <see cref="ListInstalled(string, ModPlatform)"/>, read from <paramref name="files"/>.</summary>
+    public Task<IReadOnlyList<InstalledMod>> ListInstalledAsync(IServerFileSystem files, ModPlatform platform, CancellationToken cancellationToken = default) =>
+        ListInstalledAsync(new ServerModFiles(files), platform, cancellationToken);
+
+    private static async Task<IReadOnlyList<InstalledMod>> ListInstalledAsync(IModFiles files, ModPlatform platform, CancellationToken cancellationToken)
+    {
+        var names = await files.ListJarsAsync(platform.FolderName, cancellationToken).ConfigureAwait(false);
+        return Named(names, await ReadRecordsAsync(files, cancellationToken).ConfigureAwait(false));
+    }
+
+    private static List<InstalledMod> Named(IEnumerable<string> jarNames, List<InstalledMod> records)
+    {
+        var byName = new Dictionary<string, InstalledMod>(StringComparer.OrdinalIgnoreCase);
+        foreach (var record in records)
+        {
+            byName.TryAdd(record.FileName, record);
+        }
+
+        return jarNames
+            .Select(name => byName.GetValueOrDefault(name) ?? new InstalledMod(name))
             .OrderBy(m => m.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
@@ -58,7 +80,7 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// <returns>Nothing installed when the server already has the project, even as a jar copied in by hand.</returns>
     /// <exception cref="NoCompatibleVersionException">The project itself has no version for this server.</exception>
     /// <exception cref="IncompatibleModsException">Something to install clashes with an installed mod.</exception>
-    public async Task<ModInstallResult> InstallAsync(
+    public Task<ModInstallResult> InstallAsync(
         string instanceDir,
         ModPlatform platform,
         string gameVersion,
@@ -67,19 +89,46 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         bool allowIncompatible = false,
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default,
-        ModVersion? chosenVersion = null)
+        ModVersion? chosenVersion = null) =>
+        InstallAsync(new LocalModFiles(instanceDir), platform, gameVersion, projectId, title, allowIncompatible, progress, chosenVersion, cancellationToken);
+
+    /// <summary>The same as <see cref="InstallAsync(string, ModPlatform, string, string, string, bool, IProgress{double}?, CancellationToken, ModVersion?)"/>, in <paramref name="files"/>.</summary>
+    public Task<ModInstallResult> InstallAsync(
+        IServerFileSystem files,
+        ModPlatform platform,
+        string gameVersion,
+        string projectId,
+        string title,
+        bool allowIncompatible = false,
+        IProgress<double>? progress = null,
+        ModVersion? chosenVersion = null,
+        CancellationToken cancellationToken = default) =>
+        InstallAsync(new ServerModFiles(files), platform, gameVersion, projectId, title, allowIncompatible, progress, chosenVersion, cancellationToken);
+
+    private async Task<ModInstallResult> InstallAsync(
+        IModFiles files,
+        ModPlatform platform,
+        string gameVersion,
+        string projectId,
+        string title,
+        bool allowIncompatible,
+        IProgress<double>? progress,
+        ModVersion? chosenVersion,
+        CancellationToken cancellationToken)
     {
-        var folder = platform.FolderIn(instanceDir);
-        var installed = ListInstalled(instanceDir, platform);
+        var folder = platform.FolderName;
+        var installed = await ListInstalledAsync(files, platform, cancellationToken).ConfigureAwait(false);
         var known = installed.Where(m => m.ProjectId is not null).Select(m => m.ProjectId!).ToHashSet(StringComparer.Ordinal);
 
         // A dependency copied in by hand (often Fabric API) must not be downloaded a second time under another file
         // name: two copies of one mod stop the server from starting. The incompatibility check needs every jar's
         // version, so then all of them are looked up.
         var lookUp = new Dictionary<string, InstalledMod>(StringComparer.OrdinalIgnoreCase);
-        foreach (var mod in installed.Where(m => !allowIncompatible || m.ProjectId is null))
+        var toHash = installed.Where(m => !allowIncompatible || m.ProjectId is null).ToList();
+        var hashes = await files.HashAsync(toHash.Select(m => $"{folder}/{m.FileName}").ToList(), cancellationToken).ConfigureAwait(false);
+        for (var i = 0; i < toHash.Count; i++)
         {
-            lookUp.TryAdd(HashFile(folder, mod.FileName), mod);
+            lookUp.TryAdd(hashes[i], toHash[i]);
         }
 
         var identified = await modrinth.IdentifyVersionsAsync(lookUp.Keys, cancellationToken).ConfigureAwait(false);
@@ -144,8 +193,8 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             }
         }
 
-        Directory.CreateDirectory(folder);
-        var records = ReadRecords(instanceDir).Where(r => File.Exists(Path.Combine(folder, r.FileName))).ToList();
+        var present = installed.Select(m => m.FileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var records = (await ReadRecordsAsync(files, cancellationToken).ConfigureAwait(false)).Where(r => present.Contains(r.FileName)).ToList();
         for (var i = 0; i < plan.Count; i++)
         {
             var (version, name) = plan[i];
@@ -153,17 +202,15 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             var fileProgress = progress is null
                 ? null
                 : new SyncProgress<DownloadProgress>(p => progress.Report((step + (p.Fraction ?? 0)) / plan.Count));
-            await downloader.DownloadAsync(
-                version.Url,
-                Path.Combine(folder, version.FileName),
-                ExpectedHash.Sha512(version.Sha512),
-                fileProgress,
+            await files.ReceiveAsync(
+                JarPath(folder, version.FileName),
+                local => downloader.DownloadAsync(version.Url, local, ExpectedHash.Sha512(version.Sha512), fileProgress, cancellationToken),
                 cancellationToken).ConfigureAwait(false);
 
             // Saved after every file, so a failure halfway still leaves the finished ones named.
             records.RemoveAll(r => string.Equals(r.FileName, version.FileName, StringComparison.OrdinalIgnoreCase));
             records.Add(new InstalledMod(version.FileName, version.ProjectId, version.VersionId, name));
-            WriteRecords(instanceDir, records);
+            await WriteRecordsAsync(files, records, cancellationToken).ConfigureAwait(false);
         }
 
         progress?.Report(1);
@@ -231,14 +278,24 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// The installed jars, WaNut's or copied in by hand, that have a newer release on Modrinth for this loader and
     /// Minecraft version. Jars Modrinth does not know are left out.
     /// </summary>
-    public async Task<IReadOnlyList<ModUpdate>> CheckUpdatesAsync(
-        string instanceDir, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<ModUpdate>> CheckUpdatesAsync(
+        string instanceDir, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default) =>
+        CheckUpdatesAsync(new LocalModFiles(instanceDir), platform, gameVersion, cancellationToken);
+
+    /// <summary>The same as <see cref="CheckUpdatesAsync(string, ModPlatform, string, CancellationToken)"/>; a VPS hashes its jars itself.</summary>
+    public Task<IReadOnlyList<ModUpdate>> CheckUpdatesAsync(
+        IServerFileSystem files, ModPlatform platform, string gameVersion, CancellationToken cancellationToken = default) =>
+        CheckUpdatesAsync(new ServerModFiles(files), platform, gameVersion, cancellationToken);
+
+    private async Task<IReadOnlyList<ModUpdate>> CheckUpdatesAsync(
+        IModFiles files, ModPlatform platform, string gameVersion, CancellationToken cancellationToken)
     {
-        var folder = platform.FolderIn(instanceDir);
+        var installed = await ListInstalledAsync(files, platform, cancellationToken).ConfigureAwait(false);
+        var hashes = await files.HashAsync(installed.Select(m => $"{platform.FolderName}/{m.FileName}").ToList(), cancellationToken).ConfigureAwait(false);
         var byHash = new Dictionary<string, InstalledMod>(StringComparer.OrdinalIgnoreCase);
-        foreach (var mod in ListInstalled(instanceDir, platform))
+        for (var i = 0; i < installed.Count; i++)
         {
-            byHash.TryAdd(await Task.Run(() => HashFile(folder, mod.FileName), cancellationToken).ConfigureAwait(false), mod);
+            byHash.TryAdd(hashes[i], installed[i]);
         }
 
         var latest = await modrinth.GetLatestVersionsAsync(byHash.Keys, platform, gameVersion, cancellationToken).ConfigureAwait(false);
@@ -264,14 +321,31 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// goes, so a failed download leaves the mod as it was. Only call while the server is stopped.
     /// </summary>
     /// <returns>The titles of the mods that were updated, in order.</returns>
-    public async Task<IReadOnlyList<string>> UpdateAsync(
+    public Task<IReadOnlyList<string>> UpdateAsync(
         string instanceDir,
         ModPlatform platform,
         IReadOnlyList<ModUpdate> updates,
         IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        UpdateAsync(new LocalModFiles(instanceDir), platform, updates, progress, cancellationToken);
+
+    /// <summary>The same as <see cref="UpdateAsync(string, ModPlatform, IReadOnlyList{ModUpdate}, IProgress{double}?, CancellationToken)"/>, in <paramref name="files"/>.</summary>
+    public Task<IReadOnlyList<string>> UpdateAsync(
+        IServerFileSystem files,
+        ModPlatform platform,
+        IReadOnlyList<ModUpdate> updates,
+        IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default) =>
+        UpdateAsync(new ServerModFiles(files), platform, updates, progress, cancellationToken);
+
+    private async Task<IReadOnlyList<string>> UpdateAsync(
+        IModFiles files,
+        ModPlatform platform,
+        IReadOnlyList<ModUpdate> updates,
+        IProgress<double>? progress,
+        CancellationToken cancellationToken)
     {
-        var folder = platform.FolderIn(instanceDir);
+        var folder = platform.FolderName;
         var done = new List<string>();
         for (var i = 0; i < updates.Count; i++)
         {
@@ -286,24 +360,21 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
                 ? null
                 : new SyncProgress<DownloadProgress>(p => progress.Report((step + (p.Fraction ?? 0)) / updates.Count));
             var sameName = string.Equals(mod.FileName, version.FileName, StringComparison.OrdinalIgnoreCase);
-            var target = Path.Combine(folder, version.FileName);
-            var download = sameName ? target + ".update" : target;
-            await downloader.DownloadAsync(version.Url, download, ExpectedHash.Sha512(version.Sha512), fileProgress, cancellationToken).ConfigureAwait(false);
-            if (sameName)
+            await files.ReceiveAsync(
+                JarPath(folder, version.FileName),
+                local => downloader.DownloadAsync(version.Url, local, ExpectedHash.Sha512(version.Sha512), fileProgress, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+            if (!sameName)
             {
-                File.Move(download, target, overwrite: true);
-            }
-            else
-            {
-                File.Delete(Path.Combine(folder, mod.FileName));
+                await files.DeleteAsync(JarPath(folder, mod.FileName), cancellationToken).ConfigureAwait(false);
             }
 
-            var records = ReadRecords(instanceDir)
+            var records = (await ReadRecordsAsync(files, cancellationToken).ConfigureAwait(false))
                 .Where(r => !string.Equals(r.FileName, mod.FileName, StringComparison.OrdinalIgnoreCase)
                     && !string.Equals(r.FileName, version.FileName, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             records.Add(new InstalledMod(version.FileName, version.ProjectId, version.VersionId, title));
-            WriteRecords(instanceDir, records);
+            await WriteRecordsAsync(files, records, cancellationToken).ConfigureAwait(false);
             done.Add(title);
         }
 
@@ -316,11 +387,20 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
     /// known ones show their project's name. A jar of a project the server already has, or with a file name already
     /// in the folder, is skipped: two copies of one mod stop the server. Only call while the server is stopped.
     /// </summary>
-    public async Task<JarAddResult> AddJarsAsync(
-        string instanceDir, ModPlatform platform, IReadOnlyList<string> paths, CancellationToken cancellationToken = default)
+    public Task<JarAddResult> AddJarsAsync(
+        string instanceDir, ModPlatform platform, IReadOnlyList<string> paths, CancellationToken cancellationToken = default) =>
+        AddJarsAsync(new LocalModFiles(instanceDir), platform, paths, cancellationToken);
+
+    /// <summary>The same as <see cref="AddJarsAsync(string, ModPlatform, IReadOnlyList{string}, CancellationToken)"/>; the jars are sent to <paramref name="files"/>.</summary>
+    public Task<JarAddResult> AddJarsAsync(
+        IServerFileSystem files, ModPlatform platform, IReadOnlyList<string> paths, CancellationToken cancellationToken = default) =>
+        AddJarsAsync(new ServerModFiles(files), platform, paths, cancellationToken);
+
+    private async Task<JarAddResult> AddJarsAsync(
+        IModFiles files, ModPlatform platform, IReadOnlyList<string> paths, CancellationToken cancellationToken)
     {
-        var folder = platform.FolderIn(instanceDir);
-        var installed = ListInstalled(instanceDir, platform);
+        var folder = platform.FolderName;
+        var installed = await ListInstalledAsync(files, platform, cancellationToken).ConfigureAwait(false);
         var byHash = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var notJars = new List<string>();
         var skipped = new List<string>();
@@ -342,11 +422,7 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             }
         }
 
-        var installedHashes = new List<string>();
-        foreach (var mod in installed)
-        {
-            installedHashes.Add(await Task.Run(() => HashFile(folder, mod.FileName), cancellationToken).ConfigureAwait(false));
-        }
+        var installedHashes = await files.HashAsync(installed.Select(m => $"{folder}/{m.FileName}").ToList(), cancellationToken).ConfigureAwait(false);
 
         var identified = await modrinth.IdentifyVersionsAsync(byHash.Keys.Concat(installedHashes).ToList(), cancellationToken).ConfigureAwait(false);
         var knownProjects = installedHashes
@@ -359,8 +435,8 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
                 cancellationToken).ConfigureAwait(false))
             .ToDictionary(p => p.Id, StringComparer.Ordinal);
 
-        Directory.CreateDirectory(folder);
-        var records = ReadRecords(instanceDir).Where(r => File.Exists(Path.Combine(folder, r.FileName))).ToList();
+        var present = installed.Select(m => m.FileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var records = (await ReadRecordsAsync(files, cancellationToken).ConfigureAwait(false)).Where(r => present.Contains(r.FileName)).ToList();
         var added = new List<string>();
         var clientOnly = new List<string>();
         foreach (var (hash, path) in byHash)
@@ -374,11 +450,11 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
                 continue;
             }
 
-            File.Copy(path, Path.Combine(folder, name), overwrite: false);
+            await files.CopyInAsync(path, JarPath(folder, name), cancellationToken).ConfigureAwait(false);
             if (version is not null)
             {
                 records.Add(new InstalledMod(name, version.ProjectId, version.VersionId, project?.Title ?? name));
-                WriteRecords(instanceDir, records);
+                await WriteRecordsAsync(files, records, cancellationToken).ConfigureAwait(false);
             }
 
             added.Add(project?.Title ?? name);
@@ -404,6 +480,17 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
             .Where(r => !string.Equals(r.FileName, mod.FileName, StringComparison.OrdinalIgnoreCase))
             .ToList();
         WriteRecords(instanceDir, records);
+    }
+
+    /// <summary>The same as <see cref="Remove"/>, in <paramref name="files"/>.</summary>
+    public async Task RemoveAsync(IServerFileSystem files, ModPlatform platform, InstalledMod mod, CancellationToken cancellationToken = default)
+    {
+        var modFiles = new ServerModFiles(files);
+        await modFiles.DeleteAsync(JarPath(platform.FolderName, mod.FileName), cancellationToken).ConfigureAwait(false);
+        var records = (await ReadRecordsAsync(modFiles, cancellationToken).ConfigureAwait(false))
+            .Where(r => !string.Equals(r.FileName, mod.FileName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        await WriteRecordsAsync(modFiles, records, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>The folder next to mods or plugins where turned-off jars wait, e.g. "mods-disabled".</summary>
@@ -437,25 +524,39 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
         return destination;
     }
 
-    private static string HashFile(string folder, string fileName) => HashFile(Path.Combine(folder, fileName));
+    /// <summary>A jar's path in the server folder. Refuses a name that isn't a plain .jar file name.</summary>
+    private static string JarPath(string folder, string fileName) =>
+        ModrinthClient.IsSafeJarName(fileName)
+            ? $"{folder}/{fileName}"
+            : throw new ArgumentException($"\"{fileName}\" is not a jar in the {folder} folder.", nameof(fileName));
 
-    private static string HashFile(string path)
+    internal static string HashFile(string path)
     {
         using var stream = File.OpenRead(path);
         return Convert.ToHexStringLower(System.Security.Cryptography.SHA512.HashData(stream));
     }
 
-    private static List<InstalledMod> ReadRecords(string instanceDir)
+    private static List<InstalledMod> ReadRecords(string instanceDir) => ParseRecords(ReadLocalRecords(instanceDir));
+
+    private static string? ReadLocalRecords(string instanceDir)
     {
         var path = Path.Combine(instanceDir, RecordsFileName);
-        if (!File.Exists(path))
+        return File.Exists(path) ? File.ReadAllText(path) : null;
+    }
+
+    private static async Task<List<InstalledMod>> ReadRecordsAsync(IModFiles files, CancellationToken cancellationToken) =>
+        ParseRecords(await files.ReadTextAsync(RecordsFileName, cancellationToken).ConfigureAwait(false));
+
+    private static List<InstalledMod> ParseRecords(string? json)
+    {
+        if (json is null)
         {
             return [];
         }
 
         try
         {
-            return JsonSerializer.Deserialize<List<InstalledMod>>(File.ReadAllText(path), JsonOptions) ?? [];
+            return JsonSerializer.Deserialize<List<InstalledMod>>(json, JsonOptions) ?? [];
         }
         catch (JsonException)
         {
@@ -466,4 +567,7 @@ public sealed class ModLibrary(ModrinthClient modrinth, FileDownloader downloade
 
     private static void WriteRecords(string instanceDir, List<InstalledMod> records) =>
         AtomicFile.WriteAllText(Path.Combine(instanceDir, RecordsFileName), JsonSerializer.Serialize(records, JsonOptions));
+
+    private static Task WriteRecordsAsync(IModFiles files, List<InstalledMod> records, CancellationToken cancellationToken) =>
+        files.WriteTextAsync(RecordsFileName, JsonSerializer.Serialize(records, JsonOptions), cancellationToken);
 }
